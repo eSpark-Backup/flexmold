@@ -50,8 +50,8 @@
                         </Grid.ColumnDefinitions>
                         <GroupBox  Header="Projects Selection" Grid.Column="0">
                             <StackPanel Grid.Column="0" Grid.Row="0" Margin="10" Orientation="Vertical">
-                                <Button Content="Browse Projects" Width="150" 
-                                Margin="{StaticResource ControlMargin}" ></Button>
+                                <Button Name="btProjectBrowse" Content="Browse Projects" Width="150" 
+                                Margin="{StaticResource ControlMargin}"  Click="btProjectBrowse_Click"></Button>
                                 <StackPanel Orientation="Horizontal">
                                     <Label Content="Projects : "  Margin="{StaticResource ControlMargin}"></Label>
                                     <ComboBox Width="150"  Margin="{StaticResource ControlMargin}"></ComboBox>

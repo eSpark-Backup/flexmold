@@ -4,4 +4,7 @@ To develop a desktop HMI software for client that runs on Windows 10 or above an
 # Requirements
 # Testing
 # Issues
+[i1]: https://github.com/eSpark-Consultants/flexmold/issues/1
 # Results
+- 23-11-22 UI template has been updated
+![](img/231122.gif)

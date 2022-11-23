@@ -4,32 +4,85 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:FlexMold.MVVM.View"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:viewmodel="clr-namespace:FlexMold.MVVM.ViewModel"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <Grid RenderOptions.ClearTypeHint="Enabled" TextOptions.TextFormattingMode="Display">
+    <UserControl.DataContext>
+        <viewmodel:HomeViewModel/>
+    </UserControl.DataContext>
+
+    <Border Background="#33577f" CornerRadius="20">
+        <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <GroupBox Grid.Column="0" Header="Unit">
-                <StackPanel Orientation="Vertical">
-                    <StackPanel.Resources>
-                        <!--A Style that affects all TextBlocks-->
-                        <Style TargetType="Button">
-                            <Setter Property="Height" Value="60"/>
-                        </Style>
-                    </StackPanel.Resources>
-                    <Button Content="Motor Status"  ></Button>
-                    <Button Content="Sytem Status" ></Button>
-                    <Button Content="Motor Status"  ></Button>
-                    <Button Content="Vcauum Status" ></Button>
-                    <Button Content="Heater Status" ></Button>
-                    <Button Content="Laser Status"  ></Button>
-                    <Button Content="Motor Status" ></Button>
-                </StackPanel>
-            </GroupBox>
-            <GroupBox Grid.Column="1" Header="Status"></GroupBox>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <StackPanel 
+                        Grid.Row="0"
+                        ScrollViewer.CanContentScroll="True" Orientation="Vertical">
+
+                <RadioButton Content="Visual Display"
+                            Height="50"
+                            Foreground="White" FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding VisualDisplayCommand}"
+                             IsChecked="True"
+                             />
+                <RadioButton Content="Vaccum Status"
+                            Height="50"
+                            Foreground="White" FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}"
+                              Command="{Binding VaccumStatusCommand}"
+                             />
+                <RadioButton Content="Machine Details"
+                            Height="50"
+                            Foreground="White" FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding MachineDetailCommand}"
+                             />
+                <RadioButton Content="Motor Status"
+                            Height="50"
+                            Foreground="White" FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding MotorStatusCommand}"
+                             />
+                <RadioButton Content="Heater Status"
+                            Height="50"
+                            Foreground="White" FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding HeaterStatusCommand}"
+                             />
+                <RadioButton Content="Power Status"
+                            Height="50"
+                            Foreground="White" FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding PowerStatusCommand}"
+                             />
+                <RadioButton Content="Emergency Status"
+                            Height="50"
+                            Foreground="White" FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding EmergencyStatusCommand}"
+                             />
+                <RadioButton Content="Laser Status"
+                            Height="50"
+                            Foreground="White" FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding LaserStatusCommand}"
+                             />
+            </StackPanel>
+            <ContentControl 
+                Grid.Column="1" Grid.Row="1"
+                Margin="10"
+                Content="{Binding CurrentView}"
+                >
+            </ContentControl>
         </Grid>
-    </Grid>
+
+    </Border>
+
 </UserControl>

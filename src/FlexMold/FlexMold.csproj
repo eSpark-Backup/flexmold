@@ -35,6 +35,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>flexmold.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="ControlzEx, Version=4.0.0.0, Culture=neutral, PublicKeyToken=69f1c32f803d307e, processorArchitecture=MSIL">
       <HintPath>..\packages\ControlzEx.4.4.0\lib\net45\ControlzEx.dll</HintPath>
@@ -177,6 +180,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Common\WpConverter.cs" />
     <Compile Include="Core\ObservableObject.cs" />
     <Compile Include="Core\RelayCommand.cs" />
     <Compile Include="MainWindow.xaml.cs">
@@ -187,7 +191,47 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="MVVM\View\Accessory\HeaterStatusView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVM\View\Accessory\LaserStatusView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MVVM\View\HomeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVM\View\Home\EmergencyStatusView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVM\View\Home\HeaterStatusView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVM\View\Home\LaserStatusView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVM\View\Home\MachineDetailView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVM\View\Home\MotorStatusView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVM\View\Home\PowerStatusView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVM\View\Home\VaccumStatusView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVM\View\Home\VisualDisplayView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -199,23 +243,90 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Theme\MenubuttonTheme.xaml">
+    <Page Include="MVVM\View\Setting\MachineSettingView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="MVVM\View\Setting\MotorSettingView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVM\View\Setting\PowerSettingView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVM\View\Setting\VacuumSettingView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Theme\MenuButtonTheme.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Theme\TextBoxTheme.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MVVM\Model\ProjectModel.cs" />
+    <Compile Include="MVVM\ViewModel\AccessoryViewModel.cs" />
+    <Compile Include="MVVM\ViewModel\HomeViewModel.cs" />
+    <Compile Include="MVVM\ViewModel\ProjectViewModel.cs" />
+    <Compile Include="MVVM\ViewModel\SettingViewModel.cs" />
     <Compile Include="MVVM\View\AccessoryView.xaml.cs">
       <DependentUpon>AccessoryView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MVVM\View\Accessory\HeaterStatusView.xaml.cs">
+      <DependentUpon>HeaterStatusView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\Accessory\LaserStatusView.xaml.cs">
+      <DependentUpon>LaserStatusView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MVVM\View\HomeView.xaml.cs">
       <DependentUpon>HomeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\Home\EmergencyStatusView.xaml.cs">
+      <DependentUpon>EmergencyStatusView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\Home\HeaterStatusView.xaml.cs">
+      <DependentUpon>HeaterStatusView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\Home\LaserStatusView.xaml.cs">
+      <DependentUpon>LaserStatusView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\Home\MachineDetailView.xaml.cs">
+      <DependentUpon>MachineDetailView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\Home\MotorStatusView.xaml.cs">
+      <DependentUpon>MotorStatusView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\Home\PowerStatusView.xaml.cs">
+      <DependentUpon>PowerStatusView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\Home\VaccumStatusView.xaml.cs">
+      <DependentUpon>VaccumStatusView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\Home\VisualDisplayView.xaml.cs">
+      <DependentUpon>VisualDisplayView.xaml</DependentUpon>
     </Compile>
     <Compile Include="MVVM\View\ProjectView.xaml.cs">
       <DependentUpon>ProjectView.xaml</DependentUpon>
     </Compile>
     <Compile Include="MVVM\View\SettingView.xaml.cs">
       <DependentUpon>SettingView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\Setting\MachineSettingView.xaml.cs">
+      <DependentUpon>MachineSettingView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\Setting\MotorSettingView.xaml.cs">
+      <DependentUpon>MotorSettingView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\Setting\PowerSettingView.xaml.cs">
+      <DependentUpon>PowerSettingView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\Setting\VacuumSettingView.xaml.cs">
+      <DependentUpon>VacuumSettingView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -245,8 +356,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Font\" />
-    <Folder Include="MVVM\Model\" />
-    <Folder Include="MVVM\ViewModel\" />
+    <Folder Include="MVVM\ViewModel\Accessory\" />
+    <Folder Include="MVVM\ViewModel\Home\" />
+    <Folder Include="MVVM\ViewModel\Setting\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="flexmold.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -8,8 +8,9 @@
         xmlns:local="clr-namespace:FlexMold"
                   xmlns:View="clr-namespace:FlexMold.MVVM.View"
                   xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+                 Icon="flexmold.ico"
                   mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="800">
+        Title="FlexMold" Height="600" Width="800">
     <Window.Resources>
         <ResourceDictionary>
             <ObjectDataProvider x:Key="SyncModePreferenceEnumValues"
@@ -72,7 +73,7 @@
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands ShowLastSeparator="False">
             <Button 
-                    Content="Flyouts"
+                    Content="_"
                     ToolTip="Flyouts demo window" />
             <ToggleButton Content="Confirm quit"
                           IsChecked="{Binding QuitConfirmationEnabled}"
@@ -117,7 +118,7 @@
             </TabItem>
         </mah:MetroAnimatedSingleRowTabControl>
         <StatusBar Grid.Row="2">
-            <StatusBarItem>MahApps.Metro DEMO Application</StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">eSpark Consulting Group</StatusBarItem>
             <Separator Style="{StaticResource MahApps.Styles.Separator.StatusBar}" />
             <StatusBarItem>Selected Tab:</StatusBarItem>
             <StatusBarItem Content="{Binding ElementName=MainTabControl, Path=SelectedItem.Header, Mode=OneWay}" />

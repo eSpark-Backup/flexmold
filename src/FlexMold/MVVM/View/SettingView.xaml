@@ -4,34 +4,61 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:FlexMold.MVVM.View"
+             xmlns:viewmodel="clr-namespace:FlexMold.MVVM.ViewModel"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <Grid RenderOptions.ClearTypeHint="Enabled" TextOptions.TextFormattingMode="Display">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <GroupBox Grid.Column="0" Header="Unit">
-                <StackPanel Orientation="Vertical">
-                    <StackPanel.Resources>
-                        <!--A Style that affects all TextBlocks-->
-                        <Style TargetType="Button">
-                            <Setter Property="Height" Value="60"/>
-                        </Style>
-                    </StackPanel.Resources>
-                    <Button Content="Machine"  ></Button>
-                    <Button Content="Power" ></Button>
-                    <Button Content="Motor"  ></Button>
-                    <Button Content="Vcauum" ></Button>
-                    <Button Content="Heater" ></Button>
-                    <Button Content="Laser"  ></Button>
-                </StackPanel>
-            </GroupBox>
-            <GroupBox Grid.Column="1" Header="Parameters">
+    <UserControl.DataContext>
+        <viewmodel:SettingViewModel/>
+    </UserControl.DataContext>
 
-            </GroupBox>
+    <Border Background="#33577f" CornerRadius="20">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <StackPanel 
+                        Grid.Row="0"
+                        ScrollViewer.CanContentScroll="True" Orientation="Vertical">
+
+                <RadioButton Content="Machine"
+                            Height="50"
+                            Foreground="White" FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding MachineSettingCommand}"
+                             IsChecked="True"
+                             />
+                <RadioButton Content="Power"
+                            Height="50"
+                            Foreground="White" FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding PowerSettingCommand}"
+                             />
+                <RadioButton Content="Motor"
+                            Height="50"
+                            Foreground="White" FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding MotorSettingCommand}"
+                             />
+                <RadioButton Content="Vacuum"
+                            Height="50"
+                            Foreground="White" FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding VacuumSettingCommand}"
+                             />
+               
+            </StackPanel>
+            <ContentControl 
+                Grid.Column="1" Grid.Row="1"
+                Margin="10"
+                Content="{Binding CurrentView}"
+                >
+            </ContentControl>
         </Grid>
 
-    </Grid>
+    </Border>
+
 </UserControl>

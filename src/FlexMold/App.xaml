@@ -1,24 +1,32 @@
-﻿<Application x:Class="FlexMold.App"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:FlexMold"
-              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-             StartupUri="MainWindow.xaml">
+﻿<Application
+    x:Class="FlexMold.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:FlexMold"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:view="clr-namespace:FlexMold.MVVM.View"
+    xmlns:viewModelx="clr-namespace:FlexMold.MVVM.ViewModel"
+    StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Theme/MenuButtonTheme.xaml" />
+                <ResourceDictionary Source="Theme/TextBoxTheme.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <Style x:Key="ControlMargin"
-                   BasedOn="{StaticResource {x:Type Button}}"
-                   TargetType="{x:Type Button}">
-                <Setter Property="Margin" Value="5" />
+            <Style BasedOn="{StaticResource MahApps.Styles.Button.Flat}" TargetType="{x:Type Button}">
+                <Setter Property="Margin" Value="10" />
             </Style>
-            <Style x:Key="DescriptionHeaderStyle"
-                   BasedOn="{StaticResource {x:Type Label}}"
-                   TargetType="{x:Type Label}">
+            <Style BasedOn="{StaticResource {x:Type mah:DropDownButton}}" TargetType="{x:Type mah:DropDownButton}">
+                <Setter Property="Margin" Value="10" />
+            </Style>
+
+            <Style
+                x:Key="DescriptionHeaderStyle"
+                BasedOn="{StaticResource {x:Type Label}}"
+                TargetType="{x:Type Label}">
                 <Setter Property="FontSize" Value="22" />
                 <Setter Property="HorizontalAlignment" Value="Center" />
             </Style>
@@ -29,11 +37,12 @@
 
             <!--  quick change of the collapse storyboard duration  -->
             <Storyboard x:Key="MahApps.Storyboard.Expander.Collapse.Fast">
-                <DoubleAnimation Storyboard.TargetName="ExpandSite"
-                                 Storyboard.TargetProperty="(UIElement.Opacity)"
-                                 From="1"
-                                 To="0"
-                                 Duration="0:0:0.1" />
+                <DoubleAnimation
+                    Storyboard.TargetName="ExpandSite"
+                    Storyboard.TargetProperty="(UIElement.Opacity)"
+                    From="1"
+                    To="0"
+                    Duration="0:0:0.1" />
                 <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ExpandSite" Storyboard.TargetProperty="(UIElement.Visibility)">
                     <DiscreteObjectKeyFrame KeyTime="0:0:0.1" Value="{x:Static Visibility.Collapsed}" />
                 </ObjectAnimationUsingKeyFrames>
@@ -42,10 +51,11 @@
                 <Setter Property="mah:ExpanderHelper.CollapseStoryboard" Value="{StaticResource MahApps.Storyboard.Expander.Collapse.Fast}" />
             </Style>
 
-            <Style x:Key="MahApps.Styles.MetroHeader.Horizontal"
-                   BasedOn="{StaticResource MahApps.Styles.MetroHeader}"
-                   TargetType="mah:MetroHeader">
-                <Setter Property="Padding" Value="0 2" />
+            <Style
+                x:Key="MahApps.Styles.MetroHeader.Horizontal"
+                BasedOn="{StaticResource MahApps.Styles.MetroHeader}"
+                TargetType="mah:MetroHeader">
+                <Setter Property="Padding" Value="0,2" />
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="mah:MetroHeader">
@@ -55,31 +65,33 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <Grid Grid.Column="0" Background="{TemplateBinding mah:HeaderedControlHelper.HeaderBackground}">
-                                    <mah:ContentControlEx x:Name="PART_Header"
-                                                          Margin="{TemplateBinding mah:HeaderedControlHelper.HeaderMargin}"
-                                                          HorizontalAlignment="{TemplateBinding mah:HeaderedControlHelper.HeaderHorizontalContentAlignment}"
-                                                          VerticalAlignment="{TemplateBinding mah:HeaderedControlHelper.HeaderVerticalContentAlignment}"
-                                                          Content="{TemplateBinding Header}"
-                                                          ContentCharacterCasing="{TemplateBinding mah:ControlsHelper.ContentCharacterCasing}"
-                                                          ContentStringFormat="{TemplateBinding HeaderStringFormat}"
-                                                          ContentTemplate="{TemplateBinding HeaderTemplate}"
-                                                          ContentTemplateSelector="{TemplateBinding HeaderTemplateSelector}"
-                                                          FontFamily="{TemplateBinding mah:HeaderedControlHelper.HeaderFontFamily}"
-                                                          FontSize="{TemplateBinding mah:HeaderedControlHelper.HeaderFontSize}"
-                                                          FontStretch="{TemplateBinding mah:HeaderedControlHelper.HeaderFontStretch}"
-                                                          FontWeight="{TemplateBinding mah:HeaderedControlHelper.HeaderFontWeight}"
-                                                          Foreground="{TemplateBinding mah:HeaderedControlHelper.HeaderForeground}"
-                                                          IsTabStop="False"
-                                                          RecognizesAccessKey="{TemplateBinding mah:ControlsHelper.RecognizesAccessKey}"
-                                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                    <mah:ContentControlEx
+                                        x:Name="PART_Header"
+                                        Margin="{TemplateBinding mah:HeaderedControlHelper.HeaderMargin}"
+                                        HorizontalAlignment="{TemplateBinding mah:HeaderedControlHelper.HeaderHorizontalContentAlignment}"
+                                        VerticalAlignment="{TemplateBinding mah:HeaderedControlHelper.HeaderVerticalContentAlignment}"
+                                        Content="{TemplateBinding Header}"
+                                        ContentCharacterCasing="{TemplateBinding mah:ControlsHelper.ContentCharacterCasing}"
+                                        ContentStringFormat="{TemplateBinding HeaderStringFormat}"
+                                        ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                        ContentTemplateSelector="{TemplateBinding HeaderTemplateSelector}"
+                                        FontFamily="{TemplateBinding mah:HeaderedControlHelper.HeaderFontFamily}"
+                                        FontSize="{TemplateBinding mah:HeaderedControlHelper.HeaderFontSize}"
+                                        FontStretch="{TemplateBinding mah:HeaderedControlHelper.HeaderFontStretch}"
+                                        FontWeight="{TemplateBinding mah:HeaderedControlHelper.HeaderFontWeight}"
+                                        Foreground="{TemplateBinding mah:HeaderedControlHelper.HeaderForeground}"
+                                        IsTabStop="False"
+                                        RecognizesAccessKey="{TemplateBinding mah:ControlsHelper.RecognizesAccessKey}"
+                                        SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                                 </Grid>
                                 <Grid Grid.Column="1" Background="{TemplateBinding Background}">
-                                    <ContentPresenter x:Name="PART_Content"
-                                                      Margin="{TemplateBinding Padding}"
-                                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                      ContentSource="Content"
-                                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                    <ContentPresenter
+                                        x:Name="PART_Content"
+                                        Margin="{TemplateBinding Padding}"
+                                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                        ContentSource="Content"
+                                        SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                                 </Grid>
                             </Grid>
                         </ControlTemplate>
@@ -89,16 +101,36 @@
                 <Setter Property="mah:HeaderedControlHelper.HeaderVerticalContentAlignment" Value="Center" />
             </Style>
 
-            <Style x:Key="MahApps.Styles.ColorPalette.ColorPickerDropDown"
-                   BasedOn="{StaticResource MahApps.Styles.ColorPalette}"
-                   TargetType="{x:Type mah:ColorPalette}">
+            <Style
+                x:Key="MahApps.Styles.ColorPalette.ColorPickerDropDown"
+                BasedOn="{StaticResource MahApps.Styles.ColorPalette}"
+                TargetType="{x:Type mah:ColorPalette}">
                 <Setter Property="mah:ControlsHelper.ContentCharacterCasing" Value="Normal" />
             </Style>
-            <!--<DataTemplate DataType="{x:Type viewmodel:ButtonViewModel}">
-                <view:ButtonView/>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type viewmodel:Button2ViewModel}">
-                <view:Button2View/>
+
+            <Style TargetType="Label">
+                <Setter Property="FontSize" Value="20" />
+                <Setter Property="Foreground" Value="#FFD1D9EA" />
+                <Setter Property="FontFamily" Value="Trebuchet MS" />
+                <Setter Property="Margin" Value="0,10,10,10" />
+            </Style>
+            <Style TargetType="TextBox">
+                <Setter Property="FontSize" Value="20" />
+                <Setter Property="Foreground" Value="#4E87D4" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="FontFamily" Value="Trebuchet MS" />
+                <Setter Property="Margin" Value="0,5,5,5" />
+            </Style>
+            <SolidColorBrush x:Key="MahApps.Brushes.ToggleSwitch.StrokeOff" Color="White" />
+            <SolidColorBrush x:Key="MahApps.Brushes.ToggleSwitch.StrokeOffPointerOver" Color="White" />
+            <SolidColorBrush x:Key="MahApps.Brushes.ToggleSwitch.KnobFillOff" Color="White" />
+            <SolidColorBrush x:Key="MahApps.Brushes.ToggleSwitch.KnobFillOnPressed" Color="White" />
+            <SolidColorBrush x:Key="MahApps.Brushes.ToggleSwitch.KnobFillOffPointerOver" Color="White" />
+            <SolidColorBrush x:Key="MahApps.Brushes.ToggleSwitch.HeaderForeground" Color="White" />
+            <SolidColorBrush x:Key="MahApps.Brushes.ToggleSwitch.ContentForeground" Color="White" />
+            <SolidColorBrush x:Key="MahApps.Brushes.ToggleSwitch.ContentForegroundDisabled" Color="White" />
+            <!--<DataTemplate DataType="{x:Type viewModelx:ProjectViewModel}">
+                <view:ProjectView />
             </DataTemplate>-->
         </ResourceDictionary>
     </Application.Resources>

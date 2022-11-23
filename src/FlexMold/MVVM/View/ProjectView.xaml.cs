@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FlexMold.MVVM.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +21,13 @@ namespace FlexMold.MVVM.View
     /// </summary>
     public partial class ProjectView : UserControl
     {
+       
+
         public ProjectView()
         {
+           
             InitializeComponent();
+           
         }
 
         private void btProjectBrowse_Click(object sender, RoutedEventArgs e)

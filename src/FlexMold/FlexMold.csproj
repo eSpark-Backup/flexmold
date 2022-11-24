@@ -181,6 +181,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Common\WpConverter.cs" />
+    <Compile Include="Core\HeaderToImageConverter.cs" />
     <Compile Include="Core\ObservableObject.cs" />
     <Compile Include="Core\RelayCommand.cs" />
     <Compile Include="MainWindow.xaml.cs">
@@ -269,7 +270,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MVVM\Model\ProjectModel.cs" />
+    <Compile Include="MVVM\Model\ProjectData.cs" />
     <Compile Include="MVVM\ViewModel\AccessoryViewModel.cs" />
     <Compile Include="MVVM\ViewModel\HomeViewModel.cs" />
     <Compile Include="MVVM\ViewModel\ProjectViewModel.cs" />
@@ -362,6 +363,10 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="flexmold.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\diskdrive.png" />
+    <Resource Include="images\folder.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

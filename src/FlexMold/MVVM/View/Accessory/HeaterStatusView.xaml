@@ -30,7 +30,7 @@
         <mah:DropDownButton
             Grid.Row="1"
             Content="Temperature Current"
-            DisplayMemberPath="Name">
+            >
             <mah:DropDownButton.Icon>
                 <iconPacks:PackIconMaterial Margin="6" Kind="TemperatureCelsius" />
             </mah:DropDownButton.Icon>
@@ -38,7 +38,7 @@
         <mah:DropDownButton
             Grid.Row="2"
             Content="Temperature Set"
-            DisplayMemberPath="Name">
+            >
             <mah:DropDownButton.Icon>
                 <iconPacks:PackIconMaterial Margin="6" Kind="TemperatureCelsius" />
             </mah:DropDownButton.Icon>
@@ -46,7 +46,7 @@
         <mah:DropDownButton
             Grid.Row="3"
             Content="Temperature Time"
-            DisplayMemberPath="Name">
+            >
             <mah:DropDownButton.Icon>
                 <iconPacks:PackIconMaterial Margin="6" Kind="TemperatureCelsius" />
             </mah:DropDownButton.Icon>

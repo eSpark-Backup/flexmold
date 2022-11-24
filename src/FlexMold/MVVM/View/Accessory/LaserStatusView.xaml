@@ -36,7 +36,7 @@
              Grid.Row="2"
             Margin="5"
                                 Content="Callibrate Value"
-                                DisplayMemberPath="Name">
+                                >
             <mah:DropDownButton.Icon>
                 <iconPacks:PackIconMaterial Margin="6" Kind="AirPurifier" />
             </mah:DropDownButton.Icon>
@@ -45,7 +45,7 @@
             Grid.Row="3"
             Margin="5"
                                 Content="Callibration Error"
-                                DisplayMemberPath="Name">
+                                >
             <mah:DropDownButton.Icon>
                 <iconPacks:PackIconBootstrapIcons Margin="6" Kind="Alarm" />
             </mah:DropDownButton.Icon>

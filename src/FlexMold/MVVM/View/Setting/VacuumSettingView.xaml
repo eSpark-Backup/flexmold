@@ -28,8 +28,7 @@
         <mah:DropDownButton
             Grid.Row="1"
             Grid.Column="1"
-            Content="Vacuum Pressure"
-            DisplayMemberPath="Name">
+            Content="Vacuum Pressure">
             <mah:DropDownButton.Icon>
                 <iconPacks:PackIconMaterial Margin="6" Kind="AirPurifier" />
             </mah:DropDownButton.Icon>

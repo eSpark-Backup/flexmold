@@ -9,6 +9,20 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <Grid>
-        <TextBlock FontSize="25" Foreground="AliceBlue">VisualDisplayView</TextBlock>
+        <StackPanel Orientation="Vertical">
+            <TextBlock
+                FontSize="25"
+                Foreground="AliceBlue"
+                Text="TWINCAT3 PLC Test" />
+            <Button
+                Height="50"
+                Click="read"
+                Content="Read" />
+            <Button
+                Height="50"
+                Click="write"
+                Content="Write" />
+            <TextBox Name="textBox1" Height="50" />
+        </StackPanel>
     </Grid>
 </UserControl>

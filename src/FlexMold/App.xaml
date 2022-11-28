@@ -14,8 +14,14 @@
                 <ResourceDictionary Source="Theme/TextBoxTheme.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Dark.Blue.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="panelMenuBorder" TargetType="{x:Type Border}">
+                <Setter Property="Background" Value="#FF252526" />
+                <Setter Property="BorderBrush" Value="#3A4149" />
+                <Setter Property="BorderThickness" Value="5" />
+                <Setter Property="CornerRadius" Value="20" />
+            </Style>
             <Style BasedOn="{StaticResource MahApps.Styles.Button.Flat}" TargetType="{x:Type Button}">
                 <Setter Property="Margin" Value="10" />
             </Style>

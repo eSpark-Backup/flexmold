@@ -163,6 +163,9 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="TwinCAT.Ads, Version=4.4.0.0, Culture=neutral, PublicKeyToken=180016cd49e5e8c3, processorArchitecture=MSIL">
+      <HintPath>..\packages\Beckhoff.TwinCAT.Ads.4.4.21\lib\Net40-full\TwinCAT.Ads.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -181,7 +184,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Common\WpConverter.cs" />
-    <Compile Include="Core\HeaderToImageConverter.cs" />
     <Compile Include="Core\ObservableObject.cs" />
     <Compile Include="Core\RelayCommand.cs" />
     <Compile Include="MainWindow.xaml.cs">
@@ -237,6 +239,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MVVM\View\ProjectView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVM\View\Project\ProjectGridView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -313,6 +319,9 @@
     </Compile>
     <Compile Include="MVVM\View\ProjectView.xaml.cs">
       <DependentUpon>ProjectView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\Project\ProjectGridView.xaml.cs">
+      <DependentUpon>ProjectGridView.xaml</DependentUpon>
     </Compile>
     <Compile Include="MVVM\View\SettingView.xaml.cs">
       <DependentUpon>SettingView.xaml</DependentUpon>

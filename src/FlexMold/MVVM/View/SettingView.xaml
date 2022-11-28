@@ -1,62 +1,68 @@
-﻿<UserControl x:Class="FlexMold.MVVM.View.SettingView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:FlexMold.MVVM.View"
-             xmlns:viewmodel="clr-namespace:FlexMold.MVVM.ViewModel"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+﻿<UserControl
+    x:Class="FlexMold.MVVM.View.SettingView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:FlexMold.MVVM.View"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodel="clr-namespace:FlexMold.MVVM.ViewModel"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
     <UserControl.DataContext>
-        <viewmodel:SettingViewModel/>
+        <viewmodel:SettingViewModel />
     </UserControl.DataContext>
 
-    <Border Background="#33577f" CornerRadius="20">
+    <Border Style="{StaticResource panelMenuBorder}">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"/>
-                <ColumnDefinition/>
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition/>
+                <RowDefinition />
             </Grid.RowDefinitions>
-            <StackPanel 
-                        Grid.Row="0"
-                        ScrollViewer.CanContentScroll="True" Orientation="Vertical">
+            <StackPanel
+                Grid.Row="0"
+                Orientation="Vertical"
+                ScrollViewer.CanContentScroll="True">
 
-                <RadioButton Content="Machine"
-                            Height="50"
-                            Foreground="White" FontSize="14"
-                             Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding MachineSettingCommand}"
-                             IsChecked="True"
-                             />
-                <RadioButton Content="Power"
-                            Height="50"
-                            Foreground="White" FontSize="14"
-                             Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding PowerSettingCommand}"
-                             />
-                <RadioButton Content="Motor"
-                            Height="50"
-                            Foreground="White" FontSize="14"
-                             Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding MotorSettingCommand}"
-                             />
-                <RadioButton Content="Vacuum"
-                            Height="50"
-                            Foreground="White" FontSize="14"
-                             Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding VacuumSettingCommand}"
-                             />
-               
+                <RadioButton
+                    Height="50"
+                    Command="{Binding MachineSettingCommand}"
+                    Content="Machine"
+                    FontSize="14"
+                    Foreground="White"
+                    IsChecked="True"
+                    Style="{StaticResource MenuButtonTheme}" />
+                <RadioButton
+                    Height="50"
+                    Command="{Binding PowerSettingCommand}"
+                    Content="Power"
+                    FontSize="14"
+                    Foreground="White"
+                    Style="{StaticResource MenuButtonTheme}" />
+                <RadioButton
+                    Height="50"
+                    Command="{Binding MotorSettingCommand}"
+                    Content="Motor"
+                    FontSize="14"
+                    Foreground="White"
+                    Style="{StaticResource MenuButtonTheme}" />
+                <RadioButton
+                    Height="50"
+                    Command="{Binding VacuumSettingCommand}"
+                    Content="Vacuum"
+                    FontSize="14"
+                    Foreground="White"
+                    Style="{StaticResource MenuButtonTheme}" />
+
             </StackPanel>
-            <ContentControl 
-                Grid.Column="1" Grid.Row="1"
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
                 Margin="10"
-                Content="{Binding CurrentView}"
-                >
-            </ContentControl>
+                Content="{Binding CurrentView}" />
         </Grid>
 
     </Border>

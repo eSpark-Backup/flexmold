@@ -10,9 +10,23 @@
 		</System>
 		<Plc>
 			<Project GUID="{FEB23395-5BE5-42E5-AF18-23AB6B124911}" Name="TestPLC" PrjFilePath="TestPLC\TestPLC.plcproj" TmcFilePath="TestPLC\TestPLC.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="TestPLC\TestPLC.tmc" TmcHash="{EA0D625D-14E0-F778-6FB5-CA3113A3AC27}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="TestPLC\TestPLC.tmc" TmcHash="{C73863CF-D88B-2781-E3AF-E03E53566EE2}">
 					<Name>TestPLC Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
+					<Vars VarGrpType="1">
+						<Name>PlcTask Inputs</Name>
+						<Var>
+							<Name>MAIN.rawAngle</Name>
+							<Type>DWORD</Type>
+						</Var>
+					</Vars>
+					<Vars VarGrpType="2" AreaNo="1">
+						<Name>PlcTask Outputs</Name>
+						<Var>
+							<Name>MAIN.dummyData</Name>
+							<Type>DWORD</Type>
+						</Var>
+					</Vars>
 					<Contexts>
 						<Context>
 							<Id NeedCalleeCall="true">0</Id>
@@ -30,8 +44,5 @@
 				</Instance>
 			</Project>
 		</Plc>
-		<Cpp>
-			<Project GUID="{C2221677-C48B-4AC4-ADCB-079C94F62BB1}" Name="Untitled1" PrjFilePath="Untitled1\Untitled1.vcxproj" TmcFilePath="Untitled1\Untitled1.tmc"/>
-		</Cpp>
 	</Project>
 </TcSmProject>

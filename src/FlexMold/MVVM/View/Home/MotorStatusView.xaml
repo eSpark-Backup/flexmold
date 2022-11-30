@@ -10,10 +10,10 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <UserControl.Resources>
-        <viewmodel:MotorStatusViewModel x:Key="m" />
-    </UserControl.Resources>
-    <Grid DataContext="{Binding Source={StaticResource m}}">
+    <UserControl.DataContext>
+        <viewmodel:MotorStatusViewModel />
+    </UserControl.DataContext>
+    <Grid>
         <Grid.Resources>
             <Style TargetType="mah:NumericUpDown">
                 <Setter Property="HorizontalAlignment" Value="Left" />
@@ -21,6 +21,7 @@
             <Style TargetType="Label">
                 <Setter Property="HorizontalAlignment" Value="Right" />
             </Style>
+            
         </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -62,23 +63,23 @@
             Grid.Column="1"
             Foreground="AliceBlue"
             ItemsSource="{Binding plcHelper.plcHostAvailableIPs}"
-            SelectedItem="{Binding plcHelper.plcHostSelectedIP}" />
+            SelectedItem="{Binding plcHelper.plcHostSelectedIP }"/>
         <ComboBox
             Grid.Row="1"
             Grid.Column="1"
             Foreground="AliceBlue"
             ItemsSource="{Binding plcHelper.plcHostAvailablePorts}"
-            SelectedItem="{Binding plcHelper.plcHostSelectedPort}" />
+            SelectedItem="{Binding plcHelper.plcHostSelectedPort }"/>
         <Button
             Grid.Row="2"
             Grid.ColumnSpan="2"
             Height="50"
             Command="{Binding PlcConnectCommand}"
-            Content="Connect" />
+            Content="{Binding PlcConnectButtonContent}" />
         <mah:ToggleSwitch
             Grid.Row="3"
             Grid.Column="1"
-            IsOn="{Binding motorDirection}"
+            IsOn="{Binding plcHelper.motorDirection , Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
             OffCommand="{Binding MotorReverseCommand}"
             OffContent="Reverse"
             OnCommand="{Binding MotorForwardCommand}"
@@ -87,10 +88,12 @@
             Grid.Row="4"
             Grid.Column="1"
             mah:TextBoxHelper.ClearTextButton="True"
-            ButtonsAlignment="Left"
+            ButtonsAlignment="Right"
+            FontSize="25"
             Maximum="255"
             Minimum="0"
             TextAlignment="Left"
-            Value="{Binding motorStep}" />
+            ValueChanged="NumericUpDown_ValueChanged"
+            Value="{Binding plcHelper.motorStep, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
     </Grid>
 </UserControl>

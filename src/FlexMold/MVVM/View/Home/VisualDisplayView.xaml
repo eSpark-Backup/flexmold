@@ -14,14 +14,8 @@
                 FontSize="25"
                 Foreground="AliceBlue"
                 Text="TWINCAT3 PLC Test" />
-            <Button
-                Height="50"
-                Click="read"
-                Content="Read" />
-            <Button
-                Height="50"
-                Click="write"
-                Content="Write" />
+            <Button Height="50" Content="Read" />
+            <Button Height="50" Content="Write" />
             <TextBox Name="textBox1" Height="50" />
         </StackPanel>
     </Grid>

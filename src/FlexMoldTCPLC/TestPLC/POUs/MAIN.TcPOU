@@ -4,13 +4,20 @@
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
 	motorStatus : STRING[30] := 'Running';
+	dir : BYTE := 1;
+	speed : WORD := 100;
+	dummyData AT %Q*: DWORD := SHL(dir,2*8) OR speed ;
+	rawAngle AT %I*: DWORD;
+	angle: REAL;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[]]></ST>
+      <ST><![CDATA[dummyData := SHL(dir,2*8) OR speed ;
+angle := (rawAngle/100.0) - 180;]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="2" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

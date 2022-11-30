@@ -185,6 +185,7 @@
     </Compile>
     <Compile Include="Common\WpConverter.cs" />
     <Compile Include="Core\ObservableObject.cs" />
+    <Compile Include="Core\PropertyValidation.cs" />
     <Compile Include="Core\RelayCommand.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -280,7 +281,7 @@
     <Compile Include="MVVM\ViewModel\AccessoryViewModel.cs" />
     <Compile Include="MVVM\ViewModel\HomeViewModel.cs" />
     <Compile Include="MVVM\ViewModel\Home\MotorStatusViewModel.cs" />
-    <Compile Include="MVVM\ViewModel\PlcHelper.cs" />
+    <Compile Include="MVVM\ViewModel\PlcTask.cs" />
     <Compile Include="MVVM\ViewModel\ProjectViewModel.cs" />
     <Compile Include="MVVM\ViewModel\SettingViewModel.cs" />
     <Compile Include="MVVM\View\AccessoryView.xaml.cs">

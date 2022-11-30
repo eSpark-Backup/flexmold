@@ -17,58 +17,33 @@ namespace FlexMold.MVVM.ViewModel.Home
         public ICommand MotorReverseCommand { get; set; }
         public ICommand MotorForwardCommand { get; set; }
         public ICommand PlcConnectCommand { get; set; }
-        private PlcHelper _plcHelper;
-        public PlcHelper plcHelper
+        private string _PlcConnectButtonContent;
+        public string PlcConnectButtonContent
         {
-            get { return _plcHelper; }
-            set
-            {
-                _plcHelper = value;
+            get { return _PlcConnectButtonContent; }
+            set {
+                _PlcConnectButtonContent = value;
                 OnPropertyChanged();
             }
         }
 
-        private int _motorStep;
-        public int motorStep
-        {
-            get { return _motorStep; }
-            set
-            {
-                _motorStep = value;
-                OnPropertyChanged();
-            }
-        }
-        private bool _motorDirection;
-
-        public bool motorDirection
-        {
-            get { return _motorDirection; }
-            set
-            {
-                _motorDirection = value;
-                OnPropertyChanged();
-            }
-        }
+        //private PlcHelper _plcHelper;
+        public PlcTask plcHelper { get; set; }
 
         public MotorStatusViewModel()
         {
-            _motorStep = 10;
-            _motorDirection = false;
-            plcHelper = new PlcHelper
+            PlcConnectButtonContent = "Connect";
+            PlcConnectCommand = new RelayCommand(x => { PlcConnectButtonContent = plcHelper.connectPLC( PlcConnectButtonContent == "Connect"); });
+            MotorReverseCommand = new RelayCommand(x => { plcHelper.setMotorDirection(); });
+            MotorForwardCommand = new RelayCommand(x => { plcHelper.setMotorDirection(); });
+            MotorStepCommand = new RelayCommand(x => { plcHelper.setMotorStep(); });
+            plcHelper = new PlcTask
             {
-                plcHostAvailablePorts = new int[] { 851, 850 },
-                plcHostAvailableIPs = new string[] { "192.168.1.1.1.1" }
+                plcHostAvailablePorts = new UInt16[] { 851, 850 },
+                plcHostAvailableIPs = new string[] { "192.168.18.57.1.1" },
             };
-            MotorReverseCommand = new RelayCommand(x => { changeMotorDirection(); });
-            MotorForwardCommand = new RelayCommand(x => { changeMotorDirection(); });
-            PlcConnectCommand = new RelayCommand(x => { plcHelper.connectPLC(); });
+            
 
         }
-        public void changeMotorDirection()
-        {
-            MessageBox.Show("asdasd");
-        }
-
-
     }
 }

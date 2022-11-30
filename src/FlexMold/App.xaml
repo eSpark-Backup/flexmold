@@ -25,7 +25,7 @@
             <Style BasedOn="{StaticResource MahApps.Styles.Button.Flat}" TargetType="{x:Type Button}">
                 <Setter Property="Margin" Value="10" />
             </Style>
-            <Style BasedOn="{StaticResource {x:Type mah:DropDownButton}}" TargetType="{x:Type mah:DropDownButton}">
+            <Style TargetType="{x:Type mah:DropDownButton}">
                 <Setter Property="Margin" Value="10" />
             </Style>
 

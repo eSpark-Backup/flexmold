@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="Header Files">
+			<UniqueIdentifier>{f22b14dd-942f-4c77-9589-4125883d482e}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files">
+			<UniqueIdentifier>{8018c3a8-b253-41f5-97c8-a585a2883150}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="TwinCAT UM Files">
+			<UniqueIdentifier>{e76080df-47d6-4762-841d-e302cccb1320}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="TwinCAT RT Files">
+			<UniqueIdentifier>{06e35e92-4544-43c9-8787-2e9d71feecbc}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="TwinCAT OS Files">
+			<UniqueIdentifier>{963b1c97-cd11-4f8f-8d61-00538273b2a9}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="TMC Files">
+			<UniqueIdentifier>{4504010b-5ba1-4011-a314-1800d2e966c5}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="Resource.h">
+			<Filter>TwinCAT UM Files</Filter>
+		</ClInclude>
+		<ClInclude Include="TcPch.h">
+			<Filter>Header Files</Filter>
+		</ClInclude>
+		<ClInclude Include="Untitled1ClassFactory.h">
+			<Filter>Header Files</Filter>
+		</ClInclude>
+		<ClInclude Include="Untitled1Interfaces.h">
+			<Filter>Header Files</Filter>
+		</ClInclude>
+		<ClInclude Include="Untitled1Services.h">
+			<Filter>Header Files</Filter>
+		</ClInclude>
+		<ClInclude Include="Untitled1Ctrl.h">
+			<Filter>TwinCAT UM Files</Filter>
+		</ClInclude>
+		<ClInclude Include="Untitled1Driver.h">
+			<Filter>TwinCAT RT Files</Filter>
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="TcPch.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="Untitled1ClassFactory.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="Untitled1Ctrl.cpp">
+			<Filter>TwinCAT UM Files</Filter>
+		</ClCompile>
+		<ClCompile Include="Untitled1W32.cpp">
+			<Filter>TwinCAT UM Files</Filter>
+		</ClCompile>
+		<ClCompile Include="Untitled1Driver.cpp">
+			<Filter>TwinCAT RT Files</Filter>
+		</ClCompile>
+		<ClCompile Include="Untitled1Main.cpp">
+			<Filter>TwinCAT OS Files</Filter>
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ResourceCompile Include="Untitled1.rc">
+			<Filter>Source Files</Filter>
+		</ResourceCompile>
+		<ResourceCompile Include="Untitled1W32.rc">
+			<Filter>TwinCAT UM Files</Filter>
+		</ResourceCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="Untitled1W32.def">
+			<Filter>TwinCAT UM Files</Filter>
+		</None>
+		<None Include="Untitled1.tmc">
+			<Filter>TMC Files</Filter>
+		</None>
+	</ItemGroup>
+	<ItemGroup>
+		<Midl Include="Untitled1W32.idl">
+			<Filter>TwinCAT UM Files</Filter>
+		</Midl>
+	</ItemGroup>
+</Project>

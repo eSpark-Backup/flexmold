@@ -10,7 +10,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{FEB23395-5BE5-42E5-AF18-23AB6B124911}" Name="TestPLC" PrjFilePath="TestPLC\TestPLC.plcproj" TmcFilePath="TestPLC\TestPLC.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{2E93D77B-FDE3-3780-92FD-065346479071}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="TestPLC\TestPLC.tmc" TmcHash="{EA0D625D-14E0-F778-6FB5-CA3113A3AC27}">
 					<Name>TestPLC Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Contexts>
@@ -30,5 +30,8 @@
 				</Instance>
 			</Project>
 		</Plc>
+		<Cpp>
+			<Project GUID="{C2221677-C48B-4AC4-ADCB-079C94F62BB1}" Name="Untitled1" PrjFilePath="Untitled1\Untitled1.vcxproj" TmcFilePath="Untitled1\Untitled1.tmc"/>
+		</Cpp>
 	</Project>
 </TcSmProject>

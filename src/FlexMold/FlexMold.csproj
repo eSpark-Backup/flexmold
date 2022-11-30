@@ -279,6 +279,8 @@
     <Compile Include="MVVM\Model\ProjectData.cs" />
     <Compile Include="MVVM\ViewModel\AccessoryViewModel.cs" />
     <Compile Include="MVVM\ViewModel\HomeViewModel.cs" />
+    <Compile Include="MVVM\ViewModel\Home\MotorStatusViewModel.cs" />
+    <Compile Include="MVVM\ViewModel\PlcHelper.cs" />
     <Compile Include="MVVM\ViewModel\ProjectViewModel.cs" />
     <Compile Include="MVVM\ViewModel\SettingViewModel.cs" />
     <Compile Include="MVVM\View\AccessoryView.xaml.cs">
@@ -367,7 +369,6 @@
   <ItemGroup>
     <Folder Include="Font\" />
     <Folder Include="MVVM\ViewModel\Accessory\" />
-    <Folder Include="MVVM\ViewModel\Home\" />
     <Folder Include="MVVM\ViewModel\Setting\" />
   </ItemGroup>
   <ItemGroup>

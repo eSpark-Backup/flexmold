@@ -1,5 +1,4 @@
-﻿using FlexMold.Model;
-using MahApps.Metro.Controls;
+﻿using MahApps.Metro.Controls;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -31,7 +30,6 @@ namespace FlexMold
 
             DirectoryInfo di = new DirectoryInfo(selectedPath);
             var laserFilesPath = di.GetFiles("*.las", SearchOption.AllDirectories);
-            var pd = new List<ProjectData>();
             var diPanels = new List<string>();
             var diProjects = new List<string>();
 

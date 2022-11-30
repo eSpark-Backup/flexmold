@@ -1,0 +1,28 @@
+﻿<UserControl
+    x:Class="FlexMold.MVVM.View.Home.VisualDisplayView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:FlexMold.MVVM.View.Home"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <TextBlock
+                FontSize="25"
+                Foreground="AliceBlue"
+                Text="TWINCAT3 PLC Test" />
+            <Button
+                Height="50"
+                Click="read"
+                Content="Read" />
+            <Button
+                Height="50"
+                Click="write"
+                Content="Write" />
+            <TextBox Name="textBox1" Height="50" />
+        </StackPanel>
+    </Grid>
+</UserControl>

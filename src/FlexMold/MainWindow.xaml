@@ -4,172 +4,125 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+                   xmlns:controlzEx="urn:controlzex"
         xmlns:local="clr-namespace:FlexMold"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="800">
+                  xmlns:View="clr-namespace:FlexMold.MVVM.View"
+                  xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+                 Icon="flexmold.ico"
+                  mc:Ignorable="d"
+        Title="FlexMold" Height="600" Width="800">
     <Window.Resources>
         <ResourceDictionary>
-            <Thickness x:Key="ControlMargin">0 5 0 0</Thickness>
+            <ObjectDataProvider x:Key="SyncModePreferenceEnumValues"
+                                MethodName="GetValues"
+                                ObjectType="{x:Type controlzEx:ThemeSyncMode}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="controlzEx:ThemeSyncMode" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+
+            <Ellipse x:Key="AppThemeMenuIcon"
+                     Width="16"
+                     Height="16"
+                     x:Shared="False"
+                     Fill="{Binding ColorBrush, Mode=OneWay}"
+                     Stroke="{Binding BorderColorBrush, Mode=OneWay}"
+                     StrokeThickness="1" />
+            <Ellipse x:Key="AccentMenuIcon"
+                     Width="16"
+                     Height="16"
+                     x:Shared="False"
+                     Fill="{Binding ColorBrush, Mode=OneWay}" />
+
+            <Style x:Key="AppThemeMenuItemStyle"
+                   BasedOn="{StaticResource MahApps.Styles.MenuItem}"
+                   TargetType="{x:Type MenuItem}">
+                <Setter Property="Command" Value="{Binding ChangeAccentCommand}" />
+                <Setter Property="CommandParameter" Value="{Binding Name, Mode=OneWay}" />
+                <Setter Property="Header" Value="{Binding Name, Mode=OneWay}" />
+                <Setter Property="Icon" Value="{StaticResource AppThemeMenuIcon}" />
+            </Style>
+
+            <Style x:Key="AccentColorMenuItemStyle"
+                   BasedOn="{StaticResource MahApps.Styles.MenuItem}"
+                   TargetType="{x:Type MenuItem}">
+                <Setter Property="Command" Value="{Binding ChangeAccentCommand}" />
+                <Setter Property="CommandParameter" Value="{Binding Name, Mode=OneWay}" />
+                <Setter Property="Header" Value="{Binding Name, Mode=OneWay}" />
+                <Setter Property="Icon" Value="{StaticResource AccentMenuIcon}" />
+            </Style>
+
+            <Style x:Key="SyncModeMenuItemStyle"
+                   BasedOn="{StaticResource MahApps.Styles.MenuItem}"
+                   TargetType="{x:Type MenuItem}">
+                <Setter Property="Command" Value="{Binding DataContext.ChangeSyncModeCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
+                <Setter Property="CommandParameter" Value="{Binding Mode=OneTime}" />
+                <Setter Property="Header" Value="{Binding Mode=OneTime}" />
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
+    <mah:MetroWindow.LeftWindowCommands>
+        <mah:WindowCommands>
+            <Button  ToolTip="MahApps.Metro on GitHub">
+                <iconPacks:PackIconModern Width="22"
+                                          Height="22"
+                                          Kind="Home" />
+            </Button>
+        </mah:WindowCommands>
+    </mah:MetroWindow.LeftWindowCommands>
+    <mah:MetroWindow.RightWindowCommands>
+        <mah:WindowCommands ShowLastSeparator="False">
+            <Button 
+                    Content="_"
+                    ToolTip="Flyouts demo window" />
+            <ToggleButton Content="Confirm quit"
+                          IsChecked="{Binding QuitConfirmationEnabled}"
+                          ToolTip="Enable quit confirmation dialog on exit" />
+        </mah:WindowCommands>
+    </mah:MetroWindow.RightWindowCommands>
     <Grid>
-        <TabControl>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" Grid.Row="1">
             <TabItem Header="Home">
-                <Grid RenderOptions.ClearTypeHint="Enabled" TextOptions.TextFormattingMode="Display">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <GroupBox Grid.Column="0" Header="Unit">
-                        <StackPanel Orientation="Vertical">
-                            <StackPanel.Resources>
-                                <!--A Style that affects all TextBlocks-->
-                                <Style TargetType="Button">
-                                    <Setter Property="Height" Value="60"/>
-                                </Style>
-                            </StackPanel.Resources>
-                            <Button Content="Motor Status"  ></Button>
-                            <Button Content="Sytem Status" ></Button>
-                            <Button Content="Motor Status"  ></Button>
-                            <Button Content="Vcauum Status" ></Button>
-                            <Button Content="Heater Status" ></Button>
-                            <Button Content="Laser Status"  ></Button>
-                            <Button Content="Motor Status" ></Button>
-                        </StackPanel>
-                    </GroupBox>
-                    <GroupBox Grid.Column="1" Header="Status"></GroupBox>
-                </Grid>
+                <ScrollViewer Margin="2"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto">
+                    <View:HomeView />
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Settings">
+                <ScrollViewer Margin="2"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto">
+                    <View:SettingView  />
+                </ScrollViewer>
             </TabItem>
             <TabItem Header="Projects">
-                    <Grid RenderOptions.ClearTypeHint="Enabled" TextOptions.TextFormattingMode="Display">
-
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <GroupBox  Header="Projects Selection" Grid.Column="0">
-                            <StackPanel Grid.Column="0" Grid.Row="0" Margin="10" Orientation="Vertical">
-                                <Button Name="btProjectBrowse" Content="Browse Projects" Width="150" 
-                                Margin="{StaticResource ControlMargin}"  Click="btProjectBrowse_Click"></Button>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="Projects : "  Margin="{StaticResource ControlMargin}"></Label>
-                                    <ComboBox Width="150"  Margin="{StaticResource ControlMargin}"></ComboBox>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="Panels : "  Margin="{StaticResource ControlMargin}"></Label>
-                                    <ComboBox Width="150"  Margin="{StaticResource ControlMargin}"></ComboBox>
-                                </StackPanel>
-
-                                <GroupBox Name="datagb" Header="Available Projects" Grid.Column="0"  Margin="2,0,-2,0">
-                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                        <TreeView>
-                                            <TreeViewItem Header="Cold Drinks">
-                                                <TreeViewItem Header="Iced Tea"></TreeViewItem>
-                                                <TreeViewItem Header="Mango Shake"></TreeViewItem>
-                                            </TreeViewItem>
-                                            <TreeViewItem Header="Cold Drinks">
-                                                <TreeViewItem Header="Iced Tea"></TreeViewItem>
-                                                <TreeViewItem Header="Mango Shake"></TreeViewItem>
-                                            </TreeViewItem>
-                                        </TreeView>
-                                    </ScrollViewer>
-                                </GroupBox>
-                            </StackPanel>
-                        </GroupBox>
-                        <StackPanel Orientation="Vertical" Grid.Column="1">
-                            <GroupBox  Header="Available Panels" Grid.Column="0">
-                                <ScrollViewer>
-                                    <TreeView>
-                                        <TreeViewItem Header="Cold Drinks">
-                                            <TreeViewItem Header="Coke"></TreeViewItem>
-                                            <TreeViewItem Header="Pepsi"></TreeViewItem>
-                                            <TreeViewItem Header="Orange Juice"></TreeViewItem>
-
-                                        </TreeViewItem>
-                                        <TreeViewItem Header="Cold Drinks">
-                                            <TreeViewItem Header="Coke"></TreeViewItem>
-                                            <TreeViewItem Header="Pepsi"></TreeViewItem>
-                                            <TreeViewItem Header="Orange Juice"></TreeViewItem>
-
-                                        </TreeViewItem>
-                                    </TreeView>
-                                </ScrollViewer>
-
-                            </GroupBox>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2" Orientation="Vertical">
-                            <GroupBox Header="Motor Sensor Info">
-                                <StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Label Content="Selected Config : "></Label>
-                                        <Label Content="Project_Panel_File"></Label>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Label Content="Motor Max Travel :" ></Label>
-                                        <Label Content="2m"></Label>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Label Content="Travel time : "></Label>
-                                        <mah:TimePicker></mah:TimePicker>
-                                        <Button Content="Set"></Button>
-                                    </StackPanel>
-
-                                </StackPanel>
-                            </GroupBox>
-                            <GroupBox Header="Motor Sensor Controls">
-                                <StackPanel>
-                                    <Button Content="Shape A" ></Button>
-                                    <Button Content="Shape B" ></Button>
-                                    <Button Content="Home" ></Button>
-                                    <Button Content="Stop" ></Button>
-                                </StackPanel>
-                            </GroupBox>
-                        </StackPanel>
-
-                    </Grid>
-                </TabItem>
-                <TabItem Header="Setting">
-                <Grid RenderOptions.ClearTypeHint="Enabled" TextOptions.TextFormattingMode="Display">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <GroupBox Grid.Column="0" Header="Unit">
-                        <StackPanel Orientation="Vertical">
-                            <StackPanel.Resources>
-                                <!--A Style that affects all TextBlocks-->
-                                <Style TargetType="Button">
-                                    <Setter Property="Height" Value="60"/>
-                                </Style>
-                            </StackPanel.Resources>
-                            <Button Content="Machine"  ></Button>
-                            <Button Content="Power" ></Button>
-                            <Button Content="Motor"  ></Button>
-                            <Button Content="Vcauum" ></Button>
-                            <Button Content="Heater" ></Button>
-                            <Button Content="Laser"  ></Button>
-                        </StackPanel>
-                    </GroupBox>
-                    <GroupBox Grid.Column="1" Header="Parameters">
-
-                    </GroupBox>
-                </Grid>
-                    
+                <ScrollViewer Margin="2"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto">
+                    <View:ProjectView  />
+                </ScrollViewer>
             </TabItem>
-                <TabItem Header="Accessories">
-                    <Grid RenderOptions.ClearTypeHint="Enabled" TextOptions.TextFormattingMode="Display">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="11*"/>
-                            <ColumnDefinition Width="500*"/>
-                        </Grid.ColumnDefinitions>
+            <TabItem Header="Accessories">
+                <ScrollViewer Margin="2"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto">
+                    <View:AccessoryView  />
+                </ScrollViewer>
+            </TabItem>
+        </mah:MetroAnimatedSingleRowTabControl>
+        <StatusBar Grid.Row="2">
+            <StatusBarItem HorizontalAlignment="Right">eSpark Consulting Group</StatusBarItem>
+            <Separator Style="{StaticResource MahApps.Styles.Separator.StatusBar}" />
+            <StatusBarItem>Selected Tab:</StatusBarItem>
+            <StatusBarItem Content="{Binding ElementName=MainTabControl, Path=SelectedItem.Header, Mode=OneWay}" />
+        </StatusBar>
+    </Grid>
 
-                    </Grid>
-                </TabItem>
-               
-            </TabControl>
-
-
-
-        </Grid>
 </mah:MetroWindow>

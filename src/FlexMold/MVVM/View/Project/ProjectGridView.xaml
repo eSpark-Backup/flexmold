@@ -2,53 +2,139 @@
     x:Class="FlexMold.MVVM.View.Project.ProjectGridView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:convertor="clr-namespace:FlexMold.Convertor"
+    xmlns:core="clr-namespace:FlexMold.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dgx="urn:tom-englert.de/DataGridExtensions"
     xmlns:local="clr-namespace:FlexMold.MVVM.View.Project"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:model="clr-namespace:FlexMold.MVVM.Model"
+    xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+    xmlns:viewmodel="clr-namespace:FlexMold.MVVM.ViewModel"
     d:DesignHeight="450"
-    d:DesignWidth="800"
     mc:Ignorable="d">
+    <UserControl.DataContext>
+        <viewmodel:ProjectViewModel />
+    </UserControl.DataContext>
+    <UserControl.Resources>
+        <convertor:CompleteConverter x:Key="completeConverter" />
+        <model:MyDataModels x:Key="tasks" />
+        <CollectionViewSource x:Key="cvsTasks" Source="{StaticResource tasks}">
+            <CollectionViewSource.SortDescriptions>
+                <!--  Requires 'xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"' declaration.  -->
+                <scm:SortDescription PropertyName="ProjectName" />
+                <scm:SortDescription PropertyName="Complete" />
+                <scm:SortDescription PropertyName="DueDate" />
+                <scm:SortDescription PropertyName="Panel" />
+            </CollectionViewSource.SortDescriptions>
+            <CollectionViewSource.GroupDescriptions>
+                <PropertyGroupDescription PropertyName="ProjectName" />
+                <PropertyGroupDescription PropertyName="Complete" />
+            </CollectionViewSource.GroupDescriptions>
+        </CollectionViewSource>
+        <ControlTemplate x:Key="MultipleChoiceFilter">
+            <core:MultipleChoiceFilter Background="Black" Filter="{Binding Path=Filter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=dgx:DataGridFilterColumnControl}}" >
+            </core:MultipleChoiceFilter>
+        </ControlTemplate>
+    </UserControl.Resources>
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="350" />
+        </Grid.RowDefinitions>
         <DataGrid
-            Name="dg1"
+            x:Name="dataGrid1"
+            Margin="5"
+            Grid.Row="1"
+            dgx:DataGridFilter.IsAutoFilterEnabled="True"
             AutoGenerateColumns="False"
-            CanUserAddRows="false"
-            CanUserDeleteRows="False"
-            SelectionMode="Single"
+            CanUserAddRows="False"
+            IsReadOnly="True"
+            ItemsSource="{Binding Source={StaticResource cvsTasks}}"
+            RowHeaderWidth="20"
+            ScrollViewer.HorizontalScrollBarVisibility="Auto"
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
             SelectionUnit="FullRow">
-            <DataGrid.CellStyle>
-                <Style TargetType="DataGridCell">
-                    <Setter Property="BorderThickness" Value="0" />
-                </Style>
-            </DataGrid.CellStyle>
-
-            <DataGrid.RowHeaderTemplate>
-                <DataTemplate>
-                    <Expander Collapsed="Expander_Collapsed" Expanded="Expander_Expanded" />
-                </DataTemplate>
-            </DataGrid.RowHeaderTemplate>
+            <DataGrid.GroupStyle>
+                <!--  Style for groups at top level.  -->
+                <GroupStyle>
+                    <GroupStyle.ContainerStyle>
+                        <Style TargetType="{x:Type GroupItem}">
+                            <Setter Property="Margin" Value="0,0,0,5" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type GroupItem}">
+                                        <Expander
+                                            Background="#FF38607C"
+                                            BorderBrush="#FF007ACC"
+                                            BorderThickness="1,1,1,5"
+                                            IsExpanded="True">
+                                            <Expander.Header>
+                                                <DockPanel>
+                                                    <TextBlock
+                                                        Width="100"
+                                                        Margin="5,0,0,0"
+                                                        FontWeight="Bold"
+                                                        Text="{Binding Path=Name}" />
+                                                    <TextBlock FontWeight="Bold" Text="{Binding Path=ItemCount}" />
+                                                </DockPanel>
+                                            </Expander.Header>
+                                            <Expander.Content>
+                                                <ItemsPresenter />
+                                            </Expander.Content>
+                                        </Expander>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </GroupStyle.ContainerStyle>
+                </GroupStyle>
+                <!--  Style for groups under the top level.  -->
+                <GroupStyle>
+                    <GroupStyle.HeaderTemplate>
+                        <DataTemplate>
+                            <DockPanel >
+                                <TextBlock
+                                    Width="100"
+                                    Margin="30,0,0,0"
+                                    Text="{Binding Path=Name, Converter={StaticResource completeConverter}}" />
+                                <TextBlock  Text="{Binding Path=ItemCount}" />
+                            </DockPanel>
+                        </DataTemplate>
+                    </GroupStyle.HeaderTemplate>
+                </GroupStyle>
+            </DataGrid.GroupStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn
-                    Width="100"
-                    Binding="{Binding FirstName}"
-                    Header="Name"
-                    IsReadOnly="True" />
+                    dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
+                    Binding="{Binding ProjectName}"
+                    Header="Project" />
                 <DataGridTextColumn
-                    Width="100"
-                    Binding="{Binding LastName}"
-                    Header="Title"
-                    IsReadOnly="True" />
-                <DataGridTextColumn
-                    Width="100"
-                    Binding="{Binding Email}"
-                    Header="Job"
-                    IsReadOnly="True" />
+                    dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
+                    Binding="{Binding Panel}"
+                    Header="Panel" />
+                <DataGridCheckBoxColumn Binding="{Binding Complete}" Header="Complete" />
             </DataGrid.Columns>
-            <DataGrid.RowDetailsTemplate>
-                <DataTemplate>
-                    <TextBlock Margin="10,5,0,0" Text="{Binding id}" />
-                </DataTemplate>
-            </DataGrid.RowDetailsTemplate>
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="BorderThickness" Value="2" />
+                            <Setter Property="Background" Value="#FF92C2D2" />
+                        </Trigger>
+                    </Style.Triggers>
+                    <Setter Property="BorderBrush" Value="#FFB9B9B9" />
+                    <Setter Property="BorderThickness" Value="1" />
+                </Style>
+            </DataGrid.RowStyle>
         </DataGrid>
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <CheckBox
+                VerticalAlignment="Center"
+                Checked="GroupButton_Click"
+                Content="Groups"
+                IsChecked="True"
+                Unchecked="UngroupButton_Click" />
+        </StackPanel>
     </Grid>
 </UserControl>

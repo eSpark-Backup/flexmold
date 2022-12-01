@@ -42,6 +42,9 @@
     <Reference Include="ControlzEx, Version=4.0.0.0, Culture=neutral, PublicKeyToken=69f1c32f803d307e, processorArchitecture=MSIL">
       <HintPath>..\packages\ControlzEx.4.4.0\lib\net45\ControlzEx.dll</HintPath>
     </Reference>
+    <Reference Include="DataGridExtensions, Version=2.5.14.0, Culture=neutral, PublicKeyToken=43de855f87de903a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DataGridExtensions.2.5.14\lib\net452\DataGridExtensions.dll</HintPath>
+    </Reference>
     <Reference Include="MahApps.Metro, Version=2.0.0.0, Culture=neutral, PublicKeyToken=51482d6f650b2b3f, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.2.4.9\lib\net46\MahApps.Metro.dll</HintPath>
     </Reference>
@@ -145,7 +148,7 @@
       <HintPath>..\packages\MahApps.Metro.IconPacks.4.11.0\lib\net46\MahApps.Metro.IconPacks.Zondicons.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.19\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.39\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -184,6 +187,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Common\WpConverter.cs" />
+    <Compile Include="Convertor\HeightConverter.cs" />
+    <Compile Include="Convertor\CompleteConverter.cs" />
+    <Compile Include="Core\MultipleChoiceFilter.cs" />
     <Compile Include="Core\ObservableObject.cs" />
     <Compile Include="Core\PropertyValidation.cs" />
     <Compile Include="Core\RelayCommand.cs" />
@@ -277,6 +283,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MVVM\Model\MyDataModel.cs" />
     <Compile Include="MVVM\Model\ProjectData.cs" />
     <Compile Include="MVVM\ViewModel\AccessoryViewModel.cs" />
     <Compile Include="MVVM\ViewModel\HomeViewModel.cs" />

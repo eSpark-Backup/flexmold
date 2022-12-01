@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace FlexMold.MVVM.ViewModel
 {
-     class ProjectViewModel
+     class ProjectViewModel : ObservableObject
     {
         public  ProjectData projectData { get; set; }
 

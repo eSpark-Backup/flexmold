@@ -79,7 +79,7 @@
         <mah:ToggleSwitch
             Grid.Row="3"
             Grid.Column="1"
-            IsOn="{Binding plcHelper.motorDirection , Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            IsOn="{Binding plcHelper.motorDirection}"
             OffCommand="{Binding MotorReverseCommand}"
             OffContent="Reverse"
             OnCommand="{Binding MotorForwardCommand}"
@@ -94,6 +94,6 @@
             Minimum="0"
             TextAlignment="Left"
             ValueChanged="NumericUpDown_ValueChanged"
-            Value="{Binding plcHelper.motorStep, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            Value="{Binding plcHelper.motorStep}" />
     </Grid>
 </UserControl>

@@ -58,7 +58,7 @@ namespace FlexMold.MVVM.View.Project
             {
                 cvTasks.GroupDescriptions.Clear();
                 cvTasks.GroupDescriptions.Add(new PropertyGroupDescription("ProjectName"));
-                cvTasks.GroupDescriptions.Add(new PropertyGroupDescription("Complete"));
+                //cvTasks.GroupDescriptions.Add(new PropertyGroupDescription("Complete"));
             }
         }
     }

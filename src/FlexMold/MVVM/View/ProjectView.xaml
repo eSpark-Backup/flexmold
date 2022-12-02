@@ -22,12 +22,11 @@
         <Grid RenderOptions.ClearTypeHint="Enabled" TextOptions.TextFormattingMode="Display">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="250" />
-                <ColumnDefinition Width="250*" />
-                <ColumnDefinition Width="250*" />
+                <ColumnDefinition Width="245*" />
+                <ColumnDefinition Width="245*" />
             </Grid.ColumnDefinitions>
             <GroupBox
                 Grid.Column="0"
-                MinWidth="266"
                 Header="Projects Selection">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -37,13 +36,13 @@
                     <Button
                         Name="btProjectBrowse"
                         Grid.Row="0"
-                        Click="btProjectBrowse_Click">
+                        Click="btProjectBrowse_Click" Grid.ColumnSpan="2">
                         <StackPanel Orientation="Horizontal">
                             <iconPacks:PackIconMaterial Margin="6" Kind="Folder" />
                             <TextBlock VerticalAlignment="Center" Text="Browse Project" />
                         </StackPanel>
                     </Button>
-                    <project:ProjectGridView Grid.Row="1" Grid.Column="0" />
+                    <project:ProjectGridView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" />
                 </Grid>
             </GroupBox>
             <GroupBox Grid.Column="1" Header="Available Files" />
@@ -77,6 +76,7 @@
                         <TextBox
                             Grid.Row="2"
                             Grid.Column="0"
+                            
                             Text="Travel Time : 1min 20sec" />
                         <Button
                             Grid.Row="2"

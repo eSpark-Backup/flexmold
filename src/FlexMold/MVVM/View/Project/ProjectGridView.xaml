@@ -7,34 +7,29 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dgx="urn:tom-englert.de/DataGridExtensions"
     xmlns:local="clr-namespace:FlexMold.MVVM.View.Project"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:model="clr-namespace:FlexMold.MVVM.Model"
     xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
     xmlns:viewmodel="clr-namespace:FlexMold.MVVM.ViewModel"
     d:DesignHeight="450"
+    Background="White"
     mc:Ignorable="d">
     <UserControl.DataContext>
         <viewmodel:ProjectViewModel />
     </UserControl.DataContext>
     <UserControl.Resources>
-        <convertor:CompleteConverter x:Key="completeConverter" />
         <model:MyDataModels x:Key="tasks" />
         <CollectionViewSource x:Key="cvsTasks" Source="{StaticResource tasks}">
             <CollectionViewSource.SortDescriptions>
-                <!--  Requires 'xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"' declaration.  -->
                 <scm:SortDescription PropertyName="ProjectName" />
                 <scm:SortDescription PropertyName="Complete" />
                 <scm:SortDescription PropertyName="DueDate" />
                 <scm:SortDescription PropertyName="Panel" />
             </CollectionViewSource.SortDescriptions>
-            <CollectionViewSource.GroupDescriptions>
-                <PropertyGroupDescription PropertyName="ProjectName" />
-                <PropertyGroupDescription PropertyName="Complete" />
-            </CollectionViewSource.GroupDescriptions>
         </CollectionViewSource>
         <ControlTemplate x:Key="MultipleChoiceFilter">
-            <core:MultipleChoiceFilter Background="Black" Filter="{Binding Path=Filter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=dgx:DataGridFilterColumnControl}}" >
-            </core:MultipleChoiceFilter>
+            <core:MultipleChoiceFilter Filter="{Binding Path=Filter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=dgx:DataGridFilterColumnControl}}" />
         </ControlTemplate>
     </UserControl.Resources>
     <Grid>
@@ -44,8 +39,8 @@
         </Grid.RowDefinitions>
         <DataGrid
             x:Name="dataGrid1"
-            Margin="5"
             Grid.Row="1"
+            Margin="5"
             dgx:DataGridFilter.IsAutoFilterEnabled="True"
             AutoGenerateColumns="False"
             CanUserAddRows="False"
@@ -65,18 +60,18 @@
                                 <Setter.Value>
                                     <ControlTemplate TargetType="{x:Type GroupItem}">
                                         <Expander
-                                            Background="#FF38607C"
-                                            BorderBrush="#FF007ACC"
-                                            BorderThickness="1,1,1,5"
+                                            mah:HeaderedControlHelper.HeaderBackground="Transparent"
+                                            BorderBrush="{x:Null}"
                                             IsExpanded="True">
                                             <Expander.Header>
                                                 <DockPanel>
                                                     <TextBlock
                                                         Width="100"
+                                                        FontSize="15"
                                                         Margin="5,0,0,0"
-                                                        FontWeight="Bold"
+                                                        Foreground="Black"
                                                         Text="{Binding Path=Name}" />
-                                                    <TextBlock FontWeight="Bold" Text="{Binding Path=ItemCount}" />
+                                                    <TextBlock FontSize="15" Foreground="Black" Text="{Binding Path=ItemCount}" />
                                                 </DockPanel>
                                             </Expander.Header>
                                             <Expander.Content>
@@ -90,20 +85,19 @@
                     </GroupStyle.ContainerStyle>
                 </GroupStyle>
                 <!--  Style for groups under the top level.  -->
-                <GroupStyle>
-                    <GroupStyle.HeaderTemplate>
-                        <DataTemplate>
-                            <DockPanel >
-                                <TextBlock
-                                    Width="100"
-                                    Margin="30,0,0,0"
-                                    Text="{Binding Path=Name, Converter={StaticResource completeConverter}}" />
-                                <TextBlock  Text="{Binding Path=ItemCount}" />
-                            </DockPanel>
-                        </DataTemplate>
-                    </GroupStyle.HeaderTemplate>
-                </GroupStyle>
             </DataGrid.GroupStyle>
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Height" Value="35"/>
+                    <Setter Property="Foreground" Value="Blue"/>
+                    <Setter Property="FontSize" Value="13" />
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="ToolTip" Value="Click to sort."/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn
                     dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
@@ -116,17 +110,24 @@
                 <DataGridCheckBoxColumn Binding="{Binding Complete}" Header="Complete" />
             </DataGrid.Columns>
             <DataGrid.RowStyle>
-                <Style TargetType="DataGridRow">
+                <Style BasedOn="{StaticResource MahApps.Styles.DataGridRow}" TargetType="{x:Type DataGridRow}">
+                    <Setter Property="FontSize" Value="14" />
                     <Style.Triggers>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="BorderThickness" Value="2" />
-                            <Setter Property="Background" Value="#FF92C2D2" />
-                        </Trigger>
+                        <!--  IsMouseOver  -->
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding Path=IsMouseOver, RelativeSource={RelativeSource Self}}" Value="true" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Background" Value="#FF53DEF5" />
+                        </MultiDataTrigger>
                     </Style.Triggers>
-                    <Setter Property="BorderBrush" Value="#FFB9B9B9" />
-                    <Setter Property="BorderThickness" Value="1" />
                 </Style>
             </DataGrid.RowStyle>
+            <DataGrid.Style>
+                <Style BasedOn="{StaticResource MahApps.Styles.DataGrid}" TargetType="{x:Type DataGrid}">
+                    <Setter Property="AlternatingRowBackground" Value="{DynamicResource MahApps.Brushes.Gray9}" />
+                </Style>
+            </DataGrid.Style>
         </DataGrid>
         <StackPanel Grid.Row="0" Orientation="Horizontal">
             <CheckBox

@@ -19,13 +19,12 @@
         <viewmodel:ProjectViewModel />
     </UserControl.DataContext>
     <UserControl.Resources>
-        <model:MyDataModels x:Key="tasks" />
-        <CollectionViewSource x:Key="cvsTasks" Source="{StaticResource tasks}">
+        <convertor:DistinctConverter x:Key="distinctConverter"/>
+        <CollectionViewSource x:Key="cvsTasks" Source="{Binding myDataModels}">
             <CollectionViewSource.SortDescriptions>
-                <scm:SortDescription PropertyName="ProjectName" />
-                <scm:SortDescription PropertyName="Complete" />
-                <scm:SortDescription PropertyName="DueDate" />
+                <scm:SortDescription PropertyName="PorjectName" />
                 <scm:SortDescription PropertyName="Panel" />
+                <scm:SortDescription PropertyName="Complete" />
             </CollectionViewSource.SortDescriptions>
         </CollectionViewSource>
         <ControlTemplate x:Key="MultipleChoiceFilter">
@@ -37,6 +36,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="350" />
         </Grid.RowDefinitions>
+        <!--IsSynchronizedWithCurrentItem="True"-->
         <DataGrid
             x:Name="dataGrid1"
             Grid.Row="1"
@@ -44,8 +44,10 @@
             dgx:DataGridFilter.IsAutoFilterEnabled="True"
             AutoGenerateColumns="False"
             CanUserAddRows="False"
+         
             IsReadOnly="True"
-            ItemsSource="{Binding Source={StaticResource cvsTasks}}"
+            ItemsSource="{Binding myDataModels}"
+            SelectedItem="{Binding Path=selectedMyDataModel}"
             RowHeaderWidth="20"
             ScrollViewer.HorizontalScrollBarVisibility="Auto"
             ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -62,7 +64,7 @@
                                         <Expander
                                             mah:HeaderedControlHelper.HeaderBackground="Transparent"
                                             BorderBrush="{x:Null}"
-                                            IsExpanded="True">
+                                            IsExpanded="False">
                                             <Expander.Header>
                                                 <DockPanel>
                                                     <TextBlock
@@ -105,7 +107,7 @@
                     Header="Project" />
                 <DataGridTextColumn
                     dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
-                    Binding="{Binding Panel}"
+                    Binding="{Binding Panel}" 
                     Header="Panel" />
                 <DataGridCheckBoxColumn Binding="{Binding Complete}" Header="Complete" />
             </DataGrid.Columns>

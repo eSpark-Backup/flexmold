@@ -26,20 +26,6 @@ namespace FlexMold.MVVM.View.Project
         {
             InitializeComponent();
             // Get a reference to the tasks collection.
-            MyDataModels _tasks = (MyDataModels)this.Resources["tasks"];
-
-            // Generate some task data and add it to the task list.
-            for (int i = 1; i <= 14; i++)
-            {
-                _tasks.Add(new MyDataModel()
-                {
-                    ProjectName = "Project " + ((i % 3) + 1).ToString(),
-                    TaskName = "Task " + i.ToString(),
-                    DueDate = DateTime.Now.AddDays(i),
-                    Complete = (i % 2 == 0),
-                    Panel = "p" + i
-                });
-            }
         }
 
         private void UngroupButton_Click(object sender, RoutedEventArgs e)

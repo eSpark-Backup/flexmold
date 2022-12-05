@@ -23,12 +23,13 @@ namespace FlexMold.MVVM.View
     /// </summary>
     public partial class ProjectView : UserControl
     {
-       
 
         public ProjectView()
         {
            
             InitializeComponent();
+            var dc = this.DataContext;
+            Console.WriteLine();
         }
 
         private void btProjectBrowse_Click(object sender, RoutedEventArgs e)

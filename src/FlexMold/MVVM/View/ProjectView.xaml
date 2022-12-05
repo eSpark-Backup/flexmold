@@ -15,6 +15,9 @@
     d:DesignHeight="400"
     d:DesignWidth="750"
     mc:Ignorable="d">
+    <UserControl.DataContext>
+        <viewmodel:ProjectViewModel />
+    </UserControl.DataContext>
     <UserControl.Resources>
         <convertor:HeightConverter x:Key="HeightConverter" />
     </UserControl.Resources>
@@ -25,9 +28,7 @@
                 <ColumnDefinition Width="245*" />
                 <ColumnDefinition Width="245*" />
             </Grid.ColumnDefinitions>
-            <GroupBox
-                Grid.Column="0"
-                Header="Projects Selection">
+            <GroupBox Grid.Column="0" Header="Projects Selection">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -36,16 +37,28 @@
                     <Button
                         Name="btProjectBrowse"
                         Grid.Row="0"
-                        Click="btProjectBrowse_Click" Grid.ColumnSpan="2">
+                        Grid.ColumnSpan="2"
+                        Click="btProjectBrowse_Click">
                         <StackPanel Orientation="Horizontal">
                             <iconPacks:PackIconMaterial Margin="6" Kind="Folder" />
                             <TextBlock VerticalAlignment="Center" Text="Browse Project" />
                         </StackPanel>
                     </Button>
-                    <project:ProjectGridView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" />
+                    <project:ProjectGridView
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2" />
                 </Grid>
             </GroupBox>
-            <GroupBox Grid.Column="1" Header="Available Files" />
+            <GroupBox Grid.Column="1" Header="Available Files(Selected Panel)">
+                <DataGrid
+                    Height="400"
+                    Margin="8"
+                    Name="mylv"
+                    ItemsSource="{Binding sda}"
+                    >
+                </DataGrid>
+            </GroupBox>
             <StackPanel
                 Grid.Column="2"
                 MinWidth="266"
@@ -67,7 +80,7 @@
                             Grid.Row="0"
                             Grid.Column="0"
                             Grid.ColumnSpan="2"
-                            Text="{Binding projectData.labeltext}" />
+                            />
                         <TextBox
                             Grid.Row="1"
                             Grid.Column="0"
@@ -76,7 +89,6 @@
                         <TextBox
                             Grid.Row="2"
                             Grid.Column="0"
-                            
                             Text="Travel Time : 1min 20sec" />
                         <Button
                             Grid.Row="2"

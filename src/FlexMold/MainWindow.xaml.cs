@@ -1,4 +1,5 @@
-﻿using MahApps.Metro.Controls;
+﻿using FlexMold.MVVM.Model;
+using MahApps.Metro.Controls;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,30 +26,7 @@ namespace FlexMold
     {
         public MainWindow()
         {
-            string selectedPath = @"C:\Users\123\Desktop\Projects";
-
-
-            DirectoryInfo di = new DirectoryInfo(selectedPath);
-            var laserFilesPath = di.GetFiles("*.las", SearchOption.AllDirectories);
-            var diPanels = new List<string>();
-            var diProjects = new List<string>();
-
-            foreach (var item in laserFilesPath)
-            {
-                diPanels.Add(item.Directory.ToString());
-                diProjects.Add(item.Directory.Parent.ToString());
-
-            }
-            diPanels = diPanels.Distinct().ToList();
-            diProjects = diProjects.Distinct().ToList();
-            foreach (var projectItem in diProjects)
-            {
-                //new DirectoryInfo(projectItem).GetDirectories
-                //foreach (var item in)
-                //{
-
-                //}
-            }
+            
             InitializeComponent();
             Console.WriteLine();
         }

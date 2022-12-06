@@ -1,5 +1,8 @@
-﻿using System;
+﻿using DataGridExtensions;
+using FlexMold.MVVM.Model;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,28 +26,27 @@ namespace FlexMold.MVVM.View.Project
         public ProjectGridView()
         {
             InitializeComponent();
+            // Get a reference to the tasks collection.
         }
 
-        private void Expander_Expanded(object sender, RoutedEventArgs e)
+        private void UngroupButton_Click(object sender, RoutedEventArgs e)
         {
-            for (var vis = sender as Visual; vis != null; vis = VisualTreeHelper.GetParent(vis) as Visual)
-                if (vis is DataGridRow)
-                {
-                    var row = (DataGridRow)vis;
-                    row.DetailsVisibility = row.DetailsVisibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
-                    break;
-                }
+            ICollectionView cvTasks = CollectionViewSource.GetDefaultView(dataGrid1.ItemsSource);
+            if (cvTasks != null)
+            {
+                cvTasks.GroupDescriptions.Clear();
+            }
         }
 
-        private void Expander_Collapsed(object sender, RoutedEventArgs e)
+        private void GroupButton_Click(object sender, RoutedEventArgs e)
         {
-            for (var vis = sender as Visual; vis != null; vis = VisualTreeHelper.GetParent(vis) as Visual)
-                if (vis is DataGridRow)
-                {
-                    var row = (DataGridRow)vis;
-                    row.DetailsVisibility = row.DetailsVisibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
-                    break;
-                }
+            ICollectionView cvTasks = CollectionViewSource.GetDefaultView(dataGrid1.ItemsSource);
+            if (cvTasks != null && cvTasks.CanGroup == true)
+            {
+                cvTasks.GroupDescriptions.Clear();
+                cvTasks.GroupDescriptions.Add(new PropertyGroupDescription("ProjectName"));
+                //cvTasks.GroupDescriptions.Add(new PropertyGroupDescription("Complete"));
+            }
         }
     }
 }

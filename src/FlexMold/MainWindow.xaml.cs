@@ -1,5 +1,6 @@
 ﻿using FlexMold.MVVM.Model;
 using MahApps.Metro.Controls;
+using Sylvan.Data.Csv;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,9 +27,31 @@ namespace FlexMold
     {
         public MainWindow()
         {
-            
+
             InitializeComponent();
             Console.WriteLine();
+            //var csv = @"C:\Users\123\Downloads\Sylvan-main\Sylvan-main\source\Sylvan.Data.Csv.Tests\Data\Quote.csv";
+            var csv = @"D:\smhraza\Projects\FLEXMOLD\flexmolddata\FlexMain\Projects\M&M\S3.2\S3.2.csv";
+
+
+            using (var reader = new StreamReader(csv))
+            {
+                var options = new CsvDataReaderOptions
+                {
+                    HasHeaders = false,
+                    BufferSize = 0x10000,
+                };
+                var csvr = CsvDataReader.Create(reader, options);
+                var data = new List<double>();
+                while (csvr.Read())
+                {
+                    for (int i = 0; i < csvr.FieldCount; i++)
+                    {
+                        data.Add(csvr.GetDouble(i));
+                    }
+                }
+                Console.WriteLine();
+            }
         }
 
         private void btProjectBrowse_Click(object sender, RoutedEventArgs e)

@@ -65,7 +65,8 @@
                         ItemsSource="{Binding selectedMyDataModel.LaserFile}"
                         ScrollViewer.CanContentScroll="True"
                         ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                        ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                        SelectedItem="{Binding Path=slectedFile}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Binding="{Binding Name}" Header="File" />
                             <DataGridTextColumn Binding="{Binding Length}" Header="Size(b)" />
@@ -114,6 +115,7 @@
                 </GroupBox>
                 <GroupBox Margin="0,0,8,0" Header="Motor Sensor Controls">
                     <StackPanel>
+                        <Button Command="{Binding ReadFileCommand}" Content="Read File" />
                         <Button Content="Shape A" />
                         <Button Content="Shape B" />
                         <Button Content="Stop" />

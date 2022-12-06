@@ -61,13 +61,11 @@
         <ComboBox
             Grid.Row="0"
             Grid.Column="1"
-            Foreground="AliceBlue"
             ItemsSource="{Binding plcHelper.plcHostAvailableIPs}"
             SelectedItem="{Binding plcHelper.plcHostSelectedIP }"/>
         <ComboBox
             Grid.Row="1"
             Grid.Column="1"
-            Foreground="AliceBlue"
             ItemsSource="{Binding plcHelper.plcHostAvailablePorts}"
             SelectedItem="{Binding plcHelper.plcHostSelectedPort }"/>
         <Button

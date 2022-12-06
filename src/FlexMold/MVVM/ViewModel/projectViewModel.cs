@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace FlexMold.MVVM.ViewModel
 {
 
-    public class ProjectViewModel : ObservableObject
+    public class ProjectViewModel 
     {
         private MyDataModel _selectedMyDataModel;
         public MyDataModel selectedMyDataModel
@@ -22,25 +22,13 @@ namespace FlexMold.MVVM.ViewModel
             set
             {
                 _selectedMyDataModel = value;
-                sda = new ObservableCollection<FileInfo>(value.LaserFile) ;
-                OnPropertyChanged();
             }
         }
         public MyDataModels myDataModels { get; set; }
-        private ObservableCollection<FileInfo> _sda;
-
-        public ObservableCollection<FileInfo> sda
-        {
-            get { return _sda; }
-            set { _sda = value;
-                OnPropertyChanged();
-            }
-        }
 
         public ProjectViewModel()
         {
-            sda = new ObservableCollection<FileInfo>();
-            sda.Add(new FileInfo(@"C:\Users\123\Desktop\Untitled.png"));
+            //FileInfo f = new FileInfo("");
             myDataModels = new MyDataModels();
             string selectedPath = @"C:\Users\123\Desktop\Projects";
             DirectoryInfo di = new DirectoryInfo(selectedPath);

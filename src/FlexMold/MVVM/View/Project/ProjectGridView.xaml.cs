@@ -1,4 +1,5 @@
-﻿using FlexMold.MVVM.Model;
+﻿using DataGridExtensions;
+using FlexMold.MVVM.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

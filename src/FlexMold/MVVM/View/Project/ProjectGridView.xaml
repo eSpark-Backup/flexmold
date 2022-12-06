@@ -15,17 +15,17 @@
     d:DesignHeight="450"
     Background="White"
     mc:Ignorable="d">
-    <UserControl.DataContext>
-        <viewmodel:ProjectViewModel />
-    </UserControl.DataContext>
     <UserControl.Resources>
-        <convertor:DistinctConverter x:Key="distinctConverter"/>
+        <convertor:DistinctConverter x:Key="distinctConverter" />
         <CollectionViewSource x:Key="cvsTasks" Source="{Binding myDataModels}">
             <CollectionViewSource.SortDescriptions>
                 <scm:SortDescription PropertyName="PorjectName" />
                 <scm:SortDescription PropertyName="Panel" />
                 <scm:SortDescription PropertyName="Complete" />
             </CollectionViewSource.SortDescriptions>
+            <CollectionViewSource.GroupDescriptions>
+                <PropertyGroupDescription PropertyName="ProjectName" />
+            </CollectionViewSource.GroupDescriptions>
         </CollectionViewSource>
         <ControlTemplate x:Key="MultipleChoiceFilter">
             <core:MultipleChoiceFilter Filter="{Binding Path=Filter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=dgx:DataGridFilterColumnControl}}" />
@@ -36,7 +36,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="350" />
         </Grid.RowDefinitions>
-        <!--IsSynchronizedWithCurrentItem="True"-->
+        <!--  IsSynchronizedWithCurrentItem="True"  -->
         <DataGrid
             x:Name="dataGrid1"
             Grid.Row="1"
@@ -44,13 +44,12 @@
             dgx:DataGridFilter.IsAutoFilterEnabled="True"
             AutoGenerateColumns="False"
             CanUserAddRows="False"
-         
             IsReadOnly="True"
-            ItemsSource="{Binding myDataModels}"
-            SelectedItem="{Binding Path=selectedMyDataModel}"
+            ItemsSource="{Binding Source={StaticResource cvsTasks}}"
             RowHeaderWidth="20"
             ScrollViewer.HorizontalScrollBarVisibility="Auto"
             ScrollViewer.VerticalScrollBarVisibility="Auto"
+            SelectedItem="{Binding Path=selectedMyDataModel}"
             SelectionUnit="FullRow">
             <DataGrid.GroupStyle>
                 <!--  Style for groups at top level.  -->
@@ -69,11 +68,14 @@
                                                 <DockPanel>
                                                     <TextBlock
                                                         Width="100"
-                                                        FontSize="15"
                                                         Margin="5,0,0,0"
+                                                        FontSize="15"
                                                         Foreground="Black"
                                                         Text="{Binding Path=Name}" />
-                                                    <TextBlock FontSize="15" Foreground="Black" Text="{Binding Path=ItemCount}" />
+                                                    <TextBlock
+                                                        FontSize="15"
+                                                        Foreground="Black"
+                                                        Text="{Binding Path=ItemCount}" />
                                                 </DockPanel>
                                             </Expander.Header>
                                             <Expander.Content>
@@ -90,12 +92,12 @@
             </DataGrid.GroupStyle>
             <DataGrid.ColumnHeaderStyle>
                 <Style TargetType="DataGridColumnHeader">
-                    <Setter Property="Height" Value="35"/>
-                    <Setter Property="Foreground" Value="Blue"/>
+                    <Setter Property="Height" Value="35" />
+                    <Setter Property="Foreground" Value="Blue" />
                     <Setter Property="FontSize" Value="13" />
                     <Style.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="ToolTip" Value="Click to sort."/>
+                            <Setter Property="ToolTip" Value="Click to sort." />
                         </Trigger>
                     </Style.Triggers>
                 </Style>
@@ -107,7 +109,7 @@
                     Header="Project" />
                 <DataGridTextColumn
                     dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
-                    Binding="{Binding Panel}" 
+                    Binding="{Binding Panel}"
                     Header="Panel" />
                 <DataGridCheckBoxColumn Binding="{Binding Complete}" Header="Complete" />
             </DataGrid.Columns>

@@ -24,11 +24,14 @@
     <Border Style="{StaticResource panelMenuBorder}">
         <Grid RenderOptions.ClearTypeHint="Enabled" TextOptions.TextFormattingMode="Display">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="258" />
                 <ColumnDefinition Width="250" />
-                <ColumnDefinition Width="245*" />
-                <ColumnDefinition Width="245*" />
+                <ColumnDefinition Width="250*" />
             </Grid.ColumnDefinitions>
-            <GroupBox Grid.Column="0" Header="Projects Selection">
+            <GroupBox
+                Grid.Column="0"
+                Margin="8,0,0,0"
+                Header="Projects Selection">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -51,20 +54,31 @@
                 </Grid>
             </GroupBox>
             <GroupBox Grid.Column="1" Header="Available Files(Selected Panel)">
-                <DataGrid
-                    Height="400"
-                    Margin="8"
-                    Name="mylv"
-                    ItemsSource="{Binding sda}"
-                    >
-                </DataGrid>
+                <DockPanel>
+                    <!--    -->
+                    <DataGrid
+                        Margin="5"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        DockPanel.Dock="Top"
+                        IsReadOnly="True"
+                        ItemsSource="{Binding selectedMyDataModel.LaserFile}"
+                        ScrollViewer.CanContentScroll="True"
+                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding Name}" Header="File" />
+                            <DataGridTextColumn Binding="{Binding Length}" Header="Size(b)" />
+                            <DataGridTextColumn Binding="{Binding LastWriteTime}" Header="Last Modified" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
             </GroupBox>
             <StackPanel
                 Grid.Column="2"
                 MinWidth="266"
                 Orientation="Vertical">
-                <GroupBox Header="Motor Sensor Chart Info">
-
+                <GroupBox Margin="0,0,8,0" Header="Motor Sensor Chart Info">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -80,15 +94,17 @@
                             Grid.Row="0"
                             Grid.Column="0"
                             Grid.ColumnSpan="2"
-                            />
+                            FontSize="14" />
                         <TextBox
                             Grid.Row="1"
                             Grid.Column="0"
                             Grid.ColumnSpan="2"
+                            FontSize="14"
                             Text="Motor Max Travel" />
                         <TextBox
                             Grid.Row="2"
                             Grid.Column="0"
+                            FontSize="14"
                             Text="Travel Time : 1min 20sec" />
                         <Button
                             Grid.Row="2"
@@ -96,7 +112,7 @@
                             Content="Set Time" />
                     </Grid>
                 </GroupBox>
-                <GroupBox Header="Motor Sensor Controls">
+                <GroupBox Margin="0,0,8,0" Header="Motor Sensor Controls">
                     <StackPanel>
                         <Button Content="Shape A" />
                         <Button Content="Shape B" />

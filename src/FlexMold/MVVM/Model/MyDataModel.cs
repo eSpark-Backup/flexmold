@@ -21,7 +21,9 @@ namespace FlexMold.MVVM.Model
         public string ProjectName
         {
             get { return _ProjectName; }
-            set { _ProjectName = value; }
+            set { _ProjectName = value;
+                OnPropertyChanged();
+            }
         }
 
 
@@ -35,6 +37,7 @@ namespace FlexMold.MVVM.Model
                 {
                     this.m_Complete = value;
                     OnPropertyChanged();
+
                 }
             }
         }
@@ -46,8 +49,9 @@ namespace FlexMold.MVVM.Model
                 if (value != this._Panel)
                 {
                     this._Panel = value;
+                    OnPropertyChanged();
+
                 }
-                OnPropertyChanged();
             }
         }
         private List<FileInfo> _laserFile;
@@ -56,7 +60,7 @@ namespace FlexMold.MVVM.Model
             get { return _laserFile; }
             set
             {
-                _laserFile = value;
+                   _laserFile = value;
                 OnPropertyChanged();
             }
         }

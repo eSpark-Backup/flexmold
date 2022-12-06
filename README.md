@@ -7,4 +7,4 @@ To develop a desktop HMI software for client that runs on Windows 10 or above an
 [i1]: https://github.com/eSpark-Consultants/flexmold/issues/1
 # Results
 ## Issue #2 Result 05-12-22 Datagrid UI update
- ![](img/issue2.gif)
+ ![](img/issue2completed.gif)

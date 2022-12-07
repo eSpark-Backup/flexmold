@@ -1,12 +1,15 @@
 ﻿using FlexMold.MVVM.Model;
 using MahApps.Metro.Controls;
+using NLog;
 using Sylvan.Data.Csv;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -25,43 +28,54 @@ namespace FlexMold
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
+        //Task _logTask;
+        //CancellationTokenSource _cancelLogTask;
         public MainWindow()
         {
+           
 
             InitializeComponent();
+            logCtrl.ItemAdded += OnLogMessageItemAdded;
+
             Console.WriteLine();
-            //var csv = @"C:\Users\123\Downloads\Sylvan-main\Sylvan-main\source\Sylvan.Data.Csv.Tests\Data\Quote.csv";
-            var csv = @"D:\smhraza\Projects\FLEXMOLD\flexmolddata\FlexMain\Projects\M&M\S3.2\S3.2.csv";
-
-
-            using (var reader = new StreamReader(csv))
-            {
-                var options = new CsvDataReaderOptions
-                {
-                    HasHeaders = false,
-                    BufferSize = 0x10000,
-                };
-                var csvr = CsvDataReader.Create(reader, options);
-                var data = new List<double>();
-                while (csvr.Read())
-                {
-                    for (int i = 0; i < csvr.FieldCount; i++)
-                    {
-                        data.Add(csvr.GetDouble(i));
-                    }
-                }
-                Console.WriteLine();
-            }
         }
-
-        private void btProjectBrowse_Click(object sender, RoutedEventArgs e)
+        private void OnLogMessageItemAdded(object o, EventArgs Args)
         {
-            using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
-            {
-                System.Windows.Forms.DialogResult result = dialog.ShowDialog();
-
-                Console.WriteLine();
-            }
+            // Do what you want :)
+            LogEventInfo logInfo = (NLogEvent)Args;
+            if (logInfo.Level >= NLog.LogLevel.Error)
+                SystemSounds.Beep.Play();
         }
+        
+        //private void BackgroundSending_Checked(object sender, RoutedEventArgs e)
+        //{
+        //    _cancelLogTask = new CancellationTokenSource();
+        //    var token = _cancelLogTask.Token;
+        //    _logTask = new Task(SendLogs, token, token);
+        //    _logTask.Start();
+        //}
+        //private void SendLogs(object obj)
+        //{
+        //    CancellationToken ct = (CancellationToken)obj;
+
+        //    int counter = 0;
+        //    Logger log = NLog.LogManager.GetLogger("task");
+
+        //    log.Debug("Backgroundtask started.");
+
+        //    while (!ct.WaitHandle.WaitOne(2000))
+        //    {
+        //        log.Trace(string.Format("Messageno {0} from backgroudtask.", counter++));
+        //    }
+
+        //    log.Debug("Backgroundtask stopped.");
+        //}
+        private void BackgroundSending_Unchecked(object sender, RoutedEventArgs e)
+        {
+            //if (_cancelLogTask != null)
+            //    _cancelLogTask.Cancel();
+        }
+      
+
     }
 }

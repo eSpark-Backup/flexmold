@@ -26,14 +26,9 @@ namespace FlexMold.MVVM.View
 
         public ProjectView()
         {
-           
             InitializeComponent();
-            var dc = this.DataContext;
-            Console.WriteLine();
         }
 
-        private void btProjectBrowse_Click(object sender, RoutedEventArgs e)
-        {
-        }
+      
     }
 }

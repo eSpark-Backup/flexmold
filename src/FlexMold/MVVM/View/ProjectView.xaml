@@ -41,7 +41,7 @@
                         Name="btProjectBrowse"
                         Grid.Row="0"
                         Grid.ColumnSpan="2"
-                        Click="btProjectBrowse_Click">
+                        Command="{Binding BrowseProjectCommand}">
                         <StackPanel Orientation="Horizontal">
                             <iconPacks:PackIconMaterial Margin="6" Kind="Folder" />
                             <TextBlock VerticalAlignment="Center" Text="Browse Project" />

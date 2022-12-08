@@ -18,8 +18,6 @@ namespace FlexMold.MVVM.ViewModel
 
     class ProjectViewModel : ObservableObject
     {
-        Logger log = LogManager.GetLogger("ProjectViewModel");
-
         public RelayCommand ReadFileCommand { get; set; }
         public RelayCommand BrowseProjectCommand { get; set; }
 
@@ -57,9 +55,10 @@ namespace FlexMold.MVVM.ViewModel
         }
         void readCsvLasFile()
         {
+            Logger log = LogManager.GetLogger("CSV LAS File Reader");
             if (slectedFile != null)
             {
-                log.Log(LogLevel.Info, $"Reading CSV|Las File {slectedFile.Name}");
+                log.Log(LogLevel.Info, $"Reading File {slectedFile.Name}");
                 if (slectedFile.FullName.EndsWith(".csv"))
                 {
                     try
@@ -86,9 +85,9 @@ namespace FlexMold.MVVM.ViewModel
                         }
 
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-
+                        log.Log(LogLevel.Error, $"Reading CSV|Las File {slectedFile.Name}");
                         throw;
                     }
                 }
@@ -99,10 +98,13 @@ namespace FlexMold.MVVM.ViewModel
                 log.Log(LogLevel.Warn, $"Please Select File First");
 
         }
+
         void BrowseProject()
         {
+            Logger log = LogManager.GetLogger("Browse Project");
             using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
             {
+                log.Log(LogLevel.Info, $"Select Project Folder");
                 System.Windows.Forms.DialogResult result = dialog.ShowDialog();
                 if (result == System.Windows.Forms.DialogResult.OK)
                 {
@@ -115,6 +117,10 @@ namespace FlexMold.MVVM.ViewModel
                              .Where(path => reg.IsMatch(path.FullName))
                              .ToList();
                     var panels = laserFilesPath.GroupBy(p => p.Directory.Name);
+                    var projectsTemp = laserFilesPath.GroupBy(p => p.Directory.Parent.Name);
+                    log.Log(LogLevel.Info, $"{projectsTemp.Count()} Projects Found");
+                    log.Log(LogLevel.Info, $"{panels.Count()} Panels Found");
+                    log.Log(LogLevel.Info, $"{laserFilesPath.Count()} Files Found");
                     foreach (var item in panels)
                     {
                         myDataModels.Add(new MyDataModel()
@@ -126,7 +132,7 @@ namespace FlexMold.MVVM.ViewModel
                         });
                     }
                 }
-                Console.WriteLine();
+                else log.Log(LogLevel.Warn, $"User Cancelled Project Browser");
             }
         }
         public ProjectViewModel()

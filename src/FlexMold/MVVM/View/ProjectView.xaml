@@ -12,6 +12,7 @@
     xmlns:project="clr-namespace:FlexMold.MVVM.View.Project"
     xmlns:viewmodel="clr-namespace:FlexMold.MVVM.ViewModel"
     Name="parent"
+    d:DataContext=""
     d:DesignHeight="400"
     d:DesignWidth="750"
     mc:Ignorable="d">

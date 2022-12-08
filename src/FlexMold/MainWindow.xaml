@@ -94,8 +94,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="100" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" Grid.Row="1">
@@ -133,7 +133,7 @@
             </TabItem>
             <TextBox Text="Logs" />
         </mah:MetroAnimatedSingleRowTabControl>
-        <StatusBar Grid.Row="2">
+        <StatusBar Grid.Row="3">
             <StatusBarItem HorizontalAlignment="Right">eSpark Consulting Group</StatusBarItem>
             <Separator Style="{StaticResource MahApps.Styles.Separator.StatusBar}" />
             <StatusBarItem>Selected Tab:</StatusBarItem>
@@ -141,7 +141,7 @@
         </StatusBar>
         <nlogviewer:NlogViewer
             x:Name="logCtrl"
-            Grid.Row="3"
+            Grid.Row="2"
             ExceptionWidth="auto"
             LevelWidth="auto"
             LoggerNameWidth="auto"

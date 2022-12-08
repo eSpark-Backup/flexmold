@@ -1,5 +1,6 @@
 ﻿using FlexMold.Core;
 using MahApps.Metro.Controls;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace FlexMold.MVVM.ViewModel.Home
 {
     class MotorStatusViewModel : ObservableObject
     {
+
         public ICommand MotorStepCommand { get; set; }
         public ICommand MotorReverseCommand { get; set; }
         public ICommand MotorForwardCommand { get; set; }
@@ -32,6 +34,7 @@ namespace FlexMold.MVVM.ViewModel.Home
 
         public MotorStatusViewModel()
         {
+
             PlcConnectButtonContent = "Connect";
             PlcConnectCommand = new RelayCommand(x => { PlcConnectButtonContent = plcHelper.connectPLC( PlcConnectButtonContent == "Connect"); });
             MotorReverseCommand = new RelayCommand(x => { plcHelper.setMotorDirection(); });

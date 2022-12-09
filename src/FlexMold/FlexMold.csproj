@@ -159,6 +159,9 @@
     <Reference Include="NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.5.1.0\lib\net46\NLog.dll</HintPath>
     </Reference>
+    <Reference Include="SMBLibrary, Version=1.4.9.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SMBLibrary.1.4.9\lib\net40\SMBLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="Sylvan.Data.Csv, Version=1.2.4.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Sylvan.Data.Csv.1.2.4\lib\netstandard2.0\Sylvan.Data.Csv.dll</HintPath>
     </Reference>
@@ -191,6 +194,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="MVVM\Model\Porjector.cs" />
+    <Compile Include="MVVM\ViewModel\ProjectorViewModel.cs" />
+    <Compile Include="Utility\NetworkShareAccesser.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -200,6 +206,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Common\WpConverter.cs" />
+    <Compile Include="Convertor\BoolInverterConverter.cs" />
     <Compile Include="Convertor\DistinctConverter.cs" />
     <Compile Include="Convertor\HeightConverter.cs" />
     <Compile Include="Convertor\CompleteConverter.cs" />
@@ -382,6 +389,7 @@
     <Content Include="Nlog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="MVVM\Model\main.cd" />
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
@@ -395,6 +403,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Contols\" />
     <Folder Include="Font\" />
     <Folder Include="MVVM\ViewModel\Accessory\" />
     <Folder Include="MVVM\ViewModel\Project\" />

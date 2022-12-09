@@ -11,18 +11,24 @@
     mc:Ignorable="d">
     <UserControl.Resources />
     <Grid>
-        <ListView Name="logView" ItemsSource="{Binding LogEntries}">
+        <ListView Name="logView" ItemsSource="{Binding LogEntries}" >
             <ListView.ItemContainerStyle>
                 <Style TargetType="{x:Type ListViewItem}">
                     <Setter Property="ToolTip" Value="{Binding ToolTip}" />
-                    <Setter Property="Background" Value="{Binding Background}" />
-                    <Setter Property="Foreground" Value="{Binding Foreground}" />
-                    <Style.Triggers>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="{Binding Background}" />
-                            <Setter Property="Foreground" Value="{Binding Foreground}" />
-                        </Trigger>
-                    </Style.Triggers>
+                    <Setter Property="Focusable" Value="False"/>
+                    <Setter Property="Foreground" Value="{Binding Background}" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                <Border
+                         BorderBrush="Transparent"
+                         BorderThickness="0"
+                         Background="{TemplateBinding Background}">
+                                    <GridViewRowPresenter HorizontalAlignment="Stretch" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Width="Auto" Margin="0" Content="{TemplateBinding Content}"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
                 </Style>
             </ListView.ItemContainerStyle>
             <ListView.View>

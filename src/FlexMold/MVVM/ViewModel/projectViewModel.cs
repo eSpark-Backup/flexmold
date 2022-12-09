@@ -18,9 +18,9 @@ namespace FlexMold.MVVM.ViewModel
 
     class ProjectViewModel : ObservableObject
     {
-        public RelayCommand ReadFileCommand { get; set; }
+        public RelayCommand ReadCSVFileCommand { get; set; }
+        public RelayCommand SendLasFileCommand { get; set; }
         public RelayCommand BrowseProjectCommand { get; set; }
-
         private MyDataModel _selectedMyDataModel;
         public MyDataModel selectedMyDataModel
         {
@@ -53,14 +53,14 @@ namespace FlexMold.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        void readCsvLasFile()
+        void readCsvFile()
         {
-            Logger log = LogManager.GetLogger("CSV LAS File Reader");
+            Logger log = LogManager.GetLogger("CSV File Reader");
             if (slectedFile != null)
             {
-                log.Log(LogLevel.Info, $"Reading File {slectedFile.Name}");
                 if (slectedFile.FullName.EndsWith(".csv"))
                 {
+                    log.Log(LogLevel.Info, $"Reading File {slectedFile.Name}");
                     try
                     {
                         //var csv = @"C:\Users\123\Downloads\Sylvan-main\Sylvan-main\source\Sylvan.Data.Csv.Tests\Data\Quote.csv";
@@ -83,22 +83,29 @@ namespace FlexMold.MVVM.ViewModel
                             }
                             Console.WriteLine();
                         }
-
                     }
                     catch (Exception ex)
                     {
-                        log.Log(LogLevel.Error, $"Reading CSV|Las File {slectedFile.Name}");
+                        log.Log(LogLevel.Error, ex, ex.Message);
                         throw;
                     }
                 }
                 else
-                    log.Log(LogLevel.Warn, $"Selected File Not a CSV File {slectedFile.Name}");
+                    log.Log(LogLevel.Warn, $"Selected File Not a .csv File {slectedFile.Name}");
             }
             else
                 log.Log(LogLevel.Warn, $"Please Select File First");
-
         }
-
+        public bool IsSerialMode { get; set; }
+        void sendLasFileToProjector()
+        {
+            var pjvm = new ProjectorViewModel(new Projector()
+            {
+                Name = "p1", IpAddress = "192.168.1.132", Status = 1,
+                Port = new System.IO.Ports.SerialPort("COM5")
+            });
+            pjvm.sendLasFile(slectedFile, IsSerialMode);
+        }
         void BrowseProject()
         {
             Logger log = LogManager.GetLogger("Browse Project");
@@ -139,8 +146,9 @@ namespace FlexMold.MVVM.ViewModel
         {
             //selectedMyDataModel = new MyDataModel();
             //selectedMyDataModel.LaserFile = new List<FileInfo>() { new FileInfo("")};
-            ReadFileCommand = new RelayCommand(o => { readCsvLasFile(); });
+            ReadCSVFileCommand = new RelayCommand(o => { readCsvFile(); });
             BrowseProjectCommand = new RelayCommand(o => { BrowseProject(); });
+            SendLasFileCommand = new RelayCommand(o => { sendLasFileToProjector(); });
         }
     }
 }

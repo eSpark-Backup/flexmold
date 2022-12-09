@@ -125,6 +125,7 @@ namespace NlogViewer
             if (LogView.Items.Count <= 0) return;
             LogView.SelectedIndex = 0;
             ScrollToItem(LogView.SelectedItem);
+            LogView.UnselectAll();
         }
         public void ScrollToLast()
         {

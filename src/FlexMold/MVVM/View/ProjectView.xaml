@@ -13,21 +13,22 @@
     xmlns:viewmodel="clr-namespace:FlexMold.MVVM.ViewModel"
     Name="parent"
     d:DataContext=""
-    d:DesignHeight="400"
-    d:DesignWidth="750"
+    d:DesignHeight="600"
+    d:DesignWidth="800"
     mc:Ignorable="d">
     <UserControl.DataContext>
         <viewmodel:ProjectViewModel />
     </UserControl.DataContext>
     <UserControl.Resources>
         <convertor:HeightConverter x:Key="HeightConverter" />
+        <convertor:BoolInverterConverter x:Key="BoolInverterConverter" />
     </UserControl.Resources>
     <Border Style="{StaticResource panelMenuBorder}">
         <Grid RenderOptions.ClearTypeHint="Enabled" TextOptions.TextFormattingMode="Display">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="258" />
-                <ColumnDefinition Width="250" />
-                <ColumnDefinition Width="250*" />
+                <ColumnDefinition Width="290" />
+                <ColumnDefinition Width="290" />
+                <ColumnDefinition Width="190*" />
             </Grid.ColumnDefinitions>
             <GroupBox
                 Grid.Column="0"
@@ -76,22 +77,11 @@
                     </DataGrid>
                 </DockPanel>
             </GroupBox>
-            <StackPanel
-                Grid.Column="2"
-                MinWidth="266"
-                Orientation="Vertical">
+            <StackPanel Grid.Column="2" Orientation="Vertical">
                 <GroupBox Margin="0,0,8,0" Header="Motor Sensor Chart Info">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
+
+
+                    <StackPanel Orientation="Vertical">
                         <TextBox
                             Grid.Row="0"
                             Grid.Column="0"
@@ -112,11 +102,37 @@
                             Grid.Row="2"
                             Grid.Column="1"
                             Content="Set Time" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Margin="0,0,8,0" Header="Projector Controls">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                            <RadioButton
+                                Grid.Row="0"
+                                Content="Serial  "
+                                GroupName="Group1"
+                                IsChecked="{Binding IsSerialMode}" />
+                            <RadioButton
+                                 Grid.Row="1"
+                                Content="Samba "
+                                GroupName="Group1"
+                                IsChecked="{Binding IsSerialMode, Converter={StaticResource BoolInverterConverter}}" />
+                            <Button 
+                                Grid.Column="1" 
+                                Grid.RowSpan="2"
+                                Command="{Binding SendLasFileCommand}" Content="Send Las File" />
                     </Grid>
                 </GroupBox>
                 <GroupBox Margin="0,0,8,0" Header="Motor Sensor Controls">
                     <StackPanel>
-                        <Button Command="{Binding ReadFileCommand}" Content="Read File" />
+                        <Button Command="{Binding ReadCSVFileCommand}" Content="Read Csv File" />
                         <Button Content="Shape A" />
                         <Button Content="Shape B" />
                         <Button Content="Stop" />

@@ -12,8 +12,7 @@
     xmlns:model="clr-namespace:FlexMold.MVVM.Model"
     xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
     xmlns:viewmodel="clr-namespace:FlexMold.MVVM.ViewModel"
-    d:DesignHeight="450"
-    Background="White"
+    d:DesignHeight="400"
     mc:Ignorable="d">
     <UserControl.Resources>
         <convertor:DistinctConverter x:Key="distinctConverter" />
@@ -30,6 +29,7 @@
         <ControlTemplate x:Key="MultipleChoiceFilter">
             <core:MultipleChoiceFilter Filter="{Binding Path=Filter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=dgx:DataGridFilterColumnControl}}" />
         </ControlTemplate>
+        
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -51,6 +51,9 @@
             ScrollViewer.VerticalScrollBarVisibility="Auto"
             SelectedItem="{Binding Path=selectedMyDataModel}"
             SelectionUnit="FullRow">
+            <DataGrid.Resources>
+               
+            </DataGrid.Resources>
             <DataGrid.GroupStyle>
                 <!--  Style for groups at top level.  -->
                 <GroupStyle>
@@ -61,8 +64,6 @@
                                 <Setter.Value>
                                     <ControlTemplate TargetType="{x:Type GroupItem}">
                                         <Expander
-                                            mah:HeaderedControlHelper.HeaderBackground="Transparent"
-                                            BorderBrush="{x:Null}"
                                             IsExpanded="False">
                                             <Expander.Header>
                                                 <DockPanel>
@@ -70,11 +71,9 @@
                                                         Width="100"
                                                         Margin="5,0,0,0"
                                                         FontSize="15"
-                                                        Foreground="Black"
                                                         Text="{Binding Path=Name}" />
                                                     <TextBlock
                                                         FontSize="15"
-                                                        Foreground="Black"
                                                         Text="{Binding Path=ItemCount}" />
                                                 </DockPanel>
                                             </Expander.Header>
@@ -91,13 +90,11 @@
                 <!--  Style for groups under the top level.  -->
             </DataGrid.GroupStyle>
             <DataGrid.ColumnHeaderStyle>
-                <Style TargetType="DataGridColumnHeader">
+                <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader}">
                     <Setter Property="Height" Value="35" />
-                    <Setter Property="Foreground" Value="Blue" />
                     <Setter Property="FontSize" Value="13" />
                     <Style.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="ToolTip" Value="Click to sort." />
                         </Trigger>
                     </Style.Triggers>
                 </Style>
@@ -133,13 +130,12 @@
                 </Style>
             </DataGrid.Style>
         </DataGrid>
-        <StackPanel Grid.Row="0" Orientation="Horizontal">
+        
             <CheckBox
                 VerticalAlignment="Center"
                 Checked="GroupButton_Click"
                 Content="Groups"
                 IsChecked="True"
                 Unchecked="UngroupButton_Click" />
-        </StackPanel>
     </Grid>
 </UserControl>

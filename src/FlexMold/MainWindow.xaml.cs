@@ -1,4 +1,5 @@
 ﻿using FlexMold.MVVM.Model;
+using FlexMold.Utility;
 using MahApps.Metro.Controls;
 using NLog;
 using Sylvan.Data.Csv;
@@ -30,6 +31,12 @@ namespace FlexMold
     {
         public MainWindow()
         {
+            /// Test Area please comment
+    
+
+            /// Region closed 
+
+
             Logger log = LogManager.GetLogger("Main");
             InitializeComponent();
             logCtrl.ItemAdded += OnLogMessageItemAdded;

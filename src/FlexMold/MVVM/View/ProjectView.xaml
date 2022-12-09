@@ -27,7 +27,7 @@
         <Grid RenderOptions.ClearTypeHint="Enabled" TextOptions.TextFormattingMode="Display">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="290" />
-                <ColumnDefinition Width="290" />
+                <ColumnDefinition Width="270" />
                 <ColumnDefinition Width="190*" />
             </Grid.ColumnDefinitions>
             <GroupBox
@@ -100,8 +100,12 @@
                             Text="Travel Time : 1min 20sec" />
                         <Button
                             Grid.Row="2"
-                            Grid.Column="1"
-                            Content="Set Time" />
+                            Grid.Column="1">
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Margin="6" Kind="Clock" />
+                                <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Text="Set Time" />
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </GroupBox>
                 <GroupBox Margin="0,0,8,0" Header="Projector Controls">
@@ -124,20 +128,50 @@
                                 Content="Samba "
                                 GroupName="Group1"
                                 IsChecked="{Binding IsSerialMode, Converter={StaticResource BoolInverterConverter}}" />
-                            <Button 
+                        <Button 
                                 Grid.Column="1" 
                                 Grid.RowSpan="2"
-                                Command="{Binding SendLasFileCommand}" Content="Send Las File" />
+                                Command="{Binding SendLasFileCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Margin="6" Kind="Send" />
+                                <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Text="Send Las File" />
+                            </StackPanel>
+                        </Button>
                     </Grid>
                 </GroupBox>
                 <GroupBox Margin="0,0,8,0" Header="Motor Sensor Controls">
-                    <StackPanel>
-                        <Button Command="{Binding ReadCSVFileCommand}" Content="Read Csv File" />
-                        <Button Content="Shape A" />
-                        <Button Content="Shape B" />
-                        <Button Content="Stop" />
-                        <Button Content="Home" />
-                    </StackPanel>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Row="0" Grid.Column="0" Command="{Binding ReadCSVFileCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Margin="6" Kind="SmartCardReader" />
+                                <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Text="Read CSV" />
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Row="0" Grid.Column="1" Content="Shape A" />
+                        <Button Grid.Row="1" Grid.Column="0" Content="Shape B" />
+                        <Button Grid.Row="1" Grid.Column="1">
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Margin="6" Kind="StopCircle" />
+                                <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Text="Stop" />
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Row="2" Grid.Column="0" >
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Margin="6" Kind="Home" />
+                                <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Text="Home" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
                 </GroupBox>
             </StackPanel>
         </Grid>

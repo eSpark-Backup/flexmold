@@ -13,9 +13,12 @@
                 <ResourceDictionary Source="Theme/MenuButtonTheme.xaml" />
                 <ResourceDictionary Source="Theme/TextBoxTheme.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+                <!--<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Clean/Controls.xaml" />-->
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Dark.Blue.xaml" />
             </ResourceDictionary.MergedDictionaries>
+           
+
             <Style x:Key="panelMenuBorder" TargetType="{x:Type Border}">
                 <Setter Property="Background" Value="#FF252526" />
                 <Setter Property="BorderBrush" Value="#3A4149" />
@@ -25,25 +28,11 @@
             <Style BasedOn="{StaticResource MahApps.Styles.Button.Flat}" TargetType="{x:Type Button}">
                 <Setter Property="Margin" Value="10" />
             </Style>
-            <Style BasedOn="{StaticResource MahApps.Styles.RadioButton.Win10}" TargetType="{x:Type RadioButton}" >
-                <Setter  Property="MinWidth" Value="60"/>
+            <Style BasedOn="{StaticResource MahApps.Styles.RadioButton.Win10}" TargetType="{x:Type RadioButton}">
+                <Setter Property="MinWidth" Value="60" />
             </Style>
-            <Style BasedOn="{StaticResource MahApps.Styles.CheckBox.Win10}" TargetType="{x:Type CheckBox}">
-                
-            </Style>
-            <Style
-                x:Key="DescriptionHeaderStyle"
-                BasedOn="{StaticResource {x:Type Label}}"
-                TargetType="{x:Type Label}">
-                <Setter Property="FontSize" Value="22" />
-                <Setter Property="HorizontalAlignment" Value="Center" />
-            </Style>
-            <Style BasedOn="{StaticResource MahApps.Styles.CustomValidationPopup}" TargetType="{x:Type mah:CustomValidationPopup}">
-                <Setter Property="CloseOnMouseLeftButtonDown" Value="False" />
-                <Setter Property="ShowValidationErrorOnMouseOver" Value="False" />
-            </Style>
-
-              <!--quick change of the collapse storyboard duration-->  
+            <Style BasedOn="{StaticResource MahApps.Styles.CheckBox.Win10}" TargetType="{x:Type CheckBox}" />
+            <!--  quick change of the collapse storyboard duration  -->
             <Storyboard x:Key="MahApps.Storyboard.Expander.Collapse.Fast">
                 <DoubleAnimation
                     Storyboard.TargetName="ExpandSite"
@@ -58,38 +47,11 @@
             <Style BasedOn="{StaticResource MahApps.Styles.Expander}" TargetType="{x:Type Expander}">
                 <Setter Property="mah:ExpanderHelper.CollapseStoryboard" Value="{StaticResource MahApps.Storyboard.Expander.Collapse.Fast}" />
             </Style>
-
-            <Style
-                x:Key="MahApps.Styles.ColorPalette.ColorPickerDropDown"
-                BasedOn="{StaticResource MahApps.Styles.ColorPalette}"
-                TargetType="{x:Type mah:ColorPalette}">
-                <Setter Property="mah:ControlsHelper.ContentCharacterCasing" Value="Normal" />
-            </Style>
-
-            <!--<Style TargetType="Label">
-                <Setter Property="FontSize" Value="20" />
-                <Setter Property="Foreground" Value="#FFD1D9EA" />
-                <Setter Property="FontFamily" Value="Trebu                         t MS" />
-                <Setter Property="Margin" Value="0,10,10,10" />
-            </Style>-->
             <Style TargetType="TextBox">
                 <Setter Property="FontSize" Value="20" />
-                <Setter Property="Foreground" Value="#4E87D4" />
-                <Setter Property="VerticalAlignment" Value="Center" />
                 <Setter Property="FontFamily" Value="Trebuchet MS" />
                 <Setter Property="Margin" Value="0,5,5,5" />
             </Style>
-            <SolidColorBrush x:Key="MahApps.Brushes.ToggleSwitch.StrokeOff" Color="White" />
-            <SolidColorBrush x:Key="MahApps.Brushes.ToggleSwitch.StrokeOffPointerOver" Color="White" />
-            <SolidColorBrush x:Key="MahApps.Brushes.ToggleSwitch.KnobFillOff" Color="White" />
-            <SolidColorBrush x:Key="MahApps.Brushes.ToggleSwitch.KnobFillOnPressed" Color="White" />
-            <SolidColorBrush x:Key="MahApps.Brushes.ToggleSwitch.KnobFillOffPointerOver" Color="White" />
-            <SolidColorBrush x:Key="MahApps.Brushes.ToggleSwitch.HeaderForeground" Color="White" />
-            <SolidColorBrush x:Key="MahApps.Brushes.ToggleSwitch.ContentForeground" Color="White" />
-            <SolidColorBrush x:Key="MahApps.Brushes.ToggleSwitch.ContentForegroundDisabled" Color="White" />
-            <!--<DataTemplate DataType="{x:Type viewModelx:ProjectViewModel}">
-                <view:ProjectView />
-            </DataTemplate>-->
         </ResourceDictionary>
     </Application.Resources>
 </Application>

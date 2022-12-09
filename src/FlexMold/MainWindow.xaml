@@ -14,6 +14,7 @@
     Width="800"
     Height="700"
     Icon="flexmold.ico"
+    ResizeMode="CanResizeWithGrip"
     mc:Ignorable="d">
     <Window.Resources>
         <ResourceDictionary>
@@ -94,7 +95,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="100" />
         </Grid.RowDefinitions>
 
@@ -133,20 +133,13 @@
             </TabItem>
             <TextBox Text="Logs" />
         </mah:MetroAnimatedSingleRowTabControl>
-        <StatusBar Grid.Row="2">
-            <StatusBarItem HorizontalAlignment="Right">eSpark Consulting Group</StatusBarItem>
-            <Separator Style="{StaticResource MahApps.Styles.Separator.StatusBar}" />
-            <StatusBarItem>Selected Tab:</StatusBarItem>
-            <StatusBarItem Content="{Binding ElementName=MainTabControl, Path=SelectedItem.Header, Mode=OneWay}" />
-        </StatusBar>
         <nlogviewer:NlogViewer
             x:Name="logCtrl"
-            Grid.Row="3"
+            Grid.Row="2"
             ExceptionWidth="600"
             LevelWidth="auto"
             LoggerNameWidth="auto"
             MessageWidth="auto"
             TimeWidth="AUTO" />
     </Grid>
-
 </mah:MetroWindow>

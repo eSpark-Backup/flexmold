@@ -32,6 +32,7 @@ namespace FlexMold.MVVM.ViewModel
                                     {
                                         log.Log(LogLevel.Info, $"Opening Port {MyPorjector.Port.PortName} Baud rate {MyPorjector.Port.BaudRate}");
                                         MyPorjector.Port.Open();
+                                        MyPorjector.Port.WriteTimeout = 2000;
                                         MyPorjector.Port.Write((new BinaryReader(fs)).ReadBytes((int)fs.Length), 0, (int)fs.Length);
                                         log.Log(LogLevel.Info, $"File Write Sucessfully");
                                     }

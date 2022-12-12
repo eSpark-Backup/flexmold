@@ -196,6 +196,9 @@
     </ApplicationDefinition>
     <Compile Include="MVVM\Model\Porjector.cs" />
     <Compile Include="MVVM\ViewModel\ProjectorViewModel.cs" />
+    <Compile Include="MVVM\View\DynamicFlyout.xaml.cs">
+      <DependentUpon>DynamicFlyout.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utility\NetworkShareAccesser.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -228,6 +231,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MVVM\View\Accessory\LaserStatusView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVM\View\DynamicFlyout.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

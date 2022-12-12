@@ -1,11 +1,16 @@
 ﻿using FlexMold.MVVM.Model;
+using FlexMold.Utility;
 using MahApps.Metro.Controls;
+using NLog;
+using Sylvan.Data.Csv;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,6 +21,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TwinCAT.Ads;
 
 namespace FlexMold
 {
@@ -26,19 +32,24 @@ namespace FlexMold
     {
         public MainWindow()
         {
-            
+            /// Test Area please comment
+           
+            /// Region closed 
+
+
+            Logger log = LogManager.GetLogger("Main");
             InitializeComponent();
+            logCtrl.ItemAdded += OnLogMessageItemAdded;
+            log.Log(LogLevel.Info, $"Application Loaded Scussfully.....");
             Console.WriteLine();
         }
-
-        private void btProjectBrowse_Click(object sender, RoutedEventArgs e)
+        private void OnLogMessageItemAdded(object o, EventArgs Args)
         {
-            using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
-            {
-                System.Windows.Forms.DialogResult result = dialog.ShowDialog();
-
-                Console.WriteLine();
-            }
+            // Do what you want :)
+            LogEventInfo logInfo = (NLogEvent)Args;
+            if (logInfo.Level >= NLog.LogLevel.Error)
+                SystemSounds.Beep.Play();
         }
+
     }
 }

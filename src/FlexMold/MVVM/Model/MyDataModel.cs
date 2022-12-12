@@ -10,6 +10,7 @@ namespace FlexMold.MVVM.Model
     // Requires using System.ComponentModel;
     public class MyDataModel : ObservableObject
     {
+
         // The Task class implements INotifyPropertyChanged and IEditableObject
         // so that the datagrid can properly respond to changes to the
         // data collection and edits made in the DataGrid.

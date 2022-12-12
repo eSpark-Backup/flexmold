@@ -1,60 +1,71 @@
-﻿<mah:MetroWindow  x:Class="FlexMold.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                 xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-                   xmlns:controlzEx="urn:controlzex"
-        xmlns:local="clr-namespace:FlexMold"
-                  xmlns:View="clr-namespace:FlexMold.MVVM.View"
-                  xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-                 Icon="flexmold.ico"
-                  mc:Ignorable="d"
-        Title="FlexMold" Height="600" Width="800">
+﻿<mah:MetroWindow
+    x:Class="FlexMold.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:View="clr-namespace:FlexMold.MVVM.View"
+    xmlns:controlzEx="urn:controlzex"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+    xmlns:local="clr-namespace:FlexMold"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:nlogviewer="clr-namespace:NlogViewer;assembly=NlogViewer"
+    Title="FlexMold"
+    Width="800"
+    Height="700"
+    Icon="flexmold.ico"
+    ResizeMode="CanResizeWithGrip"
+    mc:Ignorable="d">
     <Window.Resources>
         <ResourceDictionary>
-            <ObjectDataProvider x:Key="SyncModePreferenceEnumValues"
-                                MethodName="GetValues"
-                                ObjectType="{x:Type controlzEx:ThemeSyncMode}">
+            <ObjectDataProvider
+                x:Key="SyncModePreferenceEnumValues"
+                MethodName="GetValues"
+                ObjectType="{x:Type controlzEx:ThemeSyncMode}">
                 <ObjectDataProvider.MethodParameters>
                     <x:Type TypeName="controlzEx:ThemeSyncMode" />
                 </ObjectDataProvider.MethodParameters>
             </ObjectDataProvider>
 
-            <Ellipse x:Key="AppThemeMenuIcon"
-                     Width="16"
-                     Height="16"
-                     x:Shared="False"
-                     Fill="{Binding ColorBrush, Mode=OneWay}"
-                     Stroke="{Binding BorderColorBrush, Mode=OneWay}"
-                     StrokeThickness="1" />
-            <Ellipse x:Key="AccentMenuIcon"
-                     Width="16"
-                     Height="16"
-                     x:Shared="False"
-                     Fill="{Binding ColorBrush, Mode=OneWay}" />
+            <Ellipse
+                x:Key="AppThemeMenuIcon"
+                Width="16"
+                Height="16"
+                x:Shared="False"
+                Fill="{Binding ColorBrush, Mode=OneWay}"
+                Stroke="{Binding BorderColorBrush, Mode=OneWay}"
+                StrokeThickness="1" />
+            <Ellipse
+                x:Key="AccentMenuIcon"
+                Width="16"
+                Height="16"
+                x:Shared="False"
+                Fill="{Binding ColorBrush, Mode=OneWay}" />
 
-            <Style x:Key="AppThemeMenuItemStyle"
-                   BasedOn="{StaticResource MahApps.Styles.MenuItem}"
-                   TargetType="{x:Type MenuItem}">
+            <Style
+                x:Key="AppThemeMenuItemStyle"
+                BasedOn="{StaticResource MahApps.Styles.MenuItem}"
+                TargetType="{x:Type MenuItem}">
                 <Setter Property="Command" Value="{Binding ChangeAccentCommand}" />
                 <Setter Property="CommandParameter" Value="{Binding Name, Mode=OneWay}" />
                 <Setter Property="Header" Value="{Binding Name, Mode=OneWay}" />
                 <Setter Property="Icon" Value="{StaticResource AppThemeMenuIcon}" />
             </Style>
 
-            <Style x:Key="AccentColorMenuItemStyle"
-                   BasedOn="{StaticResource MahApps.Styles.MenuItem}"
-                   TargetType="{x:Type MenuItem}">
+            <Style
+                x:Key="AccentColorMenuItemStyle"
+                BasedOn="{StaticResource MahApps.Styles.MenuItem}"
+                TargetType="{x:Type MenuItem}">
                 <Setter Property="Command" Value="{Binding ChangeAccentCommand}" />
                 <Setter Property="CommandParameter" Value="{Binding Name, Mode=OneWay}" />
                 <Setter Property="Header" Value="{Binding Name, Mode=OneWay}" />
                 <Setter Property="Icon" Value="{StaticResource AccentMenuIcon}" />
             </Style>
 
-            <Style x:Key="SyncModeMenuItemStyle"
-                   BasedOn="{StaticResource MahApps.Styles.MenuItem}"
-                   TargetType="{x:Type MenuItem}">
+            <Style
+                x:Key="SyncModeMenuItemStyle"
+                BasedOn="{StaticResource MahApps.Styles.MenuItem}"
+                TargetType="{x:Type MenuItem}">
                 <Setter Property="Command" Value="{Binding DataContext.ChangeSyncModeCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
                 <Setter Property="CommandParameter" Value="{Binding Mode=OneTime}" />
                 <Setter Property="Header" Value="{Binding Mode=OneTime}" />
@@ -63,66 +74,72 @@
     </Window.Resources>
     <mah:MetroWindow.LeftWindowCommands>
         <mah:WindowCommands>
-            <Button  ToolTip="MahApps.Metro on GitHub">
-                <iconPacks:PackIconModern Width="22"
-                                          Height="22"
-                                          Kind="Home" />
+            <Button ToolTip="MahApps.Metro on GitHub">
+                <iconPacks:PackIconModern
+                    Width="22"
+                    Height="22"
+                    Kind="Home" />
             </Button>
         </mah:WindowCommands>
     </mah:MetroWindow.LeftWindowCommands>
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands ShowLastSeparator="False">
-            <Button 
-                    Content="_"
-                    ToolTip="Flyouts demo window" />
-            <ToggleButton Content="Confirm quit"
-                          IsChecked="{Binding QuitConfirmationEnabled}"
-                          ToolTip="Enable quit confirmation dialog on exit" />
+            <Button Content="_" ToolTip="Flyouts demo window" />
+            <ToggleButton
+                Content="Confirm quit"
+                IsChecked="{Binding QuitConfirmationEnabled}"
+                ToolTip="Enable quit confirmation dialog on exit" />
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="100" />
         </Grid.RowDefinitions>
 
         <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" Grid.Row="1">
             <TabItem Header="Home">
-                <ScrollViewer Margin="2"
-                              HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto">
+                <ScrollViewer
+                    Margin="2"
+                    HorizontalScrollBarVisibility="Auto"
+                    VerticalScrollBarVisibility="Auto">
                     <View:HomeView />
                 </ScrollViewer>
             </TabItem>
             <TabItem Header="Settings">
-                <ScrollViewer Margin="2"
-                              HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto">
-                    <View:SettingView  />
+                <ScrollViewer
+                    Margin="2"
+                    HorizontalScrollBarVisibility="Auto"
+                    VerticalScrollBarVisibility="Auto">
+                    <View:SettingView />
                 </ScrollViewer>
             </TabItem>
             <TabItem Header="Projects">
-                <ScrollViewer Margin="2"
-                              HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto">
-                    <View:ProjectView  />
+                <ScrollViewer
+                    Margin="2"
+                    HorizontalScrollBarVisibility="Auto"
+                    VerticalScrollBarVisibility="Auto">
+                    <View:ProjectView />
                 </ScrollViewer>
             </TabItem>
             <TabItem Header="Accessories">
-                <ScrollViewer Margin="2"
-                              HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto">
-                    <View:AccessoryView  />
+                <ScrollViewer
+                    Margin="2"
+                    HorizontalScrollBarVisibility="Auto"
+                    VerticalScrollBarVisibility="Auto">
+                    <View:AccessoryView />
                 </ScrollViewer>
             </TabItem>
+            <TextBox Text="Logs" />
         </mah:MetroAnimatedSingleRowTabControl>
-        <StatusBar Grid.Row="2">
-            <StatusBarItem HorizontalAlignment="Right">eSpark Consulting Group</StatusBarItem>
-            <Separator Style="{StaticResource MahApps.Styles.Separator.StatusBar}" />
-            <StatusBarItem>Selected Tab:</StatusBarItem>
-            <StatusBarItem Content="{Binding ElementName=MainTabControl, Path=SelectedItem.Header, Mode=OneWay}" />
-        </StatusBar>
+        <nlogviewer:NlogViewer
+            x:Name="logCtrl"
+            Grid.Row="2"
+            ExceptionWidth="600"
+            LevelWidth="auto"
+            LoggerNameWidth="auto"
+            MessageWidth="auto"
+            TimeWidth="AUTO" />
     </Grid>
-
 </mah:MetroWindow>

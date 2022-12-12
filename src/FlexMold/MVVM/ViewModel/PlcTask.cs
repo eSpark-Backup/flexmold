@@ -1,4 +1,5 @@
 ﻿using FlexMold.Core;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -48,7 +49,7 @@ namespace FlexMold.MVVM.ViewModel
 
         public string connectPLC(bool connect)
         {
-
+            Logger log = LogManager.GetLogger("connectPLC");
             // Create instance of class TcAdsClient
             adsClient = new TcAdsClient();
             if (connect)
@@ -57,7 +58,14 @@ namespace FlexMold.MVVM.ViewModel
                 {
                     // PLC1 Port - TwinCAT 3=851
                     adsClient.Connect(plcHostSelectedIP, plcHostSelectedPort);
-                    vhmotorStatus = adsClient.CreateVariableHandle("MAIN.motorStatus");
+                    log.Log(LogLevel.Info, $"ADS Address : {adsClient.Address}");
+                    log.Log(LogLevel.Info, $"ADS ID : {adsClient.Id}");
+                    log.Log(LogLevel.Info, $"ADS Protocol : {adsClient.Protocol}");
+                    log.Log(LogLevel.Info, $"ADS IsLocal : {adsClient.IsLocal}");
+                    log.Log(LogLevel.Info, $"ADS ClientAddress : {adsClient.ClientAddress}");
+                    log.Log(LogLevel.Info, $"ADS RouterState : {adsClient.RouterState}");
+
+                    //vhmotorStatus = adsClient.CreateVariableHandle("MAIN.motorStatus");
                     vhdir = adsClient.CreateVariableHandle("MAIN.dir");
                     vhspeed = adsClient.CreateVariableHandle("MAIN.speed");
                     getPlcVariables();
@@ -65,7 +73,7 @@ namespace FlexMold.MVVM.ViewModel
                 }
                 catch (Exception err)
                 {
-                    MessageBox.Show(err.Message);
+                    log.Log(LogLevel.Error, err, $"Reding Failed");
                     return "Connect";
                 }
             }
@@ -78,7 +86,7 @@ namespace FlexMold.MVVM.ViewModel
                 }
                 catch (Exception err)
                 {
-                    MessageBox.Show(err.Message);
+                    log.Log(LogLevel.Error, err, $"Reding Failed");
                     return "Diconnect";
                 }
             }
@@ -90,6 +98,7 @@ namespace FlexMold.MVVM.ViewModel
         }
         public void getMotorDirection()
         {
+            Logger log = LogManager.GetLogger("getMotorDirection");
             try
             {
                 if (adsClient != null)
@@ -100,11 +109,12 @@ namespace FlexMold.MVVM.ViewModel
             }
             catch (Exception err)
             {
-                MessageBox.Show(err.Message);
+                log.Log(LogLevel.Error, err, $"Reding Failed");
             }
         }
         public void getMotorStep()
         {
+            Logger log = LogManager.GetLogger("getMotorStep");
             try
             {
                 if (adsClient != null)
@@ -115,11 +125,14 @@ namespace FlexMold.MVVM.ViewModel
             }
             catch (Exception err)
             {
-                MessageBox.Show(err.Message);
+                log.Log(LogLevel.Error, err, $"Reding Failed");
+
             }
         }
         public void setMotorDirection()
         {
+            Logger log = LogManager.GetLogger("setMotorDirection");
+
             try
             {
                 if (adsClient != null)
@@ -130,11 +143,13 @@ namespace FlexMold.MVVM.ViewModel
             }
             catch (Exception err)
             {
-                MessageBox.Show(err.Message);
+                log.Log(LogLevel.Error, err, $"Reding Failed");
             }
         }
         public void setMotorStep()
         {
+            Logger log = LogManager.GetLogger("setMotorStep");
+
             try
             {
                 if (adsClient != null)
@@ -144,7 +159,7 @@ namespace FlexMold.MVVM.ViewModel
             }
             catch (Exception err)
             {
-                MessageBox.Show(err.Message);
+                log.Log(LogLevel.Error, err, $"Reding Failed");
             }
         }
     }

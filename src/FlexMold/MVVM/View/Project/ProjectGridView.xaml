@@ -40,7 +40,6 @@
         <DataGrid
             x:Name="dataGrid1"
             Grid.Row="1"
-            Margin="5"
             dgx:DataGridFilter.IsAutoFilterEnabled="True"
             AutoGenerateColumns="False"
             CanUserAddRows="False"
@@ -133,9 +132,7 @@
                 </Style>
             </DataGrid.Style>
         </DataGrid>
-        
             <CheckBox
-                VerticalAlignment="Center"
                 Checked="GroupButton_Click"
                 Content="Groups"
                 IsChecked="True"

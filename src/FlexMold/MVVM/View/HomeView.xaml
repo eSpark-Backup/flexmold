@@ -29,61 +29,37 @@
                 ScrollViewer.CanContentScroll="True">
 
                 <RadioButton
-                    Height="50"
                     Command="{Binding VisualDisplayCommand}"
                     Content="Visual Display"
-                    FontSize="14"
-                    Foreground="White"
                     IsChecked="True"
                     Style="{StaticResource MenuButtonTheme}" />
                 <RadioButton
-                    Height="50"
                     Command="{Binding VaccumStatusCommand}"
                     Content="Vaccum Status"
-                    FontSize="14"
-                    Foreground="White"
                     Style="{StaticResource MenuButtonTheme}" />
                 <RadioButton
-                    Height="50"
                     Command="{Binding MachineDetailCommand}"
                     Content="Machine Details"
-                    FontSize="14"
-                    Foreground="White"
                     Style="{StaticResource MenuButtonTheme}" />
                 <RadioButton
-                    Height="50"
                     Command="{Binding MotorStatusCommand}"
                     Content="Motor Status"
-                    FontSize="14"
-                    Foreground="White"
                     Style="{StaticResource MenuButtonTheme}" />
                 <RadioButton
-                    Height="50"
                     Command="{Binding HeaterStatusCommand}"
                     Content="Heater Status"
-                    FontSize="14"
-                    Foreground="White"
                     Style="{StaticResource MenuButtonTheme}" />
                 <RadioButton
-                    Height="50"
                     Command="{Binding PowerStatusCommand}"
                     Content="Power Status"
-                    FontSize="14"
-                    Foreground="White"
                     Style="{StaticResource MenuButtonTheme}" />
                 <RadioButton
-                    Height="50"
                     Command="{Binding EmergencyStatusCommand}"
                     Content="Emergency Status"
-                    FontSize="14"
-                    Foreground="White"
                     Style="{StaticResource MenuButtonTheme}" />
                 <RadioButton
-                    Height="50"
                     Command="{Binding LaserStatusCommand}"
                     Content="Laser Status"
-                    FontSize="14"
-                    Foreground="White"
                     Style="{StaticResource MenuButtonTheme}" />
             </StackPanel>
             <ContentControl

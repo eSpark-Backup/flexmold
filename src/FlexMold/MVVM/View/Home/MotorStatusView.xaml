@@ -21,7 +21,7 @@
             <Style TargetType="Label">
                 <Setter Property="HorizontalAlignment" Value="Right" />
             </Style>
-            
+
         </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -37,37 +37,29 @@
         <Label
             Grid.Row="0"
             Grid.Column="0"
-            Content="PLC Host IP :"
-            FontSize="25"
-            Foreground="AliceBlue" />
+            Content="PLC Host IP :" />
         <Label
             Grid.Row="1"
             Grid.Column="0"
-            Content="PLC Host Port :"
-            FontSize="25"
-            Foreground="AliceBlue" />
+            Content="PLC Host Port :" />
         <Label
             Grid.Row="3"
             Grid.Column="0"
-            Content="Motor Direction :"
-            FontSize="25"
-            Foreground="AliceBlue" />
+            Content="Motor Direction :" />
         <Label
             Grid.Row="4"
             Grid.Column="0"
-            Content="Motor Step :"
-            FontSize="25"
-            Foreground="AliceBlue" />
+            Content="Motor Step :" />
         <ComboBox
             Grid.Row="0"
             Grid.Column="1"
             ItemsSource="{Binding plcHelper.plcHostAvailableIPs}"
-            SelectedItem="{Binding plcHelper.plcHostSelectedIP }"/>
+            SelectedItem="{Binding plcHelper.plcHostSelectedIP}" />
         <ComboBox
             Grid.Row="1"
             Grid.Column="1"
             ItemsSource="{Binding plcHelper.plcHostAvailablePorts}"
-            SelectedItem="{Binding plcHelper.plcHostSelectedPort }"/>
+            SelectedItem="{Binding plcHelper.plcHostSelectedPort}" />
         <Button
             Grid.Row="2"
             Grid.ColumnSpan="2"
@@ -85,13 +77,8 @@
         <mah:NumericUpDown
             Grid.Row="4"
             Grid.Column="1"
-            mah:TextBoxHelper.ClearTextButton="True"
-            ButtonsAlignment="Right"
-            FontSize="25"
-            Width="250"
             Maximum="65535"
             Minimum="0"
-            TextAlignment="Left"
             ValueChanged="NumericUpDown_ValueChanged"
             Value="{Binding plcHelper.motorStep}" />
     </Grid>

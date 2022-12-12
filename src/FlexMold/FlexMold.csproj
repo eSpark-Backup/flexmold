@@ -195,9 +195,28 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="MVVM\Model\Porjector.cs" />
+    <Compile Include="MVVM\ViewModel\MachineSettingViewModel.cs" />
     <Compile Include="MVVM\ViewModel\ProjectorViewModel.cs" />
     <Compile Include="MVVM\View\DynamicFlyout.xaml.cs">
       <DependentUpon>DynamicFlyout.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\MachineSettingView.xaml.cs">
+      <DependentUpon>MachineSettingView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\MachineSetting\ReadMotorView.xaml.cs">
+      <DependentUpon>ReadMotorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\MachineSetting\PowerOnOffView.xaml.cs">
+      <DependentUpon>PowerOnOffView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\MachineSetting\RenumberingView.xaml.cs">
+      <DependentUpon>RenumberingView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\MachineSetting\PositionView.xaml.cs">
+      <DependentUpon>PositionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\MachineSetting\ResetView.xaml.cs">
+      <DependentUpon>ResetView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utility\NetworkShareAccesser.cs" />
     <Page Include="MainWindow.xaml">
@@ -238,6 +257,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="MVVM\View\MachineSettingView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MVVM\View\HomeView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -273,6 +296,26 @@
     <Page Include="MVVM\View\Home\VisualDisplayView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVM\View\MachineSetting\ReadMotorView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MVVM\View\MachineSetting\PowerOnOffView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MVVM\View\MachineSetting\RenumberingView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MVVM\View\MachineSetting\PositionView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MVVM\View\MachineSetting\ResetView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="MVVM\View\ProjectView.xaml">
       <SubType>Designer</SubType>

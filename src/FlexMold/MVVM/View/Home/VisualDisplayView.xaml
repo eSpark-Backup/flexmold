@@ -10,10 +10,7 @@
     mc:Ignorable="d">
     <Grid>
         <StackPanel Orientation="Vertical">
-            <TextBlock
-                FontSize="25"
-                Foreground="AliceBlue"
-                Text="TWINCAT3 PLC Test" />
+            <TextBlock Text="TWINCAT3 PLC Test" />
             <Button Height="50" Content="Read" />
             <Button Height="50" Content="Write" />
             <TextBox Name="textBox1" Height="50" />

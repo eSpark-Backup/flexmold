@@ -1,0 +1,79 @@
+﻿using FlexMold.MVVM.ViewModel;
+using MahApps.Metro.Controls;
+using SMBLibrary.NetBios;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO.Ports;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Effects;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+
+namespace FlexMold.MVVM.View.Project
+{
+    /// <summary>
+    /// Interaction logic for SerialPortConfigView.xaml
+    /// </summary>
+    public partial class SerialPortConfigView : MetroWindow
+    {
+
+        public MainWindow main { get; set; }
+        public SerialPort CurrentPort { get; set; }
+        public bool SaveData { get; set; }
+        public SerialPortConfigView(MainWindow _main, SerialPort _SelectedSerialPort)
+        {
+            main = _main;
+            main.IsEnabled = false;
+            main.Effect = new BlurEffect();
+            InitializeComponent();
+            SaveData = false;
+            CurrentPort = new SerialPort();
+            CurrentPort = _SelectedSerialPort;
+            CB_SerialBaudRate.ItemsSource = new int[] { 4800, 9600, 14400, 19200, 38400, 57600, 115200, 128000, 256000 };
+            CB_SerialPortName.ItemsSource = SerialPort.GetPortNames();
+            CB_SerialBaudRate.SelectedItem = _SelectedSerialPort.BaudRate;
+            CB_SerialPortName.SelectedItem = _SelectedSerialPort.PortName;
+        }
+
+        private void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (SaveData)
+            {
+                main.Effect = null;
+                main.IsEnabled = true;
+                CurrentPort.PortName = CB_SerialPortName.SelectedItem.ToString();
+                CurrentPort.BaudRate = (int)CB_SerialBaudRate.SelectedItem;
+            }
+            else
+            {
+                main.Effect = null;
+                main.IsEnabled = true;
+            }
+        }
+
+        private void MetroWindow_Closing(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            SaveData = true;
+            this.Close();
+        }
+    }
+}

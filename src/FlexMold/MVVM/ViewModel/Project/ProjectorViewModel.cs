@@ -4,7 +4,7 @@ using NLog;
 using System;
 using System.IO;
 
-namespace FlexMold.MVVM.ViewModel
+namespace FlexMold.MVVM.ViewModel.Project
 {
     class ProjectorViewModel
     {
@@ -50,13 +50,13 @@ namespace FlexMold.MVVM.ViewModel
                                 log.Log(LogLevel.Info, $"Sending file via samba");
                                 try
                                 {
-                                    log.Log(LogLevel.Info, $"Connecting to {MyPorjector.IpAddress}");
-                                    using (NetworkShareAccesser.Access(MyPorjector.IpAddress, MyPorjector.UserName, MyPorjector.Password))
+                                    log.Log(LogLevel.Info, $"Connecting to {MyPorjector.IpAddres}");
+                                    using (NetworkShareAccesser.Access(MyPorjector.IpAddres, MyPorjector.UserName, MyPorjector.Password))
                                     {
                                         log.Log(LogLevel.Info, $"Credentials Accepted");
                                         log.Log(LogLevel.Info, $"Copying File");
                                         File.Copy(_slectedFile.FullName,
-                                            $@"\\{MyPorjector.IpAddress}\{MyPorjector.DataFodlerName}\{_slectedFile.Name}",
+                                            $@"\\{MyPorjector.IpAddres}\{MyPorjector.DataFolderName}\{_slectedFile.Name}",
                                             true);
                                         log.Log(LogLevel.Info, $"File Copied Sucessfully");
                                     }

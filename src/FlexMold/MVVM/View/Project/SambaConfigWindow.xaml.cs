@@ -57,9 +57,7 @@ namespace FlexMold.MVVM.View.Project
             {
                 MessageBox.Show("Please Enter Values in all fields first \n otherwise close or discard window");
             }
-
         }
-
         private void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             if (SaveData)

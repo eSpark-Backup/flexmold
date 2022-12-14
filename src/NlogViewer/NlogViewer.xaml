@@ -11,52 +11,59 @@
     mc:Ignorable="d">
     <UserControl.Resources />
     <Grid>
-        <ListView Name="logView" ItemsSource="{Binding LogEntries}" >
-            <ListView.ItemContainerStyle>
-                <Style TargetType="{x:Type ListViewItem}">
-                    <Setter Property="ToolTip" Value="{Binding ToolTip}" />
-                    <Setter Property="Focusable" Value="False"/>
-                    <Setter Property="Foreground" Value="{Binding Background}" />
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type ListViewItem}">
-                                <Border
-                         BorderBrush="Transparent"
-                         BorderThickness="0"
-                         Background="{TemplateBinding Background}">
-                                    <GridViewRowPresenter HorizontalAlignment="Stretch" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Width="Auto" Margin="0" Content="{TemplateBinding Content}"/>
-                                </Border>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </ListView.ItemContainerStyle>
-            <ListView.View>
-                <GridView>
-                    <GridView.Columns>
-                        <GridViewColumn
-                            Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type nlogViewer:NlogViewer}}, Path=TimeWidth}"
-                            DisplayMemberBinding="{Binding Time}"
-                            Header="Time" />
-                        <GridViewColumn
-                            Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type nlogViewer:NlogViewer}}, Path=LoggerNameWidth}"
-                            DisplayMemberBinding="{Binding LoggerName}"
-                            Header="Logger" />
-                        <GridViewColumn
-                            Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type nlogViewer:NlogViewer}}, Path=LevelWidth}"
-                            DisplayMemberBinding="{Binding Level}"
-                            Header="Level" />
-                        <GridViewColumn
-                            Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type nlogViewer:NlogViewer}}, Path=MessageWidth}"
-                            DisplayMemberBinding="{Binding FormattedMessage}"
-                            Header="Message" />
-                        <GridViewColumn
-                            Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type nlogViewer:NlogViewer}}, Path=ExceptionWidth}"
-                            DisplayMemberBinding="{Binding Exception}"
-                            Header="Exception" />
-                    </GridView.Columns>
-                </GridView>
-            </ListView.View>
-        </ListView>
+        <Expander Name="MyExpander" MaxHeight="120">
+            <ListView Name="logView" ItemsSource="{Binding LogEntries}">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Setter Property="ToolTip" Value="{Binding ToolTip}" />
+                        <Setter Property="Focusable" Value="False" />
+                        <Setter Property="Foreground" Value="{Binding Background}" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                    <Border
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="Transparent"
+                                        BorderThickness="0">
+                                        <GridViewRowPresenter
+                                            Width="Auto"
+                                            Margin="0"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                            Content="{TemplateBinding Content}" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.View>
+                    <GridView>
+                        <GridView.Columns>
+                            <GridViewColumn
+                                Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type nlogViewer:NlogViewer}}, Path=TimeWidth}"
+                                DisplayMemberBinding="{Binding Time}"
+                                Header="Time" />
+                            <GridViewColumn
+                                Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type nlogViewer:NlogViewer}}, Path=LoggerNameWidth}"
+                                DisplayMemberBinding="{Binding LoggerName}"
+                                Header="Logger" />
+                            <GridViewColumn
+                                Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type nlogViewer:NlogViewer}}, Path=LevelWidth}"
+                                DisplayMemberBinding="{Binding Level}"
+                                Header="Level" />
+                            <GridViewColumn
+                                Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type nlogViewer:NlogViewer}}, Path=MessageWidth}"
+                                DisplayMemberBinding="{Binding FormattedMessage}"
+                                Header="Message" />
+                            <GridViewColumn
+                                Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type nlogViewer:NlogViewer}}, Path=ExceptionWidth}"
+                                DisplayMemberBinding="{Binding Exception}"
+                                Header="Exception" />
+                        </GridView.Columns>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Expander>
     </Grid>
 </UserControl>

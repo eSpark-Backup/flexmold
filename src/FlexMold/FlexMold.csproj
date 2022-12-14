@@ -221,6 +221,9 @@
     <Compile Include="MVVM\View\Project\SerialPortConfigView.xaml.cs">
       <DependentUpon>SerialPortConfigView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SplashMachineSlection.xaml.cs">
+      <DependentUpon>SplashMachineSlection.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utility\NetworkShareAccesser.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -349,6 +352,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MVVM\View\Setting\VacuumSettingView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SplashMachineSlection.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

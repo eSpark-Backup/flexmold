@@ -28,9 +28,9 @@
     <Border Style="{StaticResource panelMenuBorder}">
         <Grid RenderOptions.ClearTypeHint="Enabled" TextOptions.TextFormattingMode="Display">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="290" />
-                <ColumnDefinition Width="270" />
-                <ColumnDefinition Width="190*" />
+                <ColumnDefinition Width="250" />
+                <ColumnDefinition Width="230" />
+                <ColumnDefinition Width="300" />
             </Grid.ColumnDefinitions>
             <GroupBox
                 Grid.Column="0"
@@ -58,31 +58,26 @@
                 </Grid>
             </GroupBox>
             <GroupBox Grid.Column="1" Header="Available Files(Selected Panel)">
-                <DockPanel>
-                    <!--    -->
-                    <DataGrid
-                        Margin="5"
-                        AutoGenerateColumns="False"
-                        CanUserAddRows="False"
-                        DockPanel.Dock="Top"
-                        IsReadOnly="True"
-                        ItemsSource="{Binding selectedMyDataModel.LaserFile}"
-                        ScrollViewer.CanContentScroll="True"
-                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                        ScrollViewer.VerticalScrollBarVisibility="Auto"
-                        SelectedItem="{Binding Path=slectedFile}">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Binding="{Binding Name}" Header="File" />
-                            <DataGridTextColumn Binding="{Binding Length}" Header="Size(b)" />
-                            <DataGridTextColumn Binding="{Binding LastWriteTime}" Header="Last Modified" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </DockPanel>
+                <DataGrid
+                    Margin="5"
+                    AutoGenerateColumns="False"
+                    CanUserAddRows="False"
+                    IsReadOnly="True"
+                    ItemsSource="{Binding selectedMyDataModel.LaserFile}"
+                    ScrollViewer.CanContentScroll="True"
+                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    SelectedItem="{Binding Path=slectedFile}"
+                    SelectionMode="Single">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Binding="{Binding Name}" Header="File" />
+                        <DataGridTextColumn Binding="{Binding Length}" Header="Size(b)" />
+                        <DataGridTextColumn Binding="{Binding LastWriteTime}" Header="Last Modified" />
+                    </DataGrid.Columns>
+                </DataGrid>
             </GroupBox>
             <StackPanel Grid.Column="2" Orientation="Vertical">
                 <GroupBox Margin="0,0,8,0" Header="Motor Sensor Chart Info">
-
-
                     <StackPanel Orientation="Vertical">
                         <TextBox
                             Grid.Row="0"
@@ -145,9 +140,9 @@
                             </StackPanel>
                         </Button>
                         <Button
-                            Grid.Row="1"  
-                            Margin="0"
+                            Grid.Row="1"
                             Grid.Column="1"
+                            Margin="0"
                             Background="Transparent"
                             Command="{Binding SambaConfigCommand}">
                             <StackPanel Orientation="Vertical">

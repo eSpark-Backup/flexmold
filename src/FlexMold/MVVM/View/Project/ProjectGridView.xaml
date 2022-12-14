@@ -12,7 +12,7 @@
     xmlns:model="clr-namespace:FlexMold.MVVM.Model"
     xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
     xmlns:viewmodel="clr-namespace:FlexMold.MVVM.ViewModel"
-    d:DesignHeight="400"
+    d:DesignHeight="500"
     mc:Ignorable="d">
     <UserControl.Resources>
         <convertor:DistinctConverter x:Key="distinctConverter" />
@@ -34,7 +34,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="350" />
+            <RowDefinition Height="390" />
         </Grid.RowDefinitions>
         <!--  IsSynchronizedWithCurrentItem="True"  -->
         <DataGrid
@@ -49,6 +49,7 @@
             ScrollViewer.HorizontalScrollBarVisibility="Auto"
             ScrollViewer.VerticalScrollBarVisibility="Auto"
             SelectedItem="{Binding Path=selectedMyDataModel}"
+            SelectionMode="Single"
             SelectionUnit="FullRow">
             <DataGrid.Resources>
                 <Style TargetType="{x:Type CheckBox}">

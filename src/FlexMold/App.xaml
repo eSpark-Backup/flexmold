@@ -6,7 +6,7 @@
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:view="clr-namespace:FlexMold.MVVM.View"
     xmlns:viewModelx="clr-namespace:FlexMold.MVVM.ViewModel"
-    StartupUri="MainWindow.xaml">
+    StartupUri="SplashMachineSlection.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -27,6 +27,9 @@
             <Style TargetType="{x:Type mah:DropDownButton}">
                 <Setter Property="Margin" Value="5" />
                 <Setter Property="Height" Value="40" />
+            </Style>
+            <Style TargetType="{x:Type mah:Tile}">
+                <Setter Property="Margin" Value="5" />
             </Style>
             <Style TargetType="{x:Type PasswordBox}">
                 <Setter Property="Margin" Value="5" />

@@ -47,6 +47,9 @@ namespace FlexMold.MVVM.View.Project
             CB_SerialPortName.ItemsSource = SerialPort.GetPortNames();
             CB_SerialBaudRate.SelectedItem = _SelectedSerialPort.BaudRate;
             CB_SerialPortName.SelectedItem = _SelectedSerialPort.PortName;
+            if (CB_SerialPortName.SelectedItem == null)
+                CB_SerialPortName.SelectedIndex = 0;
+
         }
 
         private void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -72,8 +75,15 @@ namespace FlexMold.MVVM.View.Project
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            SaveData = true;
-            this.Close();
+            if (CB_SerialBaudRate.SelectedItem != null & CB_SerialPortName.SelectedItem.ToString() != "")
+            {
+                SaveData = true;
+                this.Close();
+            }
+            else
+            {
+                MessageBox.Show("Please Enter Values in all fields first \n otherwise close or discard window");
+            }
         }
     }
 }

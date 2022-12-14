@@ -22,7 +22,7 @@ namespace FlexMold.MVVM.View.Project
     /// Interaction logic for SambaConfigWindow.xaml
     /// </summary>
     /// 
-   
+
     public partial class SambaConfigWindow : MetroWindow
     {
         public MainWindow main { get; set; }
@@ -48,8 +48,16 @@ namespace FlexMold.MVVM.View.Project
         }
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            SaveData = true;
-            this.Close();
+            if (tb_ip.Text != "" & pbox_pwd.Password != "" & tb_username.Text != "" & tb_sharename.Text != "")
+            {
+                SaveData = true;
+                this.Close();
+            }
+            else
+            {
+                MessageBox.Show("Please Enter Values in all fields first \n otherwise close or discard window");
+            }
+
         }
 
         private void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

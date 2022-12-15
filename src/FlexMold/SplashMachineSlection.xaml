@@ -7,18 +7,27 @@
     xmlns:local="clr-namespace:FlexMold"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodel="clr-namespace:FlexMold.MVVM.ViewModel"
     Title="SplashMachineSlection"
     Width="800"
     Height="600"
+    ResizeMode="NoResize"
+    ShowCloseButton="False"
+    ShowMaxRestoreButton="False"
+    WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
+    <!--<mah:MetroWindow.DataContext>
+        <viewmodel:SplashScreenViewModel />
+    </mah:MetroWindow.DataContext>-->
     <mah:MetroWindow.Resources>
         <ResourceDictionary>
             <Style x:Key="LargeTileStyle" TargetType="mah:Tile">
-                <Setter Property="Height" Value="125" />
                 <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
+                <Setter Property="TextOptions.TextRenderingMode" Value="ClearType" />
                 <Setter Property="TextOptions.TextRenderingMode" Value="ClearType" />
                 <Setter Property="TitleFontSize" Value="14" />
                 <Setter Property="Width" Value="300" />
+
             </Style>
             <Style x:Key="SmallTileStyle" TargetType="mah:Tile">
                 <Setter Property="Height" Value="125" />
@@ -32,14 +41,14 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="100" />
-            <ColumnDefinition Width="430*" />
+            <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="259*" />
+            <RowDefinition Height="100" />
+            <RowDefinition />
         </Grid.RowDefinitions>
-
         <TextBlock
+            Grid.Row="0"
             Grid.Column="1"
             VerticalAlignment="Center"
             FontFamily="Segoe UI"
@@ -47,16 +56,35 @@
             FontWeight="Light"
             Foreground="{DynamicResource MahApps.Brushes.ThemeForeground}"
             Text="Please Select Machine First" />
-
-        <WrapPanel
+        <ItemsControl
+            x:Name="MyItems"
             Grid.Row="1"
             Grid.Column="1"
-            Width="940"
-            Name="myw"
-            Height="382"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top">
-          
-        </WrapPanel>
+            ItemsSource="{Binding MyMachines}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemContainerStyle>
+                <Style>
+                    <Setter Property="Grid.Row" Value="{Binding Row}" />
+                    <Setter Property="Grid.Column" Value="{Binding Column}" />
+                </Style>
+            </ItemsControl.ItemContainerStyle>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <mah:Tile
+                            Title="{Binding Path=Name}"
+                            Command="{Binding ElementName=MyItems, Path=DataContext.MachineClickCommand}"
+                            CommandParameter="{Binding}"
+                            Content="{Binding Path=IconT}"
+                            Style="{StaticResource LargeTileStyle}"
+                            VerticalTitleAlignment="Top" />
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </Grid>
 </mah:MetroWindow>

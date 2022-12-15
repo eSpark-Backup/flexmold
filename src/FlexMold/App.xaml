@@ -6,7 +6,7 @@
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:view="clr-namespace:FlexMold.MVVM.View"
     xmlns:viewModelx="clr-namespace:FlexMold.MVVM.ViewModel"
-    StartupUri="SplashMachineSlection.xaml">
+    StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

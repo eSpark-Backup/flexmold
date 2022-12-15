@@ -1,4 +1,5 @@
 ﻿using FlexMold.MVVM.Model;
+using FlexMold.MVVM.ViewModel;
 using FlexMold.Utility;
 using MahApps.Metro.Controls;
 using NLog;
@@ -30,18 +31,47 @@ namespace FlexMold
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
+        public Machine SelectedMachine { get; set; }
         public MainWindow()
         {
             /// Test Area please comment
-           
+
             /// Region closed 
 
-
+            ShowMachineSlectionWindow();
+            //SelectedMachine = _SelectedMachine;
             Logger log = LogManager.GetLogger("Main");
             InitializeComponent();
             logCtrl.ItemAdded += OnLogMessageItemAdded;
             log.Log(LogLevel.Info, $"Application Loaded Scussfully.....");
+            log.Log(LogLevel.Info, $"Selected Machine Type : {SelectedMachine.MachineType} Name : {SelectedMachine.Name} ID : {SelectedMachine.ID}");
             Console.WriteLine();
+        }
+        void ShowMachineSlectionWindow()
+        {
+            SelectedMachine = new Machine();
+            try
+            {
+                var vm = new SplashScreenViewModel();
+                var splashscreen = new SplashMachineSlection
+                {
+                    DataContext = vm
+                };
+                vm.OnRequestClose += (s, e) => splashscreen.Close();
+                splashscreen.ShowDialog();
+                if (vm.SelectedMachine.Name == null)
+                {
+                    ShowMachineSlectionWindow();
+                }
+                else
+                {
+                    SelectedMachine = vm.SelectedMachine;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
         private void OnLogMessageItemAdded(object o, EventArgs Args)
         {

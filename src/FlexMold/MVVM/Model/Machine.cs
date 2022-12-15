@@ -1,0 +1,42 @@
+﻿using MahApps.Metro.IconPacks;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Controls;
+
+namespace FlexMold.MVVM.Model
+{
+    public class Machine
+    {
+        public int ID { get; set; }
+        public string Name { get; set; }
+        public string Location { get; set; }
+        private EMachineType _MachineType;
+        public EMachineType MachineType
+        {
+            get { return _MachineType; }
+            set {
+                switch (value)
+                {
+                    case EMachineType.Motor:
+                        IconT = new PackIconUnicons() { Height = 80, Width = 80, Kind = PackIconUniconsKind.Drill };
+                        break;
+                    case EMachineType.Projector:
+                        IconT = new PackIconRemixIcon() { Height = 80, Width = 80, Kind = PackIconRemixIconKind.Projector2Fill };
+                        break;
+                }
+                _MachineType = value; 
+            }
+        }
+        public Control IconT { get; private set; }
+
+    }
+    public enum EMachineType
+    {
+        Motor = 0,
+        Projector
+    }
+}

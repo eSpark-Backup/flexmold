@@ -169,6 +169,7 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
@@ -194,9 +195,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="MVVM\Model\Machine.cs" />
     <Compile Include="MVVM\Model\Porjector.cs" />
     <Compile Include="MVVM\ViewModel\MachineSettingViewModel.cs" />
     <Compile Include="MVVM\ViewModel\Project\ProjectorViewModel.cs" />
+    <Compile Include="MVVM\ViewModel\SplashScreenViewModel.cs" />
     <Compile Include="MVVM\View\MachineSettingView.xaml.cs">
       <DependentUpon>MachineSettingView.xaml</DependentUpon>
     </Compile>
@@ -469,16 +472,13 @@
   <ItemGroup>
     <Folder Include="Contols\" />
     <Folder Include="Font\" />
+    <Folder Include="images\" />
     <Folder Include="MVVM\ViewModel\Accessory\" />
     <Folder Include="MVVM\ViewModel\Setting\" />
     <Folder Include="MVVM\View\Diaglog\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="flexmold.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="images\diskdrive.png" />
-    <Resource Include="images\folder.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NlogViewer\NlogViewer.csproj">

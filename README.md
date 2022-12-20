@@ -10,5 +10,6 @@ To develop a desktop HMI software for client that runs on Windows 10 or above an
 ## External Thanks
 - [For NLogViewer] https://github.com/erizet/NlogViewer
 - [For WPF Panel Control Template] https://www.youtube.com/watch?v=PzP8mw7JUzI&t=1s&ab_channel=Payload
+![[Pasted image 20221216083504.png]]
 - 
 

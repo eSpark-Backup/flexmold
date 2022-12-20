@@ -17,11 +17,13 @@ namespace FlexMold.MVVM.ViewModel
         public RelayCommand PowerSettingCommand { get; set; }
         public RelayCommand MotorSettingCommand { get; set; }
         public RelayCommand VacuumSettingCommand { get; set; }
+        public RelayCommand LaserSettingCommand { get; set; }
 
         public MachineSettingView MachineSettingVM { get; set; }
         public PowerSettingView PowerSettingVM { get; set; }
         public MotorSettingView MotorSettingVM { get; set; }
         public VacuumSettingView VacuumSettingMV { get; set; }
+        public LaserProjectorSettingView LaserSettingMV { get; set; }
 
         private object _currentView;
 
@@ -40,6 +42,7 @@ namespace FlexMold.MVVM.ViewModel
             PowerSettingVM = new PowerSettingView();
             MotorSettingVM = new MotorSettingView();
             VacuumSettingMV = new VacuumSettingView();
+            LaserSettingMV = new LaserProjectorSettingView();
 
             CurrentView = MachineSettingVM;
 
@@ -47,6 +50,7 @@ namespace FlexMold.MVVM.ViewModel
             PowerSettingCommand = new RelayCommand(o => { CurrentView = PowerSettingVM; });
             MotorSettingCommand = new RelayCommand(o => { CurrentView = MotorSettingVM; });
             VacuumSettingCommand = new RelayCommand(o => { CurrentView = VacuumSettingMV; });
+            LaserSettingCommand = new RelayCommand(o => { CurrentView = LaserSettingMV; });
 
         }
 

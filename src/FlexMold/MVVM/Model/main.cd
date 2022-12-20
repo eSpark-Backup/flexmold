@@ -3,8 +3,8 @@
   <Class Name="FlexMold.MVVM.Model.Projector">
     <Position X="5.75" Y="2.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAEAAAAAAAAAACAAAQAGAAAAAACAQAAAAAABAA=</HashCode>
-      <FileName>MVVM\Model\Porjector.cs</FileName>
+      <HashCode>AEAAAAAEAAAAAAAAAACAAAQACAAAABACAQAAAAAABAA=</HashCode>
+      <FileName>MVVM\Model\LaserProjector.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

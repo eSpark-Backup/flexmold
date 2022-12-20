@@ -13,16 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace FlexMold.MVVM.View
+namespace FlexMold.MVVM.View.MachineSetting
 {
     /// <summary>
-    /// Interaction logic for DynamicFlyout.xaml
+    /// Interaction logic for LaserStatusView.xaml
     /// </summary>
-    public partial class DynamicFlyout 
+    public partial class RenumberingView : UserControl
     {
-        public DynamicFlyout()
+        public RenumberingView()
         {
-           InitializeComponent();
+            InitializeComponent();
         }
     }
 }

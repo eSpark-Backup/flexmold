@@ -18,7 +18,6 @@ namespace NlogViewer
         public event EventHandler ItemAdded = delegate { };
         public ObservableCollection<LogEventViewModel> LogEntries { get; private set; }
         public bool IsTargetConfigured { get; private set; }
-
         private double _TimeWidth = 120;
         [Description("Width of time column in pixels"), Category("Data")]
         [TypeConverter(typeof(LengthConverter))]
@@ -102,7 +101,6 @@ namespace NlogViewer
         protected void LogReceived(AsyncLogEventInfo log)
         {
             LogEventViewModel vm = new LogEventViewModel(log.LogEvent);
-
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 if (MaxRowCount > 0 && LogEntries.Count >= MaxRowCount)
@@ -112,6 +110,7 @@ namespace NlogViewer
                 LogEntries.Insert(0, vm);
                 if (AutoScrollToLast) ScrollToLast();
                 else ScrollToFirst();
+                MyExpander.Header = $"Last Log {log.LogEvent.TimeStamp.ToShortTimeString()} {log.LogEvent.LoggerName} | {log.LogEvent.Level} | {log.LogEvent.FormattedMessage}";
                 ItemAdded(this, (NLogEvent)log.LogEvent);
             }));
         }

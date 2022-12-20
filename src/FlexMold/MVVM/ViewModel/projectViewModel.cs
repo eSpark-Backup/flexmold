@@ -1,17 +1,27 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
+using FlexMold.MVVM.View;
+using FlexMold.MVVM.View.Project;
+using FlexMold.MVVM.ViewModel.Project;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 using NLog;
+using SMBLibrary.NetBios;
 using Sylvan.Data.Csv;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media.Effects;
+using Utilities;
 
 namespace FlexMold.MVVM.ViewModel
 {
@@ -20,7 +30,28 @@ namespace FlexMold.MVVM.ViewModel
     {
         public RelayCommand ReadCSVFileCommand { get; set; }
         public RelayCommand SendLasFileCommand { get; set; }
+        public RelayCommand SerialConfigCommand { get; set; }
+        public RelayCommand SambaConfigCommand { get; set; }
         public RelayCommand BrowseProjectCommand { get; set; }
+
+        // Variable
+        private SerialPort _SelectedSerialPort;
+        private Projector SelectedPorjector;
+
+        public SerialPort SelectedSerialPort
+        {
+            get
+            {
+                return _SelectedSerialPort;
+            }
+            set
+            {
+                _SelectedSerialPort = value;
+
+            }
+        }
+
+
         private MyDataModel _selectedMyDataModel;
         public MyDataModel selectedMyDataModel
         {
@@ -99,11 +130,7 @@ namespace FlexMold.MVVM.ViewModel
         public bool IsSerialMode { get; set; }
         void sendLasFileToProjector()
         {
-            var pjvm = new ProjectorViewModel(new Projector()
-            {
-                Name = "p1", IpAddress = "192.168.1.132", Status = 1,
-                Port = new System.IO.Ports.SerialPort("COM5")
-            });
+            var pjvm = new ProjectorViewModel(SelectedPorjector);
             pjvm.sendLasFile(slectedFile, IsSerialMode);
         }
         void BrowseProject()
@@ -144,11 +171,81 @@ namespace FlexMold.MVVM.ViewModel
         }
         public ProjectViewModel()
         {
-            //selectedMyDataModel = new MyDataModel();
-            //selectedMyDataModel.LaserFile = new List<FileInfo>() { new FileInfo("")};
+            if (SelectedSerialPort == null)
+            {
+                SelectedSerialPort = new SerialPort();
+            }
+            if (SelectedPorjector == null)
+            {
+                SelectedPorjector = new Projector()
+                {
+                    Name = "p1",
+                    IpAddres = "192.168.1.132",
+                    UserName = "admin",
+                    Status = 1,
+                    Password = "123456",
+                    Port = SelectedSerialPort
+                };
+            }
             ReadCSVFileCommand = new RelayCommand(o => { readCsvFile(); });
             BrowseProjectCommand = new RelayCommand(o => { BrowseProject(); });
             SendLasFileCommand = new RelayCommand(o => { sendLasFileToProjector(); });
+            SerialConfigCommand = new RelayCommand(o => { SerialConfigWindow(); });
+            SambaConfigCommand = new RelayCommand(o => { SambaConfigWindow(); });
+        }
+        private void SerialConfigWindow()
+        {
+            Logger log = LogManager.GetLogger("Serial Port Config");
+            try
+            {
+                log.Log(LogLevel.Info, $"Current port {SelectedSerialPort.PortName} Baud {SelectedSerialPort.BaudRate}");
+                log.Log(LogLevel.Info, $"Please Select Port params from available list ");
+                var main = App.Current.MainWindow as MainWindow;
+                var sv = new SerialPortConfigView(main, SelectedSerialPort);
+                sv.ShowDialog();
+                if (sv.SaveData)
+                {
+                    SelectedSerialPort = sv.CurrentPort;
+                    log.Log(LogLevel.Info, $"Saved Port {SelectedSerialPort.PortName} Baud {SelectedSerialPort.BaudRate}");
+                }
+                else
+                {
+                    log.Log(LogLevel.Warn, $"Closing without saving");
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Log(LogLevel.Error, ex, ex.Message);
+                throw;
+            }
+        }
+        private void SambaConfigWindow()
+        {
+            Logger log = LogManager.GetLogger("Samba Config");
+            try
+            {
+                log.Log(LogLevel.Info, $"Current IP {SelectedPorjector.IpAddres} UserName {SelectedPorjector.UserName}");
+                log.Log(LogLevel.Info, $"Please Enter Samba params");
+                var main = App.Current.MainWindow as MainWindow;
+                var sv = new SambaConfigWindow(main, SelectedPorjector);
+                sv.ShowDialog();
+                if (sv.SaveData)
+                {
+                    SelectedPorjector = sv.CurrentProjector;
+                    log.Log(LogLevel.Info, $"Saved IP {SelectedPorjector.IpAddres}");
+                    log.Log(LogLevel.Info, $"Saved PlotFolderName {SelectedPorjector.PlotFolderName}");
+                    log.Log(LogLevel.Info, $"Saved UserName {SelectedPorjector.UserName}");
+                }
+                else
+                {
+                    log.Log(LogLevel.Warn, $"Closing without saving");
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Log(LogLevel.Error, ex, ex.Message);
+                throw;
+            }
         }
     }
 }

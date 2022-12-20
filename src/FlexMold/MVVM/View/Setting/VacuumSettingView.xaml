@@ -13,25 +13,18 @@
     <Grid>
         <Grid.Resources />
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+        <Label Grid.Row="0" Grid.Column="0" Content="Vacuum Status" />
+        <Label Grid.Row="1" Grid.Column="0" Content="Vacuum Pressure" />
         <mah:ToggleSwitch
             Grid.Row="0"
-            Grid.Column="1"
-            Header="Vacuum Status"
-            OffContent="Off"
-            OnContent="On" />
-        <mah:DropDownButton
-            Grid.Row="1"
-            Grid.Column="1"
-            Content="Vacuum Pressure">
-            <mah:DropDownButton.Icon>
-                <iconPacks:PackIconMaterial Margin="6" Kind="AirPurifier" />
-            </mah:DropDownButton.Icon>
-        </mah:DropDownButton>
+            Grid.Column="1"/>
+        <ComboBox Grid.Row="1" Grid.Column="1"/>
     </Grid>
 </UserControl>

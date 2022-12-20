@@ -169,6 +169,7 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
@@ -194,10 +195,37 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="MVVM\Model\Machine.cs" />
     <Compile Include="MVVM\Model\Porjector.cs" />
-    <Compile Include="MVVM\ViewModel\ProjectorViewModel.cs" />
-    <Compile Include="MVVM\View\DynamicFlyout.xaml.cs">
-      <DependentUpon>DynamicFlyout.xaml</DependentUpon>
+    <Compile Include="MVVM\ViewModel\MachineSettingViewModel.cs" />
+    <Compile Include="MVVM\ViewModel\Project\ProjectorViewModel.cs" />
+    <Compile Include="MVVM\ViewModel\SplashScreenViewModel.cs" />
+    <Compile Include="MVVM\View\MachineSettingView.xaml.cs">
+      <DependentUpon>MachineSettingView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\MachineSetting\ReadMotorView.xaml.cs">
+      <DependentUpon>ReadMotorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\MachineSetting\PowerOnOffView.xaml.cs">
+      <DependentUpon>PowerOnOffView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\MachineSetting\RenumberingView.xaml.cs">
+      <DependentUpon>RenumberingView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\MachineSetting\PositionView.xaml.cs">
+      <DependentUpon>PositionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\MachineSetting\ResetView.xaml.cs">
+      <DependentUpon>ResetView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\Project\SambaConfigWindow.xaml.cs">
+      <DependentUpon>SambaConfigWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\Project\SerialPortConfigView.xaml.cs">
+      <DependentUpon>SerialPortConfigView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SplashMachineSlection.xaml.cs">
+      <DependentUpon>SplashMachineSlection.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utility\NetworkShareAccesser.cs" />
     <Page Include="MainWindow.xaml">
@@ -234,9 +262,9 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MVVM\View\DynamicFlyout.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="MVVM\View\MachineSettingView.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="MVVM\View\HomeView.xaml">
       <SubType>Designer</SubType>
@@ -274,11 +302,39 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="MVVM\View\MachineSetting\ReadMotorView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MVVM\View\MachineSetting\PowerOnOffView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MVVM\View\MachineSetting\RenumberingView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MVVM\View\MachineSetting\PositionView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MVVM\View\MachineSetting\ResetView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MVVM\View\ProjectView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MVVM\View\Project\ProjectGridView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVM\View\Project\SambaConfigWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVM\View\Project\SerialPortConfigView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -299,6 +355,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MVVM\View\Setting\VacuumSettingView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SplashMachineSlection.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -412,16 +472,13 @@
   <ItemGroup>
     <Folder Include="Contols\" />
     <Folder Include="Font\" />
+    <Folder Include="images\" />
     <Folder Include="MVVM\ViewModel\Accessory\" />
-    <Folder Include="MVVM\ViewModel\Project\" />
     <Folder Include="MVVM\ViewModel\Setting\" />
+    <Folder Include="MVVM\View\Diaglog\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="flexmold.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="images\diskdrive.png" />
-    <Resource Include="images\folder.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NlogViewer\NlogViewer.csproj">

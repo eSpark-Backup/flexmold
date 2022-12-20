@@ -13,6 +13,7 @@
     <Grid>
         <Grid.Resources />
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -21,36 +22,31 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <mah:ToggleSwitch
+        <Label
             Grid.Row="0"
             Grid.Column="0"
-            Header="Power"
+            Content="Power" />
+        <Label
+            Grid.Row="1"
+            Grid.Column="0"
+            Content="Temperature Current :" />
+        <Label
+            Grid.Row="2"
+            Grid.Column="0"
+            Content="Temperature Set :" />
+        <Label
+            Grid.Row="3"
+            Grid.Column="0"
+            Content="Temperature Time :" />
+        <mah:ToggleSwitch
+            Grid.Row="0"
+            Grid.Column="1"
             OffContent="Off"
             OnContent="On" />
-        <mah:DropDownButton
-            Grid.Row="1"
-            Content="Temperature Current"
-            >
-            <mah:DropDownButton.Icon>
-                <iconPacks:PackIconMaterial Margin="6" Kind="TemperatureCelsius" />
-            </mah:DropDownButton.Icon>
-        </mah:DropDownButton>
-        <mah:DropDownButton
-            Grid.Row="2"
-            Content="Temperature Set"
-            >
-            <mah:DropDownButton.Icon>
-                <iconPacks:PackIconMaterial Margin="6" Kind="TemperatureCelsius" />
-            </mah:DropDownButton.Icon>
-        </mah:DropDownButton>
-        <mah:DropDownButton
-            Grid.Row="3"
-            Content="Temperature Time"
-            >
-            <mah:DropDownButton.Icon>
-                <iconPacks:PackIconMaterial Margin="6" Kind="TemperatureCelsius" />
-            </mah:DropDownButton.Icon>
-        </mah:DropDownButton>
+        <ComboBox Grid.Row="1" Grid.Column="1" />
+        <ComboBox Grid.Row="2" Grid.Column="1" />
+        <ComboBox Grid.Row="3" Grid.Column="1" />
+
 
     </Grid>
 </UserControl>

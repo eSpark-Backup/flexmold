@@ -12,9 +12,10 @@
     xmlns:nlogviewer="clr-namespace:NlogViewer;assembly=NlogViewer"
     Title="FlexMold"
     Width="800"
-    Height="700"
+    Height="600"
     Icon="flexmold.ico"
     ResizeMode="CanResizeWithGrip"
+    WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
     <Window.Resources>
         <ResourceDictionary>
@@ -95,7 +96,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="100" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" Grid.Row="1">
@@ -131,7 +132,14 @@
                     <View:AccessoryView />
                 </ScrollViewer>
             </TabItem>
-            <TextBox Text="Logs" />
+            <TabItem Header="Machine Setting">
+                <ScrollViewer
+                    Margin="2"
+                    HorizontalScrollBarVisibility="Auto"
+                    VerticalScrollBarVisibility="Auto">
+                    <View:MachineSettingView />
+                </ScrollViewer>
+            </TabItem>
         </mah:MetroAnimatedSingleRowTabControl>
         <nlogviewer:NlogViewer
             x:Name="logCtrl"

@@ -1,5 +1,6 @@
 ﻿using FlexMold.MVVM.Model;
 using FlexMold.MVVM.ViewModel;
+using MahApps.Metro.Controls;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,7 +29,5 @@ namespace FlexMold.MVVM.View
         {
             InitializeComponent();
         }
-
-      
     }
 }

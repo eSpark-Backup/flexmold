@@ -28,33 +28,21 @@
                 ScrollViewer.CanContentScroll="True">
 
                 <RadioButton
-                    Height="50"
                     Command="{Binding MachineSettingCommand}"
                     Content="Machine"
-                    FontSize="14"
-                    Foreground="White"
                     IsChecked="True"
                     Style="{StaticResource MenuButtonTheme}" />
                 <RadioButton
-                    Height="50"
                     Command="{Binding PowerSettingCommand}"
                     Content="Power"
-                    FontSize="14"
-                    Foreground="White"
                     Style="{StaticResource MenuButtonTheme}" />
                 <RadioButton
-                    Height="50"
                     Command="{Binding MotorSettingCommand}"
                     Content="Motor"
-                    FontSize="14"
-                    Foreground="White"
                     Style="{StaticResource MenuButtonTheme}" />
                 <RadioButton
-                    Height="50"
                     Command="{Binding VacuumSettingCommand}"
                     Content="Vacuum"
-                    FontSize="14"
-                    Foreground="White"
                     Style="{StaticResource MenuButtonTheme}" />
 
             </StackPanel>

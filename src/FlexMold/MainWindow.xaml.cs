@@ -1,5 +1,6 @@
 ﻿using FlexMold.MVVM.Model;
 using FlexMold.MVVM.ViewModel;
+using FlexMold.MVVM.ViewModel.Setting;
 using FlexMold.Utility;
 using MahApps.Metro.Controls;
 using NLog;
@@ -35,7 +36,7 @@ namespace FlexMold
         public MainWindow()
         {
             /// Test Area please comment
-
+         
             /// Region closed 
 
             ShowMachineSlectionWindow();

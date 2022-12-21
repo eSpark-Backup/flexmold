@@ -8,7 +8,7 @@ namespace FlexMold.MVVM.Model
 {
     // Task Class
     // Requires using System.ComponentModel;
-    public class MyDataModel : ObservableObject
+    public class Project : ObservableObject
     {
 
         // The Task class implements INotifyPropertyChanged and IEditableObject
@@ -69,7 +69,7 @@ namespace FlexMold.MVVM.Model
     }
 
     // Requires using System.Collections.ObjectModel;
-    public class MyDataModels : ObservableCollection<MyDataModel>
+    public class Porjects : ObservableCollection<Project>
     {
         // Creating the Tasks collection in this way enables data binding from XAML.
     }

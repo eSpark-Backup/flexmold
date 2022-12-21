@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using NLog;
 using NLog.Common;
 
@@ -97,7 +98,6 @@ namespace NlogViewer
                 }
             }
         }
-
         protected void LogReceived(AsyncLogEventInfo log)
         {
             LogEventViewModel vm = new LogEventViewModel(log.LogEvent);
@@ -110,7 +110,13 @@ namespace NlogViewer
                 LogEntries.Insert(0, vm);
                 if (AutoScrollToLast) ScrollToLast();
                 else ScrollToFirst();
-                MyExpander.Header = $"Last Log {log.LogEvent.TimeStamp.ToShortTimeString()} {log.LogEvent.LoggerName} | {log.LogEvent.Level} | {log.LogEvent.FormattedMessage}";
+                MyExpander.Header = new TextBlock
+                {
+                    Text = $"Last Log {log.LogEvent.TimeStamp.ToShortTimeString()} {log.LogEvent.LoggerName} | {log.LogEvent.Level} | {log.LogEvent.FormattedMessage}",
+                    Height = 20,
+                    ToolTip = vm.ToolTip,
+                    Foreground = vm.Background
+                };
                 ItemAdded(this, (NLogEvent)log.LogEvent);
             }));
         }

@@ -10,8 +10,8 @@
     xmlns:local="clr-namespace:FlexMold.MVVM.View"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:project="clr-namespace:FlexMold.MVVM.View.Project"
-    xmlns:viewmodel="clr-namespace:FlexMold.MVVM.ViewModel"
+    xmlns:projectview="clr-namespace:FlexMold.MVVM.View.Project"
+    xmlns:projectvm="clr-namespace:FlexMold.MVVM.ViewModel.Project"
     Name="parent"
     Dialog:DialogParticipation.Register="{Binding}"
     d:DataContext=""
@@ -19,9 +19,11 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <UserControl.DataContext>
-        <viewmodel:ProjectViewModel />
+        <projectvm:ProjectViewModel />
     </UserControl.DataContext>
     <UserControl.Resources>
+        <convertor:RadioBoolToIntConverter x:Key="radioBoolToIntConverter" />
+
         <convertor:HeightConverter x:Key="HeightConverter" />
         <convertor:BoolInverterConverter x:Key="BoolInverterConverter" />
     </UserControl.Resources>
@@ -30,53 +32,122 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="250" />
                 <ColumnDefinition Width="230" />
-                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <GroupBox
                 Grid.Column="0"
+                Height="{Binding Path=ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UIElement}}"
                 Margin="8,0,0,0"
                 Header="Projects Selection">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+                <DockPanel>
                     <Button
                         Name="btProjectBrowse"
-                        Grid.Row="0"
-                        Grid.ColumnSpan="2"
-                        Command="{Binding BrowseProjectCommand}">
+                        Command="{Binding BrowseProjectCommand}"
+                        DockPanel.Dock="Top">
                         <StackPanel Orientation="Horizontal">
                             <iconPacks:PackIconMaterial Margin="6" Kind="Folder" />
                             <TextBlock VerticalAlignment="Center" Text="Browse Project" />
                         </StackPanel>
                     </Button>
-                    <project:ProjectGridView
-                        Grid.Row="1"
-                        Grid.Column="0"
-                        Grid.ColumnSpan="2" />
-                </Grid>
+                    <projectview:ProjectGridView />
+                </DockPanel>
             </GroupBox>
-            <GroupBox Grid.Column="1" Header="Available Files(Selected Panel)">
-                <DataGrid
-                    Margin="5"
-                    AutoGenerateColumns="False"
-                    CanUserAddRows="False"
-                    IsReadOnly="True"
-                    ItemsSource="{Binding selectedMyDataModel.LaserFile}"
-                    ScrollViewer.CanContentScroll="True"
-                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                    ScrollViewer.VerticalScrollBarVisibility="Auto"
-                    SelectedItem="{Binding Path=slectedFile}"
-                    SelectionMode="Single">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Binding="{Binding Name}" Header="File" />
-                        <DataGridTextColumn Binding="{Binding Length}" Header="Size(b)" />
-                        <DataGridTextColumn Binding="{Binding LastWriteTime}" Header="Last Modified" />
-                    </DataGrid.Columns>
-                </DataGrid>
-            </GroupBox>
+            <DockPanel Grid.Column="1" Height="{Binding Path=ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UIElement}}">
+                <GroupBox
+                    Margin="0,0,8,0"
+                    DockPanel.Dock="Bottom"
+                    Header="Projector Controls">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <UniformGrid
+                            Grid.ColumnSpan="3"
+                            Columns="3"
+                            Rows="2">
+                            <RadioButton
+                                Margin="5,0,0,0"
+                                Content="Serial"
+                                GroupName="Group1"
+                                IsChecked="{Binding LaserProjectorComMode, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=0}" />
+                            <RadioButton
+                                Margin="5,0,0,0"
+                                Content="Samba"
+                                GroupName="Group1"
+                                IsChecked="{Binding LaserProjectorComMode, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=1}" />
+                            <RadioButton
+                                Margin="5,0,0,0"
+                                Content="TelNet"
+                                GroupName="Group1"
+                                IsChecked="{Binding LaserProjectorComMode, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=2}" />
+
+                            <Button
+                                Margin="0"
+                                HorizontalAlignment="Left"
+                                Background="Transparent"
+                                Command="{Binding SerialConfigCommand}">
+                                <StackPanel Orientation="Vertical">
+                                    <iconPacks:PackIconForkAwesome Foreground="White" Kind="Bars" />
+                                </StackPanel>
+                            </Button>
+                            <Button
+                                Margin="0"
+                                HorizontalAlignment="Left"
+                                Background="Transparent"
+                                Command="{Binding SambaConfigCommand}">
+                                <StackPanel Orientation="Vertical">
+                                    <iconPacks:PackIconForkAwesome Foreground="White" Kind="Bars" />
+                                </StackPanel>
+                            </Button>
+                            <Button
+                                Margin="0"
+                                HorizontalAlignment="Left"
+                                Background="Transparent"
+                                Command="{Binding SambaConfigCommand}">
+                                <StackPanel Orientation="Vertical">
+                                    <iconPacks:PackIconForkAwesome Foreground="White" Kind="Bars" />
+                                </StackPanel>
+                            </Button>
+                        </UniformGrid>
+                        <Button Grid.Row="1" Command="{Binding SendLasFileCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Margin="6" Kind="Send" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Text="Send Las File"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Available Files(Selected Panel)">
+                    <DataGrid
+                        Margin="5"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        IsReadOnly="True"
+                        ItemsSource="{Binding selectedMyDataModel.LaserFile}"
+                        ScrollViewer.CanContentScroll="True"
+                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                        SelectedItem="{Binding Path=slectedFile}"
+                        SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding Name}" Header="File" />
+                            <DataGridTextColumn Binding="{Binding Length}" Header="Size(b)" />
+                            <DataGridTextColumn Binding="{Binding LastWriteTime}" Header="Last Modified" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                </GroupBox>
+
+            </DockPanel>
             <StackPanel Grid.Column="2" Orientation="Vertical">
+
                 <GroupBox Margin="0,0,8,0" Header="Motor Sensor Chart Info">
                     <StackPanel Orientation="Vertical">
                         <TextBox
@@ -102,66 +173,6 @@
                             </StackPanel>
                         </Button>
                     </StackPanel>
-                </GroupBox>
-                <GroupBox Margin="0,0,8,0" Header="Projector Controls">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <RadioButton
-                            Grid.Row="0"
-                            Margin="5,0,0,0"
-                            Content="Serial"
-                            GroupName="Group1"
-                            IsChecked="{Binding IsSerialMode}" />
-                        <RadioButton
-                            Grid.Row="1"
-                            Margin="5,0,0,0"
-                            Content="Samba"
-                            GroupName="Group1"
-                            IsChecked="{Binding IsSerialMode, Converter={StaticResource BoolInverterConverter}}" />
-                        <Button
-                            Grid.Row="0"
-                            Grid.Column="1"
-                            Margin="0"
-                            Background="Transparent"
-                            Command="{Binding SerialConfigCommand}">
-                            <StackPanel Orientation="Vertical">
-                                <iconPacks:PackIconMaterial
-                                    Margin="0"
-                                    Foreground="White"
-                                    Kind="SettingsHelper" />
-                            </StackPanel>
-                        </Button>
-                        <Button
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            Margin="0"
-                            Background="Transparent"
-                            Command="{Binding SambaConfigCommand}">
-                            <StackPanel Orientation="Vertical">
-                                <iconPacks:PackIconMaterial Foreground="White" Kind="SettingsHelper" />
-                            </StackPanel>
-                        </Button>
-                        <Button
-                            Grid.RowSpan="2"
-                            Grid.Column="2"
-                            Command="{Binding SendLasFileCommand}">
-                            <StackPanel Orientation="Horizontal">
-                                <iconPacks:PackIconMaterial Margin="6" Kind="Send" />
-                                <TextBlock
-                                    VerticalAlignment="Center"
-                                    Text="Send Las File"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-                        </Button>
-                    </Grid>
                 </GroupBox>
                 <GroupBox Margin="0,0,8,0" Header="Motor Sensor Controls">
                     <Grid>

@@ -44,6 +44,10 @@
                     Command="{Binding VacuumSettingCommand}"
                     Content="Vacuum"
                     Style="{StaticResource MenuButtonTheme}" />
+                <RadioButton
+                    Command="{Binding LaserSettingCommand}"
+                    Content="Laser Projector"
+                    Style="{StaticResource MenuButtonTheme}" />
 
             </StackPanel>
             <ContentControl

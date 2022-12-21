@@ -26,14 +26,14 @@ namespace FlexMold.MVVM.View.Project
     public partial class SambaConfigWindow : MetroWindow
     {
         public MainWindow main { get; set; }
-        public Projector CurrentProjector { get; set; }
+        public LaserProjector CurrentProjector { get; set; }
         public bool SaveData { get; set; }
-        public SambaConfigWindow(MainWindow _main, Projector _Porjector)
+        public SambaConfigWindow(MainWindow _main, LaserProjector _Porjector)
         {
             main = _main;
             main.IsEnabled = false;
             main.Effect = new BlurEffect();
-            CurrentProjector = new Projector();
+            CurrentProjector = new LaserProjector();
             CurrentProjector = _Porjector;
             InitializeComponent();
             SaveData = false;

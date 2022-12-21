@@ -6,7 +6,7 @@ namespace FlexMold.Utility
 {
     static class MixUtil
     {
-        public static async Task<string> ReadTextAsync(string filePath)
+        public static async Task<string> ReadTextFromFileAsync(string filePath)
         {
             var sourceStream =
                new FileStream(

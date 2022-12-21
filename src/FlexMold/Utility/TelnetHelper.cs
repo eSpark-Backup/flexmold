@@ -41,7 +41,6 @@ namespace FlexMold.Utility
         {
             log = LogManager.GetLogger("Laser Projector");
             SendMessage = "magic!";
-           
         }
        
         public void DisconnectTelnet()
@@ -57,7 +56,7 @@ namespace FlexMold.Utility
                 log.Log(LogLevel.Info, $"No Active Connection Found");
             }
         }
-        public async Task<bool> ConnectSendTelnet(string IpAddres, int TelnetPort)
+        public async Task<bool> ConnectTelnet(string IpAddres, int TelnetPort)
         {
             log.Log(LogLevel.Info, $"Testing TelNet Connection....");
             ReceivedMessage = "";
@@ -69,9 +68,6 @@ namespace FlexMold.Utility
                 MyTelnetClient.MessageReceived += HandleMessageReceived;
                 log.Log(LogLevel.Info, $"Connecting....");
                 await MyTelnetClient.Connect();
-                log.Log(LogLevel.Info, $"Sending Sessage....");
-                await MyTelnetClient.Send(SendMessage);
-                log.Log(LogLevel.Info, $"Message Sent Sucessfully");
                 return true;
             }
             catch (Exception err)
@@ -80,15 +76,26 @@ namespace FlexMold.Utility
                 return false;
             }
         }
+        public async Task SendTelnetMessgae()
+        {
+            ReceivedMessage = "";
+            log.Log(LogLevel.Info, $"Sending TelNet Message....");
+            log.Log(LogLevel.Info, $"{SendMessage}");
+            await MyTelnetClient.Send(SendMessage);
+            log.Log(LogLevel.Info, $"Message Sent Sucessfully");
+        }
         private void HandleConnectionClosed(object sender, EventArgs e)
         {
-            ReceivedMessage = "Connection Closed";
+            ReceivedMessage = "Connection Closed"; 
             log.Log(LogLevel.Info, $"Connection Closed");
         }
 
         private void HandleMessageReceived(object sender, string e)
         {
             ReceivedMessage += e + "\n";
+            log.Log(LogLevel.Info, $"Message Received Sucessfully");
+            log.Log(LogLevel.Info, $"{ReceivedMessage}");
+
         }
     }
 }

@@ -141,6 +141,7 @@
                 </ScrollViewer>
             </TabItem>
         </mah:MetroAnimatedSingleRowTabControl>
+
         <nlogviewer:NlogViewer
             x:Name="logCtrl"
             Grid.Row="2"

@@ -209,7 +209,7 @@
     <Compile Include="MVVM\Model\Machine.cs" />
     <Compile Include="MVVM\Model\LaserProjector.cs" />
     <Compile Include="MVVM\ViewModel\MachineSettingViewModel.cs" />
-    <Compile Include="Utility\Class1.cs" />
+    <Compile Include="Utility\MixUtil.cs" />
     <Compile Include="Utility\TelnetHelper.cs" />
     <Compile Include="MVVM\ViewModel\Setting\LaserProjectorSettingViewModel.cs" />
     <Compile Include="MVVM\ViewModel\SplashScreenViewModel.cs" />

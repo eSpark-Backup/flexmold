@@ -11,7 +11,7 @@
     mc:Ignorable="d">
     <UserControl.Resources />
     <Grid>
-        <Expander Name="MyExpander" MaxHeight="120">
+        <Expander Name="MyExpander" MaxHeight="200">
             <ListView Name="logView" ItemsSource="{Binding LogEntries}">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="{x:Type ListViewItem}">

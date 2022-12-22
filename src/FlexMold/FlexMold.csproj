@@ -471,6 +471,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <Content Include="Nlog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -94,11 +94,11 @@ namespace ScriptingTest
         /// <summary>
         /// Gets the DTE Object which has opened a solution with the specified name.
         /// </summary>
-        /// <param name="solutionPath">Name of the solution (without path, without extension)</param>
+        /// <param name="solutionName">Name of the solution (without path, without extension)</param>
         /// <returns>The DTE Object</returns>
-        public static DTE GetActiveDTE(string solutionPath)
+        public static DTE GetActiveDTE(string solutionName)
         {
-            KeyValuePair<ROTDteInfo, DTE> foundEntry = GetRunningDTETable().First<KeyValuePair<ROTDteInfo, DTE>>((entry) => { return (StringComparer.OrdinalIgnoreCase.Compare(entry.Key.SolutionPath, solutionPath) == 0); });
+            KeyValuePair<ROTDteInfo, DTE> foundEntry = GetRunningDTETable().First<KeyValuePair<ROTDteInfo, DTE>>((entry) => { return (StringComparer.OrdinalIgnoreCase.Compare(entry.Key.SolutionName, solutionName) == 0); });
             return foundEntry.Value;
         }
     }
@@ -123,7 +123,7 @@ namespace ScriptingTest
         /// <value>
         /// The solution path.
         /// </value>
-        public string SolutionPath { get; internal set; }
+        public string SolutionPath { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ROTDteInfo"/> class.

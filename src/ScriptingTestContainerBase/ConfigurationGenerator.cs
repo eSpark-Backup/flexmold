@@ -342,19 +342,6 @@ namespace ScriptingTest
                             case 12:
                                 vsName = "Visual Studio 2013";
                                 break;
-                            case 14:
-                                vsName = "Visual Studio 2015";
-                                break;
-                            case 15:
-                                vsName = "Visual Studio 2017";   
-                                break;
-
-                            case 16:
-                                vsName = "Visual Studio 2019";
-                                break; 
-                            case 17:
-                                vsName = "Visual Studio 2022";
-                                break; 
                             default:
                                 Debug.Fail("VS version unknown!");
                                 vsName = string.Format("Visual Studio ({0})",progId);

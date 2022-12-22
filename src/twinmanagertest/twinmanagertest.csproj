@@ -36,6 +36,9 @@
     <Reference Include="envdte, Version=17.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\envdte.17.4.33103.184\lib\net472\envdte.dll</HintPath>
     </Reference>
+    <Reference Include="envdte80, Version=17.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\envdte80.17.4.33103.184\lib\net472\envdte80.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.VisualStudio.Interop, Version=17.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.VisualStudio.Interop.17.4.33103.184\lib\net472\Microsoft.VisualStudio.Interop.dll</HintPath>
     </Reference>
@@ -71,7 +74,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ScriptingTestContainerBase\ScriptingTestContainerBase.csproj">
-      <Project>{84bf2917-6a6e-45b9-b1bb-3fb86c57756d}</Project>
+      <Project>{84BF2917-6A6E-45B9-B1BB-3FB86C57756D}</Project>
       <Name>ScriptingTestContainerBase</Name>
     </ProjectReference>
   </ItemGroup>

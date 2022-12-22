@@ -10,15 +10,15 @@ using System.Timers;
 using ScriptingTest;
 using System.Xml;
 using System.Collections.Generic;
-using System.Windows.Forms;
+using Scripting.CSharp;
 
-namespace Scripting.CSharp
+namespace TwincatAutomationTestAppWPF
 {
     /// <summary>
     /// Demonstrates the generation + compilation of PLC projects. 
     /// The method Execute() will be called by ScriptingContainer and will execute the actual script code.
     /// </summary>
-    public class PlcStressTest
+    public class GeneratePlcProject
         : ScriptEarlyBound
     {
         ITcSysManager4 systemManager = null;
@@ -85,7 +85,7 @@ namespace Scripting.CSharp
             string xml = root.ProduceXml();
 
             // Iteration over each node and produce output for demo purposes
-            foreach (ITcSmTreeItem3 child in root)  
+            foreach (ITcSmTreeItem3 child in root)
             {
                 browse(child, worker);
             }
@@ -96,7 +96,7 @@ namespace Scripting.CSharp
         /// </summary>
         /// <param name="worker">The worker.</param>
         protected override void OnExecute(IWorker worker)
-        {
+        {   
             worker.Progress = 0;
             if (worker.CancellationPending)
                 throw new Exception("Cancelled");
@@ -112,7 +112,7 @@ namespace Scripting.CSharp
              * ================================================================================================= */
             worker.ProgressStatus = "Creating empty PLC Project ...";
             ITcSmTreeItem plcGenerated = plcConfig.CreateChild("PlcGenerated", 0, "", vsXaePlcStandardTemplateName);
-
+           
             worker.ProgressStatus = "PLC Project created ...";
             worker.Progress = 10;
 
@@ -120,7 +120,7 @@ namespace Scripting.CSharp
              * Get references to attached PLC Project and some of its childs
              * ================================================================================================= */
             ITcSmTreeItem plcProjectRootItem = systemManager.LookupTreeItem("TIPC^PlcGenerated"); // Plc Project Root (XAE Base side)
-            ITcSmTreeItem plcProjectItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project"); // PlcProject (PlcControl side)
+            ITcSmTreeItem plcProjectItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project"); // PlcProject (PlcControl side) determined via LookupTreeItem
             ITcSmTreeItem plcInstancesItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Instance"); // Instances
             ITcSmTreeItem plcPousItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project^POUs");
             ITcSmTreeItem plcDutsItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project^DUTs");
@@ -129,34 +129,15 @@ namespace Scripting.CSharp
             /* =================================================================================================
              * Iterate through subnotes (via _NewEnum)
              * ================================================================================================= */
-
-            for (int i = 0; i < 10; i++)
+            foreach (ITcSmTreeItem item in plcProjectItem)
             {
-                foreach (ITcSmTreeItem item in plcProjectItem)
-                {
-                    string name = item.Name;
-                    worker.ProgressStatus = string.Format("Node '{0}'", name);
-                }
+                string name = item.Name;
             }
-
-            /* =================================================================================================
-             * Iterate through subnotes (via get_child(index))
-             * ================================================================================================= */
-            //int count = plcProjectItem.ChildCount;
-            //for (int i = 1; i <= count; i++)
-            //{
-            //    ITcSmTreeItem item2 = plcProjectItem.get_Child(i);
-            //    string name = item2.Name;
-            //}
             
             /* =================================================================================================
              * Creating datatypes in sub-folder \DUTs\MyDuts\
              * ================================================================================================= */
             ITcSmTreeItem dutFolder = CreatePlcFolder(plcDutsItem, "MyDuts", "", worker);
-
-            //worker.ProgressStatus = "Waiting ....";
-            //System.Threading.Thread.Sleep(10000);
-            //worker.ProgressStatus = "Succeeding";
 
             string declAlias = @"TYPE AliasType : BOOL; END_TYPE";
             ITcSmTreeItem plcDutAlias = CreateDut(dutFolder, TreeItemType.PlcDutAlias, "AliasType", "INT", declAlias, worker);
@@ -197,6 +178,11 @@ END_VAR";
             ITcSmTreeItem plcGlv = CreateGlv(plcGlvsItem, "MyGlv", glvDecl, worker);
 
             /* =================================================================================================
+             * Creating ParameterList in GVL folder
+             * ================================================================================================= */
+            // ITcSmTreeItem plcParameterList = CreateParameterList(plcGlvsItem, "MyParameterList", null, worker);
+
+            /* =================================================================================================
              * Creating POUs under folder "MyPous"
              * ================================================================================================= */
             ITcSmTreeItem myPousItem = CreatePlcFolder(plcPousItem, "MyPous", "", worker);
@@ -223,68 +209,194 @@ END_VAR";
             ITcSmTreeItem itfPropSet = itfPropItem.CreateChild("", TreeItemType.PlcItfPropSet.AsInt32(), "", null);
             ITcSmTreeItem itfPropGet = itfPropItem.CreateChild("", TreeItemType.PlcItfPropGet.AsInt32(), "", null);
 
-//            /* =================================================================================================
-//             * Compiling project using Automation Interface methods
-//             * ================================================================================================= */
-//            ITcPlcProject iecProjectRoot = (ITcPlcProject)plcProjectRootItem;
-//            worker.ProgressStatus = "Compiling project (1) ...";
-//            iecProjectRoot.CompileProject();
-//            ErrorItems errors = dte.ToolWindows.ErrorList.ErrorItems;
-//            worker.Progress = 75;
-//            iecProjectRoot.BootProjectAutostart = true;
+            /* =================================================================================================
+             * Adjust Visual Studio Solution configuration
+             * ================================================================================================= */
+            SolutionBuild solutionBuild = solution.SolutionBuild;
+            SolutionConfiguration activeConfig = solutionBuild.ActiveConfiguration;
+            SolutionContexts contexts = activeConfig.SolutionContexts;
+
+            // ATTENTION: VisualStudio has a bug so that the SolutionContexts Collections cannot be used. This
+            // Bug is fixed by Microsoft in VS2012 and later!
+
+            // Iterate over the active Configuration Solution Contexts and activate all Projects within the Solution
+            // (Root and Nested projects)
+            foreach (SolutionContext context in activeConfig.SolutionContexts) 
+            {
+                string projectName = context.ProjectName;
+                string configName = context.ConfigurationName;
+                string platform = context.PlatformName;
+
+                bool shouldBuild = context.ShouldBuild;
+
+                if (shouldBuild == false) // If not set
+                {
+                    context.ShouldBuild = true; // ShouldBuild can be set.
+                }
+            }
+
+            /* =================================================================================================
+             * Compiling project using Automation Interface methods
+             * ================================================================================================= */
+            ITcPlcProject iecProjectRoot = (ITcPlcProject)plcProjectRootItem;
+            worker.ProgressStatus = "Compiling project (1) ...";
+            
+            iecProjectRoot.CompileProject();
+
+            ErrorItems errors = dte.ToolWindows.ErrorList.ErrorItems;
+            worker.Progress = 75;
+            iecProjectRoot.BootProjectAutostart = true;
 
             
-//            /* =================================================================================================
-//             * Compiling project using Visual Studio DTE methods 
-//             * ================================================================================================= */
-//            errors = null;
-//            worker.ProgressStatus = "Compiling project (3) ...";
-//            dte.Solution.SolutionBuild.Build(true);
-//            waitForBuildAndCheckErrors(worker, out errors);
+            /* =================================================================================================
+             * Compiling project using Visual Studio DTE methods 
+             * ================================================================================================= */
+            errors = null;
+            worker.ProgressStatus = "Compiling project (3) ...";
+            dte.Solution.SolutionBuild.Build(true);
+            waitForBuildAndCheckErrors(worker, out errors);
 
-//            /* =================================================================================================
-//             * Generating Boot Project
-//             * ================================================================================================= */
-//            worker.ProgressStatus = "Generating boot project ...";
-//            iecProjectRoot.GenerateBootProject(true);
+            /* =================================================================================================
+             * Generating Boot Project
+             * ================================================================================================= */
+            worker.ProgressStatus = "Generating boot project ...";
+            iecProjectRoot.GenerateBootProject(true);
 
-//            /* =================================================================================================
-//             * Optional: Saving the PLC Project as a PLC library and PLC Compiled Library. For more information
-//             * please see the sample "ManagePlcLibraries.cs"
-//             * ================================================================================================= */
-//            ITcPlcIECProject nestedProject = (ITcPlcIECProject)plcProjectItem;
-//            if (!Directory.Exists(this.ScriptTempFolder))
-//                Directory.CreateDirectory(this.ScriptTempFolder);
+            /* =================================================================================================
+             * Optional: Saving the PLC Project as a PLC library and PLC Compiled Library. For more information
+             * please see the sample "ManagePlcLibraries.cs"
+             * ================================================================================================= */
+            ITcPlcIECProject nestedProject = (ITcPlcIECProject)plcProjectItem;
+            if (!Directory.Exists(this.ScriptTempFolder))
+                Directory.CreateDirectory(this.ScriptTempFolder);
 
-//            string libPath = Path.Combine(this.ScriptTempFolder, this.ScriptName + ".library");
+            string libPath = Path.Combine(this.ScriptTempFolder, this.ScriptName + ".library");
+            
+            string xml = @" <TreeItem>
+                                <IECProjectDef>
+                                    <ProjectInfo>
+                                <Company>Beckhoff Automation GmbH</Company>
+                                <Title>TestLibrary</Title>
+                                <Version>1.2.3.4</Version>
+                                <DefaultNamespace>Beckhoff.TestLibrary</DefaultNamespace>
+                                <Author>Beckhoff Employee</Author>
+                                <Description>Test Library Description</Description>
+                                <Released>true</Released>
+                                    </ProjectInfo>
+                                </IECProjectDef>
+                            </TreeItem>";
+            plcProjectItem.ConsumeXml(xml);
+            nestedProject.SaveAsLibrary(libPath, false); // Save as Library but don't install
+            xml = @"<TreeItem>
+                              <IECProjectDef>
+                                <ProjectInfo>
+                                <Title>TestLibrary Compiled</Title>
+                                </ProjectInfo>
+                              </IECProjectDef>
+                            </TreeItem>";
+            plcProjectItem.ConsumeXml(xml);
+            string compiledLibPath = Path.Combine(this.ScriptTempFolder, this.ScriptName + ".compiled-library");
+            nestedProject.SaveAsLibrary(compiledLibPath, false);
 
 
+            /* =================================================================================================
+             * Prepare XML for PLC Login
+             * ================================================================================================= */
+            string xmlLogin = @"<TreeItem>
+                                    <IECProjectDef>
+                                        <OnlineSettings>
+                                                <Commands>
+                                                        <LoginCmd>true</LoginCmd>
+                                                        <LogoutCmd>false</LogoutCmd>
+                                                        <StartCmd>false</StartCmd>
+                                                        <StopCmd>false</StopCmd>
+                                                        <ResetColdCmd>false</ResetColdCmd>
+                                                        <ResetOriginCmd>false</ResetOriginCmd>
+                                                </Commands>
+                                        </OnlineSettings>
+                                    </IECProjectDef>
+                                </TreeItem>";
 
-//            string xml = @" <TreeItem>
-//                                <IECProjectDef>
-//                                    <ProjectInfo>
-//                                <Company>Beckhoff Automation GmbH</Company>
-//                                <Title>TestLibrary</Title>
-//                                <Version>1.2.3.4</Version>
-//                                <DefaultNamespace>Beckhoff.TestLibrary</DefaultNamespace>
-//                                <Author>Beckhoff Employee</Author>
-//                                <Description>Test Library Description</Description>
-//                                <Released>true</Released>
-//                                    </ProjectInfo>
-//                                </IECProjectDef>
-//                            </TreeItem>";
-//            plcProjectItem.ConsumeXml(xml);
-//            nestedProject.SaveAsLibrary(libPath, false); // Save as Library but don't install
-//            xml = @"<TreeItem>
-//                              <IECProjectDef>
-//                                <ProjectInfo>
-//                                <Title>TestLibrary Compiled</Title>
-//                                </ProjectInfo>
-//                              </IECProjectDef>
-//                            </TreeItem>";
-//            plcProjectItem.ConsumeXml(xml);
-//            string compiledLibPath = Path.Combine(this.ScriptTempFolder, this.ScriptName + ".compiled-library");
-//            nestedProject.SaveAsLibrary(compiledLibPath, false);
+            /* =================================================================================================
+             * Prepare XML for PLC Start
+             * ================================================================================================= */
+            string xmlStart = @"<TreeItem>
+                                    <IECProjectDef>
+                                        <OnlineSettings>
+                                                <Commands>
+                                                        <LoginCmd>false</LoginCmd>
+                                                        <LogoutCmd>false</LogoutCmd>
+                                                        <StartCmd>true</StartCmd>
+                                                        <StopCmd>false</StopCmd>
+                                                        <ResetColdCmd>false</ResetColdCmd>
+                                                        <ResetOriginCmd>false</ResetOriginCmd>
+                                                </Commands>
+                                        </OnlineSettings>
+                                    </IECProjectDef>
+                                </TreeItem>";
+
+            /* =================================================================================================
+             * Prepare XML for PLC Stop
+             * ================================================================================================= */
+            string xmlStop = @"<TreeItem>
+                                    <IECProjectDef>
+                                        <OnlineSettings>
+                                                <Commands>
+                                                        <LoginCmd>false</LoginCmd>
+                                                        <LogoutCmd>false</LogoutCmd>
+                                                        <StartCmd>false</StartCmd>
+                                                        <StopCmd>true</StopCmd>
+                                                        <ResetColdCmd>false</ResetColdCmd>
+                                                        <ResetOriginCmd>false</ResetOriginCmd>
+                                                </Commands>
+                                        </OnlineSettings>
+                                    </IECProjectDef>
+                                </TreeItem>";
+
+            /* =================================================================================================
+             * Prepare XML for PLC Logout
+             * ================================================================================================= */
+            string xmlLogout = @"<TreeItem>
+                                    <IECProjectDef>
+                                        <OnlineSettings>
+                                                <Commands>
+                                                        <LoginCmd>false</LoginCmd>
+                                                        <LogoutCmd>true</LogoutCmd>
+                                                        <StartCmd>false</StartCmd>
+                                                        <StopCmd>false</StopCmd>
+                                                        <ResetColdCmd>false</ResetColdCmd>
+                                                        <ResetOriginCmd>false</ResetOriginCmd>
+                                                </Commands>
+                                        </OnlineSettings>
+                                    </IECProjectDef>
+                                </TreeItem>";
+
+            /* =================================================================================================
+             * Activate configuration and restart TwinCAT
+             * ================================================================================================= */
+            worker.ProgressStatus = "Activating configuration ...";
+            systemManager.ActivateConfiguration();
+
+            worker.ProgressStatus = "Restarting TwinCAT ...";
+            systemManager.StartRestartTwinCAT();
+
+            /* =================================================================================================
+             * Execute PLC Login, Start, Logout, ...
+             * ================================================================================================= */
+            System.Threading.Thread.Sleep(5000);
+            worker.ProgressStatus = "Logging in to PLC runtime ...";
+            System.Threading.Thread.Sleep(5000);
+            plcProjectItem.ConsumeXml(xmlLogin);
+            worker.ProgressStatus = "Stopping PLC runtime ...";
+            System.Threading.Thread.Sleep(5000);
+            plcProjectItem.ConsumeXml(xmlStop);
+            worker.ProgressStatus = "Starting PLC runtime ...";
+            System.Threading.Thread.Sleep(5000);
+            plcProjectItem.ConsumeXml(xmlStart);
+            worker.ProgressStatus = "Logging out of PLC runtime ...";
+            System.Threading.Thread.Sleep(5000);
+            plcProjectItem.ConsumeXml(xmlLogout);
+            
             worker.Progress = 100;
         }
 
@@ -400,7 +512,7 @@ END_VAR";
              * Creating the GVL using CreateChild()
              * ================================================================================================= */
             worker.ProgressStatus = string.Format("Creating Global Variable worksheet '{0}' ...", name);
-            ITcSmTreeItem item = parent.CreateChild(name, TreeItemType.PlcGlobalVariablesList.AsInt32(), "", declarationCode);
+            ITcSmTreeItem item = parent.CreateChild(name, TreeItemType.PlcGvl.AsInt32(), "", declarationCode);
 
             /* =================================================================================================
              * Accessing the declaration code of the newly created GVL
@@ -410,6 +522,32 @@ END_VAR";
             declaration.DeclarationText = declarationCode;
             string oldDeclaration2 = declaration.DeclarationText;
             string newDecl = declaration.DeclarationText;
+            return item;
+        }
+
+        /// <summary>
+        /// Creates Global Variable Parameter List
+        /// </summary>
+        /// <param name="parent">The parent item.</param>
+        /// <param name="name">Name of the Parameter List.</param>
+        /// <param name="declarationCode">Fill the Parameter List with declaration code.</param>
+        /// <param name="worker">The worker.</param>
+        private ITcSmTreeItem CreateParameterList(ITcSmTreeItem parent, string name, string declarationCode, IWorker worker)
+        {
+            /* =================================================================================================
+             * Creating the ParameterList using CreateChild()
+             * ================================================================================================= */
+            worker.ProgressStatus = string.Format("Creating ParameterList worksheet '{0}' ...", name);
+            ITcSmTreeItem item = parent.CreateChild(name, TreeItemType.PlcGvlParameters.AsInt32(), "", declarationCode);
+
+            //* =================================================================================================
+            // * Accessing the declaration code of the newly created ParaemeterList
+            // * ================================================================================================= */
+            //ITcPlcDeclaration declaration = (ITcPlcDeclaration)item;
+            //string oldDeclaration1 = declaration.DeclarationText;
+            //declaration.DeclarationText = declarationCode;
+            //string oldDeclaration2 = declaration.DeclarationText;
+            //string newDecl = declaration.DeclarationText;
             return item;
         }
 
@@ -675,6 +813,9 @@ END_VAR";
             ITcXmlDocument pouDoc = programPou as ITcXmlDocument;
             string decl1 = pouDecl.DeclarationText;
             string impl1 = pouImpl.ImplementationText;
+
+            pouDecl.DeclarationText += (Environment.NewLine + "(* Added by Script *)");
+
             string oldDocumentXml = pouDoc.DocumentXml; // Accessing POUs Code Document
 
             /* =================================================================================================
@@ -684,6 +825,8 @@ END_VAR";
             if (language == IECLanguageType.ST)
             {
                 pouImpl.ImplementationText = "i := i + 1; (* This code is added by script *)";
+                pouImpl.ImplementationText += (Environment.NewLine + "(* Added by Script *)");
+
             }
             else if (language == IECLanguageType.SFC)
             {
@@ -753,7 +896,7 @@ END_VAR";
         /// Adds a Method to a POU
         /// </summary>
         /// <param name="pou">POU object.</param>
-        /// <param name="name">Name of the method.</param>
+        /// <param name="name">Name of the Method</param>
         /// <param name="language">The IEC language.</param>
         /// <param name="returnType">Return type</param>
         /// <param name="accessor">The accessor.</param>
@@ -1044,7 +1187,7 @@ END_VAR";
         /// <value>The description.</value>
         public override string Description
         {
-            get { return "PlcProject Stress Test"; }
+            get { return "Demonstrates the creation of PLC projects, POUs etc., Setting of Solution Configurations."; }
         }
 
 
@@ -1056,7 +1199,9 @@ END_VAR";
         {
             get
             {
-                string test = @"Cyclic creation of PLC Projects. Only for INTERNAL USE!";
+                string test = @"Creation of a new PLC Project from Scratch. Adding Libraries, POUs of the different types and languages and referencing tasks.
+Compilation of the project and Generating a Boot project.  Access and adjustment of Solution Configurations
+";
                 return test;
             }
         }
@@ -1070,7 +1215,7 @@ END_VAR";
         {
             get
             {
-                return "Stress Test, Plc Creation";
+                return "Create PlcProject, POU Management, Interface / Code access, PlcImport/Export, Build Configuration";
             }
         }
 

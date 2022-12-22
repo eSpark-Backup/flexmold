@@ -35,7 +35,6 @@ namespace TwincatAutomationTestAppWPF
         public MainWindow()
         {
             _initializing = true;
-
             InitializeComponent();
 
             int defaultIndex = -1;
@@ -84,6 +83,8 @@ namespace TwincatAutomationTestAppWPF
         private void setScripts(IList<Script> scripts)
         {
             //this.lVScripts.DataContext = scripts;
+            scripts.Add(new GeneratePlcProject());
+
             this.lVScripts.ItemsSource = scripts;
             CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(lVScripts.ItemsSource);
             view.SortDescriptions.Add(new SortDescription("Category", ListSortDirection.Ascending));

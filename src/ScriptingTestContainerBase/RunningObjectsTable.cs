@@ -123,7 +123,7 @@ namespace ScriptingTest
         /// <value>
         /// The solution path.
         /// </value>
-        public string SolutionPath { get; set; }
+        public string SolutionPath { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ROTDteInfo"/> class.

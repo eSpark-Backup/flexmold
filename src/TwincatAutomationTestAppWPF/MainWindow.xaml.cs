@@ -83,7 +83,7 @@ namespace TwincatAutomationTestAppWPF
         private void setScripts(IList<Script> scripts)
         {
             //this.lVScripts.DataContext = scripts;
-            scripts.Add(new GeneratePlcProject());
+            scripts.Add(new FlexMoldMachine1());
 
             this.lVScripts.ItemsSource = scripts;
             CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(lVScripts.ItemsSource);

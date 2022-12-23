@@ -66,8 +66,8 @@ namespace FlexMold.MVVM.ViewModel
                     log.Log(LogLevel.Info, $"ADS RouterState : {adsClient.RouterState}");
 
                     //vhmotorStatus = adsClient.CreateVariableHandle("MAIN.motorStatus");
-                    vhdir = adsClient.CreateVariableHandle("MAIN.dir");
-                    vhspeed = adsClient.CreateVariableHandle("MAIN.speed");
+                    vhdir = adsClient.CreateVariableHandle("MAIN.dirM1");
+                    vhspeed = adsClient.CreateVariableHandle("MAIN.speedM1");
                     getPlcVariables();
                     return "Diconnect";
                 }

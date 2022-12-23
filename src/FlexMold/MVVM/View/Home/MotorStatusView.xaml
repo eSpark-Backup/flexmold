@@ -14,15 +14,7 @@
         <viewmodel:MotorStatusViewModel />
     </UserControl.DataContext>
     <Grid>
-        <Grid.Resources>
-            <Style TargetType="mah:NumericUpDown">
-                <Setter Property="HorizontalAlignment" Value="Left" />
-            </Style>
-            <Style TargetType="Label">
-                <Setter Property="HorizontalAlignment" Value="Right" />
-            </Style>
-
-        </Grid.Resources>
+        <Grid.Resources />
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />

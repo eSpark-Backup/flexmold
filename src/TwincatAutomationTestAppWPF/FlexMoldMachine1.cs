@@ -111,9 +111,10 @@ namespace TwincatAutomationTestAppWPF
             /* =================================================================================================
              * Scans the Fieldbus interfaces and adds an EtherCAT Device.
              * ================================================================================================= */
-            //ITcSmTreeItem device = Helper.CreateEthernetDevice(this.systemManager, DeviceType.EtherCAT_DirectMode, "EtherCAT Master", worker);
+            ScanDevicesAndBoxes(); //custom code
+           ITcSmTreeItem device = Helper.CreateEthernetDevice(this.systemManager, DeviceType.EtherCAT_DirectMode, "EtherCAT Master", worker);
 
-            //worker.ProgressStatus = "Creating A2P (EK1100)";
+            worker.ProgressStatus = "Creating A2P (EK1100)";
 
 
 
@@ -192,7 +193,7 @@ namespace TwincatAutomationTestAppWPF
             worker.ProgressStatus = "Generating boot project ...";
             iecProjectRoot.GenerateBootProject(true);
 
-            
+
             /* =================================================================================================
              * Prepare XML for PLC Login
              * ================================================================================================= */
@@ -432,7 +433,7 @@ namespace TwincatAutomationTestAppWPF
             /* =================================================================================================
              * Create Program POU using CreateChild()
              * ================================================================================================= */
-            string fname = @"C:\Users\123\Downloads\ChristianRaun-FirmwareDevelopment-main (1)\ChristianRaun-FirmwareDevelopment-main\TwinCAT Projects\Motor controlling Daisy Chain\Motor controlling Daisy Chain\Untitled1\POUs\MAIN.zip";
+            string fname = @".\Template\MAIN.zip";
             ITcSmTreeItem programPou = parent.ImportChild(fname, "", true, "");
             Console.WriteLine(string.Format("POU Program '{0}' added ...", pouName));
 
@@ -457,7 +458,7 @@ namespace TwincatAutomationTestAppWPF
             if (language == IECLanguageType.ST)
             {
                 pouDecl.DeclarationText = "";
-                   var decl1info = decl1.Replace("\t", "").Split(new string[1] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                var decl1info = decl1.Replace("\t", "").Split(new string[1] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (var item in decl1info)
                 {
                     if (item.Contains("{attribute 'TcLinkTo' := 'TIID^Device"))
@@ -882,6 +883,42 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
             get
             {
                 return "PLC";
+            }
+        }
+        public void ScanDevicesAndBoxes()
+        {
+            ITcSmTreeItem ioDevicesItem = systemManager.LookupTreeItem("TIID");
+            string scannedXml = ioDevicesItem.ProduceXml(false);
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(scannedXml);
+            XmlNodeList xmlDeviceList = xmlDoc.SelectNodes("TreeItem/DeviceGrpDef/FoundDevices/Device");
+            List<ITcSmTreeItem> devices = new List<ITcSmTreeItem>();
+            int deviceCount = 0;
+            foreach (XmlNode node in xmlDeviceList)
+            {
+                int itemSubType = int.Parse(node.SelectSingleNode("ItemSubType").InnerText);
+                string typeName = node.SelectSingleNode("ItemSubTypeName").InnerText;
+                XmlNode xmlAddress = node.SelectSingleNode("AddressInfo");
+                ITcSmTreeItem device = ioDevicesItem.CreateChild(string.Format("Device_{0}", ++deviceCount), itemSubType, string.Empty, null);
+                string xml = string.Format("<TreeItem><DeviceDef>{0}</DeviceDef></TreeItem>", xmlAddress.OuterXml);
+                device.ConsumeXml(xml);
+                devices.Add(device);
+            }
+            foreach (ITcSmTreeItem device in devices)
+            {
+                string xml = "<TreeItem><DeviceDef><ScanBoxes>1</ScanBoxes></DeviceDef></TreeItem>";
+                try
+                {
+                    device.ConsumeXml(xml);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Warning: {0}", ex.Message);
+                }
+                foreach (ITcSmTreeItem box in device)
+                {
+                    Console.WriteLine(box.Name);
+                }
             }
         }
     }

@@ -35,9 +35,7 @@ namespace FlexMold
         public Machine SelectedMachine { get; set; }
         public MainWindow()
         {
-            /// Test Area please comment
-         
-            /// Region closed 
+          
 
             ShowMachineSlectionWindow();
             //SelectedMachine = _SelectedMachine;
@@ -47,6 +45,10 @@ namespace FlexMold
             log.Log(LogLevel.Info, $"Application Loaded Scussfully.....");
             log.Log(LogLevel.Info, $"Selected Machine Type : {SelectedMachine.MachineType} Name : {SelectedMachine.Name} ID : {SelectedMachine.ID}");
             Console.WriteLine();
+
+            /// Test Area please comment
+            //TwinCathelper tt = new TwinCathelper();
+            /// Region closed 
         }
         void ShowMachineSlectionWindow()
         {

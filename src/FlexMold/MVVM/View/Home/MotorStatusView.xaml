@@ -20,46 +20,37 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
+        
         <Label
             Grid.Row="0"
             Grid.Column="0"
-            Content="PLC Host IP :" />
-        <Label
-            Grid.Row="1"
-            Grid.Column="0"
             Content="PLC Host Port :" />
         <Label
-            Grid.Row="3"
+            Grid.Row="2"
             Grid.Column="0"
             Content="Motor Direction :" />
         <Label
-            Grid.Row="4"
+            Grid.Row="3"
             Grid.Column="0"
             Content="Motor Step :" />
         <ComboBox
             Grid.Row="0"
             Grid.Column="1"
-            ItemsSource="{Binding plcHelper.plcHostAvailableIPs}"
-            SelectedItem="{Binding plcHelper.plcHostSelectedIP}" />
-        <ComboBox
-            Grid.Row="1"
-            Grid.Column="1"
             ItemsSource="{Binding plcHelper.plcHostAvailablePorts}"
             SelectedItem="{Binding plcHelper.plcHostSelectedPort}" />
         <Button
-            Grid.Row="2"
+            Grid.Row="1"
             Grid.ColumnSpan="2"
             Height="50"
             Command="{Binding PlcConnectCommand}"
             Content="{Binding PlcConnectButtonContent}" />
         <mah:ToggleSwitch
-            Grid.Row="3"
+            Grid.Row="2"
             Grid.Column="1"
             IsOn="{Binding plcHelper.motorDirection}"
             OffCommand="{Binding MotorReverseCommand}"
@@ -67,7 +58,7 @@
             OnCommand="{Binding MotorForwardCommand}"
             OnContent="Forward" />
         <mah:NumericUpDown
-            Grid.Row="4"
+            Grid.Row="3"
             Grid.Column="1"
             Maximum="65535"
             Minimum="0"

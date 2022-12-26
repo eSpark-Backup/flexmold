@@ -11,6 +11,7 @@ using ScriptingTest;
 using System.Xml;
 using System.Collections.Generic;
 using Scripting.CSharp;
+using System.Windows.Controls;
 
 namespace TwincatAutomationTestAppWPF
 {
@@ -111,12 +112,8 @@ namespace TwincatAutomationTestAppWPF
             /* =================================================================================================
              * Scans the Fieldbus interfaces and adds an EtherCAT Device.
              * ================================================================================================= */
-            ScanDevicesAndBoxes(); //custom code
-           ITcSmTreeItem device = Helper.CreateEthernetDevice(this.systemManager, DeviceType.EtherCAT_DirectMode, "EtherCAT Master", worker);
-
-            worker.ProgressStatus = "Creating A2P (EK1100)";
-
-
+            worker.ProgressStatus = "Scanning Devices";
+            ScanDevicesAndBoxes(worker); //custom code
 
             /* =================================================================================================
              * Attach an empty PLC Project using the "TwinCAT Project" template
@@ -271,7 +268,6 @@ namespace TwincatAutomationTestAppWPF
              * ================================================================================================= */
             worker.ProgressStatus = "Activating configuration ...";
             systemManager.ActivateConfiguration();
-
             worker.ProgressStatus = "Restarting TwinCAT ...";
             systemManager.StartRestartTwinCAT();
 
@@ -433,10 +429,9 @@ namespace TwincatAutomationTestAppWPF
             /* =================================================================================================
              * Create Program POU using CreateChild()
              * ================================================================================================= */
-            string fname = @".\Template\MAIN.zip";
+            string fname = $@"{Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)}\Template\MAIN.zip";
             ITcSmTreeItem programPou = parent.ImportChild(fname, "", true, "");
             Console.WriteLine(string.Format("POU Program '{0}' added ...", pouName));
-
             /* =================================================================================================
              * Accessing declaration and implementation area 
              * ================================================================================================= */
@@ -455,26 +450,26 @@ namespace TwincatAutomationTestAppWPF
              * Modifying implementation area, based on IEC language.
              * Please note: Direct access to implementation text is only provided for ST !
              * ================================================================================================= */
-            if (language == IECLanguageType.ST)
-            {
-                pouDecl.DeclarationText = "";
-                var decl1info = decl1.Replace("\t", "").Split(new string[1] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (var item in decl1info)
-                {
-                    if (item.Contains("{attribute 'TcLinkTo' := 'TIID^Device"))
-                    {
-                        pouDecl.DeclarationText += $"{{attribute 'TcLinkTo' := 'TIID^Device {5} (EtherCAT)^Box {2} (sample_app)^Outputs process data mapping^Trigger'}}" + Environment.NewLine;
-                    }
-                    else
-                    {
-                        pouDecl.DeclarationText += item + Environment.NewLine;
-                    }
-                }
+            //if (language == IECLanguageType.ST)
+            //{
+            //    pouDecl.DeclarationText = "";
+            //    var decl1info = decl1.Replace("\t", "").Split(new string[1] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            //    foreach (var item in decl1info)
+            //    {
+            //        if (item.Contains("{attribute 'TcLinkTo' := 'TIID^Device"))
+            //        {
+            //            pouDecl.DeclarationText += $"{{attribute 'TcLinkTo' := 'TIID^Device {5} (EtherCAT)^Box {2} (sample_app)^Outputs process data mapping^Trigger'}}" + Environment.NewLine;
+            //        }
+            //        else
+            //        {
+            //            pouDecl.DeclarationText += item + Environment.NewLine;
+            //        }
+            //    }
 
-                //pouImpl.ImplementationText = "i := i + 1; (* This code is added by script *)";
-                //pouImpl.ImplementationText += (Environment.NewLine + "(* Added by Script *)");
+            //    //pouImpl.ImplementationText = "i := i + 1; (* This code is added by script *)";
+            //    //pouImpl.ImplementationText += (Environment.NewLine + "(* Added by Script *)");
 
-            }
+            //}
             return programPou;
         }
 
@@ -885,7 +880,7 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                 return "PLC";
             }
         }
-        public void ScanDevicesAndBoxes()
+        public void ScanDevicesAndBoxes(IWorker worker)
         {
             ITcSmTreeItem ioDevicesItem = systemManager.LookupTreeItem("TIID");
             string scannedXml = ioDevicesItem.ProduceXml(false);
@@ -901,6 +896,7 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                 XmlNode xmlAddress = node.SelectSingleNode("AddressInfo");
                 ITcSmTreeItem device = ioDevicesItem.CreateChild(string.Format("Device_{0}", ++deviceCount), itemSubType, string.Empty, null);
                 string xml = string.Format("<TreeItem><DeviceDef>{0}</DeviceDef></TreeItem>", xmlAddress.OuterXml);
+                worker.ProgressStatus = $"xmlAddress : {xmlAddress}, itemSubType : {itemSubType}";
                 device.ConsumeXml(xml);
                 devices.Add(device);
             }
@@ -913,11 +909,11 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Warning: {0}", ex.Message);
+                    worker.ProgressStatus = "Warning: "+ ex.Message;
                 }
                 foreach (ITcSmTreeItem box in device)
                 {
-                    Console.WriteLine(box.Name);
+                    worker.ProgressStatus = $"(box.Name : {box.Name}";
                 }
             }
         }

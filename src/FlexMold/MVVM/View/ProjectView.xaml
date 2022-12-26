@@ -103,15 +103,6 @@
                                     <iconPacks:PackIconForkAwesome Foreground="White" Kind="Bars" />
                                 </StackPanel>
                             </Button>
-                            <Button
-                                Margin="0"
-                                HorizontalAlignment="Left"
-                                Background="Transparent"
-                                Command="{Binding SambaConfigCommand}">
-                                <StackPanel Orientation="Vertical">
-                                    <iconPacks:PackIconForkAwesome Foreground="White" Kind="Bars" />
-                                </StackPanel>
-                            </Button>
                         </UniformGrid>
                         <Button Grid.Row="1" Command="{Binding SendLasFileCommand}">
                             <StackPanel Orientation="Horizontal">

@@ -40,16 +40,15 @@ namespace FlexMold.Utility
         public TelnetHelper()
         {
             log = LogManager.GetLogger("Laser Projector");
-            SendMessage = "magic!";
+            SendMessage = "echo";
         }
-       
+
         public void DisconnectTelnet()
         {
             if (MyTelnetClient != null)
             {
                 MyTelnetClient.Disconnect();
                 MyTelnetClient = null;
-                log.Log(LogLevel.Info, $"TelNet Disconnected Sucessfully");
             }
             else
             {
@@ -78,24 +77,29 @@ namespace FlexMold.Utility
         }
         public async Task SendTelnetMessgae()
         {
-            ReceivedMessage = "";
-            log.Log(LogLevel.Info, $"Sending TelNet Message....");
-            log.Log(LogLevel.Info, $"{SendMessage}");
-            await MyTelnetClient.Send(SendMessage);
-            log.Log(LogLevel.Info, $"Message Sent Sucessfully");
+            if (MyTelnetClient != null)
+            {
+                ReceivedMessage = "";
+                log.Log(LogLevel.Info, $"Sending TelNet Message....");
+                log.Log(LogLevel.Info, $"{SendMessage}");
+                await MyTelnetClient.Send(SendMessage);
+                log.Log(LogLevel.Info, $"Message Sent Sucessfully");
+            }
+            else
+            {
+                log.Log(LogLevel.Error, $"Connect First");
+            }
         }
         private void HandleConnectionClosed(object sender, EventArgs e)
         {
-            ReceivedMessage = "Connection Closed"; 
             log.Log(LogLevel.Info, $"Connection Closed");
         }
 
         private void HandleMessageReceived(object sender, string e)
         {
             ReceivedMessage += e + "\n";
+            log.Log(LogLevel.Info, $"Receive Message {ReceivedMessage}");
             log.Log(LogLevel.Info, $"Message Received Sucessfully");
-            log.Log(LogLevel.Info, $"{ReceivedMessage}");
-
         }
     }
 }

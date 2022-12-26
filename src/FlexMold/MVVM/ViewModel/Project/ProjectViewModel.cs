@@ -84,7 +84,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         public ProjectViewModel()
         {
             ReadCSVFileCommand = new RelayCommand(o => { readCsvFile(); });
-            SendLasFileCommand = new RelayCommand(o => {  sendLasFileAsync(slectedFile); });
+            SendLasFileCommand = new RelayCommand(o => { sendLasFileAsync(slectedFile); });
             SerialConfigCommand = new RelayCommand(o => { SerialConfigWindow(); });
             SambaConfigCommand = new RelayCommand(o => { SambaConfigWindow(); });
             BrowseProjectCommand = new RelayCommand(o => { BrowseProject(); });
@@ -93,9 +93,10 @@ namespace FlexMold.MVVM.ViewModel.Project
                 MyPorjector = new LaserProjector()
                 {
                     Name = "p1",
-                    IpAddres = "smhrazaEspark",
+                    IpAddres = "telehack.com",
                     UserName = "123",
                     Status = 1,
+                    TelnetPort = 23,
                     Password = "123456",
                 };
             }
@@ -240,15 +241,15 @@ namespace FlexMold.MVVM.ViewModel.Project
                                 break;
                             case (int)EProjectorComMode.Telnet:
                                 log.Log(LogLevel.Info, $"Sending file via Telnet");
-
                                 try
                                 {
                                     TelnetHelper th = new TelnetHelper();
-                                    th.SendMessage = await MixUtil.ReadTextFromFileAsync(_slectedFile.FullName);
-                                    MyPorjector.IpAddres = "aardmud.org";
-                                    MyPorjector.TelnetPort = 4000;
+
+                                    //th.SendMessage = "echo "; //
+
+                                    th.SendMessage += await MixUtil.ReadTextFromFileAsync(_slectedFile.FullName);
                                     var ii = await th.ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
-                                    th.SendMessage = "ss";
+                                    //th.SendMessage = "ss";
                                     await th.SendTelnetMessgae();
                                     th.DisconnectTelnet();
                                 }

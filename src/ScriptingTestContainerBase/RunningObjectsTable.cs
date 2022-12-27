@@ -126,16 +126,24 @@ namespace ScriptingTest
         public string SolutionPath { get; internal set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ROTDteInfo"/> class.
+        /// Gets a value indicating whether this instance represents an TcXaeShell instance
+        /// </summary>
+        /// <value><c>true</c> if this instance is shell; otherwise, <c>false</c>.</value>
+        public bool IsShell { get; internal set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ROTDteInfo" /> class.
         /// </summary>
         /// <param name="version">The version.</param>
         /// <param name="solutionPath">The solution path.</param>
         /// <param name="processId">The process identifier.</param>
-        public ROTDteInfo(Version version, string solutionPath, int processId)
+        /// <param name="isShell">if set to <c>true</c> [is shell].</param>
+        public ROTDteInfo(Version version, string solutionPath, int processId, bool isShell)
         {
             this.Version = version;
             this.SolutionPath = solutionPath;
             this.ProcessId = processId;
+            this.IsShell = isShell;
         }
 
         /// <summary>
@@ -163,7 +171,14 @@ namespace ScriptingTest
         /// </returns>
         public override string ToString()
         {
-            return string.Format("!VisualStudio.DTE.{0}:{1}", this.ProcessId);
+            if (IsShell)
+            {
+                return string.Format("!TcXaeShell.DTE.{0}:{1}", this.Version, this.ProcessId);
+            }
+            else
+            {
+                return string.Format("!VisualStudio.DTE.{0}:{1}", this.Version, this.ProcessId);
+            }
         }
 
         /// <summary>
@@ -190,32 +205,42 @@ namespace ScriptingTest
         /// <returns>true if succeeded, false if not.</returns>
         public static bool TryParse(string str, out ROTDteInfo obj)
         {
-            string searchStr = "!VisualStudio.DTE.";
-            int index = searchStr.Length;
-            int index2 = -1;
+            string[] searchStrings = new string[] { "!VisualStudio.DTE.", "!TcXaeShell.DTE." };
+            bool found = false;
+            obj = null;
 
-            if (str.StartsWith(searchStr))
+            for (int i = 0; i < searchStrings.Length; i++)
             {
-                index2 = str.LastIndexOf(':');
-                int processId = -1;
+                string searchStr = searchStrings[i];
+                bool isShell = (i == 1);
 
-                if (index2 < 0)
-                    index2 = str.Length;
+                int index = searchStr.Length;
+                int index2 = -1;
+
+                if (str.StartsWith(searchStr))
+                {
+                    index2 = str.LastIndexOf(':');
+                    int processId = -1;
+
+                    if (index2 < 0)
+                        index2 = str.Length;
+                    else
+                    {
+                        processId = int.Parse(str.Substring(index2 + 1));
+                    }
+
+                    string versionStr = str.Substring(index, index2 - index);
+                    Version version = Version.Parse(versionStr);
+                    obj = new ROTDteInfo(version, string.Empty, processId, isShell);
+                    found = true;
+                    break;
+                }
                 else
                 {
-                    processId = int.Parse(str.Substring(index2 + 1));
+                    found = false;
                 }
-
-                string versionStr = str.Substring(index, index2 - index);
-                Version version = Version.Parse(versionStr);
-                obj = new ROTDteInfo(version, string.Empty, processId);
-                return true;
             }
-            else
-            {
-                obj = null;
-                return false;
-            }
+            return found;
         }
     }
 }

@@ -26,13 +26,33 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Top"
             Foreground="White"
-            Header="ProgID">
+            Header="VisualStudio/TcXaeShell Installations">
             <Grid>
                 <ComboBox
                     Name="cBProgID"
                     Height="23"
                     Margin="6,6,47,0"
                     VerticalAlignment="Top" />
+                <CheckBox
+                    x:Name="cbComRegistration"
+                    Margin="646,41,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Checked="cbComRegistration_Checked"
+                    Content="Use COM Registration"
+                    Foreground="White"
+                    Unchecked="cbComRegistration_Unchecked" />
+                <TextBox
+                    Width="519"
+                    Height="33"
+                    Margin="112,38,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Background="#FF093A61"
+                    BorderBrush="#FF083A62"
+                    Foreground="White"
+                    Text="Use the Microsoft.VisualStudio.Configuation.Setup package to detect VisualStudio/TcXaeShell instances (new Method) or search through registered ProgIds:"
+                    TextWrapping="WrapWithOverflow" />
             </Grid>
         </GroupBox>
         <GroupBox

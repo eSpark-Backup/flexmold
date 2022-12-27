@@ -5,9 +5,6 @@ using System.Text;
 
 namespace ScriptingTest
 {
-    /// <summary>
-    /// TwinCAT Configuration Factory interface
-    /// </summary>
     public interface IConfigurationFactory
     {
         /// <summary>
@@ -25,16 +22,6 @@ namespace ScriptingTest
         /// Closes the configuration.
         /// </summary>
         void Cleanup();
-
-        /// <summary>
-        /// Gets or sets the Application ID for the TwinCAT XAE Shell
-        /// </summary>
-        /// <value>The app ID.</value>
-        string AppID
-        {
-            get;
-            set;
-        }
 
         /// <summary>
         /// Gets or sets a value indicating whether the IDE will be shown during Script processing
@@ -89,6 +76,6 @@ namespace ScriptingTest
         /// Gets the Visual Studio Process ID.
         /// </summary>
         /// <value>The Visual Studio process identifier.</value>
-        int VsProcessId { get;  }
+        int VsProcessId { get; }
     }
 }

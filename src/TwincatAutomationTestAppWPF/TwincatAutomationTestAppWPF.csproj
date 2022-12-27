@@ -8,12 +8,13 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>TwincatAutomationTestAppWPF</RootNamespace>
     <AssemblyName>TwincatAutomationTestAppWPF</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -114,12 +115,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ScriptingTestContainerBase\ScriptingTestContainerBase.csproj">
-      <Project>{84bf2917-6a6e-45b9-b1bb-3fb86c57756d}</Project>
-      <Name>ScriptingTestContainerBase</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <COMReference Include="TCatSysManagerLib">
       <Guid>{3C49D6C3-93DC-11D0-B162-00A0248C244B}</Guid>
       <VersionMajor>3</VersionMajor>
@@ -129,6 +124,12 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ScriptingTestContainerBase\ScriptingTestContainerBase.csproj">
+      <Project>{5e80f7cd-7d92-4e16-9fb7-6b36c57589ec}</Project>
+      <Name>ScriptingTestContainerBase</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

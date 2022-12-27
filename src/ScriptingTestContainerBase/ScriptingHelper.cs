@@ -77,7 +77,7 @@ namespace Scripting.CSharp
             }
 
             if (progress != null)
-                progress.ProgressStatus = string.Format("Devíce Type '{0}' added.", type.ToString());
+                progress.ProgressStatus = string.Format("Device Type '{0}' added.", type.ToString());
 
             return device;
         }

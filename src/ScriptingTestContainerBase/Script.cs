@@ -287,7 +287,7 @@ namespace ScriptingTest
         {
             get
             {
-                return "4012";
+                return "4020";
             }
         }
 
@@ -595,12 +595,12 @@ namespace ScriptingTest
             if (!Directory.Exists(target_dir)) return false;
 
             string[] files = Directory.GetFiles(target_dir);
-                string[] dirs = Directory.GetDirectories(target_dir);
+            string[] dirs = Directory.GetDirectories(target_dir);
 
-                    foreach (string dir in dirs)
+            foreach (string dir in dirs)
             {
                 DeleteDirectory(dir);
-        }
+            }
 
             foreach (string file in files)
             {
@@ -944,7 +944,8 @@ namespace ScriptingTest
             {
                 project.Save();
             }
-
+            this.solution.Close();
+            this.dte.DTE.Quit();
             this.dte = null;
             this.solution = null;
         }
@@ -1002,8 +1003,8 @@ namespace ScriptingTest
 
             if (sysSvcVersion >= this.TwinCATVersion)
             {
-            _context.Worker.ProgressStatus = string.Format("Creating project {0} from template ...", projectName, templatePath);
-            bool exists = File.Exists(VsXaeTemplatePath);
+                _context.Worker.ProgressStatus = string.Format("Creating project {0} from template ...", projectName, templatePath);
+                bool exists = File.Exists(VsXaeTemplatePath);
                 project = this.solution.AddFromTemplate(templatePath, this.ScriptRootFolder, projectName, false);
             }
             else

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -16,42 +17,34 @@ namespace TwincatAutomationTestAppWPF
     /// </summary>
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// Indicates, that the main window is initializing.
+        /// </summary>
         bool _initializing = false;
 
-
+        /// <summary>
+        /// Gets a value Indicating that the <see cref="MainWindow"/> is currently initializing.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [is initializing]; otherwise, <c>false</c>.
+        /// </value>
         public bool IsInitializing
         {
             get { return _initializing; }
         }
 
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainWindow"/> class.
+        /// </summary>
         public MainWindow()
         {
             _initializing = true;
+
             InitializeComponent();
 
-            int defaultIndex = -1;
-            int currentIndex = -1;
-            IDictionary<string, DTEInfo> progIdDict = ConfigurationFactory.GetVisualStudioProgIds(out currentIndex, out defaultIndex);
+            //this.cBProgID.SelectedIndex = actualIndex;
 
-            //List<string> progIds = new List<string>(progIdDict.Keys);
-
-
-            foreach (DTEInfo key in progIdDict.Values)
-            {
-                this.cBProgID.Items.Add(key);
-            }
-
-            int actualIndex = defaultIndex;
-
-            if (actualIndex == -1)
-                actualIndex = currentIndex;
-
-
-            //obsolete this.cBProgID.Items.Add(ConfigurationGenerator.ProgID_XAE);
-
-            this.cBProgID.SelectedIndex = actualIndex;
-
+            this.cbComRegistration.IsChecked = true;
             this.cbProgVisible.IsChecked = true;
             this.cbUserControl.IsChecked = true;
             this.cbSuppressUI.IsChecked = true;
@@ -68,26 +61,39 @@ namespace TwincatAutomationTestAppWPF
                 }
             );
 
-            setScripts(ScriptLoader.Scripts); // Setting the Scripts to the ListView
+            Version version = typeof(ScriptLoader).Assembly.GetName().Version;
+            this.Title = string.Format("TwinCAT3 Script Container (TwinCAT XAE Base Type Library '{0}')", version.ToString(2));
+
+            setScripts(); // Setting the Scripts to the ListView
+
+            updateVSInstallations(); // Fill the found VisualStudio/TcXaeShell combo Box
             enableDisableControls(); // EnableDisable Visual Elements
         }
 
-
-        private void setScripts(IList<Script> scripts)
+        /// <summary>
+        /// Sets the scripts within the ListView
+        /// </summary>
+        private void setScripts()
         {
             //this.lVScripts.DataContext = scripts;
-            scripts.Add(new FlexMoldMachine1());
-
-            this.lVScripts.ItemsSource = scripts;
+            this.lVScripts.ItemsSource = new List<Script>() { new FlexMoldMachine1() };
             CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(lVScripts.ItemsSource);
             view.SortDescriptions.Add(new SortDescription("Category", ListSortDirection.Ascending));
 
         }
 
-
+        /// <summary>
+        /// Gets the currently configured Prog ID for TwinCAT 3
+        /// </summary>
+        /// <value>The prog ID.</value>
         public DTEInfo DTEInfo
         {
             get { return (DTEInfo)cBProgID.SelectedValue; }
+        }
+
+        public VSInfo VSInfo
+        {
+            get { return (VSInfo)cBProgID.SelectedValue; }
         }
 
         /// <summary>
@@ -111,21 +117,91 @@ namespace TwincatAutomationTestAppWPF
             get { return cbUserControl.IsChecked.Value; }
         }
 
+        /// <summary>
         /// Gets a value indicating whether VisualStudio UI is suppressed.
+        /// </summary>
+        /// <value>
+        /// </value>
         public bool SupressUI
         {
             get { return cbSuppressUI.IsChecked.Value; }
         }
 
+        public bool UseComRegistration
+        {
+            get { return cbComRegistration.IsChecked.Value; }
+        }
+
+        private void UpdateVSInfos(VSInfo[] progIdDict2)
+        {
+            this.cBProgID.Items.Clear();
+
+            int CompareTo(VSInfo info1, VSInfo info2)
+            {
+                return info1.Version.CompareTo(info2.Version);
+            }
+
+            List<VSInfo> sorted = progIdDict2.ToList();
+            sorted.Sort(CompareTo);
+
+            VSInfo selected = sorted.FirstOrDefault(i => i.Version.Major == 16);
+
+            foreach (VSInfo vsInfo in sorted)
+            {
+                this.cBProgID.Items.Add(vsInfo);
+            }
+
+            this.cBProgID.SelectedItem = selected;
+        }
+
+        private void updateVSInstallations()
+        {
+            VSInfo[] vsInstallations = null;
+
+            if (cbComRegistration.IsChecked.Value)
+            {
+                int currentIndex;
+
+                vsInstallations = ConfigurationFactory.GetVSInstallationsByRegistry(out currentIndex);
+                //VSInfo selected = currentIndex >= 0 ? progIdDict2[currentIndex] : progIdDict2[0];
+            }
+            else
+            {
+                vsInstallations = ConfigurationFactory.GetVSInstallationsBySetupConfiguration();
+            }
+            UpdateVSInfos(vsInstallations);
+        }
+
+        private void cbComRegistration_Checked(object sender, RoutedEventArgs e)
+        {
+            updateVSInstallations();
+        }
+
+        private void cbComRegistration_Unchecked(object sender, RoutedEventArgs e)
+        {
+            updateVSInstallations();
+        }
+
+        /// <summary>
+        /// Background script worker
+        /// </summary>
         IWorker _worker = null;
 
-
+        /// <summary>
+        /// Configuration Generator
+        /// </summary>
         ConfigurationFactory _factory = null;
 
-
+        /// <summary>
+        /// Currently runnig script
+        /// </summary>
         Script _runningScript = null;
 
-
+        /// <summary>
+        /// Handles the Click event of the btnExecute control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void btnExecute_Click(object sender, RoutedEventArgs e)
         {
             Debug.Assert(this._factory == null);
@@ -138,9 +214,9 @@ namespace TwincatAutomationTestAppWPF
                 VsFactory vsFactory = new VsFactory();
 
                 if (_runningScript is ScriptEarlyBound)
-                    this._factory = new EarlyBoundFactory(vsFactory);
+                    this._factory = new EarlyBoundFactory(vsFactory, this.UseComRegistration);
                 else if (_runningScript is ScriptLateBound)
-                    this._factory = new LateBoundFactory(vsFactory);
+                    this._factory = new LateBoundFactory(vsFactory, this.UseComRegistration);
 
                 if (this._factory == null)
                 {
@@ -156,7 +232,12 @@ namespace TwincatAutomationTestAppWPF
                 _worker.ProgressChanged += new ProgressChangedEventHandler(_worker_ProgressChanged);
                 _worker.ProgressStatusChanged += new EventHandler<ProgressStatusChangedArgs>(_worker_ProgressStatusChanged);
                 _worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(_worker_RunWorkerCompleted);
+
+#if OLD
                 _factory.AppID = this.DTEInfo.ProgId;
+#else
+                _factory.VSInfo = this.VSInfo;
+#endif
                 _factory.IsIdeVisible = this.IsIDEVisible;
                 _factory.IsIdeUserControl = this.IsIDEUserControl;
                 _factory.SuppressUI = this.SupressUI;
@@ -198,6 +279,11 @@ namespace TwincatAutomationTestAppWPF
             }
         }
 
+        /// <summary>
+        /// Handles the StatusChanged event of the script control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="ScriptingTest.ScriptStatusChangedEventArgs"/> instance containing the event data.</param>
         void script_StatusChanged(object sender, ScriptStatusChangedEventArgs e)
         {
             Action<Script> action = (script) =>
@@ -213,7 +299,10 @@ namespace TwincatAutomationTestAppWPF
             this.Dispatcher.Invoke(action, new object[] { this._runningScript });
         }
 
-
+        /// <summary>
+        /// Updates the Main window with the Script status
+        /// </summary>
+        /// <param name="script">The script.</param>
         private void Update(Script script)
         {
             switch (script.Status)
@@ -236,6 +325,11 @@ namespace TwincatAutomationTestAppWPF
             }
         }
 
+        /// <summary>
+        /// Handles the RunWorkerCompleted event of the _worker control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.ComponentModel.RunWorkerCompletedEventArgs"/> instance containing the event data.</param>
         void _worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             Action<Script> action = (script) =>
@@ -250,22 +344,35 @@ namespace TwincatAutomationTestAppWPF
             this.Dispatcher.BeginInvoke(action, new object[] { this._runningScript });
         }
 
-
+        /// <summary>
+        /// Indicates that the Script engine is running
+        /// </summary>
         bool _executing = false;
 
+        /// <summary>
+        /// Gets a value indicating whether a script is executing.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if a script is executing; otherwise, <c>false</c>.
+        /// </value>
         public bool IsExecuting
         {
             get { return _executing; }
         }
 
-
+        /// <summary>
+        /// Sets the execution flag.
+        /// </summary>
+        /// <param name="set">if set to <c>true</c> [set].</param>
         private void SetExecution(bool set)
         {
             _executing = set;
             enableDisableControls();
         }
 
-
+        /// <summary>
+        /// Enables / Disables (updates) the Main form controls
+        /// </summary>
         private void enableDisableControls()
         {
             bool scriptSelected = (this.SelectedScript != null);
@@ -281,6 +388,11 @@ namespace TwincatAutomationTestAppWPF
             gBSettings.IsEnabled = !isExecuting;
         }
 
+        /// <summary>
+        /// Handles the ProgressChanged event of the _worker control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.ComponentModel.ProgressChangedEventArgs"/> instance containing the event data.</param>
         void _worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             if (this.Dispatcher.CheckAccess())
@@ -298,6 +410,10 @@ namespace TwincatAutomationTestAppWPF
             }
         }
 
+        /// <summary>
+        /// Gets the currently selected script.
+        /// </summary>
+        /// <value>The selected script.</value>
         public Script SelectedScript
         {
             get
@@ -306,6 +422,11 @@ namespace TwincatAutomationTestAppWPF
             }
         }
 
+        /// <summary>
+        /// Handles the Click event of the btnCancel control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
             if (this._worker != null)
@@ -316,7 +437,10 @@ namespace TwincatAutomationTestAppWPF
             }
         }
 
-
+        /// <summary>
+        /// Raises the <see cref="E:System.Windows.Window.Closing"/> event.
+        /// </summary>
+        /// <param name="e">A <see cref="T:System.ComponentModel.CancelEventArgs"/> that contains the event data.</param>
         protected override void OnClosing(CancelEventArgs e)
         {
             if (this._worker != null)
@@ -325,6 +449,11 @@ namespace TwincatAutomationTestAppWPF
             base.OnClosing(e);
         }
 
+        /// <summary>
+        /// Handles the SelectionChanged event of the lVScripts control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
         private void lVScripts_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ToolTip toolTip = new ToolTip();

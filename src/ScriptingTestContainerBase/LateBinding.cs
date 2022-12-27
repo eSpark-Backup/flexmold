@@ -18,8 +18,8 @@ namespace ScriptingTest
         /// <summary>
         /// Initializes a new instance of the <see cref="LateBoundFactory"/> class.
         /// </summary>
-        public LateBoundFactory(IVsFactory factory)
-            : base(factory)
+        public LateBoundFactory(IVsFactory factory, bool useComRegistration)
+            : base(factory,useComRegistration)
         {
         }
     }

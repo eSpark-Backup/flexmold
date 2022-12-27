@@ -11,10 +11,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.UI;
 using TwinCAT.Ads.TypeSystem;
+using TwinCAT.TypeSystem;
+using System.Windows.Media;
+using TwinCAT;
+using System.Data.Common;
+using TwinCAT.Ads;
 
 namespace FlexMold.MVVM.ViewModel.MachineSetting
 {
-    internal class MotorTestViewModel : TwinCathelper
+    internal class MotorTestViewModel : ObservableObject
     {
         public Logger log;
         public List<Symbol> MototDirectionSymbols { get; set; }
@@ -41,13 +46,11 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
                 _SelectedMototDirectionValue = value;
                 if (!justread)
                 {
-                    SelectedMototDirectionSymbol.WriteValue(value);
-                    log.Log(LogLevel.Info, $"Set Value : {value} To Motor : {SelectedMototDirectionSymbol.InstancePath}");
+                    WriteValueToTwicat(SelectedMototDirectionSymbol, value);
                 }
                 OnPropertyChanged();
             }
         }
-
         public List<Symbol> MototSpeedSymbols { get; set; }
         private Symbol _SelectedMototSpeedSymbol;
         public Symbol SelectedMototSpeedSymbol
@@ -71,22 +74,24 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
                 _SelectedMototSpeedValue = value;
                 if (!justread)
                 {
-                    SelectedMototSpeedSymbol.WriteValue(value);
-                    log.Log(LogLevel.Info, $"Set Value : {value} To Motor : {SelectedMototDirectionSymbol.InstancePath}");
+                    WriteValueToTwicat(SelectedMototSpeedSymbol, value);
                 }
                 OnPropertyChanged();
             }
         }
-
+        void WriteValueToTwicat(Symbol _symbol, dynamic _myValue)
+        {
+            _symbol.WriteValue(_myValue);
+            log.Log(LogLevel.Info, $"Set Value : {_myValue} To Motor : {_symbol.InstancePath}");
+        }
         public MotorTestViewModel()
         {
             log = LogManager.GetLogger("Motor Test");
 
-            UInt32 valueToWrite = 42;
             MototDirectionSymbols = new List<Symbol>();
             MototSpeedSymbols = new List<Symbol>();
-            MototDirectionSymbols = MySymbols.Where(a => a.InstancePath.StartsWith("MAIN.dirM")).ToList();
-            MototSpeedSymbols = MySymbols.Where(a => a.InstancePath.StartsWith("MAIN.speedM")).ToList();
+            MototDirectionSymbols = TwinCathelper.MySymbols.Where(a => a.InstancePath.StartsWith("MAIN.dirM")).ToList();
+            MototSpeedSymbols = TwinCathelper.MySymbols.Where(a => a.InstancePath.StartsWith("MAIN.speedM")).ToList();
             Console.WriteLine();
         }
     }

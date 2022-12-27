@@ -1,10 +1,13 @@
-﻿using NLog;
+﻿using FlexMold.Core;
+using NLog;
 using NLog.Fluent;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Primitives;
+using System.Data.Common;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -20,7 +23,7 @@ using static System.Windows.Forms.AxHost;
 
 namespace FlexMold.Utility
 {
-    class TwinCathelper
+     class TwinCathelper :ObservableObject
     {
         private Logger log;
 
@@ -34,6 +37,7 @@ namespace FlexMold.Utility
         public AmsRouterState MyAmsRouterState { get; set; }
         public IDataTypeCollection<IDataType> dataTypes { get; private set; }
         public ISymbolCollection<ISymbol> symbols { get; private set; }
+        public ObservableCollection<Symbol> MySymbols { get; private set; }
         public TwinCathelper()
         {
             log = LogManager.GetLogger("TwinCat");
@@ -42,7 +46,6 @@ namespace FlexMold.Utility
         }
         void Connect()
         {
-
             port = 851;
             log.Log(LogLevel.Info, $"Connecting to Local Host, Port : {port}");
             _session = new AdsSession(AmsNetId.Local, port);
@@ -64,7 +67,7 @@ namespace FlexMold.Utility
             RegisterNotificationsAsync();
         }
 
-        void Update()
+        public void Update()
         {
             if (_connection != null)
             {
@@ -164,18 +167,22 @@ namespace FlexMold.Utility
             /*SynchronizationContext syncContext = SynchronizationContext.Current;
               _context.Post(status => someLabel.Text = nCounter.ToString(), null); // Non-blocking post */
         }
+
         void GetPLCVariables()
         {
+            MySymbols = new ObservableCollection<Symbol>();
             dataTypes = _session.SymbolServer.DataTypes;
             symbols = _session.SymbolServer.Symbols;
+            ISymbolLoader loader = SymbolLoaderFactory.Create(_connection, SymbolLoaderSettings.Default);
+
             foreach (var item in from item in symbols
                                  where item.InstanceName == "MAIN"
                                  select item)
             {
                 foreach (var itemsymbols in item.SubSymbols)
                 {
-                    var ss = item.InstanceName + "." + itemsymbols.InstanceName;
-                    log.Log(LogLevel.Info, $"Symbols : {ss}");
+                    MySymbols.Add((Symbol)loader.Symbols[itemsymbols.InstancePath]);
+                    log.Log(LogLevel.Info, $"Symbol : {itemsymbols.InstancePath}");
                 }
             }
         }

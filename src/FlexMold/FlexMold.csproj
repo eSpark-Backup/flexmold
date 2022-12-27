@@ -261,7 +261,11 @@
     <Compile Include="MVVM\Model\Machine.cs" />
     <Compile Include="MVVM\Model\LaserProjector.cs" />
     <Compile Include="MVVM\ViewModel\MachineSettingViewModel.cs" />
+    <Compile Include="MVVM\ViewModel\MachineSetting\MotorTestViewModel.cs" />
     <Compile Include="MVVM\ViewModel\MachineSetting\ReadMotorViewModel.cs" />
+    <Compile Include="MVVM\View\MachineSetting\MotorTest.xaml.cs">
+      <DependentUpon>MotorTest.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utility\MixUtil.cs" />
     <Compile Include="Utility\TelnetHelper.cs" />
     <Compile Include="MVVM\ViewModel\Setting\LaserProjectorSettingViewModel.cs" />
@@ -371,6 +375,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="MVVM\View\MachineSetting\MotorTest.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MVVM\View\MachineSetting\ReadMotorView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -448,7 +456,6 @@
     <Compile Include="MVVM\Model\MyDataModel.cs" />
     <Compile Include="MVVM\ViewModel\AccessoryViewModel.cs" />
     <Compile Include="MVVM\ViewModel\HomeViewModel.cs" />
-    <Compile Include="MVVM\ViewModel\Home\MotorStatusViewModel.cs" />
     <Compile Include="MVVM\ViewModel\PlcTask.cs" />
     <Compile Include="MVVM\ViewModel\Project\ProjectViewModel.cs" />
     <Compile Include="MVVM\ViewModel\SettingViewModel.cs" />
@@ -548,6 +555,7 @@
     <Folder Include="Font\" />
     <Folder Include="images\" />
     <Folder Include="MVVM\ViewModel\Accessory\" />
+    <Folder Include="MVVM\ViewModel\Home\" />
     <Folder Include="MVVM\View\Diaglog\" />
   </ItemGroup>
   <ItemGroup>

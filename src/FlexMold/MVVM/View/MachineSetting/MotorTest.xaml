@@ -15,15 +15,15 @@
         <machinesetting:MotorTestViewModel />
     </UserControl.DataContext>
     <UserControl.Resources />
-    <UniformGrid Columns="3" Rows="8">
-        <Label Content="Motor Dir :" />
-        <ComboBox ItemsSource="{Binding DeviceIds}" SelectedItem="{Binding SelectedMotorDirIndex}" />
+    <UniformGrid Columns="2" Rows="8">
+        <Label Content="Selected Motor" />
+        <ComboBox ItemsSource="{Binding DeviceIds}" SelectedItem="{Binding SelectedMotorIndex}" />
+        <Label Content="Motor Direction : " />
         <mah:ToggleSwitch
             IsOn="{Binding SelectedMototDirValue}"
             OffContent="Reverese"
             OnContent="Forward" />
-        <Label Content="Motor Speed :" />
-        <ComboBox ItemsSource="{Binding DeviceIds}" SelectedItem="{Binding SelectedMotorSpeedIndex}" />
+        <Label Content="Motor Speed : " />
         <mah:NumericUpDown Value="{Binding SelectedMotorSpeedValue}" />
     </UniformGrid>
 </UserControl>

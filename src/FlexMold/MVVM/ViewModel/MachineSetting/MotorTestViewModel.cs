@@ -51,13 +51,13 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
                 OnPropertyChanged();
             }
         }
-        private uint _SelectedMotorDirIndex;
-        public uint SelectedMotorDirIndex
+        private uint _SelectedMotorIndex;
+        public uint SelectedMotorIndex
         {
-            get { return _SelectedMotorDirIndex; }
+            get { return _SelectedMotorIndex; }
             set
             {
-                _SelectedMotorDirIndex = value;
+                _SelectedMotorIndex = value;
                 ReadDeviceValue();
                 OnPropertyChanged();
             }
@@ -70,26 +70,13 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
             {
                 if (!justread)
                 {
-                    if (UpdatePLCMotorToTwicat())
-                    {
-                        _SelectedMototDirValue = value;
-                    }
+                    _SelectedMototDirValue = value;
+                    UpdatePLCMotorToTwicat();
                 }
                 else
                 {
                     _SelectedMototDirValue = value;
                 }
-                OnPropertyChanged();
-            }
-        }
-        private uint _SelectedMotorSpeedIndex;
-        public uint SelectedMotorSpeedIndex
-        {
-            get { return _SelectedMotorSpeedIndex; }
-            set
-            {
-                _SelectedMotorSpeedIndex = value;
-                ReadDeviceValue();
                 OnPropertyChanged();
             }
         }
@@ -101,10 +88,8 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
             {
                 if (!justread)
                 {
-                    if (UpdatePLCMotorToTwicat())
-                    {
-                        _SelectedMotorSpeedValue = value;
-                    }
+                    _SelectedMotorSpeedValue = value;
+                    UpdatePLCMotorToTwicat();
                 }
                 else
                 {
@@ -124,18 +109,18 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
             {
                 DeviceIds[i] = i;
             }
-            SelectedMotorSpeedValue = MyPLCMotor.MyEthercatDevice[SelectedMotorSpeedIndex].speed;
-            SelectedMototDirValue = Convert.ToBoolean(MyPLCMotor.MyEthercatDevice[_SelectedMotorDirIndex].dir);
+            SelectedMotorSpeedValue = MyPLCMotor.MyEthercatDevice[SelectedMotorIndex].speed;
+            SelectedMototDirValue = Convert.ToBoolean(MyPLCMotor.MyEthercatDevice[SelectedMotorIndex].dir);
             justread = false;
         }
         void ReadDeviceValue()
         {
             justread = true;
             MyPLCMotor = (PLCMotor)TwinCathelper._connection.ReadAny(DeviceVariableHandle, typeof(PLCMotor));
-            if (MyPLCMotor.MyEthercatDevice[SelectedMotorSpeedIndex].speed != SelectedMotorSpeedValue)
-                SelectedMotorSpeedValue = MyPLCMotor.MyEthercatDevice[SelectedMotorSpeedIndex].speed;
-            if (Convert.ToBoolean(MyPLCMotor.MyEthercatDevice[_SelectedMotorDirIndex].dir) != SelectedMototDirValue)
-                SelectedMototDirValue = Convert.ToBoolean(MyPLCMotor.MyEthercatDevice[_SelectedMotorDirIndex].dir);
+            if (MyPLCMotor.MyEthercatDevice[SelectedMotorIndex].speed != SelectedMotorSpeedValue)
+                SelectedMotorSpeedValue = MyPLCMotor.MyEthercatDevice[SelectedMotorIndex].speed;
+            if (Convert.ToBoolean(MyPLCMotor.MyEthercatDevice[SelectedMotorIndex].dir) != SelectedMototDirValue)
+                SelectedMototDirValue = Convert.ToBoolean(MyPLCMotor.MyEthercatDevice[SelectedMotorIndex].dir);
             log.Log(LogLevel.Info, $"Readed Value Sucessfully");
             justread = false;
         }
@@ -143,8 +128,8 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
         {
             var _PLCMotor = new PLCMotor();
             _PLCMotor = MyPLCMotor;
-            _PLCMotor.MyEthercatDevice[SelectedMotorDirIndex].dir = Convert.ToByte(SelectedMototDirValue);
-            _PLCMotor.MyEthercatDevice[SelectedMotorSpeedIndex].speed = SelectedMotorSpeedValue;
+            _PLCMotor.MyEthercatDevice[SelectedMotorIndex].dir = Convert.ToByte(SelectedMototDirValue);
+            _PLCMotor.MyEthercatDevice[SelectedMotorIndex].speed = SelectedMotorSpeedValue;
             TwinCathelper._connection.WriteAny(DeviceVariableHandle, _PLCMotor);
             log.Log(LogLevel.Info, $"Set");
             MyPLCMotor = _PLCMotor;

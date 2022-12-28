@@ -1,4 +1,5 @@
 ﻿using FlexMold.Core;
+using FlexMold.MVVM.Model;
 using NLog;
 using NLog.Fluent;
 using System;
@@ -19,6 +20,8 @@ using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
 using TwinCAT.TypeSystem;
+using TwinCAT.ValueAccess;
+using static FlexMold.MVVM.Model.PLCMotor;
 using static System.Windows.Forms.AxHost;
 
 namespace FlexMold.Utility
@@ -64,5 +67,7 @@ namespace FlexMold.Utility
                 }
             }
         }
+
+
     }
 }

@@ -69,11 +69,11 @@ namespace FlexMold
                     {
                         if (TwinCathelper._connection.IsActive)
                         {
-                            if (TwinCathelper.MySymbols.Count == 0)
-                            {
-                                MessageBox.Show("Twincat Project Not Login or Properly Configured");
-                                this.Close();
-                            }
+                            //if (TwinCathelper.MySymbols.Count == 0)
+                            //{
+                            //    MessageBox.Show("Twincat Project Not Login or Properly Configured");
+                            //    this.Close();
+                            //}
                         }
                         else
                         {

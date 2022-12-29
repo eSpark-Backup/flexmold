@@ -69,11 +69,11 @@ namespace FlexMold
                     {
                         if (TwinCathelper._connection.IsActive)
                         {
-                            //if (TwinCathelper.MySymbols.Count == 0)
-                            //{
-                            //    MessageBox.Show("Twincat Project Not Login or Properly Configured");
-                            //    this.Close();
-                            //}
+                            if (TwinCathelper.MySymbols.Count == 0)
+                            {
+                                MessageBox.Show("Twincat Project Not Login or Properly Configured");
+                                this.Close();
+                            }
                         }
                         else
                         {
@@ -92,7 +92,6 @@ namespace FlexMold
                 default:
                     break;
             }
-
             InitializeComponent();
             logCtrl.ItemAdded += OnLogMessageItemAdded;
             log.Log(LogLevel.Info, $"Application Loaded Scussfully.....");
@@ -181,12 +180,9 @@ namespace FlexMold
                     default:
                         break;
                 }
-
-
-                if (TwinCathelper._connection.IsConnected)
+                var info = TwinCathelper.GetTwincatState();
+                if (info!=null)
                 {
-                    StateInfo info = new StateInfo();
-                    AdsErrorCode errorCode = TwinCathelper._connection.TryReadState(out info);
                     tBAdsState.Text = info.AdsState.ToString();
 
                     switch (info.AdsState)

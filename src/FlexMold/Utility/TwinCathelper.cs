@@ -11,9 +11,11 @@ using System.ComponentModel.Composition.Primitives;
 using System.Data.Common;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Threading;
 using TwinCAT;
@@ -50,6 +52,23 @@ namespace FlexMold.Utility
             _connection = (AdsConnection)_session.Connect();
             GetPLCVariables();
             DeviceCount = (Int16)MySymbols.Where(a => a.InstancePath == "MAIN.deviceCount").FirstOrDefault().ReadAnyValue(typeof(Int16));
+        }
+        static public void StartpPLC()
+        {
+            _connection.WriteControl(new StateInfo(AdsState.Run, _connection.ReadState().DeviceState));
+        }
+        static public void StoppPLC()
+        {
+            _connection.WriteControl(new StateInfo(AdsState.Stop, _connection.ReadState().DeviceState));
+        }
+        public static StateInfo GetTwincatState()
+        {
+            StateInfo info = new StateInfo();
+            if (_connection.IsConnected)
+            {
+                AdsErrorCode errorCode = TwinCathelper._connection.TryReadState(out info);
+            }
+            return info;
         }
         static void GetPLCVariables()
         {

@@ -45,6 +45,8 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
             {
                 _SelectedMotorIndex = value;
                 ReadData(value);
+                SelectedMotorSpeedValue = MyPLCMotor[value].speed;
+                SelectedMotorDirValue = Convert.ToBoolean(MyPLCMotor[value].dir);
                 OnPropertyChanged();
             }
         }
@@ -57,6 +59,7 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
                 if (!justread)
                 {
                     _SelectedMotorDirValue = value;
+                    MyPLCMotor[SelectedMotorIndex].dir = Convert.ToByte(SelectedMotorDirValue);
                     WriteData(SelectedMotorIndex);
                 }
                 else
@@ -75,6 +78,7 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
                 if (!justread)
                 {
                     _SelectedMotorSpeedValue = value;
+                    MyPLCMotor[SelectedMotorIndex].speed = SelectedMotorSpeedValue;
                     WriteData(SelectedMotorIndex);
                 }
                 else
@@ -108,8 +112,7 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
                 SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
             Array.Copy(buffer, structSize * _motorNumber, mtarray, 0, structSize);
             MyPLCMotor[_motorNumber].Unpack(mtarray);
-            SelectedMotorSpeedValue = MyPLCMotor[_motorNumber].speed;
-            SelectedMotorDirValue = Convert.ToBoolean(MyPLCMotor[_motorNumber].dir);
+            
             justread = false;
         }
         void WriteData()
@@ -123,8 +126,6 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
         }
         void WriteData(uint _motorNumber)
         {
-            MyPLCMotor[_motorNumber].speed = SelectedMotorSpeedValue;
-            MyPLCMotor[_motorNumber].dir = Convert.ToByte(SelectedMotorDirValue);
             var mtarray = new byte[structSize];
             MyPLCMotor[_motorNumber].Pack().CopyTo(mtarray, 0);
             TwinCathelper._connection.Write(SymbolEthercatDevice.IndexGroup,
@@ -133,6 +134,7 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
         public int structSize { get; set; }
         public MotorTestViewModel()
         {
+
             log = LogManager.GetLogger("Motor Test");
             MyPLCMotor = new EthercatDevice[TwinCathelper.DeviceCount];
             SymbolEthercatDevice = TwinCathelper.MySymbols.Where(a => a.InstancePath == "MAIN.device").FirstOrDefault();
@@ -146,6 +148,7 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
                 DeviceIds[i] = i;
             }
             ReadData();
+            
             justread = false;
         }
     }

@@ -34,15 +34,18 @@ namespace FlexMold.MVVM.ViewModel.Setting
             TelnetMessageSendCommand = new RelayCommand(o => { SendTelnetMessgae(); });
             TelnetDisConnectCommand = new RelayCommand(o => { DisconnectTelnet(); });
 
-            ProjectionOnCommand = new RelayCommand(o => {
+            ProjectionOnCommand = new RelayCommand(o =>
+            {
                 SendMessage = "echo ZN; " + "\r\n";
                 SendTelnetMessgae();
             });
-            ProjectionOffCommand = new RelayCommand(o => {
+            ProjectionOffCommand = new RelayCommand(o =>
+            {
                 SendMessage = "echo ZF; " + "\r\n";
                 SendTelnetMessgae();
             });
-            CallibrateProjectorCommand = new RelayCommand(o => {
+            CallibrateProjectorCommand = new RelayCommand(async o =>
+            {
                 SendMessage = "echo ZD; " + "\r\n";
                 SendTelnetMessgae();
             });

@@ -108,7 +108,6 @@ namespace TwincatAutomationTestAppWPF
             ITcSmTreeItem plcConfig = systemManager.LookupTreeItem("TIPC"); // Getting PLC Configuration item
             ITcSmTreeItem devices = systemManager.LookupTreeItem("TIID"); // Getting IO-Configuration item
 
-
             /* =================================================================================================
              * Scans the Fieldbus interfaces and adds an EtherCAT Device.
              * ================================================================================================= */
@@ -130,12 +129,22 @@ namespace TwincatAutomationTestAppWPF
             ITcSmTreeItem plcProjectRootItem = systemManager.LookupTreeItem("TIPC^PlcGenerated"); // Plc Project Root (XAE Base side)
             ITcSmTreeItem plcProjectItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project"); // PlcProject (PlcControl side) determined via LookupTreeItem
             ITcSmTreeItem plcPousItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project^POUs");
+            ITcSmTreeItem plcDutsItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project^DUTs");
+
+
+            /* =================================================================================================
+             * Creating datatypes in \DUTs\
+             * ================================================================================================= */
+            ITcSmTreeItem plcDutStruct = CreateDut(plcDutsItem, worker);
+            worker.Progress = 20;
+
+
 
             /* =================================================================================================
              * Creating POUs under folder "MyPous"
              * ================================================================================================= */
             CreatePOUsST(plcPousItem, worker);
-            worker.Progress = 20;
+            worker.Progress = 30;
 
             /* =================================================================================================
              * Adjust Visual Studio Solution configuration
@@ -290,7 +299,44 @@ namespace TwincatAutomationTestAppWPF
 
             worker.Progress = 100;
         }
+        private ITcSmTreeItem CreateDut(ITcSmTreeItem parent, IWorker worker)
+        {
+            /* =================================================================================================
+             * Creating the DUT using CreateChild()
+             * ================================================================================================= */
+            string fname = $@"{Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)}\Template\EthercatDevice.zip";
+            var pp = File.Exists(fname);
+            worker.ProgressStatus = string.Format("Importing Type '{0}' ...", fname);
+            ITcSmTreeItem EthercatDeviceDut = parent.ImportChild(fname, "", true, "");
+            return EthercatDeviceDut;
+        }
 
+        private string GetDUTEmptyDeclaration(TreeItemType dutType, string childName, string baseClass)
+        {
+            if (childName == null) throw new ArgumentNullException("childName");
+
+            switch (dutType)
+            {
+                case TreeItemType.PlcDutAlias:
+                    if (baseClass == null || baseClass == string.Empty) throw new ArgumentException("Base class not specified!", "baseClass");
+                    return string.Format("TYPE {0}: {1}; END_TYPE", childName, baseClass);
+
+                case TreeItemType.PlcDutEnum:
+                    return string.Format("TYPE {0} :\n(\n\tenum_member := 0\n);\nEND_TYPE\n", childName);
+
+                case TreeItemType.PlcDutStruct:
+                    if (baseClass == null || baseClass == string.Empty)
+                        return string.Format("TYPE {0}:\n\tSTRUCT\n\tEND_STRUCT\nEND_TYPE", childName);
+                    else
+                        return string.Format("TYPE {0} EXTENDS {1} :\n\tSTRUCT\n\tEND_STRUCT\nEND_TYPE", childName);
+
+                case TreeItemType.PlcDutUnion:
+                    return string.Format("TYPE {0}:\n\tUNION\n\tEND_UNION\nEND_TYPE", childName);
+
+                default:
+                    throw new ArgumentException("dutType");
+            }
+        }
 
         /// <summary>
         /// Waits for build command to finish and checks for any errors in the ErrorList window

@@ -1,30 +1,10 @@
 ﻿using FlexMold.Core;
+using FlexMold.MVVM.Model;
 using FlexMold.Utility;
-using NLog.Fluent;
 using NLog;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.UI;
 using TwinCAT.Ads.TypeSystem;
-using TwinCAT.TypeSystem;
-using System.Windows.Media;
-using TwinCAT;
-using System.Data.Common;
-using TwinCAT.Ads;
-using FlexMold.MVVM.Model;
-using System.Threading;
-using System.Windows.Threading;
-using System.Windows.Documents;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
-using static System.Net.Mime.MediaTypeNames;
-using System.CodeDom;
 
 namespace FlexMold.MVVM.ViewModel.MachineSetting
 {
@@ -34,7 +14,6 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
         public bool justread { get; set; }
         public uint DeviceVariableHandle { get; set; }
         public Symbol SymbolEthercatDevice { get; private set; }
-        public IDataType DTEthercatDevice { get; private set; }
 
         private EthercatDevice[] _MyPLCMotor;
 
@@ -65,24 +44,24 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
             set
             {
                 _SelectedMotorIndex = value;
-                ReadDeviceValue();
+                ReadData(value);
                 OnPropertyChanged();
             }
         }
-        private bool _SelectedMototDirValue;
-        public bool SelectedMototDirValue
+        private bool _SelectedMotorDirValue;
+        public bool SelectedMotorDirValue
         {
-            get { return _SelectedMototDirValue; }
+            get { return _SelectedMotorDirValue; }
             set
             {
                 if (!justread)
                 {
-                    _SelectedMototDirValue = value;
-                    UpdatePLCMotorToTwicat();
+                    _SelectedMotorDirValue = value;
+                    WriteData(SelectedMotorIndex);
                 }
                 else
                 {
-                    _SelectedMototDirValue = value;
+                    _SelectedMotorDirValue = value;
                 }
                 OnPropertyChanged();
             }
@@ -96,7 +75,7 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
                 if (!justread)
                 {
                     _SelectedMotorSpeedValue = value;
-                    UpdatePLCMotorToTwicat();
+                    WriteData(SelectedMotorIndex);
                 }
                 else
                 {
@@ -108,36 +87,46 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
         public byte[] buffer { get; set; }
         void ReadData()
         {
+            justread = true;
             TwinCathelper._connection.Read(SymbolEthercatDevice.IndexGroup,
                 SymbolEthercatDevice.IndexOffset, buffer.AsMemory());
             for (int i = 0; i < TwinCathelper.DeviceCount; i++)
             {
                 var mtarray = new byte[structSize];
                 Array.Copy(buffer, structSize * i, mtarray, 0, structSize);
-                MyPLCMotor[i] = MixUtil.CastToStruct<EthercatDevice>(mtarray);
+                MyPLCMotor[i].Unpack(mtarray);
             }
+            SelectedMotorSpeedValue = MyPLCMotor[SelectedMotorIndex].speed;
+            SelectedMotorDirValue = Convert.ToBoolean(MyPLCMotor[SelectedMotorIndex].dir);
+            justread = false;
         }
-        void ReadData(int _motorNumber)
+        void ReadData(uint _motorNumber)
         {
+            justread = true;
             var mtarray = new byte[structSize];
-            TwinCathelper._connection.Read(SymbolEthercatDevice.IndexGroup, 
-                SymbolEthercatDevice.IndexOffset+ (uint)_motorNumber*(uint)structSize, mtarray.AsMemory());
+            TwinCathelper._connection.Read(SymbolEthercatDevice.IndexGroup,
+                SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
             Array.Copy(buffer, structSize * _motorNumber, mtarray, 0, structSize);
-            MyPLCMotor[_motorNumber] = MixUtil.CastToStruct<EthercatDevice>(mtarray);
+            MyPLCMotor[_motorNumber].Unpack(mtarray);
+            SelectedMotorSpeedValue = MyPLCMotor[_motorNumber].speed;
+            SelectedMotorDirValue = Convert.ToBoolean(MyPLCMotor[_motorNumber].dir);
+            justread = false;
         }
         void WriteData()
         {
             for (int i = 0; i < MyPLCMotor.Length; i++)
             {
-                MixUtil.CastToArray(MyPLCMotor[i]).CopyTo(buffer, structSize * i);
+                MyPLCMotor[i].Pack().CopyTo(buffer, structSize * i);
             }
             TwinCathelper._connection.Write(SymbolEthercatDevice.IndexGroup,
                 SymbolEthercatDevice.IndexOffset, buffer.AsMemory());
         }
-        void WriteData(int _motorNumber)
+        void WriteData(uint _motorNumber)
         {
+            MyPLCMotor[_motorNumber].speed = SelectedMotorSpeedValue;
+            MyPLCMotor[_motorNumber].dir = Convert.ToByte(SelectedMotorDirValue);
             var mtarray = new byte[structSize];
-            MixUtil.CastToArray(MyPLCMotor[_motorNumber]).CopyTo(mtarray,0);
+            MyPLCMotor[_motorNumber].Pack().CopyTo(mtarray, 0);
             TwinCathelper._connection.Write(SymbolEthercatDevice.IndexGroup,
                 SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
         }
@@ -146,49 +135,18 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
         {
             log = LogManager.GetLogger("Motor Test");
             MyPLCMotor = new EthercatDevice[TwinCathelper.DeviceCount];
-            DeviceVariableHandle = TwinCathelper._connection.CreateVariableHandle("MAIN.device");
             SymbolEthercatDevice = TwinCathelper.MySymbols.Where(a => a.InstancePath == "MAIN.device").FirstOrDefault();
-            DTEthercatDevice = TwinCathelper.dataTypes.Where(a => a.Name.EndsWith("EthercatDevice")).FirstOrDefault();
-            structSize = (DTEthercatDevice.Size) / TwinCathelper.DeviceCount;
+            structSize = (SymbolEthercatDevice.Size) / TwinCathelper.DeviceCount;
             buffer = new byte[structSize * TwinCathelper.DeviceCount];
             TwinCathelper._connection.Read(SymbolEthercatDevice.IndexGroup, SymbolEthercatDevice.IndexOffset, buffer.AsMemory());
-            ReadData(2);
-            MyPLCMotor[1].speed = 1100;
-            MyPLCMotor[1].dir = 11;
-            MyPLCMotor[1].dummyDataIn = 110000;
-            MyPLCMotor[1].dummyDataOut = 11000;
-            WriteData(1);
             justread = true;
             DeviceIds = new uint[TwinCathelper.DeviceCount];
             for (uint i = 0; i < TwinCathelper.DeviceCount; i++)
             {
                 DeviceIds[i] = i;
             }
-            SelectedMotorSpeedValue = MyPLCMotor[SelectedMotorIndex].speed;
-            SelectedMototDirValue = Convert.ToBoolean(MyPLCMotor[SelectedMotorIndex].dir);
+            ReadData();
             justread = false;
-        }
-        void ReadDeviceValue()
-        {
-            justread = true;
-            //MyPLCMotor = (PLCMotor)TwinCathelper._connection.ReadAny(DeviceVariableHandle, typeof(PLCMotor));
-            if (MyPLCMotor[SelectedMotorIndex].speed != SelectedMotorSpeedValue)
-                SelectedMotorSpeedValue = MyPLCMotor[SelectedMotorIndex].speed;
-            if (Convert.ToBoolean(MyPLCMotor[SelectedMotorIndex].dir) != SelectedMototDirValue)
-                SelectedMototDirValue = Convert.ToBoolean(MyPLCMotor[SelectedMotorIndex].dir);
-            log.Log(LogLevel.Info, $"Readed Value Sucessfully");
-            justread = false;
-        }
-        bool UpdatePLCMotorToTwicat()
-        {
-            var _PLCMotor = new EthercatDevice[TwinCathelper.DeviceCount];
-            _PLCMotor = MyPLCMotor;
-            _PLCMotor[SelectedMotorIndex].dir = Convert.ToByte(SelectedMototDirValue);
-            _PLCMotor[SelectedMotorIndex].speed = SelectedMotorSpeedValue;
-            TwinCathelper._connection.WriteAny(DeviceVariableHandle, _PLCMotor);
-            log.Log(LogLevel.Info, $"Set");
-            MyPLCMotor = _PLCMotor;
-            return true;
         }
     }
 }

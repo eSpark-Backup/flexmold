@@ -20,7 +20,7 @@
         <ComboBox ItemsSource="{Binding DeviceIds}" SelectedItem="{Binding SelectedMotorIndex}" />
         <Label Content="Motor Direction : " />
         <mah:ToggleSwitch
-            IsOn="{Binding SelectedMototDirValue}"
+            IsOn="{Binding SelectedMotorDirValue}"
             OffContent="Reverese"
             OnContent="Forward" />
         <Label Content="Motor Speed : " />

@@ -24,5 +24,7 @@ namespace FlexMold.MVVM.Model
         public UInt16 speed;
         public UInt32 dummyDataOut;
         public UInt32 dummyDataIn;
+        [SkipPack]
+        public uint DeviceID;
     }
 }

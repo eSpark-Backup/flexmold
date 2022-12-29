@@ -40,6 +40,7 @@ namespace FlexMold.Utility
         static public IDataTypeCollection<IDataType> dataTypes { get; private set; }
         static public ISymbolCollection<ISymbol> symbols { get; private set; }
         static public ObservableCollection<Symbol> MySymbols { get; private set; }
+        static public Int16 DeviceCount { get; private set; }
         static public void TwinCatConnect()
         {
             log = LogManager.GetLogger("TwinCat");
@@ -48,6 +49,7 @@ namespace FlexMold.Utility
             _session = new AdsSession(AmsNetId.Local, port);
             _connection = (AdsConnection)_session.Connect();
             GetPLCVariables();
+            DeviceCount = (Int16)MySymbols.Where(a => a.InstancePath == "MAIN.deviceCount").FirstOrDefault().ReadAnyValue(typeof(Int16));
         }
         static void GetPLCVariables()
         {

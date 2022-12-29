@@ -168,6 +168,9 @@
     <Reference Include="NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.5.1.0\lib\net46\NLog.dll</HintPath>
     </Reference>
+    <Reference Include="RudolfKurka.StructPackerTools, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\StructPacker.1.0.8\lib\netstandard1.0\RudolfKurka.StructPackerTools.dll</HintPath>
+    </Reference>
     <Reference Include="SMBLibrary, Version=1.4.9.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\SMBLibrary.1.4.9\lib\net40\SMBLibrary.dll</HintPath>
     </Reference>
@@ -567,6 +570,9 @@
       <Project>{c04e879d-287e-49b5-9933-42fc2eff75f0}</Project>
       <Name>NlogViewer</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\StructPacker.1.0.8\analyzers\dotnet\cs\RudolfKurka.StructPacker.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

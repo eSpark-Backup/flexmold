@@ -135,7 +135,17 @@ namespace TwincatAutomationTestAppWPF
             /* =================================================================================================
              * Creating datatypes in \DUTs\
              * ================================================================================================= */
-            ITcSmTreeItem plcDutStruct = CreateDut(plcDutsItem, worker);
+
+            string declStruct = @"TYPE EthercatDevice : 
+STRUCT
+	dir : BYTE ;
+	speed : WORD ;
+	dummyDataOut AT %Q*: DWORD ;
+	dummyDataIn AT %I*: DWORD ;
+END_STRUCT
+END_TYPE";
+
+            ITcSmTreeItem plcDutStruct = CreateDut(plcDutsItem, TreeItemType.PlcDutStruct, "EthercatDevice", null, declStruct, worker);
             worker.Progress = 20;
 
 
@@ -299,16 +309,14 @@ namespace TwincatAutomationTestAppWPF
 
             worker.Progress = 100;
         }
-        private ITcSmTreeItem CreateDut(ITcSmTreeItem parent, IWorker worker)
+        private ITcSmTreeItem CreateDut(ITcSmTreeItem parent, TreeItemType treeItemType, string typeName, string baseType, string declarationCode, IWorker worker)
         {
             /* =================================================================================================
              * Creating the DUT using CreateChild()
              * ================================================================================================= */
-            string fname = $@"{Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)}\Template\EthercatDevice.zip";
-            var pp = File.Exists(fname);
-            worker.ProgressStatus = string.Format("Importing Type '{0}' ...", fname);
-            ITcSmTreeItem EthercatDeviceDut = parent.ImportChild(fname, "", true, "");
-            return EthercatDeviceDut;
+            worker.ProgressStatus = string.Format("Creating Duts '{0}' ...", typeName);
+            ITcSmTreeItem item = parent.CreateChild(typeName, treeItemType.AsInt32(), "", declarationCode);
+            return item;
         }
 
         private string GetDUTEmptyDeclaration(TreeItemType dutType, string childName, string baseClass)
@@ -466,31 +474,56 @@ namespace TwincatAutomationTestAppWPF
         /// <returns></returns>
         private ITcSmTreeItem AddPOUProgram(string pouName, ITcSmTreeItem parent, IECLanguageType language, IWorker worker)
         {
+            AvaiableBoxes = 10;
             foreach (var item in parent)
             {
                 ITcPlcPou pofdu = item as ITcPlcPou;
                 Console.WriteLine();
             }
-            parent.DeleteChild(pouName);
-            /* =================================================================================================
-             * Create Program POU using CreateChild()
-             * ================================================================================================= */
-            string fname = $@"{Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)}\Template\MAIN.zip";
-            ITcSmTreeItem programPou = parent.ImportChild(fname, "", true, "");
-            Console.WriteLine(string.Format("POU Program '{0}' added ...", pouName));
-            /* =================================================================================================
-             * Accessing declaration and implementation area 
-             * ================================================================================================= */
-            ITcPlcPou pou = programPou as ITcPlcPou;
+            ITcSmTreeItem programPou = parent.LookupChild("Main");
             ITcPlcDeclaration pouDecl = programPou as ITcPlcDeclaration;
             ITcPlcImplementation pouImpl = programPou as ITcPlcImplementation;
             ITcXmlDocument pouDoc = programPou as ITcXmlDocument;
-            string decl1 = pouDecl.DeclarationText;
-            string impl1 = pouImpl.ImplementationText;
+            string deviceAtrib = "";
+            for (int i = 0; i < AvaiableBoxes; i++)
+            {
+                deviceAtrib += $"" +
+                    $"[{i}].dummyDataOut := TIID^Device_{i}^Box {i} (sample_app)^Outputs process data mapping^Trigger;\n" +
+                    $"[{i}].dummyDataIn := TIID^Device_{i}^Box {i} (sample_app)^Inputs process data mapping^Counter;\n";
+            }
 
-            pouDecl.DeclarationText += (Environment.NewLine + "(* Added by Script *)");
+            string decl1 =
+                "PROGRAM MAIN \n" +
+                "VAR CONSTANT \n" +
+                $"deviceCount : WORD := {AvaiableBoxes}; \n" +
+                "END_VAR \n" +
+                "VAR \n" +
+                "{attribute 'TcLinkTo' := '" + deviceAtrib +
+                //"[1].dummyDataOut := TIID^Device_1^Box 1 (sample_app)^Outputs process data mapping^Trigger;\n" +
+                //"[1].dummyDataIn := TIID^Device_1^Box 1 (sample_app)^Inputs process data mapping^Counter;\n" +
+                //"[2].dummyDataOut := TIID^Device_1^Box 2 (sample_app)^Outputs process data mapping^Trigger;\n" +
+                //"[2].dummyDataIn := TIID^Device_1^Box 2 (sample_app)^Inputs process data mapping^Counter;\n" +
+                //"[3].dummyDataOut := TIID^Device_1^Box 3 (sample_app)^Outputs process data mapping^Trigger;\n" +
+                //"[3].dummyDataIn := TIID^Device_1^Box 3 (sample_app)^Inputs process data mapping^Counter;\n" +
+                //"[4].dummyDataOut := TIID^Device_1^Box 4 (sample_app)^Outputs process data mapping^Trigger;\n" +
+                //"[4].dummyDataIn := TIID^Device_1^Box 4 (sample_app)^Inputs process data mapping^Counter;\n" +
+                "'}" +
+                "device : ARRAY [1..deviceCount] OF EthercatDevice ; \n" +
+                "counter: WORD; \n" +
+                "END_VAR"
+                ;
 
-            string oldDocumentXml = pouDoc.DocumentXml; // Accessing POUs Code Document
+            pouDecl.DeclarationText = decl1;
+            string impl1 = "" +
+                "FOR counter:=1 TO deviceCount BY 1 DO\n" +
+                "device[counter].dummyDataOut:= SHL(device[counter].dir,2*8) OR device[counter].speed ;\n" +
+                "END_FOR;";
+
+            pouImpl.ImplementationText = impl1;
+
+            //pouDecl.DeclarationText += (Environment.NewLine + "(* Added by Script *)");
+
+            //string oldDocumentXml = pouDoc.DocumentXml; // Accessing POUs Code Document
 
             /* =================================================================================================
              * Modifying implementation area, based on IEC language.
@@ -519,166 +552,6 @@ namespace TwincatAutomationTestAppWPF
             return programPou;
         }
 
-
-        /// <summary>
-        /// Loads template XML file for a POU
-        /// </summary>
-        /// <param name="pou">POU object.</param>
-        /// <param name="language">The IEC language.</param>
-        /// <returns></returns>
-        private void loadTemplate(ITcPlcPou pou, IECLanguageType language)
-        {
-            string templateName = null;
-            switch (language)
-            {
-                case IECLanguageType.CFC:
-                    templateName = "PouProgramCFC.xml";
-                    break;
-                case IECLanguageType.FBD:
-                    templateName = "PouProgramFBD.xml";
-                    break;
-                case IECLanguageType.SFC:
-                    templateName = "PouProgramSFC.xml";
-                    break;
-                case IECLanguageType.ST:
-                    templateName = "PouProgramST.xml";
-                    break;
-                case IECLanguageType.LD:
-                    templateName = "PouProgramLD.xml";
-                    break;
-                case IECLanguageType.IL:
-                case IECLanguageType.None:
-                    throw new NotSupportedException();
-            }
-
-            string template = Path.Combine(base.ConfigurationTemplatesFolder, templateName);
-
-            // Loading into XmlDocument to check if data is well formed
-            XmlDocument doc = new XmlDocument();
-            doc.Load(template);
-
-            ITcXmlDocument pouDoc = (ITcXmlDocument)pou;
-            string oldDoc = pou.DocumentXml;
-            pouDoc.DocumentXml = doc.OuterXml; // Write the new Document
-        }
-
-
-        /// <summary>
-        /// Adds a Method to a POU
-        /// </summary>
-        /// <param name="pou">POU object.</param>
-        /// <param name="name">Name of the Method</param>
-        /// <param name="language">The IEC language.</param>
-        /// <param name="returnType">Return type</param>
-        /// <param name="accessor">The accessor.</param>
-        /// <returns></returns>
-        private ITcSmTreeItem AddMethod(ITcSmTreeItem pou, string name, IECLanguageType language, string returnType, PLCACCESS accessor)
-        {
-            /* =================================================================================================
-             * Prepare vInfo parameter
-             * ================================================================================================= */
-            dynamic vInfo = new string[4];
-            vInfo[0] = language.AsString();
-            vInfo[1] = returnType;
-            vInfo[2] = PlcAccessConverter.ToString(accessor);
-            vInfo[3] = @"<ST><![CDATA[(* ST Method *)]]></ST>";
-
-            /* =================================================================================================
-             * Create method using CreateChild()
-             * ================================================================================================= */
-            ITcSmTreeItem method = pou.CreateChild(name, TreeItemType.PlcMethod.AsInt32(), "", (object)vInfo);
-
-            /* =================================================================================================
-             * Accessing declaration and implementation area
-             * ================================================================================================= */
-            ITcPlcDeclaration decl = (ITcPlcDeclaration)method;
-            string declText = decl.DeclarationText;
-            ITcPlcImplementation impl = (ITcPlcImplementation)method;
-            string implText = impl.ImplementationText;
-            string implXml = impl.ImplementationXml;
-
-            return method;
-        }
-
-        /// <summary>
-        /// Adds a Method to a POU
-        /// </summary>
-        /// <param name="pou">POU object.</param>
-        /// <param name="name">Name of the Method</param>
-        /// <param name="language">The IEC language.</param>
-        /// <param name="returnType">Return type.</param>
-        /// <returns></returns>
-        private ITcSmTreeItem AddMethod(ITcSmTreeItem pou, string name, IECLanguageType language, string returnType = "")
-        {
-            /* =================================================================================================
-             * Prepare vInfo parameter
-             * ================================================================================================= */
-            dynamic vInfo = new string[4];
-            vInfo[0] = language.AsString();
-            vInfo[1] = returnType;
-            vInfo[2] = string.Empty;
-            vInfo[3] = @"<ST><![CDATA[(* ST Method *)]]></ST>";
-
-            /* =================================================================================================
-             * Create method using CreateChild()
-             * ================================================================================================= */
-            ITcSmTreeItem method = pou.CreateChild(name, TreeItemType.PlcMethod.AsInt32(), "", (object)vInfo);
-
-            /* =================================================================================================
-             * Accessing declaration and implementation area
-             * ================================================================================================= */
-            ITcPlcDeclaration decl = (ITcPlcDeclaration)method;
-            string declText = decl.DeclarationText;
-            ITcPlcImplementation impl = (ITcPlcImplementation)method;
-            string implText = impl.ImplementationText;
-            string implXml = impl.ImplementationXml;
-
-            return method;
-        }
-
-        /// <summary>
-        /// Adds a Transition to a POU
-        /// </summary>
-        /// <param name="pou">POU object.</param>
-        /// <param name="language">The IEC language.</param>
-        /// <returns></returns>
-        private ITcSmTreeItem AddTransition(ITcSmTreeItem pou, IECLanguageType language)
-        {
-            /* =================================================================================================
-             * Preparing vInfo parameter
-             * ================================================================================================= */
-            dynamic vInfo = new string[2];
-            vInfo[0] = language.AsString();
-            if (language == IECLanguageType.ST)
-            {
-                vInfo[1] = @"<ST><![CDATA[(* ST Transition *)]]></ST>";
-            }
-
-            /* =================================================================================================
-             * Creating Transition using CreateChild()
-             * ================================================================================================= */
-            ITcSmTreeItem transition = pou.CreateChild("STTransition", TreeItemType.PlcTransition.AsInt32(), "", (object)vInfo);
-
-            /* =================================================================================================
-             * Accessing declaration and implementation area
-             * ================================================================================================= */
-            ITcPlcImplementation impl = (ITcPlcImplementation)transition;
-            string implText = impl.ImplementationText;
-            string implXml = impl.ImplementationXml;
-            if (language == IECLanguageType.ST)
-            {
-                impl.ImplementationText = "//Test\n//Test";
-
-                string xml1 = impl.ImplementationXml;
-                string text1 = impl.ImplementationText;
-
-                impl.ImplementationText = "//Test\\n//Test";
-                string xml2 = impl.ImplementationXml;
-                string text2 = impl.ImplementationText;
-            }
-
-            return transition;
-        }
 
 
         /// <summary>
@@ -718,112 +591,7 @@ namespace TwincatAutomationTestAppWPF
         }
 
 
-        /// <summary>
-        /// Adds a Get to a Property
-        /// </summary>
-        /// <param name="prop">Property object.</param>
-        /// <param name="language">The IEC language.</param>
-        /// <returns></returns>
-        private ITcSmTreeItem AddPropertyGet(ITcSmTreeItem prop, IECLanguageType language)
-        {
-            /* =================================================================================================
-             * Preparing vInfo parameter
-             * ================================================================================================= */
-            dynamic vInfo = new string[3];
-            vInfo[0] = language.AsString();
-            vInfo[1] = "PUBLIC";
-            if (language == IECLanguageType.ST)
-            {
-                vInfo[2] = @"<ST><![CDATA[(* ST PropGet *)]]></ST>";
-            }
 
-            /* =================================================================================================
-             * Creating Property using CreateChild()
-             * ================================================================================================= */
-            ITcSmTreeItem propget = prop.CreateChild("", TreeItemType.PlcPropertyGet.AsInt32(), "", (object)vInfo);
-
-            /* =================================================================================================
-             * Accessing declaration and implementation area
-             * ================================================================================================= */
-            ITcPlcDeclaration decl = (ITcPlcDeclaration)propget;
-            ITcPlcImplementation impl = (ITcPlcImplementation)propget;
-            string declText = decl.DeclarationText;
-            string implText = impl.ImplementationText;
-            string implXml = impl.ImplementationXml;
-
-            return propget;
-        }
-
-
-        /// <summary>
-        /// Adds a Property to a POU
-        /// </summary>
-        /// <param name="pou">POU object.</param>
-        /// <param name="language">The IEC language.</param>
-        /// <returns></returns>
-        private ITcSmTreeItem AddProperty(ITcSmTreeItem pou, IECLanguageType language)
-        {
-            /* =================================================================================================
-             * Preparing vInfo parameter
-             * ================================================================================================= */
-            dynamic vInfo = new string[3];
-            vInfo[0] = language.AsString();
-            vInfo[1] = "BOOL"; // Property Return Type
-            vInfo[2] = "PUBLIC"; // Property Accessor
-
-            /* =================================================================================================
-             * Creating Property using CreateChild()
-             * ================================================================================================= */
-            ITcSmTreeItem prop = pou.CreateChild("STProperty", TreeItemType.PlcProperty.AsInt32(), "", (object)vInfo);
-
-            /* =================================================================================================
-             * Adding Getter and Setter
-             * ================================================================================================= */
-            ITcSmTreeItem propGet = AddPropertySet(prop, language);
-            ITcSmTreeItem propSet = AddPropertyGet(prop, language);
-
-            /* =================================================================================================
-             * Accessing declaration area (Properties do not have an implementation area)
-             * ================================================================================================= */
-            ITcPlcDeclaration propDeclaration = (ITcPlcDeclaration)prop;
-            string declText = propDeclaration.DeclarationText;
-
-            return prop;
-        }
-
-
-        /// <summary>
-        /// Adds an Action to a POU
-        /// </summary>
-        /// <param name="pou">POU object.</param>
-        /// <param name="language">The IEC language.</param>
-        /// <returns></returns>
-        private ITcSmTreeItem AddAction(ITcSmTreeItem pou, IECLanguageType language)
-        {
-            /* =================================================================================================
-             * Preparing vInfo parameter
-             * ================================================================================================= */
-            dynamic vInfo = new string[2];
-            vInfo[0] = language.AsString();
-            if (language == IECLanguageType.ST)
-            {
-                vInfo[1] = @"<ST><![CDATA[(* ST Action *)]]></ST>";
-            }
-
-            /* =================================================================================================
-             * Creating Property using CreateChild()
-             * ================================================================================================= */
-            ITcSmTreeItem action = pou.CreateChild("STAction", TreeItemType.PlcAction.AsInt32(), "", vInfo);
-
-            /* =================================================================================================
-             * Accessing implementation area (Actions do not have a declaration area)
-             * ================================================================================================= */
-            ITcPlcImplementation impl = (ITcPlcImplementation)action;
-            string implText = impl.ImplementationText;
-            string implXml = impl.ImplementationXml;
-
-            return action;
-        }
 
 
         /// <summary>
@@ -926,8 +694,10 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                 return "PLC";
             }
         }
+        public int AvaiableBoxes { get; set; }
         public void ScanDevicesAndBoxes(IWorker worker)
         {
+            AvaiableBoxes = 0;
             ITcSmTreeItem ioDevicesItem = systemManager.LookupTreeItem("TIID");
             string scannedXml = ioDevicesItem.ProduceXml(false);
             XmlDocument xmlDoc = new XmlDocument();
@@ -955,10 +725,11 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                 }
                 catch (Exception ex)
                 {
-                    worker.ProgressStatus = "Warning: "+ ex.Message;
+                    worker.ProgressStatus = "Warning: " + ex.Message;
                 }
                 foreach (ITcSmTreeItem box in device)
                 {
+                    AvaiableBoxes = AvaiableBoxes + 1;
                     worker.ProgressStatus = $"(box.Name : {box.Name}";
                 }
             }

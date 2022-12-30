@@ -485,7 +485,7 @@ END_TYPE";
             ITcPlcImplementation pouImpl = programPou as ITcPlcImplementation;
             ITcXmlDocument pouDoc = programPou as ITcXmlDocument;
             string deviceAtrib = "";
-            for (int i = 0; i < AvaiableBoxes; i++)
+            for (int i = 1; i <= AvaiableBoxes; i++)
             {
                 deviceAtrib += $"" +
                     $"[{i}].dummyDataOut := TIID^Device_{i}^Box {i} (sample_app)^Outputs process data mapping^Trigger;\n" +

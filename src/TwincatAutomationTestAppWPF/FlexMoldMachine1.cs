@@ -108,6 +108,7 @@ namespace TwincatAutomationTestAppWPF
             ITcSmTreeItem plcConfig = systemManager.LookupTreeItem("TIPC"); // Getting PLC Configuration item
             ITcSmTreeItem devices = systemManager.LookupTreeItem("TIID"); // Getting IO-Configuration item
 
+
             /* =================================================================================================
              * Scans the Fieldbus interfaces and adds an EtherCAT Device.
              * ================================================================================================= */
@@ -486,14 +487,12 @@ END_TYPE";
             ITcPlcImplementation pouImpl = programPou as ITcPlcImplementation;
             ITcXmlDocument pouDoc = programPou as ITcXmlDocument;
             string deviceAtrib = "";
-            for (int j = 1; j <= AvaiableDevices; j++)
+
+            for (int i = 1; i <= AvaiableBoxes; i++)
             {
-                for (int i = 1; i <= AvaiableBoxes; i++)
-                {
-                    deviceAtrib += $"" +
-                        $"[{i}].dummyDataOut := TIID^Device_{j}^Box {i} (sample_app)^Outputs process data mapping^Trigger;\n" +
-                        $"[{i}].dummyDataIn := TIID^Device_{j}^Box {i} (sample_app)^Inputs process data mapping^Counter;\n";
-                }
+                deviceAtrib += $"" +
+                    $"[{i}].dummyDataOut := TIID^Device_1^Box {i} (sample_app)^Outputs process data mapping^Trigger;\n" +
+                    $"[{i}].dummyDataIn := TIID^Device_1^Box {i} (sample_app)^Inputs process data mapping^Counter;\n";
             }
 
             string decl1 =
@@ -733,7 +732,6 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                 {
                     worker.ProgressStatus = "Warning: " + ex.Message;
                 }
-                AvaiableDevices = AvaiableDevices + 1;
                 foreach (ITcSmTreeItem box in device)
                 {
                     AvaiableBoxes = AvaiableBoxes + 1;

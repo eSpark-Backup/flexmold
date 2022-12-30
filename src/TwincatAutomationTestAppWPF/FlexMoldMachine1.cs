@@ -474,7 +474,8 @@ END_TYPE";
         /// <returns></returns>
         private ITcSmTreeItem AddPOUProgram(string pouName, ITcSmTreeItem parent, IECLanguageType language, IWorker worker)
         {
-            AvaiableBoxes = 10;
+            //AvaiableBoxes = 10;
+            //AvaiableDevices = 1;
             foreach (var item in parent)
             {
                 ITcPlcPou pofdu = item as ITcPlcPou;
@@ -485,11 +486,14 @@ END_TYPE";
             ITcPlcImplementation pouImpl = programPou as ITcPlcImplementation;
             ITcXmlDocument pouDoc = programPou as ITcXmlDocument;
             string deviceAtrib = "";
-            for (int i = 1; i <= AvaiableBoxes; i++)
+            for (int j = 1; j <= AvaiableDevices; j++)
             {
-                deviceAtrib += $"" +
-                    $"[{i}].dummyDataOut := TIID^Device_{i}^Box {i} (sample_app)^Outputs process data mapping^Trigger;\n" +
-                    $"[{i}].dummyDataIn := TIID^Device_{i}^Box {i} (sample_app)^Inputs process data mapping^Counter;\n";
+                for (int i = 1; i <= AvaiableBoxes; i++)
+                {
+                    deviceAtrib += $"" +
+                        $"[{i}].dummyDataOut := TIID^Device_{j}^Box {i} (sample_app)^Outputs process data mapping^Trigger;\n" +
+                        $"[{i}].dummyDataIn := TIID^Device_{j}^Box {i} (sample_app)^Inputs process data mapping^Counter;\n";
+                }
             }
 
             string decl1 =
@@ -695,9 +699,11 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
             }
         }
         public int AvaiableBoxes { get; set; }
+        public int AvaiableDevices { get; set; }
         public void ScanDevicesAndBoxes(IWorker worker)
         {
             AvaiableBoxes = 0;
+            AvaiableDevices = 0;
             ITcSmTreeItem ioDevicesItem = systemManager.LookupTreeItem("TIID");
             string scannedXml = ioDevicesItem.ProduceXml(false);
             XmlDocument xmlDoc = new XmlDocument();
@@ -727,6 +733,7 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                 {
                     worker.ProgressStatus = "Warning: " + ex.Message;
                 }
+                AvaiableDevices = AvaiableDevices + 1;
                 foreach (ITcSmTreeItem box in device)
                 {
                     AvaiableBoxes = AvaiableBoxes + 1;

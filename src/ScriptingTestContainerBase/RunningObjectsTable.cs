@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using EnvDTE;
+using EnvDTE80;
 
 namespace ScriptingTest
 {
@@ -64,14 +65,14 @@ namespace ScriptingTest
         /// Get a table of the currently running instances of the Visual Studio .NET IDE.
         /// </summary>
         /// <returns>A dictionary mapping common information about the DTE object to the EnvDte.DTE object itself</returns>
-        public static Dictionary<ROTDteInfo, DTE> GetRunningDTETable()
+        public static Dictionary<ROTDteInfo, DTE2> GetRunningDTETable()
         {
-            Dictionary<string, DTE> runningIDEInstances = new Dictionary<string, DTE>();
+            Dictionary<string, DTE2> runningIDEInstances = new Dictionary<string, DTE2>();
             Dictionary<string, List<object>> runningObjects = GetRunningObjectTable();
 
             IEnumerable<KeyValuePair<string, List<object>>> objTable = runningObjects.Where<KeyValuePair<string, List<object>>>((entry) => { ROTDteInfo info = null; return ROTDteInfo.TryParse(entry.Key, out info); });
 
-            Dictionary<ROTDteInfo, DTE> ret = new Dictionary<ROTDteInfo, DTE>();
+            Dictionary<ROTDteInfo, DTE2> ret = new Dictionary<ROTDteInfo, DTE2>();
 
             foreach (KeyValuePair<string, List<object>> entry in objTable)
             {
@@ -80,7 +81,7 @@ namespace ScriptingTest
 
                 if (entry.Value.Count > 0)
                 {
-                    DTE dte = (DTE)entry.Value[0];
+                    DTE2 dte = (DTE2)entry.Value[0];
                     string solutionPath = dte.Solution.FullName;
 
                     ROTDteInfo info = ROTDteInfo.Parse(entry.Key);
@@ -91,14 +92,37 @@ namespace ScriptingTest
             return ret;
         }
 
+        public static void CloseRunningDTETable(string ScriptSolutionName)
+        {
+            var myDtelist =new List<DTE2>();
+            Dictionary<string, DTE2> runningIDEInstances = new Dictionary<string, DTE2>();
+            Dictionary<string, List<object>> runningObjects = GetRunningObjectTable();
+
+            IEnumerable<KeyValuePair<string, List<object>>> objTable = runningObjects.Where<KeyValuePair<string, List<object>>>((entry) => { ROTDteInfo info = null; return ROTDteInfo.TryParse(entry.Key, out info); });
+
+            foreach (KeyValuePair<string, List<object>> entry in objTable)
+            {
+                if (entry.Value.Count > 0)
+                {
+                    DTE2 dte = (DTE2)entry.Value[0];
+                    if (StringComparer.OrdinalIgnoreCase.Compare(dte.Solution.FullName, ScriptSolutionName) == 0)
+                    {
+                        Console.WriteLine($"Closing : {dte.Solution.FullName}  ....");
+                        dte.Solution.Close();
+                        dte.Quit();
+                    }   
+                }
+            }
+        }
+
         /// <summary>
         /// Gets the DTE Object which has opened a solution with the specified name.
         /// </summary>
         /// <param name="solutionName">Name of the solution (without path, without extension)</param>
         /// <returns>The DTE Object</returns>
-        public static DTE GetActiveDTE(string solutionName)
+        public static EnvDTE80.DTE2 GetActiveDTE(string solutionName)
         {
-            KeyValuePair<ROTDteInfo, DTE> foundEntry = GetRunningDTETable().First<KeyValuePair<ROTDteInfo, DTE>>((entry) => { return (StringComparer.OrdinalIgnoreCase.Compare(entry.Key.SolutionName, solutionName) == 0); });
+            KeyValuePair<ROTDteInfo, EnvDTE80.DTE2> foundEntry = GetRunningDTETable().First<KeyValuePair<ROTDteInfo, DTE2>>((entry) => { return (StringComparer.OrdinalIgnoreCase.Compare(entry.Key.SolutionName, solutionName) == 0); });
             return foundEntry.Value;
         }
     }

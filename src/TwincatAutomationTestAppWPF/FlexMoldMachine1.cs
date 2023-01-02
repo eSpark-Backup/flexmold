@@ -1,17 +1,15 @@
-﻿using System;
-using System.IO;
-using EnvDTE;
-using EnvDTE100;
+﻿using EnvDTE;
 using EnvDTE80;
-using TCatSysManagerLib;
-using TwinCAT.SystemManager;
-using System.Diagnostics;
-using System.Timers;
+using Microsoft.VisualStudio.Shell.Interop;
 using ScriptingTest;
-using System.Xml;
+using System;
 using System.Collections.Generic;
-using Scripting.CSharp;
-using System.Windows.Controls;
+using System.Diagnostics;
+using System.Xml;
+using TCatSysManagerLib;
+using TwinCAT;
+using TwinCAT.Ads;
+using TwinCAT.SystemManager;
 
 namespace TwincatAutomationTestAppWPF
 {
@@ -102,6 +100,11 @@ namespace TwincatAutomationTestAppWPF
             if (worker.CancellationPending)
                 throw new Exception("Cancelled");
 
+            tcSystemClient = new TcAdsClient();
+            tcSystemClient.Connect(srvPort: (int)AmsPort.SystemService);
+            tcSystemClient.WriteControl(new StateInfo(AdsState.Reconfig, tcSystemClient.ReadState().DeviceState));
+            WaitForState(AdsState.Config, 3000);
+
             /* =================================================================================================
              * Get references to PLC and IO nodes
              * ================================================================================================= */
@@ -137,16 +140,8 @@ namespace TwincatAutomationTestAppWPF
              * Creating datatypes in \DUTs\
              * ================================================================================================= */
 
-            string declStruct = @"TYPE EthercatDevice : 
-STRUCT
-	dir : BYTE ;
-	speed : WORD ;
-	dummyDataOut AT %Q*: DWORD ;
-	dummyDataIn AT %I*: DWORD ;
-END_STRUCT
-END_TYPE";
 
-            ITcSmTreeItem plcDutStruct = CreateDut(plcDutsItem, TreeItemType.PlcDutStruct, "EthercatDevice", null, declStruct, worker);
+            ITcSmTreeItem plcDutStruct = CreateDut(plcDutsItem, TreeItemType.PlcDutStruct, "EthercatDevice", null, worker);
             worker.Progress = 20;
 
 
@@ -295,23 +290,63 @@ END_TYPE";
              * Execute PLC Login, Start, Logout, ...
              * ================================================================================================= */
             System.Threading.Thread.Sleep(5000);
+
             worker.ProgressStatus = "Logging in to PLC runtime ...";
             System.Threading.Thread.Sleep(5000);
             plcProjectItem.ConsumeXml(xmlLogin);
-            //worker.ProgressStatus = "Stopping PLC runtime ...";
-            //System.Threading.Thread.Sleep(5000);
-            //plcProjectItem.ConsumeXml(xmlStop);
-            //worker.ProgressStatus = "Starting PLC runtime ...";
-            //System.Threading.Thread.Sleep(5000);
-            //plcProjectItem.ConsumeXml(xmlStart);
-            //worker.ProgressStatus = "Logging out of PLC runtime ...";
-            //System.Threading.Thread.Sleep(5000);
-            //plcProjectItem.ConsumeXml(xmlLogout);
+
+            worker.ProgressStatus = "Stopping PLC runtime ...";
+            System.Threading.Thread.Sleep(5000);
+            plcProjectItem.ConsumeXml(xmlStop);
+
+            worker.ProgressStatus = "Starting PLC runtime ...";
+            System.Threading.Thread.Sleep(5000);
+            plcProjectItem.ConsumeXml(xmlStart);
+
+            worker.ProgressStatus = "Logging out of PLC runtime ...";
+            System.Threading.Thread.Sleep(5000);
+            plcProjectItem.ConsumeXml(xmlLogout);
+
 
             worker.Progress = 100;
         }
-        private ITcSmTreeItem CreateDut(ITcSmTreeItem parent, TreeItemType treeItemType, string typeName, string baseType, string declarationCode, IWorker worker)
+        private bool WaitForState(AdsState state, int timeOutInMilliSeconds)
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            while (stopwatch.ElapsedMilliseconds <= timeOutInMilliSeconds)
+            {
+                try
+                {
+                    if (tcSystemClient.ReadState().AdsState == state)
+                    {
+                        return true;
+                    }
+                }
+                catch (AdsErrorException)
+                {
+                    // This can happen while ADS changes state and we try to read it
+                }
+                finally
+                {
+                    System.Threading.Thread.Sleep(5000);
+                }
+            }
+
+            stopwatch.Stop();
+            return false;
+        }
+        private ITcSmTreeItem CreateDut(ITcSmTreeItem parent, TreeItemType treeItemType, string typeName, string baseType, IWorker worker)
+        {
+            string declarationCode = @"TYPE EthercatDevice : 
+STRUCT
+	dir : BYTE ;
+	speed : WORD ;
+	dummyDataOut AT %Q*: DWORD ;
+	dummyDataIn AT %I*: DWORD ;
+END_STRUCT
+END_TYPE";
             /* =================================================================================================
              * Creating the DUT using CreateChild()
              * ================================================================================================= */
@@ -320,38 +355,6 @@ END_TYPE";
             return item;
         }
 
-        private string GetDUTEmptyDeclaration(TreeItemType dutType, string childName, string baseClass)
-        {
-            if (childName == null) throw new ArgumentNullException("childName");
-
-            switch (dutType)
-            {
-                case TreeItemType.PlcDutAlias:
-                    if (baseClass == null || baseClass == string.Empty) throw new ArgumentException("Base class not specified!", "baseClass");
-                    return string.Format("TYPE {0}: {1}; END_TYPE", childName, baseClass);
-
-                case TreeItemType.PlcDutEnum:
-                    return string.Format("TYPE {0} :\n(\n\tenum_member := 0\n);\nEND_TYPE\n", childName);
-
-                case TreeItemType.PlcDutStruct:
-                    if (baseClass == null || baseClass == string.Empty)
-                        return string.Format("TYPE {0}:\n\tSTRUCT\n\tEND_STRUCT\nEND_TYPE", childName);
-                    else
-                        return string.Format("TYPE {0} EXTENDS {1} :\n\tSTRUCT\n\tEND_STRUCT\nEND_TYPE", childName);
-
-                case TreeItemType.PlcDutUnion:
-                    return string.Format("TYPE {0}:\n\tUNION\n\tEND_UNION\nEND_TYPE", childName);
-
-                default:
-                    throw new ArgumentException("dutType");
-            }
-        }
-
-        /// <summary>
-        /// Waits for build command to finish and checks for any errors in the ErrorList window
-        /// </summary>
-        /// <param name="worker">The worker.</param>
-        /// <param name="errorItems">Returns found errors in ErrorItems list.</param>
         private bool waitForBuildAndCheckErrors(IWorker worker, out ErrorItems errorItems)
         {
             bool buildSucceeded = false;
@@ -404,57 +407,6 @@ END_TYPE";
             }
             return buildSucceeded;
         }
-
-
-        /// <summary>
-        /// Creates a PLC folder
-        /// </summary>
-        /// <param name="parent">The parent item.</param>
-        /// <param name="folderName">Name of the folder to be created.</param>
-        /// <param name="before">Before item.</param>
-        /// <param name="worker">The worker.</param>
-        private ITcSmTreeItem CreatePlcFolder(ITcSmTreeItem parent, string folderName, string before, IWorker worker)
-        {
-            /* =================================================================================================
-             * Creating the PLC folder using CreateChild()
-             * ================================================================================================= */
-            worker.ProgressStatus = string.Format("Creating Folder '{0}' ...", folderName);
-            ITcSmTreeItem item = parent.CreateChild(folderName, TreeItemType.PlcFolder.AsInt32(), before, null);
-            return item;
-        }
-
-
-        /// <summary>
-        /// Creates Global Variable Parameter List
-        /// </summary>
-        /// <param name="parent">The parent item.</param>
-        /// <param name="name">Name of the Parameter List.</param>
-        /// <param name="declarationCode">Fill the Parameter List with declaration code.</param>
-        /// <param name="worker">The worker.</param>
-        private ITcSmTreeItem CreateParameterList(ITcSmTreeItem parent, string name, string declarationCode, IWorker worker)
-        {
-            /* =================================================================================================
-             * Creating the ParameterList using CreateChild()
-             * ================================================================================================= */
-            worker.ProgressStatus = string.Format("Creating ParameterList worksheet '{0}' ...", name);
-            ITcSmTreeItem item = parent.CreateChild(name, TreeItemType.PlcGvlParameters.AsInt32(), "", declarationCode);
-
-            //* =================================================================================================
-            // * Accessing the declaration code of the newly created ParaemeterList
-            // * ================================================================================================= */
-            //ITcPlcDeclaration declaration = (ITcPlcDeclaration)item;
-            //string oldDeclaration1 = declaration.DeclarationText;
-            //declaration.DeclarationText = declarationCode;
-            //string oldDeclaration2 = declaration.DeclarationText;
-            //string newDecl = declaration.DeclarationText;
-            return item;
-        }
-
-        /// <summary>
-        /// Creates ST POUs
-        /// </summary>
-        /// <param name="parent">The parent.</param>
-        /// <param name="worker">The worker.</param>
         private void CreatePOUsST(ITcSmTreeItem parent, IWorker worker)
         {
             /* =================================================================================================
@@ -465,34 +417,26 @@ END_TYPE";
             ITcSmTreeItem program = AddPOUProgram("Main", parent, language, worker);
         }
 
-        /// <summary>
-        /// Adds a Program pou to the Parent
-        /// </summary>
-        /// <param name="pouName">Name of the pou.</param>
-        /// <param name="parent">The parent.</param>
-        /// <param name="language">The language.</param>
-        /// <param name="worker">The worker.</param>
-        /// <returns></returns>
+
         private ITcSmTreeItem AddPOUProgram(string pouName, ITcSmTreeItem parent, IECLanguageType language, IWorker worker)
         {
-            //AvaiableBoxes = 10;
-            //AvaiableDevices = 1;
-            foreach (var item in parent)
-            {
-                ITcPlcPou pofdu = item as ITcPlcPou;
-                Console.WriteLine();
-            }
+            AvaiableBoxes = 2;
+            AvaiableDevices = 1;
+
             ITcSmTreeItem programPou = parent.LookupChild("Main");
             ITcPlcDeclaration pouDecl = programPou as ITcPlcDeclaration;
             ITcPlcImplementation pouImpl = programPou as ITcPlcImplementation;
             ITcXmlDocument pouDoc = programPou as ITcXmlDocument;
             string deviceAtrib = "";
 
-            for (int i = 1; i <= AvaiableBoxes; i++)
+            for (int j = 1; j < AvaiableDevices; j++)
             {
-                deviceAtrib += $"" +
-                    $"[{i}].dummyDataOut := TIID^Device_1^Box {i} (sample_app)^Outputs process data mapping^Trigger;\n" +
-                    $"[{i}].dummyDataIn := TIID^Device_1^Box {i} (sample_app)^Inputs process data mapping^Counter;\n";
+                for (int i = 1; i <= AvaiableBoxes; i++)
+                {
+                    deviceAtrib += $"" +
+                        $"[{i}].dummyDataOut := TIID^Device_{j}^Box {i} (sample_app)^Outputs process data mapping^Trigger;\n" +
+                        $"[{i}].dummyDataIn := TIID^Device_{j}^Box {i} (sample_app)^Inputs process data mapping^Counter;\n";
+                }
             }
 
             string decl1 =
@@ -502,15 +446,11 @@ END_TYPE";
                 "END_VAR \n" +
                 "VAR \n" +
                 "{attribute 'TcLinkTo' := '" + deviceAtrib +
-                //"[1].dummyDataOut := TIID^Device_1^Box 1 (sample_app)^Outputs process data mapping^Trigger;\n" +
-                //"[1].dummyDataIn := TIID^Device_1^Box 1 (sample_app)^Inputs process data mapping^Counter;\n" +
-                //"[2].dummyDataOut := TIID^Device_1^Box 2 (sample_app)^Outputs process data mapping^Trigger;\n" +
-                //"[2].dummyDataIn := TIID^Device_1^Box 2 (sample_app)^Inputs process data mapping^Counter;\n" +
-                //"[3].dummyDataOut := TIID^Device_1^Box 3 (sample_app)^Outputs process data mapping^Trigger;\n" +
-                //"[3].dummyDataIn := TIID^Device_1^Box 3 (sample_app)^Inputs process data mapping^Counter;\n" +
-                //"[4].dummyDataOut := TIID^Device_1^Box 4 (sample_app)^Outputs process data mapping^Trigger;\n" +
-                //"[4].dummyDataIn := TIID^Device_1^Box 4 (sample_app)^Inputs process data mapping^Counter;\n" +
-                "'}" +
+              //"[1].dummyDataOut := TIID^Device_1^Box 1 (sample_app)^Outputs process data mapping^Trigger;\n" +
+              //"[1].dummyDataIn := TIID^Device_1^Box 1 (sample_app)^Inputs process data mapping^Counter;\n" +
+              //"[2].dummyDataOut := TIID^Device_1^Box 2 (sample_app)^Outputs process data mapping^Trigger;\n" +
+              //"[2].dummyDataIn := TIID^Device_1^Box 2 (sample_app)^Inputs process data mapping^Counter;\n" +
+              "'}" +
                 "device : ARRAY [1..deviceCount] OF EthercatDevice ; \n" +
                 "counter: WORD; \n" +
                 "END_VAR"
@@ -555,88 +495,11 @@ END_TYPE";
             return programPou;
         }
 
-
-
-        /// <summary>
-        /// Adds a Set to a Property
-        /// </summary>
-        /// <param name="prop">Property object.</param>
-        /// <param name="language">The IEC language.</param>
-        /// <returns></returns>
-        private ITcSmTreeItem AddPropertySet(ITcSmTreeItem prop, IECLanguageType language)
-        {
-            /* =================================================================================================
-             * Preparing vInfo parameter
-             * ================================================================================================= */
-            dynamic vInfo = new string[3];
-            vInfo[0] = language.AsString();
-            vInfo[1] = "PUBLIC";
-            if (language == IECLanguageType.ST)
-            {
-                vInfo[2] = @"<ST><![CDATA[(* ST PropSet *)]]></ST>";
-            }
-
-            /* =================================================================================================
-             * Creating Property using CreateChild()
-             * ================================================================================================= */
-            ITcSmTreeItem propput = prop.CreateChild("", TreeItemType.PlcPropertySet.AsInt32(), "", (object)vInfo);
-
-            /* =================================================================================================
-             * Accessing declaration and implementation area
-             * ================================================================================================= */
-            ITcPlcDeclaration decl = (ITcPlcDeclaration)propput;
-            ITcPlcImplementation impl = (ITcPlcImplementation)propput;
-            string declText = decl.DeclarationText;
-            string implText = impl.ImplementationText;
-            string implXml = impl.ImplementationXml;
-
-            return propput;
-        }
-
-
-
-
-
-        /// <summary>
-        /// Writes all POUs into worker window
-        /// </summary>
-        /// <param name="root">Root object.</param>
-        /// <param name="worker">The worker.</param>
-        /// <returns></returns>
-        private void DumpPous(ITcSmTreeItem root, IWorker worker)
-        {
-            foreach (ITcSmTreeItem item in root)
-            {
-                ITcPlcPou pou = item as ITcPlcPou;
-
-                if (pou != null)
-                {
-                    string pouName = item.Name;
-                    worker.ProgressStatus = string.Format("POU '{0}' found!", pouName);
-                }
-                else
-                {
-                    DumpPous(item, worker);
-                }
-            }
-
-        }
-
-
-        /// <summary>
-        /// Gets the Script description
-        /// </summary>
-        /// <value>The description.</value>
         public override string Description
         {
             get { return "Demonstrates the creation of PLC projects, POUs etc., Setting of Solution Configurations."; }
         }
 
-
-        /// <summary>
-        /// Gets the detailed description of the <see cref="Script"/> that is shown in the Method Tips.
-        /// </summary>
-        /// <value>The detailed description.</value>
         public override string DetailedDescription
         {
             get
@@ -648,11 +511,6 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
             }
         }
 
-
-        /// <summary>
-        /// Gets the keywords, describing the Script features
-        /// </summary>
-        /// <value>The keywords.</value>
         public override string Keywords
         {
             get
@@ -661,11 +519,6 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
             }
         }
 
-
-        /// <summary>
-        /// Gets the Version number of TwinCAT that is necessary for script execution.
-        /// </summary>
-        /// <value>The TwinCAT version.</value>
         public override Version TwinCATVersion
         {
             get
@@ -674,10 +527,6 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
             }
         }
 
-        /// <summary>
-        /// Gets the build number of TwinCAT that is necessary for script execution.
-        /// </summary>
-        /// <value>The TwinCAT build.</value>
         public override string TwinCATBuild
         {
             get
@@ -686,10 +535,6 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
             }
         }
 
-        /// <summary>
-        /// Gets the category of this script.
-        /// </summary>
-        /// <value>The script category.</value>
         public override string Category
         {
             get
@@ -699,10 +544,12 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
         }
         public int AvaiableBoxes { get; set; }
         public int AvaiableDevices { get; set; }
+        public TcAdsClient tcSystemClient { get; private set; }
+
         public void ScanDevicesAndBoxes(IWorker worker)
         {
-            AvaiableBoxes = 0;
-            AvaiableDevices = 0;
+            AvaiableBoxes = 2;
+            AvaiableDevices = 1;
             ITcSmTreeItem ioDevicesItem = systemManager.LookupTreeItem("TIID");
             string scannedXml = ioDevicesItem.ProduceXml(false);
             XmlDocument xmlDoc = new XmlDocument();
@@ -732,9 +579,14 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                 {
                     worker.ProgressStatus = "Warning: " + ex.Message;
                 }
+                AvaiableDevices = AvaiableDevices + 1;
                 foreach (ITcSmTreeItem box in device)
                 {
-                    AvaiableBoxes = AvaiableBoxes + 1;
+                    if (box.Name.Contains("sample"))
+                    {
+
+                        AvaiableBoxes = AvaiableBoxes + 1;
+                    }
                     worker.ProgressStatus = $"(box.Name : {box.Name}";
                 }
             }

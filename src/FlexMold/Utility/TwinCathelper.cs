@@ -1,30 +1,11 @@
-﻿using FlexMold.Core;
-using FlexMold.MVVM.Model;
-using NLog;
-using NLog.Fluent;
+﻿using NLog;
 using System;
-using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Primitives;
-using System.Data.Common;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Windows.Media;
-using System.Windows.Threading;
 using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
 using TwinCAT.TypeSystem;
-using TwinCAT.ValueAccess;
-using static FlexMold.MVVM.Model.PLCMotor;
-using static System.Windows.Forms.AxHost;
 
 namespace FlexMold.Utility
 {
@@ -33,7 +14,9 @@ namespace FlexMold.Utility
         static private Logger log;
         static public int port { get; private set; }
         static public AdsSession _session { get; set; }
+        static public AdsSession _sessionSystemService { get; set; }
         static public AdsConnection _connection { get; set; }
+        static public AdsConnection _connectionSystemService { get; set; }
         static public ConnectionState MyConnectionStateOld { get; set; }
         static public ConnectionState MyConnectionStateNew { get; set; }
         static public ConnectionStateChangedReason MyConnectionStateChangedReason { get; set; }
@@ -42,24 +25,32 @@ namespace FlexMold.Utility
         static public IDataTypeCollection<IDataType> dataTypes { get; private set; }
         static public ISymbolCollection<ISymbol> symbols { get; private set; }
         static public ObservableCollection<Symbol> MySymbols { get; private set; }
-        static public Int16 DeviceCount { get; private set; }
+        static public Int16 DeviceCount { get;  set; }
         static public void TwinCatConnect()
         {
             log = LogManager.GetLogger("TwinCat");
             port = 851;
             log.Log(LogLevel.Info, $"Connecting to Local Host, Port : {port}");
-            _session = new AdsSession(AmsNetId.Local, port);
+            _session = new AdsSession(TwinCAT.Ads.AmsNetId.Local, port);
             _connection = (AdsConnection)_session.Connect();
             GetPLCVariables();
-            DeviceCount = (Int16)MySymbols.Where(a => a.InstancePath == "MAIN.deviceCount").FirstOrDefault().ReadAnyValue(typeof(Int16));
+     
         }
         static public void StartpPLC()
         {
-            _connection.WriteControl(new StateInfo(AdsState.Run, _connection.ReadState().DeviceState));
+            _connectionSystemService.WriteControl(new StateInfo(AdsState.Run, _connection.ReadState().DeviceState));
         }
         static public void StoppPLC()
         {
-            _connection.WriteControl(new StateInfo(AdsState.Stop, _connection.ReadState().DeviceState));
+            _connectionSystemService.WriteControl(new StateInfo(AdsState.Stop, _connection.ReadState().DeviceState));
+        }
+        static public void ConfigPLC()
+        {
+            _connectionSystemService.WriteControl(new StateInfo(AdsState.Config, _connection.ReadState().DeviceState));
+        }
+        static public void ReConfigPLC()
+        {
+            _connectionSystemService.WriteControl(new StateInfo(AdsState.Reconfig, _connection.ReadState().DeviceState));
         }
         public static StateInfo GetTwincatState()
         {

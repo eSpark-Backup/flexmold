@@ -45,6 +45,8 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="100" />
+            <RowDefinition Height="300" />
+            <RowDefinition Height="100" />
             <RowDefinition />
         </Grid.RowDefinitions>
         <TextBlock
@@ -86,5 +88,15 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
+        <ListView
+            Name="lvMessages"
+            Grid.Row="2"
+            Grid.Column="1" />
+        <ProgressBar
+            Name="progressBar1"
+            Grid.Row="3"
+            Grid.Column="1"
+            Height="25"
+            HorizontalAlignment="Stretch" />
     </Grid>
 </mah:MetroWindow>

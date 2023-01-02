@@ -1,34 +1,16 @@
 ﻿using FlexMold.MVVM.Model;
 using FlexMold.MVVM.ViewModel;
-using FlexMold.MVVM.ViewModel.Setting;
 using FlexMold.Utility;
 using MahApps.Metro.Controls;
 using NLog;
-using NLog.Fluent;
-using Sylvan.Data.Csv;
 using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.IO;
 using System.Linq;
 using System.Media;
-using System.Net.Http;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using TwinCAT;
 using TwinCAT.Ads;
-using TwinCAT.Ads.TypeSystem;
 
 namespace FlexMold
 {
@@ -47,7 +29,7 @@ namespace FlexMold
             /// Region closed 
 
             ShowMachineSlectionWindow();
-            
+
             switch (SelectedMachine.MachineType)
             {
                 case EMachineType.Motor:
@@ -55,7 +37,6 @@ namespace FlexMold
                     TwinCathelper._session.ConnectionStateChanged += session_ConnectionStateChanged;
                     TwinCathelper._connection.ConnectionStateChanged += _connection_ConnectionStatusChanged;
                     TwinCathelper._connection.RouterStateChanged += _connection_RouterStateChanged;
-
                     // Add the Notification event handler
                     try
                     {
@@ -65,14 +46,26 @@ namespace FlexMold
                     {
                         MessageBox.Show(ex.Message);
                     }
+                    TwinCathelper.ReConfigPLC();
+
                     if (TwinCathelper._connection.IsConnected)
                     {
                         if (TwinCathelper._connection.IsActive)
                         {
                             if (TwinCathelper.MySymbols.Count == 0)
                             {
+
                                 MessageBox.Show("Twincat Project Not Login or Properly Configured");
                                 this.Close();
+                            }
+                            else
+                            {
+                                TwinCathelper.DeviceCount = (Int16)TwinCathelper.MySymbols.Where(a => a.InstancePath == "MAIN.deviceCount").FirstOrDefault().ReadAnyValue(typeof(Int16));
+                                InitializeComponent();
+                                logCtrl.ItemAdded += OnLogMessageItemAdded;
+                                log.Log(LogLevel.Info, $"Application Loaded Scussfully.....");
+                                log.Log(LogLevel.Info, $"Selected Machine Type : {SelectedMachine.MachineType} Name : {SelectedMachine.Name} ID : {SelectedMachine.ID}");
+                                Console.WriteLine();
                             }
                         }
                         else
@@ -92,11 +85,6 @@ namespace FlexMold
                 default:
                     break;
             }
-            InitializeComponent();
-            logCtrl.ItemAdded += OnLogMessageItemAdded;
-            log.Log(LogLevel.Info, $"Application Loaded Scussfully.....");
-            log.Log(LogLevel.Info, $"Selected Machine Type : {SelectedMachine.MachineType} Name : {SelectedMachine.Name} ID : {SelectedMachine.ID}");
-            Console.WriteLine();
         }
         private void session_ConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
         {
@@ -106,7 +94,7 @@ namespace FlexMold
             });
         }
 
-         void _connection_AdsStateChanged(object sender, AdsStateChangedEventArgs e)
+        void _connection_AdsStateChanged(object sender, AdsStateChangedEventArgs e)
         {
             Dispatcher.Invoke(() =>
             {
@@ -116,7 +104,7 @@ namespace FlexMold
             log.Log(LogLevel.Info, $"AdsState : {TwinCathelper.MyAdsState}");
         }
 
-         void _connection_RouterStateChanged(object sender, AmsRouterNotificationEventArgs e)
+        void _connection_RouterStateChanged(object sender, AmsRouterNotificationEventArgs e)
         {
             Dispatcher.Invoke(() =>
             {
@@ -126,13 +114,13 @@ namespace FlexMold
             log.Log(LogLevel.Info, $"Router State : {TwinCathelper.MyAmsRouterState}");
         }
 
-         void _connection_ConnectionStatusChanged(object sender, ConnectionStateChangedEventArgs e)
+        void _connection_ConnectionStatusChanged(object sender, ConnectionStateChangedEventArgs e)
         {
             Dispatcher.Invoke(() =>
             {
                 Update();
             });
-                TwinCathelper.MyConnectionStateOld = e.OldState;
+            TwinCathelper.MyConnectionStateOld = e.OldState;
             TwinCathelper.MyConnectionStateNew = e.NewState;
             TwinCathelper.MyConnectionStateChangedReason = e.Reason;
             log.Log(LogLevel.Info, $"Connection Status Old : {TwinCathelper.MyConnectionStateOld}");
@@ -140,7 +128,7 @@ namespace FlexMold
             log.Log(LogLevel.Info, $"Connection Status Reason : {TwinCathelper.MyConnectionStateChangedReason}");
         }
 
-         void _session_ConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
+        void _session_ConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
         {
             Dispatcher.Invoke(() =>
             {
@@ -181,7 +169,7 @@ namespace FlexMold
                         break;
                 }
                 var info = TwinCathelper.GetTwincatState();
-                if (info!=null)
+                if (info != null)
                 {
                     tBAdsState.Text = info.AdsState.ToString();
 
@@ -230,6 +218,7 @@ namespace FlexMold
                 else
                 {
                     SelectedMachine = vm.SelectedMachine;
+
                 }
             }
             catch (Exception ex)

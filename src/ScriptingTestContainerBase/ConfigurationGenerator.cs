@@ -8,6 +8,7 @@ using Microsoft.Win32;
 using System.Text.RegularExpressions;
 //using Microsoft.VisualStudio.Utilities;
 using ScriptingTestContainerBase;
+using EnvDTE80;
 
 namespace ScriptingTest
 {
@@ -673,12 +674,12 @@ namespace ScriptingTest
 
                 if (dte != null)
                 {
-                    Dictionary<ROTDteInfo, EnvDTE.DTE> dict = ROTAccess.GetRunningDTETable();
+                    Dictionary<ROTDteInfo, DTE2> dict = ROTAccess.GetRunningDTETable();
 
-                    foreach (KeyValuePair<ROTDteInfo, EnvDTE.DTE> pair in dict)
+                    foreach (KeyValuePair<ROTDteInfo, DTE2> pair in dict)
                     {
                         ROTDteInfo info = pair.Key;
-                        EnvDTE.DTE infoDTE = pair.Value;
+                        DTE2 infoDTE = pair.Value;
 
                         if (dte == infoDTE)
                         {

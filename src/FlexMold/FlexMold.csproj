@@ -54,6 +54,9 @@
     <Reference Include="DataGridExtensions, Version=2.5.14.0, Culture=neutral, PublicKeyToken=43de855f87de903a, processorArchitecture=MSIL">
       <HintPath>..\packages\DataGridExtensions.2.5.14\lib\net452\DataGridExtensions.dll</HintPath>
     </Reference>
+    <Reference Include="envdte80, Version=17.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\envdte80.17.4.33103.184\lib\net472\envdte80.dll</HintPath>
+    </Reference>
     <Reference Include="MahApps.Metro, Version=2.0.0.0, Culture=neutral, PublicKeyToken=51482d6f650b2b3f, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.2.4.9\lib\net46\MahApps.Metro.dll</HintPath>
     </Reference>
@@ -162,9 +165,13 @@
     <Reference Include="Microsoft.VisualStudio.CodeCoverage.Shim, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeCoverage.17.4.0\lib\net462\Microsoft.VisualStudio.CodeCoverage.Shim.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.Interop, Version=17.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.VisualStudio.Interop.17.4.33103.184\lib\net472\Microsoft.VisualStudio.Interop.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.39\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
+    <Reference Include="netstandard" />
     <Reference Include="NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.5.1.0\lib\net46\NLog.dll</HintPath>
     </Reference>
@@ -265,6 +272,7 @@
     <Compile Include="MVVM\Model\Machine.cs" />
     <Compile Include="MVVM\Model\LaserProjector.cs" />
     <Compile Include="MVVM\Model\PLCMotor.cs" />
+    <Compile Include="MVVM\ViewModel\FlexMoldMachine1.cs" />
     <Compile Include="MVVM\ViewModel\MachineSettingViewModel.cs" />
     <Compile Include="MVVM\ViewModel\MachineSetting\MotorTestViewModel.cs" />
     <Compile Include="MVVM\View\MachineSetting\MotorTest.xaml.cs">
@@ -570,9 +578,24 @@
       <Project>{c04e879d-287e-49b5-9933-42fc2eff75f0}</Project>
       <Name>NlogViewer</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ScriptingTestContainerBase\ScriptingTestContainerBase.csproj">
+      <Project>{5e80f7cd-7d92-4e16-9fb7-6b36c57589ec}</Project>
+      <Name>ScriptingTestContainerBase</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StructPacker.1.0.8\analyzers\dotnet\cs\RudolfKurka.StructPacker.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="TCatSysManagerLib">
+      <Guid>{3C49D6C3-93DC-11D0-B162-00A0248C244B}</Guid>
+      <VersionMajor>3</VersionMajor>
+      <VersionMinor>3</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

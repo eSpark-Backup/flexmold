@@ -1,4 +1,5 @@
-﻿using ScriptingTest;
+﻿using EnvDTE80;
+using ScriptingTest;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,25 +18,16 @@ namespace TwincatAutomationTestAppWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        /// <summary>
-        /// Indicates, that the main window is initializing.
-        /// </summary>
+
         bool _initializing = false;
 
-        /// <summary>
-        /// Gets a value Indicating that the <see cref="MainWindow"/> is currently initializing.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if [is initializing]; otherwise, <c>false</c>.
-        /// </value>
+
         public bool IsInitializing
         {
             get { return _initializing; }
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MainWindow"/> class.
-        /// </summary>
+
         public MainWindow()
         {
             _initializing = true;
@@ -97,6 +89,7 @@ namespace TwincatAutomationTestAppWPF
         }
 
         /// <summary>
+        /// <summary>
         /// Gets a value indicating whether the IDE is visible during script
         /// </summary>
         /// <value>
@@ -157,7 +150,6 @@ namespace TwincatAutomationTestAppWPF
         private void updateVSInstallations()
         {
             VSInfo[] vsInstallations = null;
-
             if (cbComRegistration.IsChecked.Value)
             {
                 int currentIndex;
@@ -228,6 +220,11 @@ namespace TwincatAutomationTestAppWPF
 
                 _worker = new ScriptBackgroundWorker(/*this._factory,*/ _runningScript, context);
                 this.Update(_runningScript);
+
+                //Access COM Running Objects Table
+                Dictionary<string, List<object>> rot = ROTAccess.GetRunningObjectTable();
+                ROTAccess.CloseRunningDTETable(_runningScript.ScriptRootFolder+@"\" +_runningScript.ScriptName+".sln");
+               
                 _worker.ConfigurationInitialized += new EventHandler(_worker_ConfigurationInitialized);
                 _worker.ProgressChanged += new ProgressChangedEventHandler(_worker_ProgressChanged);
                 _worker.ProgressStatusChanged += new EventHandler<ProgressStatusChangedArgs>(_worker_ProgressStatusChanged);

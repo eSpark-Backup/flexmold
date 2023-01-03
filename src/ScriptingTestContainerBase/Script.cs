@@ -127,7 +127,7 @@ namespace ScriptingTest
             finally
             {
                 SetStopTime();
-                worker.Progress = 100; ;
+                worker.Progress = 99; ;
             }
         }
 

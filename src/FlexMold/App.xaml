@@ -6,7 +6,7 @@
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:view="clr-namespace:FlexMold.MVVM.View"
     xmlns:viewModelx="clr-namespace:FlexMold.MVVM.ViewModel"
-    StartupUri="MainWindow.xaml">
+    StartupUri="SplashMachineSlection.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -58,6 +58,10 @@
                 <Setter Property="CornerRadius" Value="15" />
             </Style>
             <Style BasedOn="{StaticResource MahApps.Styles.Button.Flat}" TargetType="{x:Type Button}">
+                <Setter Property="Margin" Value="2" />
+                <Setter Property="Height" Value="40" />
+            </Style>
+            <Style TargetType="{x:Type mah:MetroProgressBar}">
                 <Setter Property="Margin" Value="2" />
                 <Setter Property="Height" Value="40" />
             </Style>

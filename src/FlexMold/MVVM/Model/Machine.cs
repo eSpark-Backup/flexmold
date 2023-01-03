@@ -22,10 +22,10 @@ namespace FlexMold.MVVM.Model
                 switch (value)
                 {
                     case EMachineType.Motor:
-                        IconT = new PackIconUnicons() { Height = 80, Width = 80, Kind = PackIconUniconsKind.Drill };
+                        IconT = new PackIconMaterial() { Height = 80, Width = 80, Kind = PackIconMaterialKind.Draw };
                         break;
                     case EMachineType.Projector:
-                        IconT = new PackIconRemixIcon() { Height = 80, Width = 80, Kind = PackIconRemixIconKind.Projector2Fill };
+                        IconT = new PackIconMaterial() { Height = 80, Width = 80, Kind = PackIconMaterialKind.Projector };
                         break;
                 }
                 _MachineType = value; 

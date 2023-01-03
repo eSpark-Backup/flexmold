@@ -13,5 +13,6 @@ namespace FlexMold
     /// </summary>
     public partial class App : Application
     {
+
     }
 }

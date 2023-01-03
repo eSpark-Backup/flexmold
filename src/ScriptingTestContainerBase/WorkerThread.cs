@@ -305,9 +305,9 @@ namespace ScriptingTest
                 _factory.ExecuteScript(_script /*,_parameters,this*/);   // Execution of Script
                 this.ProgressStatus = "Closing configuration ...";
                 _factory.Cleanup();  // Closing of configuration
-
-                this.Progress = 100;
-                this.ProgressStatus = "Finished";
+              
+                this.Progress = 99;
+                this.ProgressStatus = "Finishing";
             }
             //catch (ThreadAbortException tae)
             //{
@@ -328,6 +328,8 @@ namespace ScriptingTest
 
                 if (RunWorkerCompleted != null)
                     RunWorkerCompleted(this, new RunWorkerCompletedEventArgs(_script.Result, _script.Exception, this.CancellationPending));
+                this.Progress = 100;
+                this.ProgressStatus = "Finished";
             }
         }
 

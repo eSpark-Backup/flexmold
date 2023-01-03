@@ -19,71 +19,48 @@ namespace FlexMold
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
-        public Machine SelectedMachine { get; set; }
         Logger log = LogManager.GetLogger("Main");
-        public MainWindow()
+        public MainWindow(Machine SelectedMachine)
         {
-
             /// Test Area please comment
 
             /// Region closed 
 
-            ShowMachineSlectionWindow();
 
-            switch (SelectedMachine.MachineType)
+            TwinCathelper.TwinCatConnect851();
+            TwinCathelper._session.ConnectionStateChanged += session_ConnectionStateChanged;
+            TwinCathelper._connection.ConnectionStateChanged += _connection_ConnectionStatusChanged;
+            TwinCathelper._connection.RouterStateChanged += _connection_RouterStateChanged;
+            TwinCathelper._connection.RegisterAdsStateChangedAsync(_connection_AdsStateChanged, CancellationToken.None);
+            if (TwinCathelper._connection.IsConnected)
             {
-                case EMachineType.Motor:
-                    TwinCathelper.TwinCatConnect();
-                    TwinCathelper._session.ConnectionStateChanged += session_ConnectionStateChanged;
-                    TwinCathelper._connection.ConnectionStateChanged += _connection_ConnectionStatusChanged;
-                    TwinCathelper._connection.RouterStateChanged += _connection_RouterStateChanged;
-                    // Add the Notification event handler
-                    try
+                if (TwinCathelper._connection.IsActive)
+                {
+                    if (TwinCathelper.MySymbols.Count == 0)
                     {
-                        TwinCathelper._connection.RegisterAdsStateChangedAsync(_connection_AdsStateChanged, CancellationToken.None);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message);
-                    }
-                    TwinCathelper.ReConfigPLC();
-
-                    if (TwinCathelper._connection.IsConnected)
-                    {
-                        if (TwinCathelper._connection.IsActive)
-                        {
-                            if (TwinCathelper.MySymbols.Count == 0)
-                            {
-
-                                MessageBox.Show("Twincat Project Not Login or Properly Configured");
-                                this.Close();
-                            }
-                            else
-                            {
-                                TwinCathelper.DeviceCount = (Int16)TwinCathelper.MySymbols.Where(a => a.InstancePath == "MAIN.deviceCount").FirstOrDefault().ReadAnyValue(typeof(Int16));
-                                InitializeComponent();
-                                logCtrl.ItemAdded += OnLogMessageItemAdded;
-                                log.Log(LogLevel.Info, $"Application Loaded Scussfully.....");
-                                log.Log(LogLevel.Info, $"Selected Machine Type : {SelectedMachine.MachineType} Name : {SelectedMachine.Name} ID : {SelectedMachine.ID}");
-                                Console.WriteLine();
-                            }
-                        }
-                        else
-                        {
-                            MessageBox.Show("Twicat Is Not Active");
-                            this.Close();
-                        }
+                        MessageBox.Show("Twincat Project Not Login or Properly Configured");
+                        this.Close();
                     }
                     else
                     {
-                        MessageBox.Show("Twicat Not Connected");
-                        this.Close();
+                        TwinCathelper.DeviceCount = (Int16)TwinCathelper.MySymbols.Where(a => a.InstancePath == "MAIN.deviceCount").FirstOrDefault().ReadAnyValue(typeof(Int16));
+                        InitializeComponent();
+                        logCtrl.ItemAdded += OnLogMessageItemAdded;
+                        log.Log(LogLevel.Info, $"Application Loaded Scussfully.....");
+                        log.Log(LogLevel.Info, $"Selected Machine Type : {SelectedMachine.MachineType} Name : {SelectedMachine.Name} ID : {SelectedMachine.ID}");
+                        Console.WriteLine();
                     }
-                    break;
-                case EMachineType.Projector:
-                    break;
-                default:
-                    break;
+                }
+                else
+                {
+                    MessageBox.Show("Twicat Is Not Active");
+                    this.Close();
+                }
+            }
+            else
+            {
+                MessageBox.Show("Twicat Not Connected");
+                this.Close();
             }
         }
         private void session_ConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
@@ -197,33 +174,6 @@ namespace FlexMold
             {
                 tBConnectionState.Text = ConnectionState.None.ToString();
                 tBAdsState.Text = AdsState.Invalid.ToString();
-            }
-        }
-        void ShowMachineSlectionWindow()
-        {
-            SelectedMachine = new Machine();
-            try
-            {
-                var vm = new SplashScreenViewModel();
-                var splashscreen = new SplashMachineSlection
-                {
-                    DataContext = vm
-                };
-                vm.OnRequestClose += (s, e) => splashscreen.Close();
-                splashscreen.ShowDialog();
-                if (vm.SelectedMachine.Name == null)
-                {
-                    ShowMachineSlectionWindow();
-                }
-                else
-                {
-                    SelectedMachine = vm.SelectedMachine;
-
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
             }
         }
         private void OnLogMessageItemAdded(object o, EventArgs Args)

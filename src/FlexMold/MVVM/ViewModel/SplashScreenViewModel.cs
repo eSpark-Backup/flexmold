@@ -20,43 +20,58 @@ namespace FlexMold.MVVM.ViewModel
     class SplashScreenViewModel : ObservableObject
     {
         public VSInfo SelectedVS { get; set; }
+        private bool _RunButtonEnable;
+
+        public bool RunButtonEnable
+        {
+            get { return _RunButtonEnable; }
+            set
+            {
+                _RunButtonEnable = value;
+                OnPropertyChanged();
+            }
+        }
 
         public Script SelectedScript { get; set; }
 
-        private int ProgressPercentage;
+        private int _ProgressPercentage;
 
-        public int _ProgressPercentage
+        public int ProgressPercentage
         {
-            get { return ProgressPercentage; }
+            get { return _ProgressPercentage; }
             set
             {
-                ProgressPercentage = value;
-                OnPropertyChanged();
-            }
-        }
-        private List<string> ProgressStatuses;
-
-        public List<string> _ProgressStatuses
-        {
-            get { return ProgressStatuses; }
-            set
-            {
-                ProgressStatuses = value;
+                _ProgressPercentage = value;
                 OnPropertyChanged();
             }
         }
 
+        private string _ProgressStatuses;
 
+        public string ProgressStatuses
+        {
+            get { return _ProgressStatuses; }
+            set
+            {
+                _ProgressStatuses = value+"\n"+ ProgressStatuses;
+                OnPropertyChanged();
+            }
+        }
         public bool ComRegistration { get; set; }
         public IWorker _worker { get; set; }
         public ConfigurationFactory _factory { get; set; }
         public Script _runningScript { get; set; }
         public Machine SelectedMachine { get; set; }
         public RelayCommand MachineClickCommand { get; set; }
+        public RelayCommand CloseButtonCommand { get; set; }
+        public RelayCommand RunButtonCommand { get; set; }
         public ObservableCollection<Machine> MyMachines { get; set; }
+        public List<VSInfo> AvailableVS { get; private set; }
+
         public event EventHandler OnRequestClose;
         public SplashScreenViewModel()
         {
+            RunButtonEnable = false;
             SelectedMachine = new Machine();
             MyMachines = new ObservableCollection<Machine>
             {
@@ -67,16 +82,50 @@ namespace FlexMold.MVVM.ViewModel
                 new Machine()
                 { ID = 3, Location = "R2", MachineType = EMachineType.Projector, Name = "P1" },
             };
-            updateVSInstallations();
             MachineClickCommand = new RelayCommand(o => MachineSelectMethod(o as Machine));
+            RunButtonCommand = new RelayCommand(o => RunMainWindow());
+            CloseButtonCommand = new RelayCommand(o =>
+            OnRequestClose(this, new EventArgs())
+            );
+
         }
 
-        void MachineSelectMethod(Machine a)
+        void MachineSelectMethod(Machine _a)
         {
-            SelectedMachine = a;
-            OnRequestClose(this, new EventArgs());
+            SelectedMachine = _a;
+            switch (SelectedMachine.MachineType)
+            {
+                case EMachineType.Motor:
+                    if (MessageBox.Show("Do You Want to build TwinCAT Solution?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                    {
+                        RunMainWindow();
+                    }
+                    else
+                    {
+                        SelectedScript = new FlexMoldMachine1();
+                        ComRegistration = true;
+                        updateVSInstallations();
+                        string TCVS = "TcXaeShell 15.0";
+                        SelectedVS = AvailableVS.Where(a => a.Name == TCVS).FirstOrDefault();
+                        if (SelectedVS != null)
+                        {
+                            RunScript();
+                        }
+                        else
+                        {
+                            MessageBox.Show($"IDE Not Found Please Install {TCVS}");
+                            OnRequestClose(this, new EventArgs());
+                        }
+                    }
+
+                    break;
+                case EMachineType.Projector:
+                    break;
+                default:
+                    break;
+            }
         }
-        private void updateVSInstallations()
+        public void updateVSInstallations()
         {
             VSInfo[] vsInstallations = null;
             if (ComRegistration)
@@ -102,26 +151,39 @@ namespace FlexMold.MVVM.ViewModel
             List<VSInfo> sorted = progIdDict2.ToList();
             sorted.Sort(CompareTo);
 
-            var AvailableVS = new List<VSInfo>();
+            AvailableVS = new List<VSInfo>();
             foreach (VSInfo vsInfo in sorted)
             {
                 AvailableVS.Add(vsInfo);
             }
         }
+        void RunMainWindow()
+        {
+            MainWindow mw = new MainWindow(SelectedMachine);
+            OnRequestClose(this, new EventArgs());
+            mw.Show();
+            Application.Current.MainWindow = mw;
+        }
 
         void _worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             ProgressPercentage = e.ProgressPercentage;
+            if (ProgressPercentage == 100)
+            {
+                if (_worker != null)
+                    _worker.CancelAndWait(TimeSpan.FromSeconds(1.0));
+                RunButtonEnable = true;
+            }
         }
+
         void _worker_ProgressStatusChanged(object sender, ProgressStatusChangedArgs e)
         {
-
-            ProgressStatuses.Add(e.Status);
+            ProgressStatuses = e.Status;
+        
         }
-        private void btnExecute_Click()
+        public void RunScript()
         {
             Debug.Assert(this._factory == null);
-
             if (this.SelectedScript != null)
             {
                 _runningScript = this.SelectedScript;
@@ -141,7 +203,8 @@ namespace FlexMold.MVVM.ViewModel
                 ScriptContext context = new ScriptContext(_factory, null, parameterSet);
 
                 _worker = new ScriptBackgroundWorker(/*this._factory,*/ _runningScript, context);
-
+                ProgressPercentage = 5;
+                ProgressStatuses = "Closing Opened Instances Cuurent TwinCAT sln";
                 //Access COM Running Objects Table
                 Dictionary<string, List<object>> rot = ROTAccess.GetRunningObjectTable();
                 ROTAccess.CloseRunningDTETable(_runningScript.ScriptRootFolder + @"\" + _runningScript.ScriptName + ".sln");

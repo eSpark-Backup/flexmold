@@ -98,13 +98,17 @@ namespace FlexMold.MVVM.ViewModel
         /// <param name="worker">The worker.</param>
         protected override void OnExecute(IWorker worker)
         {
-            worker.Progress = 0;
+
             if (worker.CancellationPending)
                 throw new Exception("Cancelled");
-            TwinCathelper._sessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local,(int)AmsPort.SystemService);
+            worker.ProgressStatus = $"Connecting to TwinCAT Via ADS On Port {(int)AmsPort.SystemService}";
+            TwinCathelper._sessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
             TwinCathelper._connectionSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
+            worker.Progress = 8;
+            worker.ProgressStatus = $"Configuring TwinCAT System into ConfigMode ....";
             TwinCathelper.ReConfigPLC();
             WaitForState(AdsState.Config, 3000);
+            worker.Progress = 10;
 
             /* =================================================================================================
              * Get references to PLC and IO nodes
@@ -116,8 +120,9 @@ namespace FlexMold.MVVM.ViewModel
             /* =================================================================================================
              * Scans the Fieldbus interfaces and adds an EtherCAT Device.
              * ================================================================================================= */
-            worker.ProgressStatus = "Scanning Devices";
+            worker.ProgressStatus = $"Scanning Devices ....";
             ScanDevicesAndBoxes(worker); //custom code
+            worker.Progress = 15;
 
             /* =================================================================================================
              * Attach an empty PLC Project using the "TwinCAT Project" template
@@ -126,7 +131,7 @@ namespace FlexMold.MVVM.ViewModel
             ITcSmTreeItem plcGenerated = plcConfig.CreateChild("PlcGenerated", 0, "", vsXaePlcStandardTemplateName);
 
             worker.ProgressStatus = "PLC Project created ...";
-            worker.Progress = 10;
+            worker.Progress = 20;
 
             /* =================================================================================================
              * Get references to attached PLC Project and some of its childs
@@ -143,7 +148,7 @@ namespace FlexMold.MVVM.ViewModel
 
 
             ITcSmTreeItem plcDutStruct = CreateDut(plcDutsItem, TreeItemType.PlcDutStruct, "EthercatDevice", null, worker);
-            worker.Progress = 20;
+            worker.Progress = 30;
 
 
 
@@ -151,7 +156,7 @@ namespace FlexMold.MVVM.ViewModel
              * Creating POUs under folder "MyPous"
              * ================================================================================================= */
             CreatePOUsST(plcPousItem, worker);
-            worker.Progress = 30;
+            worker.Progress = 40;
 
             /* =================================================================================================
              * Adjust Visual Studio Solution configuration
@@ -183,12 +188,12 @@ namespace FlexMold.MVVM.ViewModel
              * Compiling project using Automation Interface methods
              * ================================================================================================= */
             ITcPlcProject iecProjectRoot = (ITcPlcProject)plcProjectRootItem;
-            worker.ProgressStatus = "Compiling project (1) ...";
+            worker.ProgressStatus = "Compiling project ...";
 
             iecProjectRoot.CompileProject();
 
             ErrorItems errors = dte.ToolWindows.ErrorList.ErrorItems;
-            worker.Progress = 75;
+            worker.Progress = 55;
             iecProjectRoot.BootProjectAutostart = true;
 
 
@@ -199,12 +204,14 @@ namespace FlexMold.MVVM.ViewModel
             worker.ProgressStatus = "Compiling project (3) ...";
             dte.Solution.SolutionBuild.Build(true);
             waitForBuildAndCheckErrors(worker, out errors);
+            worker.Progress = 60;
 
             /* =================================================================================================
              * Generating Boot Project
              * ================================================================================================= */
             worker.ProgressStatus = "Generating boot project ...";
             iecProjectRoot.GenerateBootProject(true);
+            worker.Progress = 65;
 
 
             /* =================================================================================================
@@ -286,30 +293,35 @@ namespace FlexMold.MVVM.ViewModel
             systemManager.ActivateConfiguration();
             worker.ProgressStatus = "Restarting TwinCAT ...";
             systemManager.StartRestartTwinCAT();
+            worker.Progress = 70;
 
             /* =================================================================================================
              * Execute PLC Login, Start, Logout, ...
              * ================================================================================================= */
             System.Threading.Thread.Sleep(5000);
+            worker.Progress = 75;
 
             worker.ProgressStatus = "Logging in to PLC runtime ...";
             System.Threading.Thread.Sleep(5000);
             plcProjectItem.ConsumeXml(xmlLogin);
+            worker.Progress = 80;
 
             worker.ProgressStatus = "Stopping PLC runtime ...";
             System.Threading.Thread.Sleep(5000);
             plcProjectItem.ConsumeXml(xmlStop);
+            worker.Progress = 85;
 
             worker.ProgressStatus = "Starting PLC runtime ...";
             System.Threading.Thread.Sleep(5000);
             plcProjectItem.ConsumeXml(xmlStart);
+            worker.Progress = 90;
 
             worker.ProgressStatus = "Logging out of PLC runtime ...";
             System.Threading.Thread.Sleep(5000);
             plcProjectItem.ConsumeXml(xmlLogout);
 
 
-            worker.Progress = 100;
+            worker.Progress = 95;
         }
         private bool WaitForState(AdsState state, int timeOutInMilliSeconds)
         {
@@ -430,7 +442,7 @@ END_TYPE";
             ITcXmlDocument pouDoc = programPou as ITcXmlDocument;
             string deviceAtrib = "";
 
-            for (int j = 1; j < AvaiableDevices; j++)
+            for (int j = 1; j <= AvaiableDevices; j++)
             {
                 for (int i = 1; i <= AvaiableBoxes; i++)
                 {
@@ -584,10 +596,9 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                 {
                     if (box.Name.Contains("sample"))
                     {
-
                         AvaiableBoxes = AvaiableBoxes + 1;
+                        worker.ProgressStatus = $"Box Added Name : {box.Name}";
                     }
-                    worker.ProgressStatus = $"(box.Name : {box.Name}";
                 }
             }
         }

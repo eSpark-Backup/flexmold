@@ -26,7 +26,7 @@ namespace FlexMold.Utility
         static public ISymbolCollection<ISymbol> symbols { get; private set; }
         static public ObservableCollection<Symbol> MySymbols { get; private set; }
         static public Int16 DeviceCount { get;  set; }
-        static public void TwinCatConnect()
+        static public void TwinCatConnect851()
         {
             log = LogManager.GetLogger("TwinCat");
             port = 851;
@@ -34,23 +34,22 @@ namespace FlexMold.Utility
             _session = new AdsSession(TwinCAT.Ads.AmsNetId.Local, port);
             _connection = (AdsConnection)_session.Connect();
             GetPLCVariables();
-     
         }
         static public void StartpPLC()
         {
-            _connectionSystemService.WriteControl(new StateInfo(AdsState.Run, _connection.ReadState().DeviceState));
+            _connectionSystemService.WriteControl(new StateInfo(AdsState.Run, _connectionSystemService.ReadState().DeviceState));
         }
         static public void StoppPLC()
         {
-            _connectionSystemService.WriteControl(new StateInfo(AdsState.Stop, _connection.ReadState().DeviceState));
+            _connectionSystemService.WriteControl(new StateInfo(AdsState.Stop, _connectionSystemService.ReadState().DeviceState));
         }
         static public void ConfigPLC()
         {
-            _connectionSystemService.WriteControl(new StateInfo(AdsState.Config, _connection.ReadState().DeviceState));
+            _connectionSystemService.WriteControl(new StateInfo(AdsState.Config, _connectionSystemService.ReadState().DeviceState));
         }
         static public void ReConfigPLC()
         {
-            _connectionSystemService.WriteControl(new StateInfo(AdsState.Reconfig, _connection.ReadState().DeviceState));
+            _connectionSystemService.WriteControl(new StateInfo(AdsState.Reconfig, _connectionSystemService.ReadState().DeviceState));
         }
         public static StateInfo GetTwincatState()
         {

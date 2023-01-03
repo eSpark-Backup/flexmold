@@ -44,6 +44,7 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
             set
             {
                 _SelectedMotorIndex = value;
+                justread = true;
                 ReadData(value);
                 SelectedMotorSpeedValue = MyPLCMotor[value].speed;
                 SelectedMotorDirValue = Convert.ToBoolean(MyPLCMotor[value].dir);
@@ -65,6 +66,7 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
                 else
                 {
                     _SelectedMotorDirValue = value;
+                    justread = false;
                 }
                 OnPropertyChanged();
             }
@@ -84,6 +86,7 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
                 else
                 {
                     _SelectedMotorSpeedValue = value;
+                    justread = false;
                 }
                 OnPropertyChanged();
             }
@@ -106,16 +109,12 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
         }
         void ReadData(uint _motorNumber)
         {
-            justread = true;
             var mtarray = new byte[structSize];
             TwinCathelper._connection.Read(SymbolEthercatDevice.IndexGroup,
                 SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
-            Array.Copy(buffer, structSize * _motorNumber, mtarray, 0, structSize);
             MyPLCMotor[_motorNumber].Unpack(mtarray);
-            
-            justread = false;
         }
-        void WriteData()
+        void WriteDataAll()
         {
             for (int i = 0; i < MyPLCMotor.Length; i++)
             {

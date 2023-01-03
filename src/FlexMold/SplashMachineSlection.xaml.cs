@@ -21,6 +21,8 @@ namespace FlexMold
         public SplashMachineSlection()
         {
             InitializeComponent();
+            var vm = DataContext as SplashScreenViewModel;
+            vm.OnRequestClose += (s, e) => this.Close();
         }
     }
 }

@@ -28,9 +28,9 @@ Executable can be downloaded from [FCA](./Binaries/FCA%203.rar)
 # Results
  ![](img/Issue10d.gif)
  ![](img/R1.png)
-  ![](img/R2.png)
-   ![](img/R3.png)
-    ![](img/R4.png)
+ ![](img/R2.png)
+ ![](img/R3.png)
+ ![](img/R4.png)
 ## External Thanks
 - [For NLogViewer] https://github.com/erizet/NlogViewer
 - [For WPF Panel Control Template] https://www.youtube.com/watch?v=PzP8mw7JUzI&t=1s&ab_channel=Payload

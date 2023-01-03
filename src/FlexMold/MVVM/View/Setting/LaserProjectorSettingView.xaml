@@ -73,11 +73,12 @@
             Columns="3">
             <Button Command="{Binding TelnetConnectCommand}" Content="Test Connect" />
             <Button Command="{Binding TelnetMessageSendCommand}" Content="Send Message" />
+            <Button Content="Save Setting" />
             <Button Command="{Binding TelnetDisConnectCommand}" Content="Disconnect" />
+            <Button Command="{Binding ProjectionOnCommand}" Content="Projection On" />
+            <Button Command="{Binding ProjectionOffCommand}" Content="Projection Off" />
+            <Button Command="{Binding CallibrateProjectorCommand}" Content="Calibrate Projector" />
+            <Button Command="{Binding TelnetDisConnectCommand}" Content="Launch LPM" />
         </UniformGrid>
-        <Button
-            Grid.Row="5"
-            Grid.ColumnSpan="3"
-            Content="Save Setting" />
     </Grid>
 </UserControl>

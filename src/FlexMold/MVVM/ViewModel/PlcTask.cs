@@ -7,7 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media.Animation;
 using TwinCAT.Ads;
+using TwinCAT.TypeSystem;
 
 namespace FlexMold.MVVM.ViewModel
 {
@@ -18,9 +20,7 @@ namespace FlexMold.MVVM.ViewModel
         public string[] plcHostAvailableIPs { get; set; }
        
         public UInt16 plcHostSelectedPort { get; set; }
-       
-        public string plcHostSelectedIP { get; set; }
-        
+
         private UInt16 _motorStep;
 
         public UInt16 motorStep
@@ -42,32 +42,33 @@ namespace FlexMold.MVVM.ViewModel
             }
         }
 
-        private TcAdsClient adsClient;
+        private AdsClient adsClient;
+        private AdsSession MyAdsSession;
+
         private int vhmotorStatus;
-        private int vhdir;
-        private int vhspeed;
+        private uint vhdir;
+        private uint vhspeed;
 
         public string connectPLC(bool connect)
         {
             Logger log = LogManager.GetLogger("connectPLC");
             // Create instance of class TcAdsClient
-            adsClient = new TcAdsClient();
+            adsClient = new AdsClient();
             if (connect)
             {
                 try
                 {
                     // PLC1 Port - TwinCAT 3=851
-                    adsClient.Connect(plcHostSelectedIP, plcHostSelectedPort);
+                    adsClient.Connect(plcHostSelectedPort);
                     log.Log(LogLevel.Info, $"ADS Address : {adsClient.Address}");
                     log.Log(LogLevel.Info, $"ADS ID : {adsClient.Id}");
-                    log.Log(LogLevel.Info, $"ADS Protocol : {adsClient.Protocol}");
                     log.Log(LogLevel.Info, $"ADS IsLocal : {adsClient.IsLocal}");
                     log.Log(LogLevel.Info, $"ADS ClientAddress : {adsClient.ClientAddress}");
-                    log.Log(LogLevel.Info, $"ADS RouterState : {adsClient.RouterState}");
+                    log.Log(LogLevel.Info, $"ADS IsConnected : {adsClient.IsConnected}");
+                    log.Log(LogLevel.Info, $"ADS Timeout : {adsClient.Timeout}");
 
-                    //vhmotorStatus = adsClient.CreateVariableHandle("MAIN.motorStatus");
-                    vhdir = adsClient.CreateVariableHandle("MAIN.dir");
-                    vhspeed = adsClient.CreateVariableHandle("MAIN.speed");
+                    vhdir = adsClient.CreateVariableHandle("MAIN.dirM1");
+                    vhspeed = adsClient.CreateVariableHandle("MAIN.speedM1");
                     getPlcVariables();
                     return "Diconnect";
                 }

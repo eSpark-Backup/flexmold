@@ -1,0 +1,210 @@
+﻿<Window
+    x:Class="TwincatAutomationTestAppWPF.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:TwincatAutomationTestAppWPF"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="MainWindow"
+    Width="800"
+    Height="450"
+    mc:Ignorable="d">
+    <Grid Name="gbScripts" Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <GroupBox
+            Name="gbProgID"
+            Height="104"
+            Margin="12,12,168,0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Top"
+            Foreground="White"
+            Header="VisualStudio/TcXaeShell Installations">
+            <Grid>
+                <ComboBox
+                    Name="cBProgID"
+                    Height="23"
+                    Margin="6,6,47,0"
+                    VerticalAlignment="Top" />
+                <CheckBox
+                    x:Name="cbComRegistration"
+                    Margin="646,41,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Checked="cbComRegistration_Checked"
+                    Content="Use COM Registration"
+                    Foreground="White"
+                    Unchecked="cbComRegistration_Unchecked" />
+                <TextBox
+                    Width="519"
+                    Height="33"
+                    Margin="112,38,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Background="#FF093A61"
+                    BorderBrush="#FF083A62"
+                    Foreground="White"
+                    Text="Use the Microsoft.VisualStudio.Configuation.Setup package to detect VisualStudio/TcXaeShell instances (new Method) or search through registered ProgIds:"
+                    TextWrapping="WrapWithOverflow" />
+            </Grid>
+        </GroupBox>
+        <GroupBox
+            Name="gBScripts"
+            Grid.Row="1"
+            Margin="12"
+            Foreground="White"
+            Header="Scripts">
+            <Grid>
+                <ListView
+                    Name="lVScripts"
+                    Margin="6"
+                    Background="Silver"
+                    DataContext="{Binding RelativeSource={RelativeSource Self}}"
+                    ItemsSource="{Binding}"
+                    SelectionChanged="lVScripts_SelectionChanged"
+                    SelectionMode="Single">
+                    <ListView.View>
+                        <GridView AllowsColumnReorder="False">
+                            <GridViewColumn
+                                Width="Auto"
+                                DisplayMemberBinding="{Binding Path=Category}"
+                                Header="Category" />
+                            <GridViewColumn
+                                Width="Auto"
+                                DisplayMemberBinding="{Binding Path=ScriptName}"
+                                Header="Script Name" />
+                            <GridViewColumn
+                                Width="Auto"
+                                DisplayMemberBinding="{Binding Path=Description}"
+                                Header="Description" />
+                            <!-- <GridViewColumn Header="Keywords" DisplayMemberBinding="{Binding Path=Keywords}" Width="Auto" /> -->
+                            <GridViewColumn
+                                Width="Auto"
+                                DisplayMemberBinding="{Binding Path=TwinCATVersion}"
+                                Header="Version" />
+                            <GridViewColumn
+                                Width="Auto"
+                                DisplayMemberBinding="{Binding Path=TwinCATBuild}"
+                                Header="Build" />
+                            <GridViewColumn
+                                Width="Auto"
+                                DisplayMemberBinding="{Binding Path=Language}"
+                                Header="Language" />
+                            <GridViewColumn
+                                Width="Auto"
+                                DisplayMemberBinding="{Binding Path=Binding}"
+                                Header="Binding" />
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </Grid>
+        </GroupBox>
+        <Button
+            Name="btnExecute"
+            Grid.Row="3"
+            Width="127"
+            Height="23"
+            Margin="0,12,187,66"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Click="btnExecute_Click"
+            Content="Execute" />
+        <Button
+            Name="btnCancel"
+            Grid.Row="3"
+            Width="115"
+            Height="23"
+            Margin="0,0,66,66"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Click="btnCancel_Click"
+            Content="Cancel" />
+        <ProgressBar
+            Name="progressBar1"
+            Grid.Row="3"
+            Height="25"
+            Margin="12,0,12,24"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Bottom" />
+        <GroupBox
+            Name="gBSettings"
+            Width="150"
+            Height="104"
+            Margin="0,12,12,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Foreground="White"
+            Header="App Settings">
+            <Grid Width="140">
+                <CheckBox
+                    Name="cbProgVisible"
+                    Height="16"
+                    Margin="17,10,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Content="IDE Visible"
+                    Foreground="White" />
+                <CheckBox
+                    Name="cbUserControl"
+                    Height="16"
+                    Margin="17,32,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Content="IDE UserControl"
+                    Foreground="White" />
+                <CheckBox
+                    Name="cbSuppressUI"
+                    Height="16"
+                    Margin="17,54,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Content="Suppress UI"
+                    Foreground="White" />
+            </Grid>
+        </GroupBox>
+        <GroupBox
+            Name="gBMessages"
+            Grid.Row="2"
+            Margin="12"
+            HorizontalAlignment="Stretch"
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Stretch"
+            Foreground="White"
+            Header="Message">
+            <Grid>
+                <ListView
+                    Name="lvMessages"
+                    Margin="6"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    Background="Silver" />
+            </Grid>
+        </GroupBox>
+        <Border
+            Name="statusBox"
+            Grid.Row="3"
+            Width="45"
+            Height="24"
+            Margin="0,0,12,66"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Background="Silver"
+            BorderBrush="Silver"
+            BorderThickness="1" />
+    </Grid>
+    <Window.Background>
+        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+            <GradientStop Offset="0" Color="Black" />
+            <GradientStop Offset="0.203" Color="#FF00457C" />
+            <GradientStop Offset="0" Color="#FF1A232A" />
+        </LinearGradientBrush>
+    </Window.Background>
+</Window>

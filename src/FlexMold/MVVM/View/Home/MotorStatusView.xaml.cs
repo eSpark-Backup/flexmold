@@ -1,5 +1,4 @@
-﻿using FlexMold.MVVM.ViewModel.Home;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,12 +25,6 @@ namespace FlexMold.MVVM.View.Home
 
             InitializeComponent();
         }
-        private void NumericUpDown_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double?> e)
-        {
-            var vm = this.DataContext as MotorStatusViewModel;
-            vm.plcHelper.setMotorStep();
-        }
-
-
+       
     }
 }

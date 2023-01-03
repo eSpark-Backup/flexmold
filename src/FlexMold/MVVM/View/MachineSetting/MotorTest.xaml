@@ -1,0 +1,29 @@
+﻿<UserControl
+    x:Class="FlexMold.MVVM.View.MachineSetting.MotorTest"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:convertor="clr-namespace:FlexMold.Convertor"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:FlexMold.MVVM.View.MachineSetting"
+    xmlns:machinesetting="clr-namespace:FlexMold.MVVM.ViewModel.MachineSetting"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.DataContext>
+        <machinesetting:MotorTestViewModel />
+    </UserControl.DataContext>
+    <UserControl.Resources />
+    <UniformGrid Columns="2" Rows="8">
+        <Label Content="Selected Motor" />
+        <ComboBox ItemsSource="{Binding DeviceIds}" SelectedItem="{Binding SelectedMotorIndex}" />
+        <Label Content="Motor Direction : " />
+        <mah:ToggleSwitch
+            IsOn="{Binding SelectedMotorDirValue}"
+            OffContent="Reverese"
+            OnContent="Forward" />
+        <Label Content="Motor Speed : " />
+        <mah:NumericUpDown Value="{Binding SelectedMotorSpeedValue}" />
+    </UniformGrid>
+</UserControl>

@@ -76,7 +76,7 @@
     <mah:MetroWindow.LeftWindowCommands>
         <mah:WindowCommands>
             <Button ToolTip="MahApps.Metro on GitHub">
-                <iconPacks:PackIconModern
+                <iconPacks:PackIconMaterial
                     Width="22"
                     Height="22"
                     Kind="Home" />
@@ -85,11 +85,38 @@
     </mah:MetroWindow.LeftWindowCommands>
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands ShowLastSeparator="False">
-            <Button Content="_" ToolTip="Flyouts demo window" />
-            <ToggleButton
-                Content="Confirm quit"
-                IsChecked="{Binding QuitConfirmationEnabled}"
-                ToolTip="Enable quit confirmation dialog on exit" />
+            <Border x:Name="borCon" Margin="0">
+                <DockPanel>
+                    <iconPacks:PackIconMaterial
+                        Width="28"
+                        Height="28"
+                        Kind="Connection" />
+                    <TextBox
+                        Name="tBConnectionState"
+                        Margin="0"
+                        HorizontalAlignment="Stretch"
+                        Background="Transparent"
+                        BorderBrush="Transparent"
+                        FontSize="16"
+                        IsReadOnly="True" />
+                </DockPanel>
+            </Border>
+            <Border x:Name="borState">
+                <DockPanel>
+                    <iconPacks:PackIconMaterial
+                        Width="28"
+                        Height="28"
+                        Kind="Play" />
+                    <TextBox
+                        Name="tBAdsState"
+                        Margin="0"
+                        HorizontalAlignment="Stretch"
+                        Background="Transparent"
+                        BorderBrush="Transparent"
+                        FontSize="16"
+                        IsReadOnly="True" />
+                </DockPanel>
+            </Border>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
     <Grid>

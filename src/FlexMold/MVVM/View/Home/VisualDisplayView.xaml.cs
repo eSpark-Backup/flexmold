@@ -24,51 +24,7 @@ namespace FlexMold.MVVM.View.Home
         public VisualDisplayView()
         {
             InitializeComponent();
-            //try
-            //{
-            //    // Create instance of class TcAdsClient
-            //    adsClient = new TcAdsClient();
-            //    // PLC1 Port - TwinCAT 3=851
-            //    adsClient.Connect(851);
-
-            //    varHandle = adsClient.CreateVariableHandle("MAIN.motorStatus");
-            //}
-            //catch (Exception err)
-            //{
-            //    MessageBox.Show(err.Message);
-            //}
         }
-        //private TcAdsClient adsClient;
-        //private int varHandle;
-        //private void read(object sender, RoutedEventArgs e)
-        //{
-        //    try
-        //    {
-        //        AdsStream adsStream = new AdsStream(30);
-        //        AdsBinaryReader reader = new AdsBinaryReader(adsStream);
-        //        adsClient.Read(varHandle, adsStream);
-        //        textBox1.Text = reader.ReadPlcAnsiString(30);
-        //    }
-        //    catch (Exception err)
-        //    {
-        //        MessageBox.Show(err.Message);
-        //    }
-        //}
-
-        //private void write(object sender, RoutedEventArgs e)
-        //{
-        //    try
-        //    {
-        //        AdsStream adsStream = new AdsStream(30);
-        //        AdsBinaryWriter writer = new AdsBinaryWriter(adsStream);
-        //        writer.WritePlcAnsiString(textBox1.Text, 30);
-        //        adsClient.Write(varHandle, adsStream);
-        //    }
-        //    catch (Exception err)
-        //    {
-        //        MessageBox.Show(err.Message);
-        //    }
-        //}
     }
 }
 

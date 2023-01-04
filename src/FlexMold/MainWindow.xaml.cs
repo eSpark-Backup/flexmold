@@ -26,7 +26,6 @@ namespace FlexMold
 
             /// Region closed 
 
-
             TwinCathelper.TwinCatConnect851();
             TwinCathelper._session.ConnectionStateChanged += session_ConnectionStateChanged;
             TwinCathelper._connection.ConnectionStateChanged += _connection_ConnectionStatusChanged;
@@ -67,7 +66,7 @@ namespace FlexMold
         {
             Dispatcher.Invoke(() =>
             {
-                Update();
+                TwinCATSystemUpdate();
             });
         }
 
@@ -75,7 +74,7 @@ namespace FlexMold
         {
             Dispatcher.Invoke(() =>
             {
-                Update();
+                TwinCATSystemUpdate();
             });
             TwinCathelper.MyAdsState = e.State.AdsState;
             log.Log(LogLevel.Info, $"AdsState : {TwinCathelper.MyAdsState}");
@@ -85,7 +84,7 @@ namespace FlexMold
         {
             Dispatcher.Invoke(() =>
             {
-                Update();
+                TwinCATSystemUpdate();
             });
             TwinCathelper.MyAmsRouterState = e.State;
             log.Log(LogLevel.Info, $"Router State : {TwinCathelper.MyAmsRouterState}");
@@ -95,7 +94,7 @@ namespace FlexMold
         {
             Dispatcher.Invoke(() =>
             {
-                Update();
+                TwinCATSystemUpdate();
             });
             TwinCathelper.MyConnectionStateOld = e.OldState;
             TwinCathelper.MyConnectionStateNew = e.NewState;
@@ -109,7 +108,7 @@ namespace FlexMold
         {
             Dispatcher.Invoke(() =>
             {
-                Update();
+                TwinCATSystemUpdate();
             });
             TwinCathelper.MyConnectionStateOld = e.OldState;
             TwinCathelper.MyConnectionStateNew = e.NewState;
@@ -118,7 +117,7 @@ namespace FlexMold
             log.Log(LogLevel.Info, $"Connection State New : {TwinCathelper.MyConnectionStateNew}");
             log.Log(LogLevel.Info, $"Connection State Reason : {TwinCathelper.MyConnectionStateChangedReason}");
         }
-        private void Update()
+        private void TwinCATSystemUpdate()
         {
 
             if (TwinCathelper._connection != null)

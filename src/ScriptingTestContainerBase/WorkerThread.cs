@@ -329,7 +329,6 @@ namespace ScriptingTest
                 if (RunWorkerCompleted != null)
                     RunWorkerCompleted(this, new RunWorkerCompletedEventArgs(_script.Result, _script.Exception, this.CancellationPending));
                 this.Progress = 100;
-                this.ProgressStatus = "Finished";
             }
         }
 

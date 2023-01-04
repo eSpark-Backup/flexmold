@@ -2,6 +2,7 @@
 using FlexMold.MVVM.Model;
 using MahApps.Metro.Controls;
 using MahApps.Metro.IconPacks;
+using NLog;
 using ScriptingTest;
 using System;
 using System.Collections.Generic;
@@ -31,7 +32,8 @@ namespace FlexMold.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-
+        Logger log = LogManager.GetLogger("Machine Selection");
+        Logger logtb = LogManager.GetLogger("TwiCAT Builder");
         public Script SelectedScript { get; set; }
 
         private int _ProgressPercentage;
@@ -53,7 +55,8 @@ namespace FlexMold.MVVM.ViewModel
             get { return _ProgressStatuses; }
             set
             {
-                _ProgressStatuses = value+"\n"+ ProgressStatuses;
+                _ProgressStatuses = value + "\n" + ProgressStatuses;
+                logtb.Log(LogLevel.Info, $"{value}");
                 OnPropertyChanged();
             }
         }
@@ -71,6 +74,7 @@ namespace FlexMold.MVVM.ViewModel
         public event EventHandler OnRequestClose;
         public SplashScreenViewModel()
         {
+            log.Log(LogLevel.Info, $"Flexmold application loading");
             RunButtonEnable = false;
             SelectedMachine = new Machine();
             MyMachines = new ObservableCollection<Machine>
@@ -82,10 +86,14 @@ namespace FlexMold.MVVM.ViewModel
                 new Machine()
                 { ID = 3, Location = "R2", MachineType = EMachineType.Projector, Name = "P1" },
             };
+            log.Log(LogLevel.Info, $"{MyMachines.Count} Machines Found");
             MachineClickCommand = new RelayCommand(o => MachineSelectMethod(o as Machine));
             RunButtonCommand = new RelayCommand(o => RunMainWindow());
             CloseButtonCommand = new RelayCommand(o =>
-            OnRequestClose(this, new EventArgs())
+            {
+                OnRequestClose(this, new EventArgs());
+                log.Log(LogLevel.Info, $"Closing ....");
+            }
             );
 
         }
@@ -105,7 +113,9 @@ namespace FlexMold.MVVM.ViewModel
                         SelectedScript = new FlexMoldMachine1();
                         ComRegistration = true;
                         updateVSInstallations();
+
                         string TCVS = "TcXaeShell 15.0";
+                        log.Log(LogLevel.Info, $"Selected IDE : {TCVS}");
                         SelectedVS = AvailableVS.Where(a => a.Name == TCVS).FirstOrDefault();
                         if (SelectedVS != null)
                         {
@@ -113,7 +123,9 @@ namespace FlexMold.MVVM.ViewModel
                         }
                         else
                         {
-                            MessageBox.Show($"IDE Not Found Please Install {TCVS}");
+                            string msg = "IDE Not Found Please Install {TCVS}";
+                            log.Log(LogLevel.Error, $"{msg}");
+                            MessageBox.Show($"{msg}");
                             OnRequestClose(this, new EventArgs());
                         }
                     }
@@ -150,10 +162,13 @@ namespace FlexMold.MVVM.ViewModel
 
             List<VSInfo> sorted = progIdDict2.ToList();
             sorted.Sort(CompareTo);
-
+            log.Log(LogLevel.Info, $"Available IDEs :");
             AvailableVS = new List<VSInfo>();
             foreach (VSInfo vsInfo in sorted)
             {
+                log.Log(LogLevel.Info, $"\t ProgId: {vsInfo.ProgId}");
+                log.Log(LogLevel.Info, $"\t\t Name: {vsInfo.Name}");
+                log.Log(LogLevel.Info, $"\t\t Version: {vsInfo.Version}");
                 AvailableVS.Add(vsInfo);
             }
         }
@@ -179,7 +194,6 @@ namespace FlexMold.MVVM.ViewModel
         void _worker_ProgressStatusChanged(object sender, ProgressStatusChangedArgs e)
         {
             ProgressStatuses = e.Status;
-        
         }
         public void RunScript()
         {
@@ -203,10 +217,9 @@ namespace FlexMold.MVVM.ViewModel
                 ScriptContext context = new ScriptContext(_factory, null, parameterSet);
 
                 _worker = new ScriptBackgroundWorker(/*this._factory,*/ _runningScript, context);
-                ProgressPercentage = 5;
+
                 ProgressStatuses = "Closing Opened Instances Cuurent TwinCAT sln";
                 //Access COM Running Objects Table
-                Dictionary<string, List<object>> rot = ROTAccess.GetRunningObjectTable();
                 ROTAccess.CloseRunningDTETable(_runningScript.ScriptRootFolder + @"\" + _runningScript.ScriptName + ".sln");
 
                 _worker.ProgressChanged += new ProgressChangedEventHandler(_worker_ProgressChanged);

@@ -15,10 +15,9 @@ using System.Web.UI.WebControls;
 
 namespace FlexMold.MVVM.ViewModel.Project
 {
-
-
     class ProjectViewModel : ObservableObject
     {
+        Logger log = LogManager.GetLogger("Project");
         public RelayCommand ReadCSVFileCommand { get; set; }
         public RelayCommand BrowseProjectCommand { get; set; }
         public RelayCommand ProjectorModeSelectionCommand { get; set; }
@@ -109,12 +108,11 @@ namespace FlexMold.MVVM.ViewModel.Project
 
         void readCsvFile()
         {
-            Logger log = LogManager.GetLogger("CSV File Reader");
             if (slectedFile != null)
             {
                 if (slectedFile.FullName.EndsWith(".csv"))
                 {
-                    log.Log(LogLevel.Info, $"Reading File {slectedFile.Name}");
+                    log.Log(LogLevel.Info, $"Reading CSV File {slectedFile.Name}");
                     try
                     {
                         //var csv = @"C:\Users\123\Downloads\Sylvan-main\Sylvan-main\source\Sylvan.Data.Csv.Tests\Data\Quote.csv";
@@ -135,7 +133,6 @@ namespace FlexMold.MVVM.ViewModel.Project
                                     data.Add(Math.Ceiling(csvr.GetDouble(i)));
                                 }
                             }
-                            Console.WriteLine();
                         }
                     }
                     catch (Exception ex)

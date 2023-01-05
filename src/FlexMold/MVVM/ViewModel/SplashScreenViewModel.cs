@@ -1,19 +1,13 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
-using MahApps.Metro.Controls;
-using MahApps.Metro.IconPacks;
 using NLog;
 using ScriptingTest;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media.Effects;
 
 namespace FlexMold.MVVM.ViewModel
 {

@@ -6,7 +6,6 @@ using Microsoft.VisualStudio.Shell.Interop;
 using ScriptingTest;
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Diagnostics;
 using System.Xml;
 using TCatSysManagerLib;
@@ -106,6 +105,7 @@ namespace FlexMold.MVVM.ViewModel
             TwinCathelper._sessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
             TwinCathelper._connectionSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
             worker.Progress = 8;
+
             worker.ProgressStatus = $"Configuring TwinCAT System into ConfigMode ....";
             TwinCathelper.ReConfigPLC();
             WaitForState(AdsState.Config, 3000);

@@ -30,52 +30,67 @@ namespace FlexMold
             /// Region closed 
             try
             {
+                
                 TwinCathelper.TwinCatConnect851();
                 TwinCathelper._session.ConnectionStateChanged += session_ConnectionStateChanged;
                 TwinCathelper._connection.ConnectionStateChanged += _connection_ConnectionStatusChanged;
                 TwinCathelper._connection.RouterStateChanged += _connection_RouterStateChanged;
                 TwinCathelper._connection.RegisterAdsStateChangedAsync(_connection_AdsStateChanged, CancellationToken.None);
-
-
-
                 if (TwinCathelper._connection.IsConnected)
                 {
                     if (TwinCathelper._connection.IsActive)
                     {
-                        if (TwinCathelper.MySymbols.Count == 0)
+                        if (TwinCathelper.MySymbols.Count > 0 && TwinCathelper.MySymbols.Where(a=>a.InstancePath== TwinCATVariableIfo.TwicatDeviceCountVariableName).Count()>0)
                         {
-                            MessageBox.Show("Twincat Project Not Login or Properly Configured");
-                            this.Close();
+                            TwinCathelper.DeviceCount = (short)TwinCathelper.MySymbols.Where(a => 
+                            a.InstancePath == TwinCATVariableIfo.TwicatDeviceCountVariableName).FirstOrDefault().ReadAnyValue(typeof(short));
+                            if (TwinCathelper.DeviceCount > 0)
+                            {
+                                InitializeComponent();
+                                Version v = Assembly.GetExecutingAssembly().GetName().Version;
+                                string About = string.Format(CultureInfo.InvariantCulture, @"YourApp Version {0}.{1}.{2} (r{3})", v.Major, v.Minor, v.Build, v.Revision);
+                                this.Title = "FlexMold MainDeviceVariableName:" + getRunningVersion().ToString();
+                                logCtrl.ItemAdded += OnLogMessageItemAdded;
+                                log.Log(LogLevel.Info, $"Application Loaded Sucessfully.....");
+                                log.Log(LogLevel.Info, $"Selected Machine Type : {SelectedMachine.MachineType} Name : {SelectedMachine.Name} ID : {SelectedMachine.ID}");
+                            }
+                            else
+                            {
+                                var tmsg = "No PLC Device Found";
+                                log.Log(LogLevel.Info, $"{tmsg}");
+                                MessageBox.Show(tmsg);
+                                this.Close();
+                            }
                         }
                         else
                         {
-                            TwinCathelper.DeviceCount = (Int16)TwinCathelper.MySymbols.Where(a => a.InstancePath == "MAIN.deviceCount").FirstOrDefault().ReadAnyValue(typeof(Int16));
-                            InitializeComponent();
-                            Version v = Assembly.GetExecutingAssembly().GetName().Version;
-                            string About = string.Format(CultureInfo.InvariantCulture, @"YourApp Version {0}.{1}.{2} (r{3})", v.Major, v.Minor, v.Build, v.Revision);
-                            this.Title = "FlexMold V:" + getRunningVersion().ToString();
-                            logCtrl.ItemAdded += OnLogMessageItemAdded;
-                            log.Log(LogLevel.Info, $"Application Loaded Scussfully.....");
-                            log.Log(LogLevel.Info, $"Selected Machine Type : {SelectedMachine.MachineType} Name : {SelectedMachine.Name} ID : {SelectedMachine.ID}");
-                            Console.WriteLine();
+                            var tmsg = "Twincat Project Not Running or Properly Configured";
+                            log.Log(LogLevel.Info, $"{tmsg}");
+                            MessageBox.Show(tmsg);
+                            this.Close();
                         }
                     }
                     else
                     {
-                        MessageBox.Show("Twicat Is Not Active");
+                        var tmsg = "Twicat Is Not Active \n Compile and run TwinCAT Project First";
+                        log.Log(LogLevel.Info, $"{tmsg}");
+                        MessageBox.Show(tmsg);
                         this.Close();
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Twicat Not Connected");
+                    var tmsg = "Twicat Not Connected";
+                    log.Log(LogLevel.Info, $"{tmsg}");
+                    MessageBox.Show(tmsg);
                     this.Close();
                 }
             }
-            catch (Exception ex )
+            catch (Exception ex)
             {
+                log.Log(LogLevel.Info, $"{ex.Message}");
                 MessageBox.Show(ex.Message);
-                throw;
+                this.Close();
             }
         }
         private Version getRunningVersion()
@@ -206,7 +221,7 @@ namespace FlexMold
         {
             // Do what you want :)
             LogEventInfo logInfo = (NLogEvent)Args;
-            if (logInfo.Level >= NLog.LogLevel.Error)
+            if (logInfo.Level >= LogLevel.Error)
                 SystemSounds.Beep.Play();
         }
 

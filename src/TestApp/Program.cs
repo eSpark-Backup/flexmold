@@ -10,11 +10,26 @@ using TwinCAT;
 using TwinCAT.Ads.TypeSystem;
 using TwinCAT.Ads.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.InteropServices;
 
 namespace TestApp
 {
     internal class Program
     {
+        [StructLayout(LayoutKind.Sequential, Pack = 0)]
+        public struct EthercatDevice
+        {
+            public bool mDirection;
+            public bool t1;
+            public bool t2;
+            public bool t3;
+            public UInt32 mSpeed;
+            public UInt32 mTime;
+            public bool mMode;
+            public bool t4;
+            public bool t5;
+            public bool t6;
+        }
         static void Main(string[] args)
         {
             // To Test the Observer run a project on the local PLC System (Port 851)
@@ -27,6 +42,7 @@ namespace TestApp
                 dynamic symbols = loader.SymbolsDynamic;
                 dynamic main = symbols.Main;
                 DynamicArrayInstance myStructSymbol = main.device; // Dynamically created
+               var pp = myStructSymbol.ReadRawValue();
                 Console.WriteLine();
             }
         }

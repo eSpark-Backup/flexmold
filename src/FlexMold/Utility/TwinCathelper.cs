@@ -33,6 +33,15 @@ namespace FlexMold.Utility
             log.Log(LogLevel.Info, $"Connecting to Local Host, Port : {port}");
             _session = new AdsSession(TwinCAT.Ads.AmsNetId.Local, port);
             _connection = (AdsConnection)_session.Connect();
+            if (_connection.IsConnected)            {
+                log.Log(LogLevel.Info, $"Connected to : {_connection.Address}, Port : {port}");
+            }
+            else 
+            {
+                log.Log(LogLevel.Info, $"Connection Status : {_connection.ConnectionState}");
+            }
+
+
             GetPLCVariables();
         }
         static public void StartpPLC()
@@ -62,6 +71,7 @@ namespace FlexMold.Utility
         }
         static void GetPLCVariables()
         {
+            log.Log(LogLevel.Info, $"Fetching PLC Variables");
             MySymbols = new ObservableCollection<Symbol>();
             dataTypes = _session.SymbolServer.DataTypes;
             symbols = _session.SymbolServer.Symbols;

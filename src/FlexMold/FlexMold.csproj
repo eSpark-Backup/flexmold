@@ -264,7 +264,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Common\WpConverter.cs" />
     <Compile Include="Convertor\DistinctConverter.cs" />
     <Compile Include="Convertor\HeightConverter.cs" />
     <Compile Include="Convertor\CompleteConverter.cs" />
@@ -409,7 +408,6 @@
     <Compile Include="MVVM\Model\MyDataModel.cs" />
     <Compile Include="MVVM\ViewModel\AccessoryViewModel.cs" />
     <Compile Include="MVVM\ViewModel\HomeViewModel.cs" />
-    <Compile Include="MVVM\ViewModel\PlcTask.cs" />
     <Compile Include="MVVM\ViewModel\Project\ProjectViewModel.cs" />
     <Compile Include="MVVM\ViewModel\SettingViewModel.cs" />
     <Compile Include="MVVM\View\AccessoryView.xaml.cs">
@@ -505,6 +503,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Common\" />
     <Folder Include="Contols\" />
     <Folder Include="Font\" />
     <Folder Include="images\" />

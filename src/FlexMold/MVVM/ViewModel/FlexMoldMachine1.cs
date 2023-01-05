@@ -121,104 +121,101 @@ namespace FlexMold.MVVM.ViewModel
             /* =================================================================================================
              * Scans the Fieldbus interfaces and adds an EtherCAT Device.
              * ================================================================================================= */
-            worker.ProgressStatus = $"Scanning Devices ....";
             ScanDevicesAndBoxes(worker); //custom code
             worker.Progress = 15;
-
-            /* =================================================================================================
-             * Attach an empty PLC Project using the "TwinCAT Project" template
-             * ================================================================================================= */
-            worker.ProgressStatus = "Creating empty PLC Project ...";
-            ITcSmTreeItem plcGenerated = plcConfig.CreateChild("PlcGenerated", 0, "", vsXaePlcStandardTemplateName);
-
-            worker.ProgressStatus = "PLC Project created ...";
-            worker.Progress = 20;
-
-            /* =================================================================================================
-             * Get references to attached PLC Project and some of its childs
-             * ================================================================================================= */
-            ITcSmTreeItem plcProjectRootItem = systemManager.LookupTreeItem("TIPC^PlcGenerated"); // Plc Project Root (XAE Base side)
-            ITcSmTreeItem plcProjectItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project"); // PlcProject (PlcControl side) determined via LookupTreeItem
-            ITcSmTreeItem plcPousItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project^POUs");
-            ITcSmTreeItem plcDutsItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project^DUTs");
-
-
-            /* =================================================================================================
-             * Creating datatypes in \DUTs\
-             * ================================================================================================= */
-
-
-            ITcSmTreeItem plcDutStruct = CreateDut(plcDutsItem, TreeItemType.PlcDutStruct, "EthercatDevice", null, worker);
-            worker.Progress = 30;
-
-
-
-            /* =================================================================================================
-             * Creating POUs under folder "MyPous"
-             * ================================================================================================= */
-            CreatePOUsST(plcPousItem, worker);
-            worker.Progress = 40;
-
-            /* =================================================================================================
-             * Adjust Visual Studio Solution configuration
-             * ================================================================================================= */
-            SolutionBuild solutionBuild = solution.SolutionBuild;
-            SolutionConfiguration activeConfig = solutionBuild.ActiveConfiguration;
-            SolutionContexts contexts = activeConfig.SolutionContexts;
-
-            // ATTENTION: VisualStudio has a bug so that the SolutionContexts Collections cannot be used. This
-            // Bug is fixed by Microsoft in VS2012 and later!
-
-            // Iterate over the active Configuration Solution Contexts and activate all Projects within the Solution
-            // (Root and Nested projects)
-            foreach (SolutionContext context in activeConfig.SolutionContexts)
+            if (AvaiableDevices > 0 && AvaiableBoxes > 0)
             {
-                string projectName = context.ProjectName;
-                string configName = context.ConfigurationName;
-                string platform = context.PlatformName;
+                /* =================================================================================================
+                 * Attach an empty PLC Project using the "TwinCAT Project" template
+                 * ================================================================================================= */
+                worker.ProgressStatus = "Creating empty PLC Project ...";
+                ITcSmTreeItem plcGenerated = plcConfig.CreateChild("PlcGenerated", 0, "", vsXaePlcStandardTemplateName);
 
-                bool shouldBuild = context.ShouldBuild;
+                worker.ProgressStatus = "PLC Project created ...";
+                worker.Progress = 20;
 
-                if (shouldBuild == false) // If not set
+                /* =================================================================================================
+                 * Get references to attached PLC Project and some of its childs
+                 * ================================================================================================= */
+                ITcSmTreeItem plcProjectRootItem = systemManager.LookupTreeItem("TIPC^PlcGenerated"); // Plc Project Root (XAE Base side)
+                ITcSmTreeItem plcProjectItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project"); // PlcProject (PlcControl side) determined via LookupTreeItem
+                ITcSmTreeItem plcPousItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project^POUs");
+                ITcSmTreeItem plcDutsItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project^DUTs");
+
+
+                /* =================================================================================================
+                 * Creating datatypes in \DUTs\
+                 * ================================================================================================= */
+
+                ITcSmTreeItem plcDutStruct = CreateDut(plcDutsItem, TreeItemType.PlcDutStruct, "EthercatDevice", null, worker);
+                worker.Progress = 30;
+
+                /* =================================================================================================
+                 * Creating POUs under folder "MyPous"
+                 * ================================================================================================= */
+                CreatePOUsST(plcPousItem, worker);
+                worker.Progress = 40;
+
+                /* =================================================================================================
+                 * Adjust Visual Studio Solution configuration
+                 * ================================================================================================= */
+                SolutionBuild solutionBuild = solution.SolutionBuild;
+                SolutionConfiguration activeConfig = solutionBuild.ActiveConfiguration;
+                SolutionContexts contexts = activeConfig.SolutionContexts;
+
+                // ATTENTION: VisualStudio has a bug so that the SolutionContexts Collections cannot be used. This
+                // Bug is fixed by Microsoft in VS2012 and later!
+
+                // Iterate over the active Configuration Solution Contexts and activate all Projects within the Solution
+                // (Root and Nested projects)
+                foreach (SolutionContext context in activeConfig.SolutionContexts)
                 {
-                    context.ShouldBuild = true; // ShouldBuild can be set.
+                    string projectName = context.ProjectName;
+                    string configName = context.ConfigurationName;
+                    string platform = context.PlatformName;
+
+                    bool shouldBuild = context.ShouldBuild;
+
+                    if (shouldBuild == false) // If not set
+                    {
+                        context.ShouldBuild = true; // ShouldBuild can be set.
+                    }
                 }
-            }
 
-            /* =================================================================================================
-             * Compiling project using Automation Interface methods
-             * ================================================================================================= */
-            ITcPlcProject iecProjectRoot = (ITcPlcProject)plcProjectRootItem;
-            worker.ProgressStatus = "Compiling project ...";
+                /* =================================================================================================
+                 * Compiling project using Automation Interface methods
+                 * ================================================================================================= */
+                ITcPlcProject iecProjectRoot = (ITcPlcProject)plcProjectRootItem;
+                worker.ProgressStatus = "Compiling project ...";
 
-            iecProjectRoot.CompileProject();
+                iecProjectRoot.CompileProject();
 
-            ErrorItems errors = dte.ToolWindows.ErrorList.ErrorItems;
-            worker.Progress = 55;
-            iecProjectRoot.BootProjectAutostart = true;
-
-
-            /* =================================================================================================
-             * Compiling project using Visual Studio DTE methods 
-             * ================================================================================================= */
-            errors = null;
-            worker.ProgressStatus = "Compiling project (3) ...";
-            dte.Solution.SolutionBuild.Build(true);
-            waitForBuildAndCheckErrors(worker, out errors);
-            worker.Progress = 60;
-
-            /* =================================================================================================
-             * Generating Boot Project
-             * ================================================================================================= */
-            worker.ProgressStatus = "Generating boot project ...";
-            iecProjectRoot.GenerateBootProject(true);
-            worker.Progress = 65;
+                ErrorItems errors = dte.ToolWindows.ErrorList.ErrorItems;
+                worker.Progress = 55;
+                iecProjectRoot.BootProjectAutostart = true;
 
 
-            /* =================================================================================================
-             * Prepare XML for PLC Login
-             * ================================================================================================= */
-            string xmlLogin = @"<TreeItem>
+                /* =================================================================================================
+                 * Compiling project using Visual Studio DTE methods 
+                 * ================================================================================================= */
+                errors = null;
+                worker.ProgressStatus = "Compiling project (3) ...";
+                dte.Solution.SolutionBuild.Build(true);
+                waitForBuildAndCheckErrors(worker, out errors);
+                worker.Progress = 60;
+
+                /* =================================================================================================
+                 * Generating Boot Project
+                 * ================================================================================================= */
+                worker.ProgressStatus = "Generating boot project ...";
+                iecProjectRoot.GenerateBootProject(true);
+                worker.Progress = 65;
+
+
+                /* =================================================================================================
+                 * Prepare XML for PLC Login
+                 * ================================================================================================= */
+                string xmlLogin = @"<TreeItem>
                                     <IECProjectDef>
                                         <OnlineSettings>
                                                 <Commands>
@@ -233,10 +230,10 @@ namespace FlexMold.MVVM.ViewModel
                                     </IECProjectDef>
                                 </TreeItem>";
 
-            /* =================================================================================================
-             * Prepare XML for PLC Start
-             * ================================================================================================= */
-            string xmlStart = @"<TreeItem>
+                /* =================================================================================================
+                 * Prepare XML for PLC Start
+                 * ================================================================================================= */
+                string xmlStart = @"<TreeItem>
                                     <IECProjectDef>
                                         <OnlineSettings>
                                                 <Commands>
@@ -251,10 +248,10 @@ namespace FlexMold.MVVM.ViewModel
                                     </IECProjectDef>
                                 </TreeItem>";
 
-            /* =================================================================================================
-             * Prepare XML for PLC Stop
-             * ================================================================================================= */
-            string xmlStop = @"<TreeItem>
+                /* =================================================================================================
+                 * Prepare XML for PLC Stop
+                 * ================================================================================================= */
+                string xmlStop = @"<TreeItem>
                                     <IECProjectDef>
                                         <OnlineSettings>
                                                 <Commands>
@@ -269,10 +266,10 @@ namespace FlexMold.MVVM.ViewModel
                                     </IECProjectDef>
                                 </TreeItem>";
 
-            /* =================================================================================================
-             * Prepare XML for PLC Logout
-             * ================================================================================================= */
-            string xmlLogout = @"<TreeItem>
+                /* =================================================================================================
+                 * Prepare XML for PLC Logout
+                 * ================================================================================================= */
+                string xmlLogout = @"<TreeItem>
                                     <IECProjectDef>
                                         <OnlineSettings>
                                                 <Commands>
@@ -287,42 +284,48 @@ namespace FlexMold.MVVM.ViewModel
                                     </IECProjectDef>
                                 </TreeItem>";
 
-            /* =================================================================================================
-             * Activate configuration and restart TwinCAT
-             * ================================================================================================= */
-            worker.ProgressStatus = "Activating configuration ...";
-            systemManager.ActivateConfiguration();
-            worker.ProgressStatus = "Restarting TwinCAT ...";
-            systemManager.StartRestartTwinCAT();
-            worker.Progress = 70;
+                /* =================================================================================================
+                 * Activate configuration and restart TwinCAT
+                 * ================================================================================================= */
+                worker.ProgressStatus = "Activating configuration ...";
+                systemManager.ActivateConfiguration();
+                worker.ProgressStatus = "Restarting TwinCAT ...";
+                systemManager.StartRestartTwinCAT();
+                worker.Progress = 70;
 
-            /* =================================================================================================
-             * Execute PLC Login, Start, Logout, ...
-             * ================================================================================================= */
-            System.Threading.Thread.Sleep(5000);
-            worker.Progress = 75;
+                /* =================================================================================================
+                 * Execute PLC Login, Start, Logout, ...
+                 * ================================================================================================= */
+                System.Threading.Thread.Sleep(5000);
+                worker.Progress = 75;
 
-            worker.ProgressStatus = "Logging in to PLC runtime ...";
-            System.Threading.Thread.Sleep(5000);
-            plcProjectItem.ConsumeXml(xmlLogin);
-            worker.Progress = 80;
+                worker.ProgressStatus = "Logging in to PLC runtime ...";
+                System.Threading.Thread.Sleep(5000);
+                plcProjectItem.ConsumeXml(xmlLogin);
+                worker.Progress = 80;
 
-            worker.ProgressStatus = "Stopping PLC runtime ...";
-            System.Threading.Thread.Sleep(5000);
-            plcProjectItem.ConsumeXml(xmlStop);
-            worker.Progress = 85;
+                worker.ProgressStatus = "Stopping PLC runtime ...";
+                System.Threading.Thread.Sleep(5000);
+                plcProjectItem.ConsumeXml(xmlStop);
+                worker.Progress = 85;
 
-            worker.ProgressStatus = "Starting PLC runtime ...";
-            System.Threading.Thread.Sleep(5000);
-            plcProjectItem.ConsumeXml(xmlStart);
-            worker.Progress = 90;
+                worker.ProgressStatus = "Starting PLC runtime ...";
+                System.Threading.Thread.Sleep(5000);
+                plcProjectItem.ConsumeXml(xmlStart);
+                worker.Progress = 90;
 
-            worker.ProgressStatus = "Logging out of PLC runtime ...";
-            System.Threading.Thread.Sleep(5000);
-            plcProjectItem.ConsumeXml(xmlLogout);
+                worker.ProgressStatus = "Logging out of PLC runtime ...";
+                System.Threading.Thread.Sleep(5000);
+                plcProjectItem.ConsumeXml(xmlLogout);
 
 
-            worker.Progress = 95;
+                worker.Progress = 95;
+            }
+            else
+            {
+                worker.ProgressStatus = "No Divice & Box Found";
+                worker.Progress = 0;
+            }
         }
         private bool WaitForState(AdsState state, int timeOutInMilliSeconds)
         {
@@ -436,9 +439,6 @@ END_TYPE";
 
         private ITcSmTreeItem AddPOUProgram(string pouName, ITcSmTreeItem parent, IECLanguageType language, IWorker worker)
         {
-            AvaiableBoxes = 2;
-            AvaiableDevices = 1;
-
             ITcSmTreeItem programPou = parent.LookupChild("Main");
             ITcPlcDeclaration pouDecl = programPou as ITcPlcDeclaration;
             ITcPlcImplementation pouImpl = programPou as ITcPlcImplementation;
@@ -458,7 +458,7 @@ END_TYPE";
                 for (int i = 1; i <= AvaiableBoxes; i++)
                 {
                     deviceAtrib += $"" +
-                        $"[{i}].mDirection := TIID^Device_{j}^Box {i} ({deviceName})^{outStr}^Direction;\n"+
+                        $"[{i}].mDirection := TIID^Device_{j}^Box {i} ({deviceName})^{outStr}^Direction;\n" +
                         $"[{i}].mSpeed := TIID^Device_{j}^Box {i} ({deviceName})^{outStr}^Speed;\n" +
                         $"[{i}].mTime := TIID^Device_{j}^Box {i} ({deviceName})^{outStr}^Time;\n" +
                         $"[{i}].mMode := TIID^Device_{j}^Box {i} ({deviceName})^{outStr}^Mode;";
@@ -494,7 +494,7 @@ END_TYPE";
                 "{attribute 'TcLinkTo' := '" + mPositionAtrib +
                     "'}\n" +
                     "mPosition AT %I* : ARRAY [1..deviceCount] OF DWORD ;\n" +
-                
+
                 "{attribute 'TcLinkTo' := '" + mTemperatureAtrib +
                     "'}\n" +
                     "mTemperature AT %I* : ARRAY [1..deviceCount] OF DWORD ;\n" +
@@ -514,7 +514,7 @@ END_TYPE";
                 ;
 
             pouDecl.DeclarationText = decl1;
-            string impl1 = ""; 
+            string impl1 = "";
 
             return programPou;
         }
@@ -571,44 +571,54 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
 
         public void ScanDevicesAndBoxes(IWorker worker)
         {
-            AvaiableBoxes = 2;
-            AvaiableDevices = 1;
-            ITcSmTreeItem ioDevicesItem = systemManager.LookupTreeItem("TIID");
-            string scannedXml = ioDevicesItem.ProduceXml(false);
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.LoadXml(scannedXml);
-            XmlNodeList xmlDeviceList = xmlDoc.SelectNodes("TreeItem/DeviceGrpDef/FoundDevices/Device");
-            List<ITcSmTreeItem> devices = new List<ITcSmTreeItem>();
-            int deviceCount = 0;
-            foreach (XmlNode node in xmlDeviceList)
+            //AvaiableDevices = 1;
+            //AvaiableBoxes = 2;
+            if (AvaiableBoxes > 0 && AvaiableBoxes > 0)
             {
-                int itemSubType = int.Parse(node.SelectSingleNode("ItemSubType").InnerText);
-                string typeName = node.SelectSingleNode("ItemSubTypeName").InnerText;
-                XmlNode xmlAddress = node.SelectSingleNode("AddressInfo");
-                ITcSmTreeItem device = ioDevicesItem.CreateChild(string.Format("Device_{0}", ++deviceCount), itemSubType, string.Empty, null);
-                string xml = string.Format("<TreeItem><DeviceDef>{0}</DeviceDef></TreeItem>", xmlAddress.OuterXml);
-                worker.ProgressStatus = $"xmlAddress : {xmlAddress}, itemSubType : {itemSubType}";
-                device.ConsumeXml(xml);
-                devices.Add(device);
+                worker.ProgressStatus = "! Warning .......";
+                worker.ProgressStatus = "Simulated Version";
+                worker.ProgressStatus = $"Dummy  {AvaiableDevices} Divices and {AvaiableBoxes} Boxes added";
             }
-            foreach (ITcSmTreeItem device in devices)
+            else
             {
-                string xml = "<TreeItem><DeviceDef><ScanBoxes>1</ScanBoxes></DeviceDef></TreeItem>";
-                try
+                worker.ProgressStatus = $"Scanning Connected Devices and boxes....";
+                ITcSmTreeItem ioDevicesItem = systemManager.LookupTreeItem("TIID");
+                string scannedXml = ioDevicesItem.ProduceXml(false);
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.LoadXml(scannedXml);
+                XmlNodeList xmlDeviceList = xmlDoc.SelectNodes("TreeItem/DeviceGrpDef/FoundDevices/Device");
+                List<ITcSmTreeItem> devices = new List<ITcSmTreeItem>();
+                int deviceCount = 0;
+                foreach (XmlNode node in xmlDeviceList)
                 {
+                    int itemSubType = int.Parse(node.SelectSingleNode("ItemSubType").InnerText);
+                    string typeName = node.SelectSingleNode("ItemSubTypeName").InnerText;
+                    XmlNode xmlAddress = node.SelectSingleNode("AddressInfo");
+                    ITcSmTreeItem device = ioDevicesItem.CreateChild(string.Format("Device_{0}", ++deviceCount), itemSubType, string.Empty, null);
+                    string xml = string.Format("<TreeItem><DeviceDef>{0}</DeviceDef></TreeItem>", xmlAddress.OuterXml);
+                    worker.ProgressStatus = $"xmlAddress : {xmlAddress}, itemSubType : {itemSubType}";
                     device.ConsumeXml(xml);
+                    devices.Add(device);
                 }
-                catch (Exception ex)
+                foreach (ITcSmTreeItem device in devices)
                 {
-                    worker.ProgressStatus = "Warning: " + ex.Message;
-                }
-                AvaiableDevices = AvaiableDevices + 1;
-                foreach (ITcSmTreeItem box in device)
-                {
-                    if (box.Name.Contains("sample"))
+                    string xml = "<TreeItem><DeviceDef><ScanBoxes>1</ScanBoxes></DeviceDef></TreeItem>";
+                    try
                     {
-                        AvaiableBoxes = AvaiableBoxes + 1;
-                        worker.ProgressStatus = $"Box Added Name : {box.Name}";
+                        device.ConsumeXml(xml);
+                    }
+                    catch (Exception ex)
+                    {
+                        worker.ProgressStatus = "Warning: " + ex.Message;
+                    }
+                    AvaiableDevices = AvaiableDevices + 1;
+                    foreach (ITcSmTreeItem box in device)
+                    {
+                        if (box.Name.Contains("sample"))
+                        {
+                            AvaiableBoxes = AvaiableBoxes + 1;
+                            worker.ProgressStatus = $"Box Added Name : {box.Name}";
+                        }
                     }
                 }
             }

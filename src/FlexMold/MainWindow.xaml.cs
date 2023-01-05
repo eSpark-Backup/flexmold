@@ -28,44 +28,54 @@ namespace FlexMold
             /// Test Area please comment
 
             /// Region closed 
-
-            TwinCathelper.TwinCatConnect851();
-            TwinCathelper._session.ConnectionStateChanged += session_ConnectionStateChanged;
-            TwinCathelper._connection.ConnectionStateChanged += _connection_ConnectionStatusChanged;
-            TwinCathelper._connection.RouterStateChanged += _connection_RouterStateChanged;
-            TwinCathelper._connection.RegisterAdsStateChangedAsync(_connection_AdsStateChanged, CancellationToken.None);
-            if (TwinCathelper._connection.IsConnected)
+            try
             {
-                if (TwinCathelper._connection.IsActive)
+                TwinCathelper.TwinCatConnect851();
+                TwinCathelper._session.ConnectionStateChanged += session_ConnectionStateChanged;
+                TwinCathelper._connection.ConnectionStateChanged += _connection_ConnectionStatusChanged;
+                TwinCathelper._connection.RouterStateChanged += _connection_RouterStateChanged;
+                TwinCathelper._connection.RegisterAdsStateChangedAsync(_connection_AdsStateChanged, CancellationToken.None);
+
+
+
+                if (TwinCathelper._connection.IsConnected)
                 {
-                    if (TwinCathelper.MySymbols.Count == 0)
+                    if (TwinCathelper._connection.IsActive)
                     {
-                        MessageBox.Show("Twincat Project Not Login or Properly Configured");
-                        this.Close();
+                        if (TwinCathelper.MySymbols.Count == 0)
+                        {
+                            MessageBox.Show("Twincat Project Not Login or Properly Configured");
+                            this.Close();
+                        }
+                        else
+                        {
+                            TwinCathelper.DeviceCount = (Int16)TwinCathelper.MySymbols.Where(a => a.InstancePath == "MAIN.deviceCount").FirstOrDefault().ReadAnyValue(typeof(Int16));
+                            InitializeComponent();
+                            Version v = Assembly.GetExecutingAssembly().GetName().Version;
+                            string About = string.Format(CultureInfo.InvariantCulture, @"YourApp Version {0}.{1}.{2} (r{3})", v.Major, v.Minor, v.Build, v.Revision);
+                            this.Title = "FlexMold V:" + getRunningVersion().ToString();
+                            logCtrl.ItemAdded += OnLogMessageItemAdded;
+                            log.Log(LogLevel.Info, $"Application Loaded Scussfully.....");
+                            log.Log(LogLevel.Info, $"Selected Machine Type : {SelectedMachine.MachineType} Name : {SelectedMachine.Name} ID : {SelectedMachine.ID}");
+                            Console.WriteLine();
+                        }
                     }
                     else
                     {
-                        TwinCathelper.DeviceCount = (Int16)TwinCathelper.MySymbols.Where(a => a.InstancePath == "MAIN.deviceCount").FirstOrDefault().ReadAnyValue(typeof(Int16));
-                        InitializeComponent();
-                        Version v = Assembly.GetExecutingAssembly().GetName().Version;
-                        string About = string.Format(CultureInfo.InvariantCulture, @"YourApp Version {0}.{1}.{2} (r{3})", v.Major, v.Minor, v.Build, v.Revision);
-                        this.Title = "FlexMold V:"+ getRunningVersion().ToString();
-                        logCtrl.ItemAdded += OnLogMessageItemAdded;
-                        log.Log(LogLevel.Info, $"Application Loaded Scussfully.....");
-                        log.Log(LogLevel.Info, $"Selected Machine Type : {SelectedMachine.MachineType} Name : {SelectedMachine.Name} ID : {SelectedMachine.ID}");
-                        Console.WriteLine();
+                        MessageBox.Show("Twicat Is Not Active");
+                        this.Close();
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Twicat Is Not Active");
+                    MessageBox.Show("Twicat Not Connected");
                     this.Close();
                 }
             }
-            else
+            catch (Exception ex )
             {
-                MessageBox.Show("Twicat Not Connected");
-                this.Close();
+                MessageBox.Show(ex.Message);
+                throw;
             }
         }
         private Version getRunningVersion()

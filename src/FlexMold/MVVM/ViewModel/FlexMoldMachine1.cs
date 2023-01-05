@@ -436,7 +436,7 @@ END_TYPE";
             ITcSmTreeItem program = AddPOUProgram("Main", parent, language, worker);
         }
 
-
+        string deviceName = "LAN9255_EtherCAT_Slave";
         private ITcSmTreeItem AddPOUProgram(string pouName, ITcSmTreeItem parent, IECLanguageType language, IWorker worker)
         {
             ITcSmTreeItem programPou = parent.LookupChild("Main");
@@ -450,7 +450,7 @@ END_TYPE";
             string Diag2Atrib = "";
             string Diag3Atrib = "";
 
-            string deviceName = "LAN9255_EtherCAT_Slave";
+            
             string outStr = "Outputs process data mapping";
             string inpStr = "Inputs process data mapping";
             for (int j = 1; j <= AvaiableDevices; j++)
@@ -475,7 +475,7 @@ END_TYPE";
                     Diag2Atrib += $"" +
                         $"[{i}]:= TIID^Device_{j}^Box {i} ({deviceName})^{inpStr}^Diag2;";
 
-                    Diag2Atrib += $"" +
+                    Diag3Atrib += $"" +
                         $"[{i}]:= TIID^Device_{j}^Box {i} ({deviceName})^{inpStr}^Diag3;";
                 }
             }
@@ -614,7 +614,7 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                     AvaiableDevices = AvaiableDevices + 1;
                     foreach (ITcSmTreeItem box in device)
                     {
-                        if (box.Name.Contains("sample"))
+                        if (box.Name.Contains(deviceName))
                         {
                             AvaiableBoxes = AvaiableBoxes + 1;
                             worker.ProgressStatus = $"Box Added Name : {box.Name}";

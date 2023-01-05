@@ -32,7 +32,7 @@
     <SupportUrl>https://esparkconsultants.com/</SupportUrl>
     <ProductName>FlexMold</ProductName>
     <PublisherName>Espark Consulting Group pk</PublisherName>
-    <ApplicationRevision>6</ApplicationRevision>
+    <ApplicationRevision>8</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -272,7 +272,6 @@
     <Compile Include="Core\ObservableObject.cs" />
     <Compile Include="Core\PropertyValidation.cs" />
     <Compile Include="Core\RelayCommand.cs" />
-    <Compile Include="LoggerM.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

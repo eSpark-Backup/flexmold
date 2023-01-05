@@ -9,21 +9,20 @@ using System.Threading.Tasks;
 
 namespace FlexMold.MVVM.Model
 {
-    //[StructLayout(LayoutKind.Sequential, Pack = 1)]
-    class PLCMotor
-    {
-        //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
-        public EthercatDevice[] MyEthercatDevice = new EthercatDevice[10];
-    }
     [Pack]
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
     public struct EthercatDevice
     {
-        public byte dir;
-        public byte temp;
-        public UInt16 speed;
-        public UInt32 dummyDataOut;
-        public UInt32 dummyDataIn;
+        public bool mDirection;
+        public bool t1;
+        public bool t2;
+        public bool t3;
+        public UInt32 mSpeed;
+        public UInt32 mTime;
+        public bool mMode;
+        public bool t4;
+        public bool t5;
+        public bool t6;
         [SkipPack]
         public uint DeviceID;
     }

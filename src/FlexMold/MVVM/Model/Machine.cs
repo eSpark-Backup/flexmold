@@ -32,7 +32,6 @@ namespace FlexMold.MVVM.Model
             }
         }
         public Control IconT { get; private set; }
-
     }
     public enum EMachineType
     {

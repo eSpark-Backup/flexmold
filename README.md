@@ -22,15 +22,17 @@ device[counter].dummyDataOut:= SHL(device[counter].dir,2*8) OR device[counter].s
 END_FOR;
 ```
 # Binaries
-Executable can be downloaded from [FCA](./Binaries/FCA%203.rar)
-# Issues
-[i10]: https://github.com/eSpark-Consultants/flexmold/issues/10
-# Results
- ![](img/Issue10d.gif)
+Executable can be downloaded from [FCA](./Binaries/FlexMold%20V1.0.0.4.rar)
+# Open Issues
+https://github.com/eSpark-Consultants/flexmold/issues/11
+
+# Issue Results
+ ![](img/11a.gif)
+ <!-- ![](img/Issue10d.gif)
  ![](img/R1.png)
  ![](img/R2.png)
  ![](img/R3.png)
- ![](img/R4.png)
+ ![](img/R4.png) -->
 ## External Thanks
 - [For NLogViewer] https://github.com/erizet/NlogViewer
 - [For WPF Panel Control Template] https://www.youtube.com/watch?v=PzP8mw7JUzI&t=1s&ab_channel=Payload

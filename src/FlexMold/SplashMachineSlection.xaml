@@ -8,7 +8,7 @@
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodel="clr-namespace:FlexMold.MVVM.ViewModel"
-    Title="SplashMachineSlection"
+    Title="Welcome To FlexMold ..."
     Width="800"
     Height="600"
     ResizeMode="NoResize"
@@ -40,14 +40,14 @@
     </mah:MetroWindow.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="110" />
             <ColumnDefinition />
-            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="110" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="100" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="300" />
-            <RowDefinition Height="100" />
+            <RowDefinition Height="150" />
             <RowDefinition />
         </Grid.RowDefinitions>
         <TextBlock

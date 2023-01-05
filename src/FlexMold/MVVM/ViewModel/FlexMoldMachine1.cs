@@ -1,6 +1,7 @@
 ﻿using EnvDTE;
 using EnvDTE80;
 using FlexMold.Utility;
+using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell.Interop;
 using ScriptingTest;
 using System;
@@ -354,12 +355,14 @@ namespace FlexMold.MVVM.ViewModel
         {
             string declarationCode = @"TYPE EthercatDevice : 
 STRUCT
-	dir : BYTE ;
-	speed : WORD ;
-	dummyDataOut AT %Q*: DWORD ;
-	dummyDataIn AT %I*: DWORD ;
+    mDirection AT %Q*: BOOL;
+    mSpeed AT %Q*: DWORD;
+    mTime AT %Q*: DWORD;
+    mMode AT %Q*: BOOL;
 END_STRUCT
 END_TYPE";
+
+
             /* =================================================================================================
              * Creating the DUT using CreateChild()
              * ================================================================================================= */
@@ -441,14 +444,39 @@ END_TYPE";
             ITcPlcImplementation pouImpl = programPou as ITcPlcImplementation;
             ITcXmlDocument pouDoc = programPou as ITcXmlDocument;
             string deviceAtrib = "";
+            string mPositionAtrib = "";
+            string mTemperatureAtrib = "";
+            string Diag1Atrib = "";
+            string Diag2Atrib = "";
+            string Diag3Atrib = "";
 
+            string deviceName = "LAN9255_EtherCAT_Slave";
+            string outStr = "Outputs process data mapping";
+            string inpStr = "Inputs process data mapping";
             for (int j = 1; j <= AvaiableDevices; j++)
             {
                 for (int i = 1; i <= AvaiableBoxes; i++)
                 {
                     deviceAtrib += $"" +
-                        $"[{i}].dummyDataOut := TIID^Device_{j}^Box {i} (sample_app)^Outputs process data mapping^Trigger;\n" +
-                        $"[{i}].dummyDataIn := TIID^Device_{j}^Box {i} (sample_app)^Inputs process data mapping^Counter;\n";
+                        $"[{i}].mDirection := TIID^Device_{j}^Box {i} ({deviceName})^{outStr}^Direction;\n"+
+                        $"[{i}].mSpeed := TIID^Device_{j}^Box {i} ({deviceName})^{outStr}^Speed;\n" +
+                        $"[{i}].mTime := TIID^Device_{j}^Box {i} ({deviceName})^{outStr}^Time;\n" +
+                        $"[{i}].mMode := TIID^Device_{j}^Box {i} ({deviceName})^{outStr}^Mode;";
+
+                    mPositionAtrib += $"" +
+                        $"[{i}]:= TIID^Device_{j}^Box {i} ({deviceName})^{inpStr}^Position;";
+
+                    mTemperatureAtrib += $"" +
+                        $"[{i}]:= TIID^Device_{j}^Box {i} ({deviceName})^{inpStr}^Temperature;";
+
+                    Diag1Atrib += $"" +
+                        $"[{i}]:= TIID^Device_{j}^Box {i} ({deviceName})^{inpStr}^Diag1;";
+
+                    Diag2Atrib += $"" +
+                        $"[{i}]:= TIID^Device_{j}^Box {i} ({deviceName})^{inpStr}^Diag2;";
+
+                    Diag2Atrib += $"" +
+                        $"[{i}]:= TIID^Device_{j}^Box {i} ({deviceName})^{inpStr}^Diag3;";
                 }
             }
 
@@ -458,53 +486,36 @@ END_TYPE";
                 $"deviceCount : WORD := {AvaiableBoxes}; \n" +
                 "END_VAR \n" +
                 "VAR \n" +
+
                 "{attribute 'TcLinkTo' := '" + deviceAtrib +
-              //"[1].dummyDataOut := TIID^Device_1^Box 1 (sample_app)^Outputs process data mapping^Trigger;\n" +
-              //"[1].dummyDataIn := TIID^Device_1^Box 1 (sample_app)^Inputs process data mapping^Counter;\n" +
-              //"[2].dummyDataOut := TIID^Device_1^Box 2 (sample_app)^Outputs process data mapping^Trigger;\n" +
-              //"[2].dummyDataIn := TIID^Device_1^Box 2 (sample_app)^Inputs process data mapping^Counter;\n" +
-              "'}" +
+                    "'}\n" +
                 "device : ARRAY [1..deviceCount] OF EthercatDevice ; \n" +
-                "counter: WORD; \n" +
+
+                "{attribute 'TcLinkTo' := '" + mPositionAtrib +
+                    "'}\n" +
+                    "mPosition AT %I* : ARRAY [1..deviceCount] OF DWORD ;\n" +
+                
+                "{attribute 'TcLinkTo' := '" + mTemperatureAtrib +
+                    "'}\n" +
+                    "mTemperature AT %I* : ARRAY [1..deviceCount] OF DWORD ;\n" +
+
+                "{attribute 'TcLinkTo' := '" + Diag1Atrib +
+                    "'}\n" +
+                    "mDiag1 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
+
+                "{attribute 'TcLinkTo' := '" + Diag2Atrib +
+                    "'}\n" +
+                    "mDiag2 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
+
+                "{attribute 'TcLinkTo' := '" + Diag3Atrib +
+                    "'}\n" +
+                    "mDiag3 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
                 "END_VAR"
                 ;
 
             pouDecl.DeclarationText = decl1;
-            string impl1 = "" +
-                "FOR counter:=1 TO deviceCount BY 1 DO\n" +
-                "device[counter].dummyDataOut:= SHL(device[counter].dir,2*8) OR device[counter].speed ;\n" +
-                "END_FOR;";
+            string impl1 = ""; 
 
-            pouImpl.ImplementationText = impl1;
-
-            //pouDecl.DeclarationText += (Environment.NewLine + "(* Added by Script *)");
-
-            //string oldDocumentXml = pouDoc.DocumentXml; // Accessing POUs Code Document
-
-            /* =================================================================================================
-             * Modifying implementation area, based on IEC language.
-             * Please note: Direct access to implementation text is only provided for ST !
-             * ================================================================================================= */
-            //if (language == IECLanguageType.ST)
-            //{
-            //    pouDecl.DeclarationText = "";
-            //    var decl1info = decl1.Replace("\t", "").Split(new string[1] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            //    foreach (var item in decl1info)
-            //    {
-            //        if (item.Contains("{attribute 'TcLinkTo' := 'TIID^Device"))
-            //        {
-            //            pouDecl.DeclarationText += $"{{attribute 'TcLinkTo' := 'TIID^Device {5} (EtherCAT)^Box {2} (sample_app)^Outputs process data mapping^Trigger'}}" + Environment.NewLine;
-            //        }
-            //        else
-            //        {
-            //            pouDecl.DeclarationText += item + Environment.NewLine;
-            //        }
-            //    }
-
-            //    //pouImpl.ImplementationText = "i := i + 1; (* This code is added by script *)";
-            //    //pouImpl.ImplementationText += (Environment.NewLine + "(* Added by Script *)");
-
-            //}
             return programPou;
         }
 

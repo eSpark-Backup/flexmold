@@ -23,7 +23,14 @@
             IsOn="{Binding SelectedMotorDirValue}"
             OffContent="Reverese"
             OnContent="Forward" />
+        <Label Content="Motor Mode : " />
+        <mah:ToggleSwitch
+            IsOn="{Binding SelectedMotorModeValue}"
+            OffContent="Time"
+            OnContent="Direction" />
         <Label Content="Motor Speed : " />
         <mah:NumericUpDown Value="{Binding SelectedMotorSpeedValue}" />
+        <Label Content="Motor Time : " />
+        <mah:NumericUpDown Value="{Binding SelectedMotorTimeValue}" />
     </UniformGrid>
 </UserControl>

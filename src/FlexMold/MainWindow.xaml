@@ -10,7 +10,6 @@
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:nlogviewer="clr-namespace:NlogViewer;assembly=NlogViewer"
-    Title="FlexMold"
     Width="800"
     Height="600"
     Icon="flexmold.ico"

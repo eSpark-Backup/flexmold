@@ -197,7 +197,7 @@ namespace FlexMold.MVVM.ViewModel
         }
         public void RunScript()
         {
-            Debug.Assert(this._factory == null);
+            RunButtonEnable = false;
             if (this.SelectedScript != null)
             {
                 _runningScript = this.SelectedScript;
@@ -218,7 +218,7 @@ namespace FlexMold.MVVM.ViewModel
 
                 _worker = new ScriptBackgroundWorker(/*this._factory,*/ _runningScript, context);
 
-                ProgressStatuses = "Closing Opened Instances Cuurent TwinCAT sln";
+                ProgressStatuses = "Closing Opened Instances of current TwinCAT sln";
                 //Access COM Running Objects Table
                 ROTAccess.CloseRunningDTETable(_runningScript.ScriptRootFolder + @"\" + _runningScript.ScriptName + ".sln");
 
@@ -231,7 +231,7 @@ namespace FlexMold.MVVM.ViewModel
 #endif
                 _factory.IsIdeVisible = false;
                 _factory.IsIdeUserControl = false;
-                _factory.SuppressUI = false;
+                _factory.SuppressUI = true;
                 _worker.BeginScriptExecution();
             }
         }

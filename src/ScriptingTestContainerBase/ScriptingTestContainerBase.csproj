@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
-    <BaseOutputPath>..\Binaries\ScriptingContainerBins\</BaseOutputPath>
+    <BaseOutputPath>bin\Release\</BaseOutputPath>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <Company>Beckhoff Automation GmbH &amp; Co KG</Company>
     <Copyright>Beckhoff Automation GmbH &amp; Co KG 2022</Copyright>

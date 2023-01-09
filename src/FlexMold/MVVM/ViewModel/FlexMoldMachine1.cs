@@ -575,8 +575,8 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
         public List<ITcSmTreeItem> AvailableBoxes { get; set; }
         public void ScanDevicesAndBoxes(IWorker worker)
         {
-            AvaiableDevices = 1;
-            AvaiableBoxesCount = 2;
+            //AvaiableDevices = 1;
+            //AvaiableBoxesCount = 2;
             if (AvaiableBoxesCount > 0 && AvaiableBoxesCount > 0)
             {
                 worker.ProgressStatus = "! Warning .......";

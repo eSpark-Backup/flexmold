@@ -109,7 +109,7 @@ namespace FlexMold.MVVM.ViewModel
                         updateVSInstallations();
 
                         string TCVS = "TcXaeShell 15.0";
-                        log.Log(LogLevel.Info, $"Selected IDE : {TCVS}");
+                        log.Log(LogLevel.Info, $"TwinCAT IDE : {TCVS}");
                         SelectedVS = AvailableVS.Where(a => a.Name == TCVS).FirstOrDefault();
                         if (SelectedVS != null)
                         {
@@ -117,7 +117,7 @@ namespace FlexMold.MVVM.ViewModel
                         }
                         else
                         {
-                            string msg = "IDE Not Found Please Install {TCVS}";
+                            string msg = $"IDE Not Found Please Install {TCVS}";
                             log.Log(LogLevel.Error, $"{msg}");
                             MessageBox.Show($"{msg}");
                             OnRequestClose(this, new EventArgs());

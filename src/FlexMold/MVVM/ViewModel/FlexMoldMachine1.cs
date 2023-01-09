@@ -123,7 +123,7 @@ namespace FlexMold.MVVM.ViewModel
              * ================================================================================================= */
             ScanDevicesAndBoxes(worker); //custom code
             worker.Progress = 15;
-            if (AvaiableDevices > 0 && AvaiableBoxes > 0)
+            if (AvaiableDevices > 0 && AvaiableBoxesCount > 0)
             {
                 /* =================================================================================================
                  * Attach an empty PLC Project using the "TwinCAT Project" template
@@ -450,75 +450,79 @@ END_TYPE";
             string Diag2Atrib = "";
             string Diag3Atrib = "";
 
-            
+
             string outStr = "Outputs process data mapping";
             string inpStr = "Inputs process data mapping";
             for (int j = 1; j <= AvaiableDevices; j++)
             {
-                for (int i = 1; i <= AvaiableBoxes; i++)
+                for (int i = 0; i < AvailableBoxes.Count; i++)
                 {
                     deviceAtrib += $"" +
-                        $"[{i}].mDirection := TIID^Device_{j}^Box {i} ({deviceName})^{outStr}^Direction;\n" +
-                        $"[{i}].mSpeed := TIID^Device_{j}^Box {i} ({deviceName})^{outStr}^Speed;\n" +
-                        $"[{i}].mTime := TIID^Device_{j}^Box {i} ({deviceName})^{outStr}^Time;\n" +
-                        $"[{i}].mMode := TIID^Device_{j}^Box {i} ({deviceName})^{outStr}^Mode;";
+                  $"[{i}].mDirection := {AvailableBoxes[i].PathName}^{outStr}^Direction;\n" +
+                  $"[{i}].mSpeed := {AvailableBoxes[i].PathName}^{outStr}^Speed;\n" +
+                  $"[{i}].mTime := {AvailableBoxes[i].PathName}^{outStr}^Time;\n" +
+                  $"[{i}].mMode := {AvailableBoxes[i].PathName}^{outStr}^Mode;\n";
+
+                    // "TIID^Device_1^Box 1 (LAN9255_EtherCAT_Slave)"
+                    deviceAtrib += $"" +
+                        $"[{i}].mDirection := {AvailableBoxes[i].PathName}^{outStr}^Direction;\n" +
+                        $"[{i}].mSpeed := {AvailableBoxes[i].PathName}^{outStr}^Speed;\n" +
+                        $"[{i}].mTime := {AvailableBoxes[i].PathName}^{outStr}^Time;\n" +
+                        $"[{i}].mMode := {AvailableBoxes[i].PathName}^{outStr}^Mode;";
 
                     mPositionAtrib += $"" +
-                        $"[{i}]:= TIID^Device_{j}^Box {i} ({deviceName})^{inpStr}^Position;";
+                        $"[{i}]:= {AvailableBoxes[i].PathName}^{inpStr}^Position;";
 
                     mTemperatureAtrib += $"" +
-                        $"[{i}]:= TIID^Device_{j}^Box {i} ({deviceName})^{inpStr}^Temperature;";
+                        $"[{i}]:= {AvailableBoxes[i].PathName}^{inpStr}^Temperature;";
 
                     Diag1Atrib += $"" +
-                        $"[{i}]:= TIID^Device_{j}^Box {i} ({deviceName})^{inpStr}^Diag1;";
+                        $"[{i}]:= {AvailableBoxes[i].PathName}^{inpStr}^Diag1;";
 
                     Diag2Atrib += $"" +
-                        $"[{i}]:= TIID^Device_{j}^Box {i} ({deviceName})^{inpStr}^Diag2;";
+                        $"[{i}]:= {AvailableBoxes[i].PathName}^{inpStr}^Diag2;";
 
                     Diag3Atrib += $"" +
-                        $"[{i}]:= TIID^Device_{j}^Box {i} ({deviceName})^{inpStr}^Diag3;";
+                        $"[{i}]:= {AvailableBoxes[i].PathName}^{inpStr}^Diag3;";
                 }
+
+                string decl1 =
+                    "PROGRAM MAIN \n" +
+                    "VAR CONSTANT \n" +
+                    $"deviceCount : WORD := {AvaiableBoxesCount}; \n" +
+                    "END_VAR \n" +
+                    "VAR \n" +
+
+                    "{attribute 'TcLinkTo' := '" + deviceAtrib +
+                        "'}\n" +
+                    "device : ARRAY [1..deviceCount] OF EthercatDevice ; \n" +
+
+                    "{attribute 'TcLinkTo' := '" + mPositionAtrib +
+                        "'}\n" +
+                        "mPosition AT %I* : ARRAY [1..deviceCount] OF DWORD ;\n" +
+
+                    "{attribute 'TcLinkTo' := '" + mTemperatureAtrib +
+                        "'}\n" +
+                        "mTemperature AT %I* : ARRAY [1..deviceCount] OF DWORD ;\n" +
+
+                    "{attribute 'TcLinkTo' := '" + Diag1Atrib +
+                        "'}\n" +
+                        "mDiag1 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
+
+                    "{attribute 'TcLinkTo' := '" + Diag2Atrib +
+                        "'}\n" +
+                        "mDiag2 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
+
+                    "{attribute 'TcLinkTo' := '" + Diag3Atrib +
+                        "'}\n" +
+                        "mDiag3 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
+                    "END_VAR"
+                    ;
+                pouDecl.DeclarationText = decl1;
+                string impl1 = "";
             }
-
-            string decl1 =
-                "PROGRAM MAIN \n" +
-                "VAR CONSTANT \n" +
-                $"deviceCount : WORD := {AvaiableBoxes}; \n" +
-                "END_VAR \n" +
-                "VAR \n" +
-
-                "{attribute 'TcLinkTo' := '" + deviceAtrib +
-                    "'}\n" +
-                "device : ARRAY [1..deviceCount] OF EthercatDevice ; \n" +
-
-                "{attribute 'TcLinkTo' := '" + mPositionAtrib +
-                    "'}\n" +
-                    "mPosition AT %I* : ARRAY [1..deviceCount] OF DWORD ;\n" +
-
-                "{attribute 'TcLinkTo' := '" + mTemperatureAtrib +
-                    "'}\n" +
-                    "mTemperature AT %I* : ARRAY [1..deviceCount] OF DWORD ;\n" +
-
-                "{attribute 'TcLinkTo' := '" + Diag1Atrib +
-                    "'}\n" +
-                    "mDiag1 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
-
-                "{attribute 'TcLinkTo' := '" + Diag2Atrib +
-                    "'}\n" +
-                    "mDiag2 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
-
-                "{attribute 'TcLinkTo' := '" + Diag3Atrib +
-                    "'}\n" +
-                    "mDiag3 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
-                "END_VAR"
-                ;
-
-            pouDecl.DeclarationText = decl1;
-            string impl1 = "";
-
             return programPou;
         }
-
         public override string Description
         {
             get { return "Demonstrates the creation of PLC projects, POUs etc., Setting of Solution Configurations."; }
@@ -566,18 +570,18 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                 return "PLC";
             }
         }
-        public int AvaiableBoxes { get; set; }
+        public int AvaiableBoxesCount { get; set; }
         public int AvaiableDevices { get; set; }
-
+        public List<ITcSmTreeItem> AvailableBoxes { get; set; }
         public void ScanDevicesAndBoxes(IWorker worker)
         {
-            //AvaiableDevices = 1;
-            //AvaiableBoxes = 2;
-            if (AvaiableBoxes > 0 && AvaiableBoxes > 0)
+            AvaiableDevices = 1;
+            AvaiableBoxesCount = 2;
+            if (AvaiableBoxesCount > 0 && AvaiableBoxesCount > 0)
             {
                 worker.ProgressStatus = "! Warning .......";
                 worker.ProgressStatus = "Simulated Version";
-                worker.ProgressStatus = $"Dummy  {AvaiableDevices} Divices and {AvaiableBoxes} Boxes added";
+                worker.ProgressStatus = $"Dummy  {AvaiableDevices} Divices and {AvaiableBoxesCount} Boxes added";
             }
             else
             {
@@ -612,12 +616,14 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                         worker.ProgressStatus = "Warning: " + ex.Message;
                     }
                     AvaiableDevices = AvaiableDevices + 1;
+
                     foreach (ITcSmTreeItem box in device)
                     {
                         if (box.Name.Contains(deviceName))
                         {
-                            AvaiableBoxes = AvaiableBoxes + 1;
-                            worker.ProgressStatus = $"Box Added Name : {box.Name}";
+                            AvailableBoxes.Add(box);
+                            AvaiableBoxesCount = AvaiableBoxesCount + 1;
+                            worker.ProgressStatus = $"{box.PathName}";
                         }
                     }
                 }

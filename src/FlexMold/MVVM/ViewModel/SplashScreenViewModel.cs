@@ -89,7 +89,6 @@ namespace FlexMold.MVVM.ViewModel
                 log.Log(LogLevel.Info, $"Closing ....");
             }
             );
-
         }
 
         void MachineSelectMethod(Machine _a)

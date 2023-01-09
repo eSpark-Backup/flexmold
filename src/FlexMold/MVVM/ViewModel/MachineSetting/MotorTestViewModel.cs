@@ -186,11 +186,11 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
             
             TwinCathelper._connection.AdsNotification += Client_AdsNotification2;
             log.Log(LogLevel.Info, $"Registring Device Status Notification...");
-            RegisterNotification(TwinCATVariableIfo.mPositionVariableName);
-            RegisterNotification(TwinCATVariableIfo.mTemperatureVariableName);
-            RegisterNotification(TwinCATVariableIfo.mDiag1VariableName);
-            RegisterNotification(TwinCATVariableIfo.mDiag2VariableName);
-            RegisterNotification(TwinCATVariableIfo.mDiag3VariableName);
+            _ = RegisterNotification(TwinCATVariableIfo.mPositionVariableName);
+            _ = RegisterNotification(TwinCATVariableIfo.mTemperatureVariableName);
+            _ = RegisterNotification(TwinCATVariableIfo.mDiag1VariableName);
+            _ = RegisterNotification(TwinCATVariableIfo.mDiag2VariableName);
+            _ = RegisterNotification(TwinCATVariableIfo.mDiag3VariableName);
 
             structSize = (SymbolEthercatDevice.Size) / TwinCathelper.DeviceCount;
             buffer = new byte[structSize * TwinCathelper.DeviceCount];

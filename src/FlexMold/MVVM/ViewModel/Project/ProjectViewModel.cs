@@ -11,7 +11,6 @@ using System.IO.Ports;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web.UI.WebControls;
 
 namespace FlexMold.MVVM.ViewModel.Project
 {
@@ -83,7 +82,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         public ProjectViewModel()
         {
             ReadCSVFileCommand = new RelayCommand(o => { readCsvFile(); });
-            SendLasFileCommand = new RelayCommand(o => { sendLasFileAsync(slectedFile); });
+            SendLasFileCommand = new RelayCommand(o => { _ = sendLasFileAsync(slectedFile); });
             SerialConfigCommand = new RelayCommand(o => { SerialConfigWindow(); });
             SambaConfigCommand = new RelayCommand(o => { SambaConfigWindow(); });
             BrowseProjectCommand = new RelayCommand(o => { BrowseProject(); });

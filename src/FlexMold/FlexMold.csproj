@@ -1,23 +1,7 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Microsoft.CodeCoverage.17.4.0\build\netstandard2.0\Microsoft.CodeCoverage.props" Condition="Exists('..\packages\Microsoft.CodeCoverage.17.4.0\build\netstandard2.0\Microsoft.CodeCoverage.props')" />
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F4B5095D-5AB6-47C0-B78F-2209C1D8E19A}</ProjectGuid>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>FlexMold</RootNamespace>
-    <AssemblyName>FlexMold</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <WarningLevel>4</WarningLevel>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -37,25 +21,10 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>flexmold.ico</ApplicationIcon>
@@ -79,434 +48,12 @@
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ConsoleControl.WPF, Version=1.3.0.0, Culture=neutral, PublicKeyToken=bb812711dbc508e1, processorArchitecture=MSIL">
-      <HintPath>..\packages\ConsoleControl.WPF.1.3.0\lib\net40-client\ConsoleControl.WPF.dll</HintPath>
-    </Reference>
-    <Reference Include="ConsoleControlAPI, Version=1.3.0.0, Culture=neutral, PublicKeyToken=7c86b8a36b9c33e2, processorArchitecture=MSIL">
-      <HintPath>..\packages\ConsoleControlAPI.1.3.0\lib\net40\ConsoleControlAPI.dll</HintPath>
-    </Reference>
-    <Reference Include="ControlzEx, Version=4.0.0.0, Culture=neutral, PublicKeyToken=69f1c32f803d307e, processorArchitecture=MSIL">
-      <HintPath>..\packages\ControlzEx.4.4.0\lib\net45\ControlzEx.dll</HintPath>
-    </Reference>
-    <Reference Include="DataGridExtensions, Version=2.5.14.0, Culture=neutral, PublicKeyToken=43de855f87de903a, processorArchitecture=MSIL">
-      <HintPath>..\packages\DataGridExtensions.2.5.14\lib\net452\DataGridExtensions.dll</HintPath>
-    </Reference>
-    <Reference Include="envdte80, Version=17.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\envdte80.17.4.33103.184\lib\net472\envdte80.dll</HintPath>
-    </Reference>
-    <Reference Include="MahApps.Metro, Version=2.0.0.0, Culture=neutral, PublicKeyToken=51482d6f650b2b3f, processorArchitecture=MSIL">
-      <HintPath>..\packages\MahApps.Metro.2.4.9\lib\net46\MahApps.Metro.dll</HintPath>
-    </Reference>
-    <Reference Include="MahApps.Metro.IconPacks, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
-      <HintPath>..\packages\MahApps.Metro.IconPacks.4.11.0\lib\net47\MahApps.Metro.IconPacks.dll</HintPath>
-    </Reference>
-    <Reference Include="MahApps.Metro.IconPacks.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
-      <HintPath>..\packages\MahApps.Metro.IconPacks.4.11.0\lib\net47\MahApps.Metro.IconPacks.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="MahApps.Metro.IconPacks.Material, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
-      <HintPath>..\packages\MahApps.Metro.IconPacks.4.11.0\lib\net47\MahApps.Metro.IconPacks.Material.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=6.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\lib\net461\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.VisualStudio.CodeCoverage.Shim, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.CodeCoverage.17.4.0\lib\net462\Microsoft.VisualStudio.CodeCoverage.Shim.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.VisualStudio.Interop, Version=17.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.VisualStudio.Interop.17.4.33103.184\lib\net472\Microsoft.VisualStudio.Interop.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.39\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
-    </Reference>
-    <Reference Include="netstandard" />
-    <Reference Include="NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NLog.5.1.0\lib\net46\NLog.dll</HintPath>
-    </Reference>
-    <Reference Include="RudolfKurka.StructPackerTools, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\StructPacker.1.0.8\lib\netstandard1.0\RudolfKurka.StructPackerTools.dll</HintPath>
-    </Reference>
-    <Reference Include="SMBLibrary, Version=1.4.9.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SMBLibrary.1.4.9\lib\net40\SMBLibrary.dll</HintPath>
-    </Reference>
-    <Reference Include="Sylvan.Data.Csv, Version=1.2.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sylvan.Data.Csv.1.2.4\lib\netstandard2.0\Sylvan.Data.Csv.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
-    </Reference>
-    <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Configuration.ConfigurationManager, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Configuration.ConfigurationManager.6.0.0\lib\net461\System.Configuration.ConfigurationManager.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.OracleClient" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.IO.Compression, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
-    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Net" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reactive, Version=5.0.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Reactive.5.0.0\lib\netstandard2.0\System.Reactive.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Security" />
-    <Reference Include="System.Security.AccessControl, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Security.AccessControl.6.0.0\lib\net461\System.Security.AccessControl.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Security.Permissions, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Security.Permissions.6.0.0\lib\net461\System.Security.Permissions.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Security.Principal.Windows, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Security.Principal.Windows.5.0.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
-    </Reference>
-    <Reference Include="System.ServiceProcess" />
-    <Reference Include="System.Text.Encoding.CodePages, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Text.Encoding.CodePages.4.5.1\lib\net461\System.Text.Encoding.CodePages.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Transactions" />
-    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web" />
-    <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xaml">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="TentacleSoftware.Telnet, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\TentacleSoftware.Telnet.1.0.3.0\lib\net45\TentacleSoftware.Telnet.dll</HintPath>
-    </Reference>
-    <Reference Include="TwinCAT.Ads, Version=6.0.0.0, Culture=neutral, PublicKeyToken=180016cd49e5e8c3, processorArchitecture=MSIL">
-      <HintPath>..\packages\Beckhoff.TwinCAT.Ads.6.0.216\lib\net461\TwinCAT.Ads.dll</HintPath>
-    </Reference>
-    <Reference Include="TwinCAT.Ads.Abstractions, Version=6.0.0.0, Culture=neutral, PublicKeyToken=180016cd49e5e8c3, processorArchitecture=MSIL">
-      <HintPath>..\packages\Beckhoff.TwinCAT.Ads.Abstractions.6.0.216\lib\net461\TwinCAT.Ads.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="TwinCAT.Ads.Server, Version=6.0.0.0, Culture=neutral, PublicKeyToken=180016cd49e5e8c3, processorArchitecture=MSIL">
-      <HintPath>..\packages\Beckhoff.TwinCAT.Ads.Server.6.0.216\lib\net461\TwinCAT.Ads.Server.dll</HintPath>
-    </Reference>
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-  </ItemGroup>
-  <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </ApplicationDefinition>
-    <Compile Include="Convertor\BoolInverterConverter.cs" />
-    <Compile Include="Convertor\BoolToByteConverter.cs" />
-    <Compile Include="Convertor\RadioBoolToIntConverter.cs" />
-    <Compile Include="MVVM\Model\Machine.cs" />
-    <Compile Include="MVVM\Model\LaserProjector.cs" />
-    <Compile Include="MVVM\Model\PLCMotor.cs" />
-    <Compile Include="MVVM\ViewModel\FlexMoldMachine1.cs" />
-    <Compile Include="MVVM\ViewModel\MachineSettingViewModel.cs" />
-    <Compile Include="MVVM\ViewModel\MachineSetting\MotorTestViewModel.cs" />
-    <Compile Include="MVVM\View\MachineSetting\MotorTest.xaml.cs">
-      <DependentUpon>MotorTest.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Utility\MixUtil.cs" />
-    <Compile Include="Utility\TelnetHelper.cs" />
-    <Compile Include="MVVM\ViewModel\Setting\LaserProjectorSettingViewModel.cs" />
-    <Compile Include="MVVM\ViewModel\SplashScreenViewModel.cs" />
-    <Compile Include="MVVM\View\MachineSettingView.xaml.cs">
-      <DependentUpon>MachineSettingView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\MachineSetting\ReadMotorView.xaml.cs">
-      <DependentUpon>ReadMotorView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\MachineSetting\PowerOnOffView.xaml.cs">
-      <DependentUpon>PowerOnOffView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\MachineSetting\RenumberingView.xaml.cs">
-      <DependentUpon>RenumberingView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\MachineSetting\PositionView.xaml.cs">
-      <DependentUpon>PositionView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\MachineSetting\ResetView.xaml.cs">
-      <DependentUpon>ResetView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\Project\SambaConfigWindow.xaml.cs">
-      <DependentUpon>SambaConfigWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\Project\SerialPortConfigView.xaml.cs">
-      <DependentUpon>SerialPortConfigView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\Setting\LaserProjectorSettingView.xaml.cs">
-      <DependentUpon>LaserProjectorSettingView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="SplashMachineSlection.xaml.cs">
-      <DependentUpon>SplashMachineSlection.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Utility\NetworkShareAccesser.cs" />
-    <Compile Include="Utility\TwinCathelper.cs" />
-    <Page Include="MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Convertor\DistinctConverter.cs" />
-    <Compile Include="Convertor\HeightConverter.cs" />
-    <Compile Include="Convertor\CompleteConverter.cs" />
-    <Compile Include="Core\MultipleChoiceFilter.cs" />
-    <Compile Include="Core\ObservableObject.cs" />
-    <Compile Include="Core\PropertyValidation.cs" />
-    <Compile Include="Core\RelayCommand.cs" />
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Page Include="MVVM\View\AccessoryView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\Accessory\HeaterStatusView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\Accessory\LaserStatusView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\MachineSettingView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="MVVM\View\HomeView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\Home\EmergencyStatusView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\Home\HeaterStatusView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\Home\LaserStatusView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\Home\MachineDetailView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\Home\MotorStatusView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\Home\PowerStatusView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\Home\VaccumStatusView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\Home\VisualDisplayView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\MachineSetting\MotorTest.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\MachineSetting\ReadMotorView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="MVVM\View\MachineSetting\PowerOnOffView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="MVVM\View\MachineSetting\RenumberingView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="MVVM\View\MachineSetting\PositionView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="MVVM\View\MachineSetting\ResetView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="MVVM\View\ProjectView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\Project\ProjectGridView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\Project\SambaConfigWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\Project\SerialPortConfigView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\SettingView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\Setting\LaserProjectorSettingView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\Setting\MachineSettingView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\Setting\MotorSettingView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\Setting\PowerSettingView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MVVM\View\Setting\VacuumSettingView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="SplashMachineSlection.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Theme\MenuButtonTheme.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Theme\TextBoxTheme.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="MVVM\Model\MyDataModel.cs" />
-    <Compile Include="MVVM\ViewModel\AccessoryViewModel.cs" />
-    <Compile Include="MVVM\ViewModel\HomeViewModel.cs" />
-    <Compile Include="MVVM\ViewModel\Project\ProjectViewModel.cs" />
-    <Compile Include="MVVM\ViewModel\SettingViewModel.cs" />
-    <Compile Include="MVVM\View\AccessoryView.xaml.cs">
-      <DependentUpon>AccessoryView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\Accessory\HeaterStatusView.xaml.cs">
-      <DependentUpon>HeaterStatusView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\Accessory\LaserStatusView.xaml.cs">
-      <DependentUpon>LaserStatusView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\HomeView.xaml.cs">
-      <DependentUpon>HomeView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\Home\EmergencyStatusView.xaml.cs">
-      <DependentUpon>EmergencyStatusView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\Home\HeaterStatusView.xaml.cs">
-      <DependentUpon>HeaterStatusView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\Home\LaserStatusView.xaml.cs">
-      <DependentUpon>LaserStatusView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\Home\MachineDetailView.xaml.cs">
-      <DependentUpon>MachineDetailView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\Home\MotorStatusView.xaml.cs">
-      <DependentUpon>MotorStatusView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\Home\PowerStatusView.xaml.cs">
-      <DependentUpon>PowerStatusView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\Home\VaccumStatusView.xaml.cs">
-      <DependentUpon>VaccumStatusView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\Home\VisualDisplayView.xaml.cs">
-      <DependentUpon>VisualDisplayView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\ProjectView.xaml.cs">
-      <DependentUpon>ProjectView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\Project\ProjectGridView.xaml.cs">
-      <DependentUpon>ProjectGridView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\SettingView.xaml.cs">
-      <DependentUpon>SettingView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\Setting\MachineSettingView.xaml.cs">
-      <DependentUpon>MachineSettingView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\Setting\MotorSettingView.xaml.cs">
-      <DependentUpon>MotorSettingView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\Setting\PowerSettingView.xaml.cs">
-      <DependentUpon>PowerSettingView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MVVM\View\Setting\VacuumSettingView.xaml.cs">
-      <DependentUpon>VacuumSettingView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Content Include="Nlog.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <None Include="MVVM\Model\main.cd" />
-    <None Include="NLog.xsd">
+    <None Update="Nlog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="packages.config" />
-    <None Include="Properties\app.manifest" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Common\" />
@@ -521,28 +68,8 @@
     <Resource Include="flexmold.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NlogViewer\NlogViewer.csproj">
-      <Project>{c04e879d-287e-49b5-9933-42fc2eff75f0}</Project>
-      <Name>NlogViewer</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ScriptingTestContainerBase\ScriptingTestContainerBase.csproj">
-      <Project>{5e80f7cd-7d92-4e16-9fb7-6b36c57589ec}</Project>
-      <Name>ScriptingTestContainerBase</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\packages\StructPacker.1.0.8\analyzers\dotnet\cs\RudolfKurka.StructPacker.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <COMReference Include="TCatSysManagerLib">
-      <Guid>{3C49D6C3-93DC-11D0-B162-00A0248C244B}</Guid>
-      <VersionMajor>3</VersionMajor>
-      <VersionMinor>3</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>primary</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
+    <ProjectReference Include="..\NlogViewer\NlogViewer.csproj" />
+    <ProjectReference Include="..\ScriptingTestContainerBase\ScriptingTestContainerBase.csproj" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.8">
@@ -555,6 +82,17 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="TCatSysManagerLib">
+      <WrapperTool>tlbimp</WrapperTool>
+      <VersionMinor>3</VersionMinor>
+      <VersionMajor>3</VersionMajor>
+      <Guid>3c49d6c3-93dc-11d0-b162-00a0248c244b</Guid>
+      <Lcid>0</Lcid>
+      <Isolated>false</Isolated>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
   <ItemGroup>
     <PublishFile Include="MahApps.Metro.IconPacks.BootstrapIcons">
@@ -858,15 +396,28 @@
       <FileType>Assembly</FileType>
     </PublishFile>
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Microsoft.CodeCoverage.17.4.0\build\netstandard2.0\Microsoft.CodeCoverage.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeCoverage.17.4.0\build\netstandard2.0\Microsoft.CodeCoverage.props'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.CodeCoverage.17.4.0\build\netstandard2.0\Microsoft.CodeCoverage.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeCoverage.17.4.0\build\netstandard2.0\Microsoft.CodeCoverage.targets'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\build\Microsoft.Extensions.Logging.Abstractions.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\build\Microsoft.Extensions.Logging.Abstractions.targets'))" />
-  </Target>
-  <Import Project="..\packages\Microsoft.CodeCoverage.17.4.0\build\netstandard2.0\Microsoft.CodeCoverage.targets" Condition="Exists('..\packages\Microsoft.CodeCoverage.17.4.0\build\netstandard2.0\Microsoft.CodeCoverage.targets')" />
-  <Import Project="..\packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\build\Microsoft.Extensions.Logging.Abstractions.targets" Condition="Exists('..\packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\build\Microsoft.Extensions.Logging.Abstractions.targets')" />
+  <ItemGroup>
+    <PackageReference Include="Beckhoff.TwinCAT.Ads" Version="6.0.216" />
+    <PackageReference Include="DataGridExtensions" Version="2.5.14" />
+    <PackageReference Include="envdte80" Version="17.4.33103.184" />
+    <PackageReference Include="MahApps.Metro" Version="2.4.9" />
+    <PackageReference Include="MahApps.Metro.IconPacks" Version="4.11.0" />
+    <PackageReference Include="Microsoft.CodeCoverage" Version="17.4.0" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="NLog" Version="5.1.1" />
+    <PackageReference Include="NLog.Schema" Version="5.1.0" />
+    <PackageReference Include="SMBLibrary" Version="1.4.9" />
+    <PackageReference Include="StructPacker" Version="1.0.8" />
+    <PackageReference Include="Sylvan.Data.Csv" Version="1.2.4" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="7.0.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+    <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
+    <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.355802">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
 </Project>

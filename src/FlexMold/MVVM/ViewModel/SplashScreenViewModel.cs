@@ -103,7 +103,8 @@ namespace FlexMold.MVVM.ViewModel
                     }
                     else
                     {
-                        SelectedScript = new FlexMoldMachine1();
+                        //SelectedScript = new FlexMoldMachine1();
+                        SelectedScript = new FlexMoldMachineDebug();
                         ComRegistration = true;
                         updateVSInstallations();
 

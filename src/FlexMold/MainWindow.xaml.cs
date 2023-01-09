@@ -4,7 +4,6 @@ using FlexMold.Utility;
 using MahApps.Metro.Controls;
 using NLog;
 using System;
-using System.Deployment.Application;
 using System.Globalization;
 using System.Linq;
 using System.Media;
@@ -30,7 +29,7 @@ namespace FlexMold
             /// Region closed 
             try
             {
-                
+
                 TwinCathelper.TwinCatConnect851();
                 TwinCathelper._session.ConnectionStateChanged += session_ConnectionStateChanged;
                 TwinCathelper._connection.ConnectionStateChanged += _connection_ConnectionStatusChanged;
@@ -40,16 +39,16 @@ namespace FlexMold
                 {
                     if (TwinCathelper._connection.IsActive)
                     {
-                        if (TwinCathelper.MySymbols.Count > 0 && TwinCathelper.MySymbols.Where(a=>a.InstancePath== TwinCATVariableIfo.TwicatDeviceCountVariableName).Count()>0)
+                        if (TwinCathelper.MySymbols.Count > 0 && TwinCathelper.MySymbols.Where(a => a.InstancePath == TwinCATVariableIfo.TwicatDeviceCountVariableName).Count() > 0)
                         {
-                            TwinCathelper.DeviceCount = (short)TwinCathelper.MySymbols.Where(a => 
+                            TwinCathelper.DeviceCount = (short)TwinCathelper.MySymbols.Where(a =>
                             a.InstancePath == TwinCATVariableIfo.TwicatDeviceCountVariableName).FirstOrDefault().ReadAnyValue(typeof(short));
                             if (TwinCathelper.DeviceCount > 0)
                             {
                                 InitializeComponent();
                                 Version v = Assembly.GetExecutingAssembly().GetName().Version;
                                 string About = string.Format(CultureInfo.InvariantCulture, @"YourApp Version {0}.{1}.{2} (r{3})", v.Major, v.Minor, v.Build, v.Revision);
-                                this.Title = "FlexMold MainDeviceVariableName:" + getRunningVersion().ToString();
+                                this.Title = "FlexMold V:" + getRunningVersion().ToString();
                                 logCtrl.ItemAdded += OnLogMessageItemAdded;
                                 log.Log(LogLevel.Info, $"Application Loaded Sucessfully.....");
                                 log.Log(LogLevel.Info, $"Selected Machine Type : {SelectedMachine.MachineType} Name : {SelectedMachine.Name} ID : {SelectedMachine.ID}");
@@ -97,7 +96,7 @@ namespace FlexMold
         {
             try
             {
-                return ApplicationDeployment.CurrentDeployment.CurrentVersion;
+                return Assembly.GetEntryAssembly().GetName().Version;
             }
             catch (Exception)
             {
@@ -187,28 +186,26 @@ namespace FlexMold
                         break;
                 }
                 var info = TwinCathelper.GetTwincatState();
-                if (info != null)
+
+                tBAdsState.Text = info.AdsState.ToString();
+
+                switch (info.AdsState)
                 {
-                    tBAdsState.Text = info.AdsState.ToString();
+                    case AdsState.Run:
+                        borState.Background = new SolidColorBrush(Colors.DarkGreen);
+                        tBAdsState.Foreground = new SolidColorBrush(Colors.White);
 
-                    switch (info.AdsState)
-                    {
-                        case AdsState.Run:
-                            borState.Background = new SolidColorBrush(Colors.DarkGreen);
-                            tBAdsState.Foreground = new SolidColorBrush(Colors.White);
+                        break;
+                    case AdsState.Stop:
+                    case AdsState.Error:
+                        borState.Background = new SolidColorBrush(Colors.DarkRed);
+                        tBAdsState.Foreground = new SolidColorBrush(Colors.White);
 
-                            break;
-                        case AdsState.Stop:
-                        case AdsState.Error:
-                            borState.Background = new SolidColorBrush(Colors.DarkRed);
-                            tBAdsState.Foreground = new SolidColorBrush(Colors.White);
-
-                            break;
-                        case AdsState.Config:
-                            borState.Background = new SolidColorBrush(Colors.DarkBlue);
-                            tBAdsState.Foreground = new SolidColorBrush(Colors.White);
-                            break;
-                    }
+                        break;
+                    case AdsState.Config:
+                        borState.Background = new SolidColorBrush(Colors.DarkBlue);
+                        tBAdsState.Foreground = new SolidColorBrush(Colors.White);
+                        break;
                 }
             }
             else

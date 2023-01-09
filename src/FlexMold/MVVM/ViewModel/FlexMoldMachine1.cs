@@ -436,7 +436,7 @@ END_TYPE";
             ITcSmTreeItem program = AddPOUProgram("Main", parent, language, worker);
         }
 
-        string deviceName = "LAN9255_EtherCAT_Slave";
+        string deviceName = "LAN9255";
         private ITcSmTreeItem AddPOUProgram(string pouName, ITcSmTreeItem parent, IECLanguageType language, IWorker worker)
         {
             ITcSmTreeItem programPou = parent.LookupChild("Main");
@@ -449,41 +449,39 @@ END_TYPE";
             string Diag1Atrib = "";
             string Diag2Atrib = "";
             string Diag3Atrib = "";
-
-
             string outStr = "Outputs process data mapping";
             string inpStr = "Inputs process data mapping";
             for (int j = 1; j <= AvaiableDevices; j++)
             {
-                for (int i = 0; i < AvailableBoxes.Count; i++)
+                for (int i = 1; i <= AvailableBoxes.Count; i++)
                 {
                     deviceAtrib += $"" +
-                  $"[{i}].mDirection := {AvailableBoxes[i].PathName}^{outStr}^Direction;\n" +
-                  $"[{i}].mSpeed := {AvailableBoxes[i].PathName}^{outStr}^Speed;\n" +
-                  $"[{i}].mTime := {AvailableBoxes[i].PathName}^{outStr}^Time;\n" +
-                  $"[{i}].mMode := {AvailableBoxes[i].PathName}^{outStr}^Mode;\n";
+                  $"[{i}].mDirection := {AvailableBoxes[i - 1].PathName}^{outStr}^Direction;\n" +
+                  $"[{i}].mSpeed := {AvailableBoxes[i - 1].PathName}^{outStr}^Speed;\n" +
+                  $"[{i}].mTime := {AvailableBoxes[i - 1].PathName}^{outStr}^Time;\n" +
+                  $"[{i}].mMode := {AvailableBoxes[i - 1].PathName}^{outStr}^Mode;\n";
 
                     // "TIID^Device_1^Box 1 (LAN9255_EtherCAT_Slave)"
                     deviceAtrib += $"" +
-                        $"[{i}].mDirection := {AvailableBoxes[i].PathName}^{outStr}^Direction;\n" +
-                        $"[{i}].mSpeed := {AvailableBoxes[i].PathName}^{outStr}^Speed;\n" +
-                        $"[{i}].mTime := {AvailableBoxes[i].PathName}^{outStr}^Time;\n" +
-                        $"[{i}].mMode := {AvailableBoxes[i].PathName}^{outStr}^Mode;";
+                        $"[{i}].mDirection := {AvailableBoxes[i - 1].PathName}^{outStr}^Direction;\n" +
+                        $"[{i}].mSpeed := {AvailableBoxes[i - 1].PathName}^{outStr}^Speed;\n" +
+                        $"[{i}].mTime := {AvailableBoxes[i - 1].PathName}^{outStr}^Time;\n" +
+                        $"[{i}].mMode := {AvailableBoxes[i - 1].PathName}^{outStr}^Mode;";
 
                     mPositionAtrib += $"" +
-                        $"[{i}]:= {AvailableBoxes[i].PathName}^{inpStr}^Position;";
+                        $"[{i}]:= {AvailableBoxes[i - 1].PathName}^{inpStr}^Position;";
 
                     mTemperatureAtrib += $"" +
-                        $"[{i}]:= {AvailableBoxes[i].PathName}^{inpStr}^Temperature;";
+                        $"[{i}]:= {AvailableBoxes[i - 1].PathName}^{inpStr}^Temperature;";
 
                     Diag1Atrib += $"" +
-                        $"[{i}]:= {AvailableBoxes[i].PathName}^{inpStr}^Diag1;";
+                        $"[{i}]:= {AvailableBoxes[i - 1].PathName}^{inpStr}^Diag1;";
 
                     Diag2Atrib += $"" +
-                        $"[{i}]:= {AvailableBoxes[i].PathName}^{inpStr}^Diag2;";
+                        $"[{i}]:= {AvailableBoxes[i - 1].PathName}^{inpStr}^Diag2;";
 
                     Diag3Atrib += $"" +
-                        $"[{i}]:= {AvailableBoxes[i].PathName}^{inpStr}^Diag3;";
+                        $"[{i}]:= {AvailableBoxes[i-1].PathName}^{inpStr}^Diag3;";
                 }
 
                 string decl1 =
@@ -575,6 +573,7 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
         public List<ITcSmTreeItem> AvailableBoxes { get; set; }
         public void ScanDevicesAndBoxes(IWorker worker)
         {
+            AvailableBoxes = new List<ITcSmTreeItem>();
             //AvaiableDevices = 1;
             //AvaiableBoxesCount = 2;
             if (AvaiableBoxesCount > 0 && AvaiableBoxesCount > 0)
@@ -619,7 +618,7 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
 
                     foreach (ITcSmTreeItem box in device)
                     {
-                        if (box.Name.Contains(deviceName))
+                        if (box.PathName.Contains(deviceName))
                         {
                             AvailableBoxes.Add(box);
                             AvaiableBoxesCount = AvaiableBoxesCount + 1;

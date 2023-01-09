@@ -1,4 +1,5 @@
-﻿using FlexMold.Utility;
+﻿using ControlzEx.Native;
+using FlexMold.Utility;
 using StructPacker;
 using System;
 using System.Collections.Generic;
@@ -25,5 +26,15 @@ namespace FlexMold.MVVM.Model
         public bool t6;
         [SkipPack]
         public uint DeviceID;
+    }
+   public static class TwinCATVariableIfo 
+    {
+        public const string TwicatDeviceCountVariableName = "MAIN.deviceCount";
+        public const string MainDeviceVariableName = "MAIN.device";
+        public const string mPositionVariableName = "MAIN.mPosition";
+        public const string mTemperatureVariableName = "MAIN.mTemperature";
+        public const string mDiag1VariableName = "MAIN.mDiag1";
+        public const string mDiag2VariableName = "MAIN.mDiag2";
+        public const string mDiag3VariableName = "MAIN.mDiag3";
     }
 }

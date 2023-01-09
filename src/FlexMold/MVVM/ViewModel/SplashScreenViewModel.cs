@@ -1,19 +1,13 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
-using MahApps.Metro.Controls;
-using MahApps.Metro.IconPacks;
 using NLog;
 using ScriptingTest;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media.Effects;
 
 namespace FlexMold.MVVM.ViewModel
 {
@@ -95,7 +89,6 @@ namespace FlexMold.MVVM.ViewModel
                 log.Log(LogLevel.Info, $"Closing ....");
             }
             );
-
         }
 
         void MachineSelectMethod(Machine _a)
@@ -111,11 +104,12 @@ namespace FlexMold.MVVM.ViewModel
                     else
                     {
                         SelectedScript = new FlexMoldMachine1();
+                        //SelectedScript = new FlexMoldMachineDebug();
                         ComRegistration = true;
                         updateVSInstallations();
 
                         string TCVS = "TcXaeShell 15.0";
-                        log.Log(LogLevel.Info, $"Selected IDE : {TCVS}");
+                        log.Log(LogLevel.Info, $"TwinCAT IDE : {TCVS}");
                         SelectedVS = AvailableVS.Where(a => a.Name == TCVS).FirstOrDefault();
                         if (SelectedVS != null)
                         {
@@ -123,7 +117,7 @@ namespace FlexMold.MVVM.ViewModel
                         }
                         else
                         {
-                            string msg = "IDE Not Found Please Install {TCVS}";
+                            string msg = $"IDE Not Found Please Install {TCVS}";
                             log.Log(LogLevel.Error, $"{msg}");
                             MessageBox.Show($"{msg}");
                             OnRequestClose(this, new EventArgs());

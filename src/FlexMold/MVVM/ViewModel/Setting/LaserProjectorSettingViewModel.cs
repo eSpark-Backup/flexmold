@@ -30,24 +30,24 @@ namespace FlexMold.MVVM.ViewModel.Setting
             LP = new LaserProjector();
             LP.IpAddres = "telehack.com";
             LP.TelnetPort = 23;
-            TelnetConnectCommand = new RelayCommand(o => { ConnectTelnet(LP.IpAddres, LP.TelnetPort); });
-            TelnetMessageSendCommand = new RelayCommand(o => { SendTelnetMessgae(); });
+            TelnetConnectCommand = new RelayCommand(o => { _ = ConnectTelnet(LP.IpAddres, LP.TelnetPort); });
+            TelnetMessageSendCommand = new RelayCommand(o => { _ = SendTelnetMessgae(); });
             TelnetDisConnectCommand = new RelayCommand(o => { DisconnectTelnet(); });
 
             ProjectionOnCommand = new RelayCommand(o =>
             {
                 SendMessage = "echo ZN; " + "\r\n";
-                SendTelnetMessgae();
+                _ = SendTelnetMessgae();
             });
             ProjectionOffCommand = new RelayCommand(o =>
             {
                 SendMessage = "echo ZF; " + "\r\n";
-                SendTelnetMessgae();
+                _ = SendTelnetMessgae();
             });
-            CallibrateProjectorCommand = new RelayCommand(async o =>
+            CallibrateProjectorCommand = new RelayCommand(o =>
             {
                 SendMessage = "echo ZD; " + "\r\n";
-                SendTelnetMessgae();
+                _ = SendTelnetMessgae();
             });
             LaunchLMPCommand = new RelayCommand(o => { DisconnectTelnet(); });
 

@@ -6,6 +6,7 @@ using NLog;
 using NLog.Fluent;
 using System;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Reactive;
@@ -183,7 +184,7 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
             log = LogManager.GetLogger("Motor Test");
             MyPLCMotor = new EthercatDevice[TwinCathelper.DeviceCount];
             SymbolEthercatDevice = TwinCathelper.MySymbols.Where(a => a.InstancePath == TwinCATVariableIfo.MainDeviceVariableName).FirstOrDefault();
-            
+
             TwinCathelper._connection.AdsNotification += Client_AdsNotification2;
             log.Log(LogLevel.Info, $"Registring Device Status Notification...");
             _ = RegisterNotification(TwinCATVariableIfo.mPositionVariableName);
@@ -201,37 +202,41 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
             }
             ReadDataAll();
         }
-         private async Task RegisterNotification(string _deviceStatusVariableName)
+        private async Task RegisterNotification(string _deviceStatusVariableName)
         {
             var deviceStatusSymbol = TwinCathelper.MySymbols.Where(a => a.InstancePath == _deviceStatusVariableName).FirstOrDefault();
             await TwinCathelper._connection.AddDeviceNotificationAsync(deviceStatusSymbol.IndexGroup,
              deviceStatusSymbol.IndexOffset, (int)(deviceStatusSymbol.Size), NotificationSettings.Default, deviceStatusSymbol, CancellationToken.None);
+            //log.Log(LogLevel.Info, $"{_deviceStatusVariableName} Notification Registered");
         }
-
         private void Client_AdsNotification2(object sender, AdsNotificationEventArgs e)
         {
             // Or here we know about UDINT type --> can be marshalled as UINT32
             var _mysymbol = e.UserData as Symbol;
-            switch (_mysymbol.InstanceName)
+            switch (_mysymbol.InstancePath)
             {
                 case TwinCATVariableIfo.mPositionVariableName:
-                    log.Log(LogLevel.Info, $"Position Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
+                    log.Log(LogLevel.Warn, $"Position Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
                     break;
                 case TwinCATVariableIfo.mTemperatureVariableName:
-                    log.Log(LogLevel.Info, $"Temperature Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
+                    log.Log(LogLevel.Warn, $"Temperature Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
                     break;
                 case TwinCATVariableIfo.mDiag1VariableName:
-                    log.Log(LogLevel.Info, $"Diag1 Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
+                    log.Log(LogLevel.Warn, $"Stepper Driver Error: {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
                     break;
                 case TwinCATVariableIfo.mDiag2VariableName:
-                    log.Log(LogLevel.Info, $"Diag3 Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
+                    log.Log(LogLevel.Warn, $"Diag2 Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
                     break;
                 case TwinCATVariableIfo.mDiag3VariableName:
-                    log.Log(LogLevel.Info, $"Diag3 Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
+                    log.Log(LogLevel.Warn, $"Diag3 Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
                     break;
                 default:
                     break;
+
             }
+        }
+        void DisplayMotorError(string _varName, UInt32[] _data)
+        {
 
         }
     }

@@ -30,6 +30,7 @@ namespace FlexMold.MVVM.Model
    public static class TwinCATVariableIfo 
     {
         public const string TwicatDeviceCountVariableName = "MAIN.deviceCount";
+        public const string TwicatDeviceMainPOUName = "MAIN.";
         public const string MainDeviceVariableName = "MAIN.device";
         public const string mPositionVariableName = "MAIN.mPosition";
         public const string mTemperatureVariableName = "MAIN.mTemperature";

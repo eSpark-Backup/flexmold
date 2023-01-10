@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,7 +36,10 @@ namespace FlexMold.Utility
             pData.Free();
             return result;
         }
-
+        public static int[] FindAllIndexof<T>(this IEnumerable<T> values, T val)
+        {
+            return values.Select((b, i) => object.Equals(b, val) ? i : -1).Where(i => i != -1).ToArray();
+        }
         public static byte[] CastToArray<T>(this T data) where T : struct
         {
             var result = new byte[Marshal.SizeOf(typeof(T))];

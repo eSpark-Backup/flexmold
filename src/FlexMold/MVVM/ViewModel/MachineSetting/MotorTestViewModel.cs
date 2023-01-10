@@ -6,6 +6,7 @@ using NLog;
 using NLog.Fluent;
 using System;
 using System.Buffers.Binary;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -14,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
+using TwinCAT.TypeSystem;
 
 namespace FlexMold.MVVM.ViewModel.MachineSetting
 {
@@ -211,6 +213,7 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
         }
         private void Client_AdsNotification2(object sender, AdsNotificationEventArgs e)
         {
+
             // Or here we know about UDINT type --> can be marshalled as UINT32
             var _mysymbol = e.UserData as Symbol;
             switch (_mysymbol.InstancePath)
@@ -222,7 +225,16 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
                     log.Log(LogLevel.Warn, $"Temperature Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
                     break;
                 case TwinCATVariableIfo.mDiag1VariableName:
-                    log.Log(LogLevel.Warn, $"Stepper Driver Error: {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
+                    var aa = (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[]));
+                    //var index = Enumerable.Range(0, aa.Length).ToArray();
+                    //var indexWithVaue = MDiag1OldValue.Zip(index);
+                    int[] v = aa.Select((b, i) => b != 0 ? i : -1).Where(i => i != -1).ToArray();
+                    foreach (var item in v)
+                    {
+                        var _tmgs = $"Err{aa[item]} Motor #{item} \nStepper Driver Failed";
+                        log.Log(LogLevel.Warn, _tmgs);
+                        ToastNotificationUtil.ShowError(_tmgs);
+                    }
                     break;
                 case TwinCATVariableIfo.mDiag2VariableName:
                     log.Log(LogLevel.Warn, $"Diag2 Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");

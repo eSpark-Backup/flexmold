@@ -1,5 +1,6 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
+using FlexMold.Utility;
 using NLog;
 using ScriptingTest;
 using System;
@@ -8,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace FlexMold.MVVM.ViewModel
 {
@@ -91,6 +93,7 @@ namespace FlexMold.MVVM.ViewModel
             );
         }
 
+
         void MachineSelectMethod(Machine _a)
         {
             SelectedMachine = _a;
@@ -103,8 +106,8 @@ namespace FlexMold.MVVM.ViewModel
                     }
                     else
                     {
-                        SelectedScript = new FlexMoldMachine1();
-                        //SelectedScript = new FlexMoldMachineDebug();
+                        //SelectedScript = new FlexMoldMachine1();
+                        SelectedScript = new FlexMoldMachineDebug();
                         ComRegistration = true;
                         updateVSInstallations();
 
@@ -168,10 +171,69 @@ namespace FlexMold.MVVM.ViewModel
         }
         void RunMainWindow()
         {
-            MainWindow mw = new MainWindow(SelectedMachine);
-            OnRequestClose(this, new EventArgs());
-            mw.Show();
-            Application.Current.MainWindow = mw;
+            if (Validataion())
+            {
+                MainWindow mw = new MainWindow(SelectedMachine);
+                OnRequestClose(this, new EventArgs());
+                mw.Show();
+                Application.Current.MainWindow = mw;
+            }
+            else
+            {
+
+            }
+        }
+        bool Validataion()
+        {
+            try
+            {
+                TwinCathelper.TwinCatConnect851();
+                if (TwinCathelper._connection.IsConnected)
+                {
+                    if (TwinCathelper._connection.IsActive)
+                    {
+                        if (TwinCathelper.MySymbols.Count > 0 && TwinCathelper.MySymbols.Where(a => a.InstancePath == TwinCATVariableIfo.TwicatDeviceCountVariableName).Count() > 0)
+                        {
+                            TwinCathelper.DeviceCount = (short)TwinCathelper.MySymbols.Where(a =>
+                            a.InstancePath == TwinCATVariableIfo.TwicatDeviceCountVariableName).FirstOrDefault().ReadAnyValue(typeof(short));
+                            if (TwinCathelper.DeviceCount > 0)
+                            {
+                                return true;
+                            }
+                            else
+                            {
+                                var tmsg = "No PLC Device Found";
+                                log.Log(LogLevel.Info, $"{tmsg}");
+                                MessageBox.Show(tmsg);
+                            }
+                        }
+                        else
+                        {
+                            var tmsg = "Twincat Project Not Running or Properly Configured";
+                            log.Log(LogLevel.Info, $"{tmsg}");
+                            MessageBox.Show(tmsg);
+                        }
+                    }
+                    else
+                    {
+                        var tmsg = "Twicat Is Not Active \n Compile and run TwinCAT Project First";
+                        log.Log(LogLevel.Info, $"{tmsg}");
+                        MessageBox.Show(tmsg);
+                    }
+                }
+                else
+                {
+                    var tmsg = "Twicat Not Connected";
+                    log.Log(LogLevel.Info, $"{tmsg}");
+                    MessageBox.Show(tmsg);
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Log(LogLevel.Info, $"{ex.Message}");
+                MessageBox.Show(ex.Message);
+            }
+            return false;
         }
 
         void _worker_ProgressChanged(object sender, ProgressChangedEventArgs e)

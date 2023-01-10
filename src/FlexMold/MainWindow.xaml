@@ -9,7 +9,7 @@
     xmlns:local="clr-namespace:FlexMold"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:nlogviewer="clr-namespace:NlogViewer;assembly=NlogViewer"
+    xmlns:nlogviewer="clr-namespace:NlogViewer;assembly=NlogViewer" xmlns:viewmodel="clr-namespace:FlexMold.MVVM.ViewModel"
     Width="800"
     Height="600"
     Icon="flexmold.ico"
@@ -72,6 +72,9 @@
             </Style>
         </ResourceDictionary>
     </Window.Resources>
+    <!--<mah:MetroWindow.DataContext>
+        <viewmodel:MainViewModel/>
+    </mah:MetroWindow.DataContext>-->
     <mah:MetroWindow.LeftWindowCommands>
         <mah:WindowCommands>
             <Button ToolTip="MahApps.Metro on GitHub">

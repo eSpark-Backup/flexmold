@@ -32,5 +32,6 @@
         <mah:NumericUpDown Value="{Binding SelectedMotorSpeedValue}" />
         <Label Content="Motor Time : " />
         <mah:NumericUpDown Value="{Binding SelectedMotorTimeValue}" />
+
     </UniformGrid>
 </UserControl>

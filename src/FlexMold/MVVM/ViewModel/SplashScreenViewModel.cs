@@ -18,13 +18,22 @@ namespace FlexMold.MVVM.ViewModel
     {
         public VSInfo SelectedVS { get; set; }
         private bool _RunButtonEnable;
-
         public bool RunButtonEnable
         {
             get { return _RunButtonEnable; }
             set
             {
                 _RunButtonEnable = value;
+                OnPropertyChanged();
+            }
+        }
+        private bool _CloseButtonEnable;
+        public bool CloseButtonEnable
+        {
+            get { return _CloseButtonEnable; }
+            set
+            {
+                _CloseButtonEnable = value;
                 OnPropertyChanged();
             }
         }
@@ -72,6 +81,7 @@ namespace FlexMold.MVVM.ViewModel
         {
             log.Log(LogLevel.Info, $"Flexmold application loading");
             RunButtonEnable = false;
+            CloseButtonEnable = true;
             SelectedMachine = new Machine();
             MyMachines = new ObservableCollection<Machine>
             {
@@ -92,7 +102,6 @@ namespace FlexMold.MVVM.ViewModel
             }
             );
         }
-
 
         void MachineSelectMethod(Machine _a)
         {
@@ -204,6 +213,7 @@ namespace FlexMold.MVVM.ViewModel
                             {
                                 var tmsg = "No PLC Device Found";
                                 log.Log(LogLevel.Info, $"{tmsg}");
+                                ToastNotificationUtil.ShowError(tmsg);
                                 MessageBox.Show(tmsg);
                             }
                         }
@@ -211,6 +221,7 @@ namespace FlexMold.MVVM.ViewModel
                         {
                             var tmsg = "Twincat Project Not Running or Properly Configured";
                             log.Log(LogLevel.Info, $"{tmsg}");
+                            ToastNotificationUtil.ShowError(tmsg);
                             MessageBox.Show(tmsg);
                         }
                     }
@@ -218,6 +229,7 @@ namespace FlexMold.MVVM.ViewModel
                     {
                         var tmsg = "Twicat Is Not Active \n Compile and run TwinCAT Project First";
                         log.Log(LogLevel.Info, $"{tmsg}");
+                        ToastNotificationUtil.ShowError(tmsg);
                         MessageBox.Show(tmsg);
                     }
                 }
@@ -225,12 +237,14 @@ namespace FlexMold.MVVM.ViewModel
                 {
                     var tmsg = "Twicat Not Connected";
                     log.Log(LogLevel.Info, $"{tmsg}");
+                    ToastNotificationUtil.ShowError(tmsg);
                     MessageBox.Show(tmsg);
                 }
             }
             catch (Exception ex)
             {
-                log.Log(LogLevel.Info, $"{ex.Message}");
+                log.Log(LogLevel.Error, ex.Message);
+                ToastNotificationUtil.ShowError(ex.Message);
                 MessageBox.Show(ex.Message);
             }
             return false;

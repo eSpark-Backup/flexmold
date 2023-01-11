@@ -1,4 +1,5 @@
 ﻿using ControlzEx.Native;
+using FlexMold.Core;
 using FlexMold.Utility;
 using StructPacker;
 using System;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace FlexMold.MVVM.Model
 {
@@ -27,7 +29,7 @@ namespace FlexMold.MVVM.Model
         [SkipPack]
         public uint DeviceID;
     }
-   public static class TwinCATVariableIfo 
+    public static class TwinCATVariableIfo
     {
         public const string TwicatDeviceCountVariableName = "MAIN.deviceCount";
         public const string TwicatDeviceMainPOUName = "MAIN.";
@@ -37,5 +39,45 @@ namespace FlexMold.MVVM.Model
         public const string mDiag1VariableName = "MAIN.mDiag1";
         public const string mDiag2VariableName = "MAIN.mDiag2";
         public const string mDiag3VariableName = "MAIN.mDiag3";
+    }
+    public enum EmDiag1
+    {
+        Healthy,
+        Recovered,
+        Stepper_Driver_Failed,
+    }
+    public class MotorStatusControl : ObservableObject
+    {
+        private int _MotorId;
+        public int MotorId
+        {
+            get { return _MotorId; }
+            set
+            {
+                _MotorId = value; OnPropertyChanged();
+            }
+        }
+        private Brush _FillColor;
+
+        public Brush FillColor
+        {
+            get { return _FillColor; }
+            set
+            {
+                _FillColor = value;
+                OnPropertyChanged();
+            }
+        }
+        private string _ErrorDeatil;
+        public string ErrorDeatil
+        {
+            get { return _ErrorDeatil; }
+            set
+            {
+                _ErrorDeatil = value;
+                OnPropertyChanged();
+            }
+        }
+
     }
 }

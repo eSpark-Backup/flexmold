@@ -27,7 +27,6 @@
                 Grid.Row="0"
                 Orientation="Vertical"
                 ScrollViewer.CanContentScroll="True">
-
                 <RadioButton
                     Command="{Binding VisualDisplayCommand}"
                     Content="Visual Display"

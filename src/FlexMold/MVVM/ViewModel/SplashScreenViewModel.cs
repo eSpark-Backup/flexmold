@@ -18,13 +18,22 @@ namespace FlexMold.MVVM.ViewModel
     {
         public VSInfo SelectedVS { get; set; }
         private bool _RunButtonEnable;
-
         public bool RunButtonEnable
         {
             get { return _RunButtonEnable; }
             set
             {
                 _RunButtonEnable = value;
+                OnPropertyChanged();
+            }
+        }
+        private bool _CloseButtonEnable;
+        public bool CloseButtonEnable
+        {
+            get { return _CloseButtonEnable; }
+            set
+            {
+                _CloseButtonEnable = value;
                 OnPropertyChanged();
             }
         }
@@ -72,6 +81,7 @@ namespace FlexMold.MVVM.ViewModel
         {
             log.Log(LogLevel.Info, $"Flexmold application loading");
             RunButtonEnable = false;
+            CloseButtonEnable = true;
             SelectedMachine = new Machine();
             MyMachines = new ObservableCollection<Machine>
             {
@@ -92,7 +102,6 @@ namespace FlexMold.MVVM.ViewModel
             }
             );
         }
-
 
         void MachineSelectMethod(Machine _a)
         {

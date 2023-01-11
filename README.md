@@ -22,7 +22,7 @@ Executable can be downloaded from [FCA](./Binaries/FlexMoldV1.0.0.8.rar)
 https://github.com/eSpark-Consultants/flexmold/issues/15
 
 # Issue Results
- ![](img/15a.gif)
+ ![](img/15b.gif)
 
 ## External Thanks
 - [For NLogViewer] https://github.com/erizet/NlogViewer

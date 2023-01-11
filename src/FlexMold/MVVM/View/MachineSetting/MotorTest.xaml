@@ -32,7 +32,6 @@
         <mah:NumericUpDown Value="{Binding SelectedMotorSpeedValue}" />
         <Label Content="Motor Time : " />
         <mah:NumericUpDown Value="{Binding SelectedMotorTimeValue}" />
-        <Label Content="Generate Debug1 Error : " />
-        <Button Command="{Binding GenerateErrorD1Command}" Content="Generate" />
+
     </UniformGrid>
 </UserControl>

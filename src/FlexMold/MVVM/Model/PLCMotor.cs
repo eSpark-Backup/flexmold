@@ -1,4 +1,5 @@
 ﻿using ControlzEx.Native;
+using FlexMold.Core;
 using FlexMold.Utility;
 using StructPacker;
 using System;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace FlexMold.MVVM.Model
 {
@@ -43,5 +45,39 @@ namespace FlexMold.MVVM.Model
         Healthy,
         Recovered,
         Stepper_Driver_Failed,
+    }
+    public class MotorStatusControl : ObservableObject
+    {
+        private int _MotorId;
+        public int MotorId
+        {
+            get { return _MotorId; }
+            set
+            {
+                _MotorId = value; OnPropertyChanged();
+            }
+        }
+        private Brush _FillColor;
+
+        public Brush FillColor
+        {
+            get { return _FillColor; }
+            set
+            {
+                _FillColor = value;
+                OnPropertyChanged();
+            }
+        }
+        private string _ErrorDeatil;
+        public string ErrorDeatil
+        {
+            get { return _ErrorDeatil; }
+            set
+            {
+                _ErrorDeatil = value;
+                OnPropertyChanged();
+            }
+        }
+
     }
 }

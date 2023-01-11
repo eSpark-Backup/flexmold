@@ -18,7 +18,10 @@
             <RowDefinition Height="Auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
-        <Button Command="{Binding GenerateErrorD1Command}" Content="Genetrate Error" />
+        <UniformGrid>
+            <Label Content="Generate Debug1 Error : " />
+            <Button Command="{Binding GenerateErrorD1Command}" Content="Generate" />
+        </UniformGrid>
         <ItemsControl
             x:Name="MyItems"
             Grid.Row="1"
@@ -37,17 +40,12 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Grid>
-                        <Ellipse
-                            Width="20"
-                            Height="20"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Fill="{Binding FillColor}" />
-                        <TextBlock
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Text="{Binding Path=MotorId}"
-                            TextAlignment="Center" />
+                        <Button
+                            Background="{Binding FillColor}"
+                            Command="{Binding ElementName=MyItems, Path=DataContext.DebugDetailClickCommand}"
+                            CommandParameter="{Binding}"
+                            Style="{StaticResource MahApps.Styles.Button.Circle}"
+                            ToolTip="{Binding ErrorDeatil}" />
                     </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

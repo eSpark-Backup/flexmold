@@ -22,6 +22,7 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
     internal class MotorTestViewModel : ObservableObject
     {
         public Logger log;
+        public RelayCommand GenerateErrorD1Command { get; set; }
         public int structSize { get; set; }
         public bool justread { get; set; }
         public uint DeviceVariableHandle { get; set; }
@@ -203,6 +204,20 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
                 DeviceIds[i] = i;
             }
             ReadDataAll();
+            GenerateErrorD1Command = new RelayCommand(o => { GenerateD1Error(); });
+
+        }
+        void GenerateD1Error()
+        {
+            var SymbolDiag1Variable = TwinCathelper.MySymbols.Where(a => a.InstancePath == TwinCATVariableIfo.mDiag1VariableName).FirstOrDefault();
+            var tt = new UInt32[TwinCathelper.DeviceCount];
+            Random rnd = new Random();
+
+            for (int i = 0; i < tt.Length; i++)
+            {
+                tt[i] = (uint)rnd.Next(0, 3);
+            }
+            SymbolDiag1Variable.WriteValue(tt);
         }
         private async Task RegisterNotification(string _deviceStatusVariableName)
         {
@@ -211,6 +226,43 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
              deviceStatusSymbol.IndexOffset, (int)(deviceStatusSymbol.Size), NotificationSettings.Default, deviceStatusSymbol, CancellationToken.None);
             //log.Log(LogLevel.Info, $"{_deviceStatusVariableName} Notification Registered");
         }
+        private UInt32[] _Diag1Value;
+        public UInt32[] Diag1Value
+        {
+            get { return _Diag1Value; }
+            set
+            {
+                if (Diag1Value != null)
+                {
+                    int[] v = value.Select((b, i) => b != 0 ? i : -1).Where(i => i != -1).ToArray();
+                    for (int i = 0; i < v.Length; i++)
+                    {
+                        if (Diag1Value[v[i]] != value[v[i]])
+                        {
+                            var _tmgs = "";
+                            switch (value[v[i]])
+                            {
+                                case (int)EmDiag1.Recovered:
+                                    _tmgs = $"[Info{value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Recovered}";
+                                    ToastNotificationUtil.ShowInformation(_tmgs);
+                                    log.Log(LogLevel.Info, _tmgs);
+                                    break;
+                                case (int)EmDiag1.Stepper_Driver_Failed:
+                                    _tmgs = $"[Err{value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Stepper_Driver_Failed.ToString().Replace("_", " ")}";
+                                    log.Log(LogLevel.Warn, _tmgs);
+                                    ToastNotificationUtil.ShowError(_tmgs);
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                        }
+                    }
+                }
+                _Diag1Value = value;
+            }
+        }
+
         private void Client_AdsNotification2(object sender, AdsNotificationEventArgs e)
         {
 
@@ -225,16 +277,7 @@ namespace FlexMold.MVVM.ViewModel.MachineSetting
                     log.Log(LogLevel.Warn, $"Temperature Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
                     break;
                 case TwinCATVariableIfo.mDiag1VariableName:
-                    var aa = (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[]));
-                    //var index = Enumerable.Range(0, aa.Length).ToArray();
-                    //var indexWithVaue = MDiag1OldValue.Zip(index);
-                    int[] v = aa.Select((b, i) => b != 0 ? i : -1).Where(i => i != -1).ToArray();
-                    foreach (var item in v)
-                    {
-                        var _tmgs = $"Err{aa[item]} Motor #{item} \nStepper Driver Failed";
-                        log.Log(LogLevel.Warn, _tmgs);
-                        ToastNotificationUtil.ShowError(_tmgs);
-                    }
+                    Diag1Value = (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[]));
                     break;
                 case TwinCATVariableIfo.mDiag2VariableName:
                     log.Log(LogLevel.Warn, $"Diag2 Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");

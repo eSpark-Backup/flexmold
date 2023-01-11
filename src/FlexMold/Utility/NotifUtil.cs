@@ -50,8 +50,11 @@ namespace FlexMold.Utility
         }
         public static void ShowInformation(string message)
         {
-            _notifier.ShowInformation(message, CreateOptions());
-            RememberMessage(message);
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _notifier.ShowInformation(message, CreateOptions());
+                RememberMessage(message);
+            });
         }
         public static void ShowError(string message)
         {
@@ -60,7 +63,22 @@ namespace FlexMold.Utility
                 _notifier.ShowError(message, CreateOptions());
                 RememberMessage(message);
             });
-            
+        }
+        public static void ShowSuccess(string message)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _notifier.ShowSuccess(message, CreateOptions());
+                RememberMessage(message);
+            });
+        }
+        public static void ShowWarning(string message)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _notifier.ShowWarning(message, CreateOptions());
+                RememberMessage(message);
+            });
         }
         private static MessageOptions CreateOptions()
         {

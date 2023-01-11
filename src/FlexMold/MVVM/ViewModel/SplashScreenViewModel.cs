@@ -204,6 +204,7 @@ namespace FlexMold.MVVM.ViewModel
                             {
                                 var tmsg = "No PLC Device Found";
                                 log.Log(LogLevel.Info, $"{tmsg}");
+                                ToastNotificationUtil.ShowError(tmsg);
                                 MessageBox.Show(tmsg);
                             }
                         }
@@ -211,6 +212,7 @@ namespace FlexMold.MVVM.ViewModel
                         {
                             var tmsg = "Twincat Project Not Running or Properly Configured";
                             log.Log(LogLevel.Info, $"{tmsg}");
+                            ToastNotificationUtil.ShowError(tmsg);
                             MessageBox.Show(tmsg);
                         }
                     }
@@ -218,6 +220,7 @@ namespace FlexMold.MVVM.ViewModel
                     {
                         var tmsg = "Twicat Is Not Active \n Compile and run TwinCAT Project First";
                         log.Log(LogLevel.Info, $"{tmsg}");
+                        ToastNotificationUtil.ShowError(tmsg);
                         MessageBox.Show(tmsg);
                     }
                 }
@@ -225,12 +228,14 @@ namespace FlexMold.MVVM.ViewModel
                 {
                     var tmsg = "Twicat Not Connected";
                     log.Log(LogLevel.Info, $"{tmsg}");
+                    ToastNotificationUtil.ShowError(tmsg);
                     MessageBox.Show(tmsg);
                 }
             }
             catch (Exception ex)
             {
-                log.Log(LogLevel.Info, $"{ex.Message}");
+                log.Log(LogLevel.Error, ex.Message);
+                ToastNotificationUtil.ShowError(ex.Message);
                 MessageBox.Show(ex.Message);
             }
             return false;

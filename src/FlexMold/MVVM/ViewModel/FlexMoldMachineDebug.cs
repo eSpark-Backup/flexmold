@@ -569,7 +569,7 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
 
         public void ScanDevicesAndBoxes(IWorker worker)
         {
-            AvaiableBoxes = 2;
+            AvaiableBoxes = 5;
             AvaiableDevices = 1;
             ITcSmTreeItem ioDevicesItem = systemManager.LookupTreeItem("TIID");
             string scannedXml = ioDevicesItem.ProduceXml(false);

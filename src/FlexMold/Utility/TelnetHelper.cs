@@ -70,6 +70,7 @@ namespace FlexMold.Utility
             }
             catch (Exception err)
             {
+                ToastNotificationUtil.ShowError(err.Message);
                 log.Log(LogLevel.Error, err.Message);
                 return false;
             }

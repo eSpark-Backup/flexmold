@@ -27,7 +27,7 @@ namespace FlexMold.MVVM.Model
         [SkipPack]
         public uint DeviceID;
     }
-   public static class TwinCATVariableIfo 
+    public static class TwinCATVariableIfo
     {
         public const string TwicatDeviceCountVariableName = "MAIN.deviceCount";
         public const string TwicatDeviceMainPOUName = "MAIN.";
@@ -37,5 +37,11 @@ namespace FlexMold.MVVM.Model
         public const string mDiag1VariableName = "MAIN.mDiag1";
         public const string mDiag2VariableName = "MAIN.mDiag2";
         public const string mDiag3VariableName = "MAIN.mDiag3";
+    }
+    public enum EmDiag1
+    {
+        Healthy,
+        Recovered,
+        Stepper_Driver_Failed,
     }
 }

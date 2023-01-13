@@ -76,93 +76,114 @@ namespace FlexMold.MVVM.ViewModel.Home
             get { return _Diag1Value; }
             set
             {
-                int[] v;
-                if (Diag1Value != null)
-                {
-                    v = value.Select((b, i) => b != 0 ? i : -1).Where(i => i != -1).ToArray();
-                    for (int i = 0; i < v.Length; i++)
-                    {
-                        if (Diag1Value[v[i]] != value[v[i]])
-                        {
-                            var _tmgs = "";
-                            switch (value[v[i]])
-                            {
-                                case (int)EmDiag1.Recovered:
-                                    _tmgs = $"[Info{value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Recovered}";
-                                    MyMotors[v[i]].FillColor = Brushes.Gray;
-                                    MyMotors[v[i]].ErrorDeatil = _tmgs;
-                                    log.Log(LogLevel.Info, _tmgs);
-                                    //ToastNotificationUtil.ShowInformation(_tmgs);
-                                    break;
-                                case (int)EmDiag1.Stepper_Driver_Failed:
-                                    _tmgs = $"[Err{value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Stepper_Driver_Failed.ToString().Replace("_", " ")}";
-                                    MyMotors[v[i]].FillColor = Brushes.Red;
-                                    MyMotors[v[i]].ErrorDeatil = _tmgs;
-                                    log.Log(LogLevel.Warn, _tmgs);
-                                    //ToastNotificationUtil.ShowError(_tmgs);
-                                    break;
-                                default:
-                                    break;
+                //int[] v;
+                //if (Diag1Value != null)
+                //{
+                //    v = value.Select((b, i) => b != 5 ? i : -1).Where(i => i != -1).ToArray();
+                //    for (int i = 0; i < v.Length; i++)
+                //    {
+                //        if (Diag1Value[v[i]] != value[v[i]])
+                //        {
+                //            var _tmgs = "";
+                //            switch (value[v[i]])
+                //            {
+                //                case (int)EmDiag1.Healthy:
+                //                    _tmgs = $"[Info{value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Healthy}";
+                //                    MyMotors[v[i]].FillColor = Brushes.Transparent;
+                //                    MyMotors[v[i]].ErrorDeatil = _tmgs;
+                //                    log.Log(LogLevel.Info, _tmgs);
+                //                    break;
+                //                case (int)EmDiag1.Recovered:
+                //                    _tmgs = $"[Info{value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Recovered}";
+                //                    MyMotors[v[i]].FillColor = Brushes.Gray;
+                //                    MyMotors[v[i]].ErrorDeatil = _tmgs;
+                //                    log.Log(LogLevel.Info, _tmgs);
+                //                    //ToastNotificationUtil.ShowInformation(_tmgs);
+                //                    break;
+                //                case (int)EmDiag1.Stepper_Driver_Failed:
+                //                    _tmgs = $"[Err{value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Stepper_Driver_Failed.ToString().Replace("_", " ")}";
+                //                    MyMotors[v[i]].FillColor = Brushes.Red;
+                //                    MyMotors[v[i]].ErrorDeatil = _tmgs;
+                //                    log.Log(LogLevel.Warn, _tmgs);
+                //                    //ToastNotificationUtil.ShowError(_tmgs);
+                //                    break;
+                //                default:
+                //                    break;
 
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    v = Enumerable.Range(0, TwinCathelper.DeviceCount).ToArray();
-                    for (int i = 0; i < v.Length; i++)
-                    {
-                        var _tmgs = "";
-                        switch (value[v[i]])
-                        {
-                            case (int)EmDiag1.Recovered:
-                                _tmgs = $"[Info{value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Recovered}";
-                                MyMotors[v[i]].FillColor = Brushes.Gray;
-                                MyMotors[v[i]].ErrorDeatil = _tmgs;
-                                log.Log(LogLevel.Info, _tmgs);
-                                //ToastNotificationUtil.ShowInformation(_tmgs);
-                                break;
-                            case (int)EmDiag1.Stepper_Driver_Failed:
-                                _tmgs = $"[Err{value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Stepper_Driver_Failed.ToString().Replace("_", " ")}";
-                                MyMotors[v[i]].FillColor = Brushes.Red;
-                                MyMotors[v[i]].ErrorDeatil = _tmgs;
-                                log.Log(LogLevel.Warn, _tmgs);
-                                //ToastNotificationUtil.ShowError(_tmgs);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                }
+                //            }
+                //        }
+                //    }
+                //}
+                //else
+                //{
+                //    v = Enumerable.Range(0, TwinCathelper.DeviceCount).ToArray();
+                //    for (int i = 0; i < v.Length; i++)
+                //    {
+                //        var _tmgs = "";
+                //        switch (value[v[i]])
+                //        {
+                //            case (int)EmDiag1.Healthy:
+                //                _tmgs = $"[Info{value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Healthy}";
+                //                MyMotors[v[i]].FillColor = Brushes.Transparent;
+                //                MyMotors[v[i]].ErrorDeatil = _tmgs;
+                //                log.Log(LogLevel.Info, _tmgs);
+                //                break;
+                //            case (int)EmDiag1.Recovered:
+                //                _tmgs = $"[Info{value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Recovered}";
+                //                MyMotors[v[i]].FillColor = Brushes.Gray;
+                //                MyMotors[v[i]].ErrorDeatil = _tmgs;
+                //                log.Log(LogLevel.Info, _tmgs);
+                //                //ToastNotificationUtil.ShowInformation(_tmgs);
+                //                break;
+                //            case (int)EmDiag1.Stepper_Driver_Failed:
+                //                _tmgs = $"[Err{value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Stepper_Driver_Failed.ToString().Replace("_", " ")}";
+                //                MyMotors[v[i]].FillColor = Brushes.Red;
+                //                MyMotors[v[i]].ErrorDeatil = _tmgs;
+                //                log.Log(LogLevel.Warn, _tmgs);
+                //                //ToastNotificationUtil.ShowError(_tmgs);
+                //                break;
+                //            default:
+                //                break;
+                //        }
+                //    }
+                //}
 
                 _Diag1Value = value;
             }
         }
         private void Client_AdsNotification2(object sender, AdsNotificationEventArgs e)
         {
-            // Or here we know about UDINT type --> can be marshalled as UINT32
-            var _mysymbol = e.UserData as Symbol;
-            switch (_mysymbol.InstancePath)
+            try
             {
-                case TwinCATVariableIfo.mPositionVariableName:
-                    log.Log(LogLevel.Warn, $"Position Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
-                    break;
-                case TwinCATVariableIfo.mTemperatureVariableName:
-                    log.Log(LogLevel.Warn, $"Temperature Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
-                    break;
-                case TwinCATVariableIfo.mDiag1VariableName:
-                    Diag1Value = (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[]));
-                    break;
-                case TwinCATVariableIfo.mDiag2VariableName:
-                    log.Log(LogLevel.Warn, $"Diag2 Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
-                    break;
-                case TwinCATVariableIfo.mDiag3VariableName:
-                    log.Log(LogLevel.Warn, $"Diag3 Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
-                    break;
-                default:
-                    break;
 
+
+                // Or here we know about UDINT type --> can be marshalled as UINT32
+                var _mysymbol = e.UserData as Symbol;
+                switch (_mysymbol.InstancePath)
+                {
+                    case TwinCATVariableIfo.mPositionVariableName:
+                        log.Log(LogLevel.Warn, $"Position Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
+                        break;
+                    case TwinCATVariableIfo.mTemperatureVariableName:
+                        log.Log(LogLevel.Warn, $"Temperature Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
+                        break;
+                    case TwinCATVariableIfo.mDiag1VariableName:
+                        Diag1Value = (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[]));
+                        break;
+                    case TwinCATVariableIfo.mDiag2VariableName:
+                        log.Log(LogLevel.Warn, $"Diag2 Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
+                        break;
+                    case TwinCATVariableIfo.mDiag3VariableName:
+                        log.Log(LogLevel.Warn, $"Diag3 Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
+                        break;
+                    default:
+                        break;
+
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Log(LogLevel.Error, ex.Message);
             }
         }
     }

@@ -115,24 +115,27 @@ namespace FlexMold.MVVM.ViewModel
                     }
                     else
                     {
-                        //SelectedScript = new FlexMoldMachine1();
-                        SelectedScript = new FlexMoldMachineDebug();
-                        ComRegistration = true;
-                        updateVSInstallations();
+                        if (Validataion())
+                        {
+                            //SelectedScript = new FlexMoldMachine1();
+                            SelectedScript = new FlexMoldMachineDebug();
+                            ComRegistration = true;
+                            updateVSInstallations();
 
-                        string TCVS = "TcXaeShell 15.0";
-                        log.Log(LogLevel.Info, $"TwinCAT IDE : {TCVS}");
-                        SelectedVS = AvailableVS.Where(a => a.Name == TCVS).FirstOrDefault();
-                        if (SelectedVS != null)
-                        {
-                            RunScript();
-                        }
-                        else
-                        {
-                            string msg = $"IDE Not Found Please Install {TCVS}";
-                            log.Log(LogLevel.Error, $"{msg}");
-                            MessageBox.Show($"{msg}");
-                            OnRequestClose(this, new EventArgs());
+                            string TCVS = "TcXaeShell 15.0";
+                            log.Log(LogLevel.Info, $"TwinCAT IDE : {TCVS}");
+                            SelectedVS = AvailableVS.Where(a => a.Name == TCVS).FirstOrDefault();
+                            if (SelectedVS != null)
+                            {
+                                RunScript();
+                            }
+                            else
+                            {
+                                string msg = $"IDE Not Found Please Install {TCVS}";
+                                log.Log(LogLevel.Error, $"{msg}");
+                                MessageBox.Show($"{msg}");
+                                OnRequestClose(this, new EventArgs());
+                            }
                         }
                     }
 

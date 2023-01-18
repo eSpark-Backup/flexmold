@@ -16,6 +16,7 @@ using TwinCAT.Ads.TypeSystem;
 using TwinCAT.Ads;
 using NLog;
 using System.Reflection.Metadata.Ecma335;
+using TwinCAT.TypeSystem;
 
 namespace FlexMold.MVVM.ViewModel.Home
 {
@@ -70,86 +71,92 @@ namespace FlexMold.MVVM.ViewModel.Home
              deviceStatusSymbol.IndexOffset, (int)(deviceStatusSymbol.Size), NotificationSettings.Default, deviceStatusSymbol, CancellationToken.None);
             //log.Log(LogLevel.Info, $"{_deviceStatusVariableName} Notification Registered");
         }
+        public UInt32[] OldValue { get; set; }
+
         private UInt32[] _Diag1Value;
         public UInt32[] Diag1Value
         {
             get { return _Diag1Value; }
             set
             {
-                //int[] v;
-                //if (Diag1Value != null)
-                //{
-                //    v = value.Select((b, i) => b != 5 ? i : -1).Where(i => i != -1).ToArray();
-                //    for (int i = 0; i < v.Length; i++)
-                //    {
-                //        if (Diag1Value[v[i]] != value[v[i]])
-                //        {
-                //            var _tmgs = "";
-                //            switch (value[v[i]])
-                //            {
-                //                case (int)EmDiag1.Healthy:
-                //                    _tmgs = $"[Info{value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Healthy}";
-                //                    MyMotors[v[i]].FillColor = Brushes.Transparent;
-                //                    MyMotors[v[i]].ErrorDeatil = _tmgs;
-                //                    log.Log(LogLevel.Info, _tmgs);
-                //                    break;
-                //                case (int)EmDiag1.Recovered:
-                //                    _tmgs = $"[Info{value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Recovered}";
-                //                    MyMotors[v[i]].FillColor = Brushes.Gray;
-                //                    MyMotors[v[i]].ErrorDeatil = _tmgs;
-                //                    log.Log(LogLevel.Info, _tmgs);
-                //                    //ToastNotificationUtil.ShowInformation(_tmgs);
-                //                    break;
-                //                case (int)EmDiag1.Stepper_Driver_Failed:
-                //                    _tmgs = $"[Err{value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Stepper_Driver_Failed.ToString().Replace("_", " ")}";
-                //                    MyMotors[v[i]].FillColor = Brushes.Red;
-                //                    MyMotors[v[i]].ErrorDeatil = _tmgs;
-                //                    log.Log(LogLevel.Warn, _tmgs);
-                //                    //ToastNotificationUtil.ShowError(_tmgs);
-                //                    break;
-                //                default:
-                //                    break;
-
-                //            }
-                //        }
-                //    }
-                //}
-                //else
-                //{
-                //    v = Enumerable.Range(0, TwinCathelper.DeviceCount).ToArray();
-                //    for (int i = 0; i < v.Length; i++)
-                //    {
-                //        var _tmgs = "";
-                //        switch (value[v[i]])
-                //        {
-                //            case (int)EmDiag1.Healthy:
-                //                _tmgs = $"[Info{value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Healthy}";
-                //                MyMotors[v[i]].FillColor = Brushes.Transparent;
-                //                MyMotors[v[i]].ErrorDeatil = _tmgs;
-                //                log.Log(LogLevel.Info, _tmgs);
-                //                break;
-                //            case (int)EmDiag1.Recovered:
-                //                _tmgs = $"[Info{value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Recovered}";
-                //                MyMotors[v[i]].FillColor = Brushes.Gray;
-                //                MyMotors[v[i]].ErrorDeatil = _tmgs;
-                //                log.Log(LogLevel.Info, _tmgs);
-                //                //ToastNotificationUtil.ShowInformation(_tmgs);
-                //                break;
-                //            case (int)EmDiag1.Stepper_Driver_Failed:
-                //                _tmgs = $"[Err{value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Stepper_Driver_Failed.ToString().Replace("_", " ")}";
-                //                MyMotors[v[i]].FillColor = Brushes.Red;
-                //                MyMotors[v[i]].ErrorDeatil = _tmgs;
-                //                log.Log(LogLevel.Warn, _tmgs);
-                //                //ToastNotificationUtil.ShowError(_tmgs);
-                //                break;
-                //            default:
-                //                break;
-                //        }
-                //    }
-                //}
-
                 _Diag1Value = value;
+                SetMotorStatus(value);
             }
+        }
+        void SetMotorStatus(UInt32[] _value) 
+        {
+            int[] v;
+            if (Diag1Value != null)
+            {
+                v = _value.Select((b, i) => b != 5 ? i : -1).Where(i => i != -1).ToArray();
+                for (int i = 0; i < v.Length; i++)
+                {
+                    if (Diag1Value[v[i]] != _value[v[i]])
+                    {
+                        var _tmgs = "";
+                        switch (_value[v[i]])
+                        {
+                            case (int)EmDiag1.Healthy:
+                                _tmgs = $"[Info{_value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Healthy}";
+                                MyMotors[v[i]].FillColor = Brushes.Transparent;
+                                MyMotors[v[i]].ErrorDeatil = _tmgs;
+                                log.Log(LogLevel.Info, _tmgs);
+                                break;
+                            case (int)EmDiag1.Recovered:
+                                _tmgs = $"[Info{_value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Recovered}";
+                                MyMotors[v[i]].FillColor = Brushes.Gray;
+                                MyMotors[v[i]].ErrorDeatil = _tmgs;
+                                log.Log(LogLevel.Info, _tmgs);
+                                //ToastNotificationUtil.ShowInformation(_tmgs);
+                                break;
+                            case (int)EmDiag1.Stepper_Driver_Failed:
+                                _tmgs = $"[Err{_value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Stepper_Driver_Failed.ToString().Replace("_", " ")}";
+                                MyMotors[v[i]].FillColor = Brushes.Red;
+                                MyMotors[v[i]].ErrorDeatil = _tmgs;
+                                log.Log(LogLevel.Warn, _tmgs);
+                                //ToastNotificationUtil.ShowError(_tmgs);
+                                break;
+                            default:
+                                break;
+
+                        }
+                    }
+                }
+            }
+            else
+            {
+                v = Enumerable.Range(0, TwinCathelper.DeviceCount).ToArray();
+                for (int i = 0; i < v.Length; i++)
+                {
+                    var _tmgs = "";
+                    switch (_value[v[i]])
+                    {
+                        case (int)EmDiag1.Healthy:
+                            _tmgs = $"[Info{_value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Healthy}";
+                            MyMotors[v[i]].FillColor = Brushes.Transparent;
+                            MyMotors[v[i]].ErrorDeatil = _tmgs;
+                            log.Log(LogLevel.Info, _tmgs);
+                            break;
+                        case (int)EmDiag1.Recovered:
+                            _tmgs = $"[Info{_value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Recovered}";
+                            MyMotors[v[i]].FillColor = Brushes.Gray;
+                            MyMotors[v[i]].ErrorDeatil = _tmgs;
+                            log.Log(LogLevel.Info, _tmgs);
+                            //ToastNotificationUtil.ShowInformation(_tmgs);
+                            break;
+                        case (int)EmDiag1.Stepper_Driver_Failed:
+                            _tmgs = $"[Err{_value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Stepper_Driver_Failed.ToString().Replace("_", " ")}";
+                            MyMotors[v[i]].FillColor = Brushes.Red;
+                            MyMotors[v[i]].ErrorDeatil = _tmgs;
+                            log.Log(LogLevel.Warn, _tmgs);
+                            //ToastNotificationUtil.ShowError(_tmgs);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
         }
         private void Client_AdsNotification2(object sender, AdsNotificationEventArgs e)
         {

@@ -29,16 +29,42 @@ namespace FlexMold.MVVM.Model
         [SkipPack]
         public uint DeviceID;
     }
-    public static class TwinCATVariableIfo
+    public static class TCVarName
     {
-        public const string TwicatDeviceCountVariableName = "MAIN.deviceCount";
-        public const string TwicatDeviceMainPOUName = "MAIN.";
-        public const string MainDeviceVariableName = "MAIN.device";
-        public const string mPositionVariableName = "MAIN.mPosition";
-        public const string mTemperatureVariableName = "MAIN.mTemperature";
-        public const string mDiag1VariableName = "MAIN.mDiag1";
-        public const string mDiag2VariableName = "MAIN.mDiag2";
-        public const string mDiag3VariableName = "MAIN.mDiag3";
+        public const string DeviceCount = "MAIN.deviceCount";
+        public const string DeviceMainPOU = "MAIN.";
+        public const string MainDevice = "MAIN.device";
+        public const string mPosition = "MAIN.mPosition";
+        public const string mTemperature = "MAIN.mTemperature";
+        public const string mDiag1 = "MAIN.mDiag1";
+        public const string mDiag2 = "MAIN.mDiag2";
+        public const string mDiag3 = "MAIN.mDiag3";
+        public const string foe_Download = "MAIN.foe_Download";
+        public const string foe_dwPass = "MAIN.foe_dwPass";
+        public const string foe_sNetId = "MAIN.foe_sNetId";
+        public const string foe_nSlaveAddr = "MAIN.foe_nSlaveAddr";
+        public const string foe_eMode = "MAIN.foe_eMode";
+        public const string foe_sPathName = "MAIN.foe_sPathName";
+        public const string foe_bLoad = "MAIN.foe_bLoad";
+        public const string foe_bBusy = "MAIN.foe_bBusy";
+        public const string foe_bError = "MAIN.foe_bError";
+        public const string foe_nErrID = "MAIN.foe_nErrID";
+        public const string foe_nBytesWritten = "MAIN.foe_nBytesWritten";
+        public const string foe_nPercent= "MAIN.foe_nPercent";
+        public const string foe_Scrip= "" +
+            "foe_Download : FB_EcFoeLoad ;\r\n" +
+            $"foe_dwPass\t: DWORD := 287454020;\r\n" +
+            $"foe_sNetId     : T_AmsNetId := '192.168.18.191.3.1' ;\r\n" +
+            $"foe_nSlaveAddr : UINT := 1001;  \r\n" +
+            $"foe_eMode      : E_EcFoeMode := eFoeMode_Write;\r\n" +
+            $"foe_sPathName : STRING := 'D:\\LAN9255Updated.bin';\r\n" +
+            $"foe_bLoad      : BOOL;\r\n" +
+            $"foe_bBusy      : BOOL;\r\n" +
+            $"foe_bError     : BOOL;\r\n" +
+            $"foe_nErrID     : UDINT;\r\n" +
+            $"foe_nBytesWritten : UDINT;\r\n" +
+            $"foe_nPercent      : UDINT;";
+
     }
     public enum EmDiag1
     {
@@ -46,6 +72,7 @@ namespace FlexMold.MVVM.Model
         Recovered,
         Stepper_Driver_Failed,
     }
+    
     public class MotorStatusControl : ObservableObject
     {
         private int _MotorId;

@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace FlexMold.MVVM.View.MachineSetting
+namespace FlexMold.MVVM.View.Setting
 {
     /// <summary>
-    /// Interaction logic for MachineDetailView.xaml
+    /// Interaction logic for FoeSettingDiaglog.xaml
     /// </summary>
-    public partial class PositionView : UserControl
+    public partial class FoeSettingDiaglog : UserControl
     {
-        public PositionView()
+        public FoeSettingDiaglog()
         {
             InitializeComponent();
         }

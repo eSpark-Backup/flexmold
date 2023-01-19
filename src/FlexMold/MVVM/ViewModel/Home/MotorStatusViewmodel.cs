@@ -22,32 +22,12 @@ namespace FlexMold.MVVM.ViewModel.Home
 {
     class MotorStatusViewmodel : ObservableObject
     {
-        public Logger log;
+        Logger log;
         public ObservableCollection<MotorStatusControl> MyMotors { get; set; }
         public RelayCommand GenerateErrorD1Command { get; set; }
         public RelayCommand DebugDetailClickCommand { get; set; }
 
-        public MotorStatusViewmodel()
-        {
-            log = LogManager.GetLogger("Motor Status");
-            TwinCathelper._connection.AdsNotification += Client_AdsNotification2;
-            log.Log(LogLevel.Info, $"Registring Device Status Notification...");
-            //_ = RegisterNotification(TwinCATVariableIfo.mPositionVariableName);
-            //_ = RegisterNotification(TwinCATVariableIfo.mTemperatureVariableName);
-            _ = RegisterNotification(TwinCATVariableIfo.mDiag1VariableName);
-            //_ = RegisterNotification(TwinCATVariableIfo.mDiag2VariableName);
-            //_ = RegisterNotification(TwinCATVariableIfo.mDiag3VariableName);
-
-            MyMotors = new ObservableCollection<MotorStatusControl>() { };
-            int mcount = 0;
-            for (int j = 0; j < TwinCathelper.DeviceCount; j++)
-            {
-                MyMotors.Add(new MotorStatusControl() { MotorId = mcount, FillColor = Brushes.Transparent, ErrorDeatil = $"Motor #{mcount} \n No anomaly found" });
-                mcount++;
-            }
-            GenerateErrorD1Command = new RelayCommand(o => { GenerateD1Error(); });
-            DebugDetailClickCommand = new RelayCommand(o => { DisplayError(o as MotorStatusControl); });
-        }
+      
         void DisplayError(MotorStatusControl o)
         {
             MessageBox.Show(o.ErrorDeatil);
@@ -55,7 +35,7 @@ namespace FlexMold.MVVM.ViewModel.Home
         }
         void GenerateD1Error()
         {
-            var SymbolDiag1Variable = TwinCathelper.MySymbols.Where(a => a.InstancePath == TwinCATVariableIfo.mDiag1VariableName).FirstOrDefault();
+            var SymbolDiag1Variable = TwinCathelper.MySymbols.Where(a => a.InstancePath == TCVarName.mDiag1).FirstOrDefault();
             var tt = new UInt32[TwinCathelper.DeviceCount];
             Random rnd = new Random();
             for (int i = 0; i < tt.Length; i++)
@@ -67,7 +47,7 @@ namespace FlexMold.MVVM.ViewModel.Home
         private async Task RegisterNotification(string _deviceStatusVariableName)
         {
             var deviceStatusSymbol = TwinCathelper.MySymbols.Where(a => a.InstancePath == _deviceStatusVariableName).FirstOrDefault();
-            await TwinCathelper._connection.AddDeviceNotificationAsync(deviceStatusSymbol.IndexGroup,
+            await TwinCathelper.Client.AddDeviceNotificationAsync(deviceStatusSymbol.IndexGroup,
              deviceStatusSymbol.IndexOffset, (int)(deviceStatusSymbol.Size), NotificationSettings.Default, deviceStatusSymbol, CancellationToken.None);
             //log.Log(LogLevel.Info, $"{_deviceStatusVariableName} Notification Registered");
         }
@@ -168,19 +148,19 @@ namespace FlexMold.MVVM.ViewModel.Home
                 var _mysymbol = e.UserData as Symbol;
                 switch (_mysymbol.InstancePath)
                 {
-                    case TwinCATVariableIfo.mPositionVariableName:
+                    case TCVarName.mPosition:
                         log.Log(LogLevel.Warn, $"Position Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
                         break;
-                    case TwinCATVariableIfo.mTemperatureVariableName:
+                    case TCVarName.mTemperature:
                         log.Log(LogLevel.Warn, $"Temperature Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
                         break;
-                    case TwinCATVariableIfo.mDiag1VariableName:
+                    case TCVarName.mDiag1:
                         Diag1Value = (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[]));
                         break;
-                    case TwinCATVariableIfo.mDiag2VariableName:
+                    case TCVarName.mDiag2:
                         log.Log(LogLevel.Warn, $"Diag2 Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
                         break;
-                    case TwinCATVariableIfo.mDiag3VariableName:
+                    case TCVarName.mDiag3:
                         log.Log(LogLevel.Warn, $"Diag3 Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
                         break;
                     default:
@@ -192,6 +172,27 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 log.Log(LogLevel.Error, ex.Message);
             }
+        }
+        public MotorStatusViewmodel()
+        {
+            log = LogManager.GetLogger("Motor Status");
+            TwinCathelper.Client.AdsNotification += Client_AdsNotification2;
+            log.Log(LogLevel.Info, $"Registring Device Status Notification...");
+            //_ = RegisterNotification(TwinCATVariableIfo.mPositionVariableName);
+            //_ = RegisterNotification(TwinCATVariableIfo.mTemperatureVariableName);
+            _ = RegisterNotification(TCVarName.mDiag1);
+            //_ = RegisterNotification(TwinCATVariableIfo.mDiag2VariableName);
+            //_ = RegisterNotification(TwinCATVariableIfo.mDiag3VariableName);
+
+            MyMotors = new ObservableCollection<MotorStatusControl>() { };
+            int mcount = 0;
+            for (int j = 0; j < TwinCathelper.DeviceCount; j++)
+            {
+                MyMotors.Add(new MotorStatusControl() { MotorId = mcount, FillColor = Brushes.Transparent, ErrorDeatil = $"Motor #{mcount} \n No anomaly found" });
+                mcount++;
+            }
+            GenerateErrorD1Command = new RelayCommand(o => { GenerateD1Error(); });
+            DebugDetailClickCommand = new RelayCommand(o => { DisplayError(o as MotorStatusControl); });
         }
     }
 

@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace FlexMold.MVVM.View.Setting
 {
     /// <summary>
-    /// Interaction logic for MachineSettingView.xaml
+    /// Interaction logic for MachineTestView.xaml
     /// </summary>
-    public partial class MachineSettingView : UserControl
+    public partial class MachineTestView : UserControl
     {
-        public MachineSettingView()
+        public MachineTestView()
         {
             InitializeComponent();
         }

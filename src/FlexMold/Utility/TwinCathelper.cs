@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using FlexMold.MVVM.Model;
+using NLog;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -13,9 +14,9 @@ namespace FlexMold.Utility
     {
         static private Logger log;
         static public int port { get; private set; }
-        static public AdsSession _session { get; set; }
+        static public AdsSession _session { get; private set; }
         static public AdsSession _sessionSystemService { get; set; }
-        static public AdsConnection _connection { get; set; }
+        static public AdsConnection Client { get; private set; }
         static public AdsConnection _connectionSystemService { get; set; }
         static public ConnectionState MyConnectionStateOld { get; set; }
         static public ConnectionState MyConnectionStateNew { get; set; }
@@ -25,24 +26,75 @@ namespace FlexMold.Utility
         static public IDataTypeCollection<IDataType> dataTypes { get; private set; }
         static public ISymbolCollection<ISymbol> symbols { get; private set; }
         static public ObservableCollection<Symbol> MySymbols { get; private set; }
-        static public Int16 DeviceCount { get;  set; }
+        static public Int16 DeviceCount { get; private set; }
+        public static EthercatDevice[] PLCMotors { get; private set; }
+
         static public void TwinCatConnect851()
         {
             log = LogManager.GetLogger("TwinCat");
             port = 851;
             log.Log(LogLevel.Info, $"Connecting to Local Host, Port : {port}");
             _session = new AdsSession(TwinCAT.Ads.AmsNetId.Local, port);
-            _connection = (AdsConnection)_session.Connect();
-            if (_connection.IsConnected)            {
-                log.Log(LogLevel.Info, $"Connected to : {_connection.Address}, Port : {port}");
-            }
-            else 
+            Client = (AdsConnection)_session.Connect();
+            if (Client.IsConnected)
             {
-                log.Log(LogLevel.Info, $"Connection Status : {_connection.ConnectionState}");
+                log.Log(LogLevel.Info, $"Connected to : {Client.Address}, Port : {port}");
+            }
+            else
+            {
+                log.Log(LogLevel.Info, $"Connection Status : {Client.ConnectionState}");
             }
 
 
             GetPLCVariables();
+        }
+        static public Symbol SymbolEthercatDevice { get; private set; }
+        static public int structSize { get; private set; }
+        static public byte[] buffer { get; private set; }
+        static public void InitializeMotors()
+        {
+            TwinCathelper.DeviceCount = (short)TwinCathelper.MySymbols.Where(a =>
+                            a.InstancePath == TCVarName.DeviceCount).FirstOrDefault().ReadAnyValue(typeof(short));
+            PLCMotors = new EthercatDevice[DeviceCount];
+            SymbolEthercatDevice = TwinCathelper.MySymbols.Where(a => a.InstancePath == TCVarName.MainDevice).FirstOrDefault();
+            structSize = (SymbolEthercatDevice.Size) / TwinCathelper.DeviceCount;
+            buffer = new byte[structSize * TwinCathelper.DeviceCount];
+            ReadAllEthercatDeviceData();
+        }
+        static void ReadAllEthercatDeviceData()
+        {
+            Client.Read(SymbolEthercatDevice.IndexGroup,
+                SymbolEthercatDevice.IndexOffset, buffer.AsMemory());
+            for (int i = 0; i < DeviceCount; i++)
+            {
+                var mtarray = new byte[structSize];
+                Array.Copy(buffer, structSize * i, mtarray, 0, structSize);
+                PLCMotors[i].Unpack(mtarray);
+            }
+        }
+        public static void ReadEthercatDeviceData(uint _motorNumber)
+        {
+            var mtarray = new byte[structSize];
+            TwinCathelper.Client.Read(SymbolEthercatDevice.IndexGroup,
+                SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
+            PLCMotors[_motorNumber].Unpack(mtarray);
+        }
+
+        public static void WriteAllEthercatDeviceData()
+        {
+            for (int i = 0; i < PLCMotors.Length; i++)
+            {
+                PLCMotors[i].Pack().CopyTo(buffer, structSize * i);
+            }
+            TwinCathelper.Client.Write(SymbolEthercatDevice.IndexGroup,
+                SymbolEthercatDevice.IndexOffset, buffer.AsMemory());
+        }
+       public static void WriteEthercatDeviceData(uint _motorNumber)
+        {
+            var mtarray = new byte[structSize];
+            PLCMotors[_motorNumber].Pack().CopyTo(mtarray, 0);
+            TwinCathelper.Client.Write(SymbolEthercatDevice.IndexGroup,
+                SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
         }
         static public void StartpPLC()
         {
@@ -63,9 +115,9 @@ namespace FlexMold.Utility
         public static StateInfo GetTwincatState()
         {
             StateInfo info = new StateInfo();
-            if (_connection.IsConnected)
+            if (Client.IsConnected)
             {
-                AdsErrorCode errorCode = TwinCathelper._connection.TryReadState(out info);
+                AdsErrorCode errorCode = TwinCathelper.Client.TryReadState(out info);
             }
             return info;
         }
@@ -75,7 +127,7 @@ namespace FlexMold.Utility
             MySymbols = new ObservableCollection<Symbol>();
             dataTypes = _session.SymbolServer.DataTypes;
             symbols = _session.SymbolServer.Symbols;
-            ISymbolLoader loader = SymbolLoaderFactory.Create(_connection, SymbolLoaderSettings.Default);
+            ISymbolLoader loader = SymbolLoaderFactory.Create(Client, SymbolLoaderSettings.Default);
 
             foreach (var item in from item in symbols
                                  where item.InstanceName == "MAIN"

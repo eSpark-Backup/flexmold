@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace FlexMold.MVVM.View.MachineSetting
+namespace FlexMold.MVVM.View.MachineTest
 {
     /// <summary>
-    /// Interaction logic for HeaterStatusView.xaml
+    /// Interaction logic for LaserStatusView.xaml
     /// </summary>
-    public partial class PowerOnOffView : UserControl
+    public partial class RenumberingView : UserControl
     {
-        public PowerOnOffView()
+        public RenumberingView()
         {
             InitializeComponent();
         }

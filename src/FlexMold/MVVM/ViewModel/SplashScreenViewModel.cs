@@ -198,14 +198,13 @@ namespace FlexMold.MVVM.ViewModel
             try
             {
                 TwinCathelper.TwinCatConnect851();
-                if (TwinCathelper._connection.IsConnected)
+                TwinCathelper.InitializeMotors();
+                if (TwinCathelper.Client.IsConnected)
                 {
-                    if (TwinCathelper._connection.IsActive)
+                    if (TwinCathelper.Client.IsActive)
                     {
-                        if (TwinCathelper.MySymbols.Count > 0 && TwinCathelper.MySymbols.Where(a => a.InstancePath == TwinCATVariableIfo.TwicatDeviceCountVariableName).Count() > 0)
+                        if (TwinCathelper.MySymbols.Count > 0 && TwinCathelper.MySymbols.Where(a => a.InstancePath == TCVarName.DeviceCount).Count() > 0)
                         {
-                            TwinCathelper.DeviceCount = (short)TwinCathelper.MySymbols.Where(a =>
-                            a.InstancePath == TwinCATVariableIfo.TwicatDeviceCountVariableName).FirstOrDefault().ReadAnyValue(typeof(short));
                             if (TwinCathelper.DeviceCount > 0)
                             {
                                 return true;

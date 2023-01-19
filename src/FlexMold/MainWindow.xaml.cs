@@ -40,9 +40,9 @@ namespace FlexMold
             //Unloaded += OnUnload;
             logCtrl.ItemAdded += OnLogMessageItemAdded;
             TwinCathelper._session.ConnectionStateChanged += session_ConnectionStateChanged;
-            TwinCathelper._connection.ConnectionStateChanged += _connection_ConnectionStatusChanged;
-            TwinCathelper._connection.RouterStateChanged += _connection_RouterStateChanged;
-            TwinCathelper._connection.RegisterAdsStateChangedAsync(_connection_AdsStateChanged, CancellationToken.None);
+            TwinCathelper.Client.ConnectionStateChanged += _connection_ConnectionStatusChanged;
+            TwinCathelper.Client.RouterStateChanged += _connection_RouterStateChanged;
+            TwinCathelper.Client.RegisterAdsStateChangedAsync(_connection_AdsStateChanged, CancellationToken.None);
             log.Log(LogLevel.Info, $"Application Loaded Sucessfully.....");
             log.Log(LogLevel.Info, $"Selected Machine Type : {SelectedMachine.MachineType} Name : {SelectedMachine.Name} ID : {SelectedMachine.ID}");
             
@@ -121,11 +121,11 @@ namespace FlexMold
         private void TwinCATSystemUpdate()
         {
 
-            if (TwinCathelper._connection != null)
+            if (TwinCathelper.Client != null)
             {
-                tBConnectionState.Text = TwinCathelper._connection.State.ToString();
+                tBConnectionState.Text = TwinCathelper.Client.State.ToString();
 
-                switch (TwinCathelper._connection.State)
+                switch (TwinCathelper.Client.State)
                 {
                     case ConnectionState.None:
                         tBConnectionState.Background = new SolidColorBrush();

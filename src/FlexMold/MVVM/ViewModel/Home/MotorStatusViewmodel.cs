@@ -142,8 +142,6 @@ namespace FlexMold.MVVM.ViewModel.Home
         {
             try
             {
-
-
                 // Or here we know about UDINT type --> can be marshalled as UINT32
                 var _mysymbol = e.UserData as Symbol;
                 switch (_mysymbol.InstancePath)

@@ -24,7 +24,6 @@ namespace FlexMold.Utility
         static public AdsState MyAdsState { get; set; }
         static public AmsRouterState MyAmsRouterState { get; set; }
         static public IDataTypeCollection<IDataType> dataTypes { get; private set; }
-        static public ISymbolCollection<ISymbol> symbols { get; private set; }
         static public ObservableCollection<Symbol> MySymbols { get; private set; }
         static public Int16 DeviceCount { get; private set; }
         public static EthercatDevice[] PLCMotors { get; private set; }
@@ -89,7 +88,7 @@ namespace FlexMold.Utility
             TwinCathelper.Client.Write(SymbolEthercatDevice.IndexGroup,
                 SymbolEthercatDevice.IndexOffset, buffer.AsMemory());
         }
-       public static void WriteEthercatDeviceData(uint _motorNumber)
+        public static void WriteEthercatDeviceData(uint _motorNumber)
         {
             var mtarray = new byte[structSize];
             PLCMotors[_motorNumber].Pack().CopyTo(mtarray, 0);
@@ -126,7 +125,7 @@ namespace FlexMold.Utility
             log.Log(LogLevel.Info, $"Fetching PLC Variables");
             MySymbols = new ObservableCollection<Symbol>();
             dataTypes = _session.SymbolServer.DataTypes;
-            symbols = _session.SymbolServer.Symbols;
+            var symbols = _session.SymbolServer.Symbols;
             ISymbolLoader loader = SymbolLoaderFactory.Create(Client, SymbolLoaderSettings.Default);
 
             foreach (var item in from item in symbols

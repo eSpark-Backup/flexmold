@@ -39,19 +39,7 @@ namespace FlexMold.MVVM.Model
         public const string mDiag1 = "MAIN.mDiag1";
         public const string mDiag2 = "MAIN.mDiag2";
         public const string mDiag3 = "MAIN.mDiag3";
-        public const string foe_Download = "MAIN.foe_Download";
-        public const string foe_dwPass = "MAIN.foe_dwPass";
-        public const string foe_sNetId = "MAIN.foe_sNetId";
-        public const string foe_nSlaveAddr = "MAIN.foe_nSlaveAddr";
-        public const string foe_eMode = "MAIN.foe_eMode";
-        public const string foe_sPathName = "MAIN.foe_sPathName";
-        public const string foe_bLoad = "MAIN.foe_bLoad";
-        public const string foe_bBusy = "MAIN.foe_bBusy";
-        public const string foe_bError = "MAIN.foe_bError";
-        public const string foe_nErrID = "MAIN.foe_nErrID";
-        public const string foe_nBytesWritten = "MAIN.foe_nBytesWritten";
-        public const string foe_nPercent= "MAIN.foe_nPercent";
-        public const string foe_Scrip= "" +
+        public const string foe_Scrip = "" +
             "foe_Download : FB_EcFoeLoad ;\r\n" +
             $"foe_dwPass\t: DWORD := 287454020;\r\n" +
             $"foe_sNetId     : T_AmsNetId := '192.168.18.191.3.1' ;\r\n" +
@@ -72,7 +60,46 @@ namespace FlexMold.MVVM.Model
         Recovered,
         Stepper_Driver_Failed,
     }
-    
+    public enum EFoeSymbols
+    {
+        foe_dwPass,
+        foe_sNetId,
+        foe_nSlaveAddr,
+        foe_eMode,
+        foe_sPathName,
+        foe_bLoad,
+        foe_bBusy,
+        foe_bError,
+        foe_nErrID,
+        foe_nBytesWritten,
+        foe_nPercent,
+    }
+    public class Foe : ObservableObject
+    {
+        private uint foe_dwPass;
+        public UInt32 Foe_dwPass { get => foe_dwPass; set => foe_dwPass = value; }
+        public UInt16 Foe_nSlaveAddr { get; set; }
+        private string foe_sPathName;
+        public string Foe_sPathName { get => foe_sPathName; set { foe_sPathName = value; OnPropertyChanged(); } }
+
+        private bool _Foe_bLoad;
+        public bool Foe_bLoad { get => _Foe_bLoad; set { _Foe_bLoad = value; OnPropertyChanged(); } }
+
+        private bool _Foe_bBusy;
+        public bool Foe_bBusy { get => _Foe_bBusy; set { _Foe_bBusy = value; OnPropertyChanged(); } }
+
+        private bool _Foe_bError;
+        public bool Foe_bError { get => _Foe_bError; set { _Foe_bError = value; OnPropertyChanged();  } }
+
+        private UInt32 _Foe_nErrID;
+        public UInt32 Foe_nErrID { get => _Foe_nErrID; set { _Foe_nErrID = value; OnPropertyChanged(); } }
+
+        private UInt32 _Foe_nBytesWritten;
+        public UInt32 Foe_nBytesWritten { get => _Foe_nBytesWritten; set { _Foe_nBytesWritten = value; OnPropertyChanged(); } }
+
+        private UInt32 _Foe_nPercent;
+        public UInt32 Foe_nPercent { get => _Foe_nPercent; set { _Foe_nPercent = value; OnPropertyChanged(); } }
+    }
     public class MotorStatusControl : ObservableObject
     {
         private int _MotorId;

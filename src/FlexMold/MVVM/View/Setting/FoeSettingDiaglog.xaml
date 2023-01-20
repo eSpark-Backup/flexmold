@@ -6,13 +6,13 @@
     xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:local="clr-namespace:FlexMold.MVVM.View.Setting"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
     xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
+    Width="400"
     mc:Ignorable="d">
-    <DialogContent>
+    <Border Style="{StaticResource panelMenuBorder}">
         <Grid>
             <Grid.Resources />
             <Grid.RowDefinitions>
@@ -25,7 +25,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Label
                 Grid.Row="0"
@@ -38,10 +38,14 @@
             <TextBox
                 Grid.Row="0"
                 Grid.Column="1"
-                Margin="4" />
+                Margin="4"
+                Text="{Binding MyFoe.Foe_sPathName}" />
             <Button
                 Grid.Row="0"
                 Grid.Column="2"
+                Width="25"
+                HorizontalAlignment="Right"
+                Command="{Binding BrowseFirmwareCommand}"
                 Content=".." />
             <PasswordBox
                 Name="pbox_pwd"
@@ -51,13 +55,13 @@
                 mah:TextBoxHelper.ClearTextButton="True"
                 mah:TextBoxHelper.Watermark="Revealed PasswordBox" />
             <UniformGrid Grid.Row="2" Grid.ColumnSpan="3">
-                <Button Command="{x:Static wpf:DialogHost.CloseDialogCommand}" IsDefault="True">
+                <Button Command="{Binding UpdateFirmwareCommand}" IsDefault="True">
                     <Button.CommandParameter>
                         <system:Boolean>True</system:Boolean>
                     </Button.CommandParameter>
                     <StackPanel Orientation="Horizontal">
                         <iconPacks:PackIconMaterial Margin="6" Kind="ContentSave" />
-                        <TextBlock VerticalAlignment="Center" Text="Save" />
+                        <TextBlock VerticalAlignment="Center" Text="Update Firmware" />
                     </StackPanel>
                 </Button>
                 <Button Command="{x:Static wpf:DialogHost.CloseDialogCommand}" IsCancel="True">
@@ -66,10 +70,30 @@
                     </Button.CommandParameter>
                     <StackPanel Orientation="Horizontal">
                         <iconPacks:PackIconMaterial Margin="6" Kind="Cancel" />
-                        <TextBlock VerticalAlignment="Center" Text="Discard" />
+                        <TextBlock VerticalAlignment="Center" Text="Close" />
                     </StackPanel>
                 </Button>
             </UniformGrid>
+            <mah:MetroProgressBar
+                Grid.Row="3"
+                Grid.ColumnSpan="3"
+                Value="{Binding MyFoe.Foe_nPercent}" />
+            <StackPanel
+                Grid.Row="4"
+                Grid.ColumnSpan="3"
+                HorizontalAlignment="Center"
+                Orientation="Horizontal">
+                <iconPacks:PackIconMaterial
+                    Width="40"
+                    Height="40"
+                    Kind="AlarmLightOutline"
+                    ToolTip="Busy Indicator" />
+                <iconPacks:PackIconMaterial
+                    Width="40"
+                    Height="40"
+                    Kind="AlarmLightOutline"
+                    ToolTip="Error Indicator" />
+            </StackPanel>
         </Grid>
-    </DialogContent>
+    </Border>
 </UserControl>

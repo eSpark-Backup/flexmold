@@ -8,6 +8,7 @@
     xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:local="clr-namespace:FlexMold"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:materialDesignMahApps="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:nlogviewer="clr-namespace:NlogViewer;assembly=NlogViewer"
     xmlns:viewmodel="clr-namespace:FlexMold.MVVM.ViewModel"
@@ -76,6 +77,7 @@
     <!--<mah:MetroWindow.DataContext>
         <viewmodel:MainViewModel/>
     </mah:MetroWindow.DataContext>-->
+
     <mah:MetroWindow.LeftWindowCommands>
         <mah:WindowCommands>
             <Button ToolTip="MahApps.Metro on GitHub">
@@ -122,63 +124,65 @@
             </Border>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <materialDesignMahApps:DialogHost DialogTheme="Inherit" Identifier="RootDialog">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" Grid.Row="1">
-            <TabItem Header="Home">
-                <ScrollViewer
-                    Margin="2"
-                    HorizontalScrollBarVisibility="Auto"
-                    VerticalScrollBarVisibility="Auto">
-                    <View:HomeView />
-                </ScrollViewer>
-            </TabItem>
-            <TabItem Header="Settings">
-                <ScrollViewer
-                    Margin="2"
-                    HorizontalScrollBarVisibility="Auto"
-                    VerticalScrollBarVisibility="Auto">
-                    <View:SettingView />
-                </ScrollViewer>
-            </TabItem>
-            <TabItem Header="Projects">
-                <ScrollViewer
-                    Margin="2"
-                    HorizontalScrollBarVisibility="Auto"
-                    VerticalScrollBarVisibility="Auto">
-                    <View:ProjectView />
-                </ScrollViewer>
-            </TabItem>
-            <TabItem Header="Accessories">
-                <ScrollViewer
-                    Margin="2"
-                    HorizontalScrollBarVisibility="Auto"
-                    VerticalScrollBarVisibility="Auto">
-                    <View:AccessoryView />
-                </ScrollViewer>
-            </TabItem>
-            <TabItem Header="Machine Test">
-                <ScrollViewer
-                    Margin="2"
-                    HorizontalScrollBarVisibility="Auto"
-                    VerticalScrollBarVisibility="Auto">
-                    <View:MachineTestView />
-                </ScrollViewer>
-            </TabItem>
-        </mah:MetroAnimatedSingleRowTabControl>
+            <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" Grid.Row="1">
+                <TabItem Header="Home">
+                    <ScrollViewer
+                        Margin="2"
+                        HorizontalScrollBarVisibility="Auto"
+                        VerticalScrollBarVisibility="Auto">
+                        <View:HomeView />
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="Settings">
+                    <ScrollViewer
+                        Margin="2"
+                        HorizontalScrollBarVisibility="Auto"
+                        VerticalScrollBarVisibility="Auto">
+                        <View:SettingView />
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="Projects">
+                    <ScrollViewer
+                        Margin="2"
+                        HorizontalScrollBarVisibility="Auto"
+                        VerticalScrollBarVisibility="Auto">
+                        <View:ProjectView />
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="Accessories">
+                    <ScrollViewer
+                        Margin="2"
+                        HorizontalScrollBarVisibility="Auto"
+                        VerticalScrollBarVisibility="Auto">
+                        <View:AccessoryView />
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="Machine Test">
+                    <ScrollViewer
+                        Margin="2"
+                        HorizontalScrollBarVisibility="Auto"
+                        VerticalScrollBarVisibility="Auto">
+                        <View:MachineTestView />
+                    </ScrollViewer>
+                </TabItem>
+            </mah:MetroAnimatedSingleRowTabControl>
 
-        <nlogviewer:NlogViewer
-            x:Name="logCtrl"
-            Grid.Row="2"
-            ExceptionWidth="600"
-            LevelWidth="auto"
-            LoggerNameWidth="auto"
-            MessageWidth="auto"
-            TimeWidth="AUTO" />
-    </Grid>
+            <nlogviewer:NlogViewer
+                x:Name="logCtrl"
+                Grid.Row="2"
+                ExceptionWidth="600"
+                LevelWidth="auto"
+                LoggerNameWidth="auto"
+                MessageWidth="auto"
+                TimeWidth="AUTO" />
+        </Grid>
+    </materialDesignMahApps:DialogHost>
 </mah:MetroWindow>

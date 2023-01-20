@@ -15,7 +15,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
     class MotorSettingViewModel : ObservableObject
     {
         Logger log;
-        public RelayCommand UpdateFirmwareCommand { get; set; }
+        public RelayCommand FirmwareCommand { get; set; }
         private uint _SelectedMotorIndex;
         private bool _IsDialogOpen;
 
@@ -51,28 +51,24 @@ namespace FlexMold.MVVM.ViewModel.Setting
         }
         public MotorSettingViewModel()
         {
-            log = LogManager.GetLogger("Motor Test");
+            log = LogManager.GetLogger("Motor Setting");
             DeviceIds = new uint[TwinCathelper.DeviceCount];
             for (uint i = 0; i < TwinCathelper.DeviceCount; i++)
             {
                 DeviceIds[i] = i;
             }
-            UpdateFirmwareCommand = new RelayCommand(o => { UpdateFirmware(); });
+            FirmwareCommand = new RelayCommand(o => { UpdateFirmware(); });
         }
         async void UpdateFirmware()
         {
-            IsDialogOpen = true;
-            var view = new FoeSettingDiaglog
+            var view = new FoeSettingDiaglog()
             {
-
+                DataContext = new FoeSettingDiaglogViewModel(SelectedMotorIndex)
             };
+            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
 
-            //show the dialog
-            var result = await DialogHost.Show(view, "RootDialog", null, ClosingEventHandler, ClosedEventHandler);
 
-            //var result = TwinCathelper.Client.InvokeRpcMethod("MAIN.fbAdsManager", "adsRemoteCall", new object[] { });
-
-            // Call a Method that has no parameter and returns VOID
+            Console.WriteLine();
         }
 
         private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs) 

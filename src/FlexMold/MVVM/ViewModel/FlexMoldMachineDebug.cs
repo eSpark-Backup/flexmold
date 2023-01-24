@@ -464,9 +464,9 @@ END_TYPE";
             string deviceName = "LAN9255_EtherCAT_Slave";
             string outStr = "Outputs process data mapping";
             string inpStr = "Inputs process data mapping";
-            for (int j = 1; j <= AvaiableDevices; j++)
+            for (int j = 1; j <= AvaiableDevicesCount; j++)
             {
-                for (int i = 1; i <= AvaiableBoxes; i++)
+                for (int i = 1; i <= AvaiableBoxesCount; i++)
                 {
                     deviceAtrib += $"" +
                         $"[{i}].mDirection := TIID^Device_{j}^Box {i} ({deviceName})^{outStr}^Direction;\n" +
@@ -491,10 +491,24 @@ END_TYPE";
                 }
             }
 
+            string foe_Scrip =
+                    "fbDownload : FB_EcFoeLoad ;\n" +
+                    "dwPass     : DWORD := 287454020; // 0x11223344\n" +
+                    "sNetId     : T_AmsNetId := '192.168.18.191.3.1' ;\n" +
+                    "nSlaveAddr : UINT := 1001;\n" +
+                    "eMode      : E_EcFoeMode := eFoeMode_Write;\n" +
+                    "sPathName : STRING := 'D:\\LAN9255Updated.bin';\n" +
+                    "bLoad      : BOOL;\n" +
+                    "bBusy      : BOOL;\n" +
+                    "bError     : BOOL;\n" +
+                    "nErrID     : UDINT;\n" +
+                    "nBytesWritten : UDINT;\n" +
+                    "nPercent      : UDINT;\n";
+
             string decl1 =
                 "PROGRAM MAIN \n" +
                 "VAR CONSTANT \n" +
-                $"deviceCount : WORD := {AvaiableBoxes}; \n" +
+                $"deviceCount : WORD := {AvaiableBoxesCount}; \n" +
                 "END_VAR \n" +
                 "VAR \n" +
 
@@ -521,28 +535,13 @@ END_TYPE";
                 "{attribute 'TcLinkTo' := '" + Diag3Atrib +
                     "'}\n" +
                     "mDiag3 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
+                    foe_Scrip +
                 "END_VAR"
                 ;
-
-             string foe_Scrip = "" +
-          "foe_Download : FB_EcFoeLoad ;\r\n" +
-          $"foe_dwPass\t: DWORD := 287454020;\r\n" +
-          $"foe_sNetId     : T_AmsNetId := '192.168.18.191.3.1' ;\r\n" +
-          $"foe_nSlaveAddr : UINT := 1001;  \r\n" +
-          $"foe_eMode      : E_EcFoeMode := eFoeMode_Write;\r\n" +
-          $"foe_sPathName : STRING := 'D:\\LAN9255Updated.bin';\r\n" +
-          $"foe_bLoad      : BOOL;\r\n" +
-          $"foe_bBusy      : BOOL;\r\n" +
-          $"foe_bError     : BOOL;\r\n" +
-          $"foe_nErrID     : UDINT;\r\n" +
-          $"foe_nBytesWritten : UDINT;\r\n" +
-          $"foe_nPercent      : UDINT;";
             string implfoe = "fbDownload( bExecute := bLoad,\r\n\t\tsNetId  := sNetId,\r\n\t\tnSlaveAddr := nSlaveAddr,\r\n\t\tdwPass  := dwPass,\r\n\t\tsPathName  := sPathName, \r\n        bBusy => bBusy,\r\n        bError => bError,\r\n        nErrId => nErrID,\r\n        cbLoad => nBytesWritten,\r\n        nProgress => nPercent );";
 
-
-
             pouDecl.DeclarationText = decl1;
-            string impl1 = "";
+            pouImpl.ImplementationText = implfoe;
 
             return programPou;
         }
@@ -594,13 +593,13 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                 return "PLC";
             }
         }
-        public int AvaiableBoxes { get; set; }
-        public int AvaiableDevices { get; set; }
+        public int AvaiableBoxesCount { get; set; }
+        public int AvaiableDevicesCount { get; set; }
 
         public void ScanDevicesAndBoxes(IWorker worker)
         {
-            AvaiableBoxes = 2;
-            AvaiableDevices = 1;
+            AvaiableBoxesCount = 2;
+            AvaiableDevicesCount = 1;
             ITcSmTreeItem ioDevicesItem = systemManager.LookupTreeItem("TIID");
             string scannedXml = ioDevicesItem.ProduceXml(false);
             XmlDocument xmlDoc = new XmlDocument();
@@ -630,12 +629,12 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                 {
                     worker.ProgressStatus = "Warning: " + ex.Message;
                 }
-                AvaiableDevices = AvaiableDevices + 1;
+                AvaiableDevicesCount = AvaiableDevicesCount + 1;
                 foreach (ITcSmTreeItem box in device)
                 {
                     if (box.Name.Contains("sample"))
                     {
-                        AvaiableBoxes = AvaiableBoxes + 1;
+                        AvaiableBoxesCount = AvaiableBoxesCount + 1;
                         worker.ProgressStatus = $"Box Added Name : {box.Name}";
                     }
                 }

@@ -1,4 +1,5 @@
 ﻿using FlexMold.Core;
+using FlexMold.MVVM.Model;
 using FlexMold.MVVM.View.Setting;
 using FlexMold.Utility;
 using MaterialDesignThemes.Wpf;
@@ -61,17 +62,15 @@ namespace FlexMold.MVVM.ViewModel.Setting
         }
         async void UpdateFirmware()
         {
+
             var view = new FoeSettingDiaglog()
             {
                 DataContext = new FoeSettingDiaglogViewModel(SelectedMotorIndex)
             };
             var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
+         }
 
-
-            Console.WriteLine();
-        }
-
-        private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs) 
+        private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
         {
             Console.WriteLine();
         }

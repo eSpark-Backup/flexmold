@@ -33,6 +33,8 @@ namespace FlexMold.MVVM.Model
     public static class TCVarName
     {
         public const string DeviceCount = "MAIN.deviceCount";
+        public const string sAmsNetId = "MAIN.sAmsNetId";
+        public const string sAmsPort = "MAIN.sAmsPort";
         public const string DeviceMainPOU = "MAIN.";
         public const string MainDevice = "MAIN.device";
         public const string mPosition = "MAIN.mPosition";
@@ -74,18 +76,24 @@ namespace FlexMold.MVVM.Model
         foe_nErrID,
         foe_nBytesWritten,
         foe_nPercent,
+        foe_sAmsNetId,
+        foe_sAmsPort
     }
     public class Foe : ObservableObject
     {
-        private SolidColorBrush errorForeground;
-        public SolidColorBrush ErrorForeground { get => errorForeground; set { errorForeground = value; OnPropertyChanged(); } }
-        private SolidColorBrush busyForeground;
-        public SolidColorBrush BusyForeground { get => busyForeground; set { busyForeground = value; OnPropertyChanged(); } }
-
-        public UInt32 Foe_dwPass { get; set; }
+        private SolidColorBrush _ErrorForeground;
+        public SolidColorBrush ErrorForeground { get => _ErrorForeground; set { _ErrorForeground = value; OnPropertyChanged(); } }
+        private SolidColorBrush _BusyForeground;
+        public SolidColorBrush BusyForeground { get => _BusyForeground; set { _BusyForeground = value; OnPropertyChanged(); } }
+        private uint _Foe_dwPass;
+        public UInt32 Foe_dwPass { get => _Foe_dwPass; set { _Foe_dwPass = value; OnPropertyChanged(); } }
         public UInt16 Foe_nSlaveAddr { get; set; }
-        public string Foe_sPathName { get; set; }
-
+        private string _Foe_sPathName;
+        public string Foe_sPathName
+        {
+            get => _Foe_sPathName; set { _Foe_sPathName = value; OnPropertyChanged(); }
+        }
+        public string Foe_sNetId { get; set; }
         private bool _Foe_bLoad;
         public bool Foe_bLoad { get => _Foe_bLoad; set { _Foe_bLoad = value; OnPropertyChanged(); } }
 
@@ -97,11 +105,11 @@ namespace FlexMold.MVVM.Model
                 _Foe_bBusy = value;
                 if (value)
                 {
-                    busyForeground = Brushes.Red;
+                    _BusyForeground = Brushes.Red;
                 }
                 else
                 {
-                    busyForeground = Brushes.White;
+                    _BusyForeground = Brushes.White;
                 }
             }
         }
@@ -132,6 +140,7 @@ namespace FlexMold.MVVM.Model
         private UInt32 _Foe_nPercent;
         public UInt32 Foe_nPercent { get => _Foe_nPercent; set { _Foe_nPercent = value; OnPropertyChanged(); } }
     }
+  
     public class MotorStatusControl : ObservableObject
     {
         private int _MotorId;

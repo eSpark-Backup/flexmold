@@ -39,9 +39,10 @@
             <TextBox
                 Grid.Row="0"
                 Grid.Column="1"
+                MaxLength="12"
                 Margin="4">
                 <TextBox.Text>
-                    <Binding Path="MyFoe.Foe_sPathName" UpdateSourceTrigger="PropertyChanged">
+                    <Binding Path="MyFoe.Foe_sPathName">
                         <Binding.ValidationRules>
                             <core:NotEmptyValidationRule ValidatesOnTargetUpdated="True" />
                         </Binding.ValidationRules>

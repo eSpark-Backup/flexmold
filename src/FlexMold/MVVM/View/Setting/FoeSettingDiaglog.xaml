@@ -2,6 +2,7 @@
     x:Class="FlexMold.MVVM.View.Setting.FoeSettingDiaglog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:core="clr-namespace:FlexMold.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:local="clr-namespace:FlexMold.MVVM.View.Setting"
@@ -38,8 +39,15 @@
             <TextBox
                 Grid.Row="0"
                 Grid.Column="1"
-                Margin="4"
-                Text="{Binding MyFoe.Foe_sPathName}" />
+                Margin="4">
+                <TextBox.Text>
+                    <Binding Path="MyFoe.Foe_sPathName" UpdateSourceTrigger="PropertyChanged">
+                        <Binding.ValidationRules>
+                            <core:NotEmptyValidationRule ValidatesOnTargetUpdated="True" />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
             <Button
                 Grid.Row="0"
                 Grid.Column="2"
@@ -47,14 +55,25 @@
                 HorizontalAlignment="Right"
                 Command="{Binding BrowseFirmwareCommand}"
                 Content=".." />
-            <PasswordBox
+            <TextBox
                 Name="pbox_pwd"
                 Grid.Row="1"
                 Grid.Column="1"
                 Grid.ColumnSpan="2"
                 mah:TextBoxHelper.ClearTextButton="True"
-                mah:TextBoxHelper.Watermark="Revealed PasswordBox" />
-            <UniformGrid Grid.Row="2" Grid.ColumnSpan="3">
+                mah:TextBoxHelper.Watermark="Revealed PasswordBox">
+                <TextBox.Text>
+                    <Binding Path="MyFoe.Foe_dwPass" UpdateSourceTrigger="PropertyChanged">
+                        <Binding.ValidationRules>
+                            <core:NotEmptyValidationRule ValidatesOnTargetUpdated="True" />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+            <UniformGrid
+                Grid.Row="2"
+                Grid.ColumnSpan="3"
+                Rows="1">
                 <Button Command="{Binding UpdateFirmwareCommand}" IsDefault="True">
                     <Button.CommandParameter>
                         <system:Boolean>True</system:Boolean>
@@ -86,11 +105,13 @@
                 <iconPacks:PackIconMaterial
                     Width="40"
                     Height="40"
+                    Foreground="{Binding MyFoe.BusyForeground}"
                     Kind="AlarmLightOutline"
                     ToolTip="Busy Indicator" />
                 <iconPacks:PackIconMaterial
                     Width="40"
                     Height="40"
+                    Foreground="{Binding MyFoe.ErrorForeground}"
                     Kind="AlarmLightOutline"
                     ToolTip="Error Indicator" />
             </StackPanel>

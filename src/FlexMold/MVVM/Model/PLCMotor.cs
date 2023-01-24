@@ -5,6 +5,7 @@ using StructPacker;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -76,20 +77,51 @@ namespace FlexMold.MVVM.Model
     }
     public class Foe : ObservableObject
     {
-        private uint foe_dwPass;
-        public UInt32 Foe_dwPass { get => foe_dwPass; set => foe_dwPass = value; }
+        private SolidColorBrush errorForeground;
+        public SolidColorBrush ErrorForeground { get => errorForeground; set { errorForeground = value; OnPropertyChanged(); } }
+        private SolidColorBrush busyForeground;
+        public SolidColorBrush BusyForeground { get => busyForeground; set { busyForeground = value; OnPropertyChanged(); } }
+
+        public UInt32 Foe_dwPass { get; set; }
         public UInt16 Foe_nSlaveAddr { get; set; }
-        private string foe_sPathName;
-        public string Foe_sPathName { get => foe_sPathName; set { foe_sPathName = value; OnPropertyChanged(); } }
+        public string Foe_sPathName { get; set; }
 
         private bool _Foe_bLoad;
         public bool Foe_bLoad { get => _Foe_bLoad; set { _Foe_bLoad = value; OnPropertyChanged(); } }
 
         private bool _Foe_bBusy;
-        public bool Foe_bBusy { get => _Foe_bBusy; set { _Foe_bBusy = value; OnPropertyChanged(); } }
+        public bool Foe_bBusy
+        {
+            get => _Foe_bBusy; set
+            {
+                _Foe_bBusy = value;
+                if (value)
+                {
+                    busyForeground = Brushes.Red;
+                }
+                else
+                {
+                    busyForeground = Brushes.White;
+                }
+            }
+        }
 
         private bool _Foe_bError;
-        public bool Foe_bError { get => _Foe_bError; set { _Foe_bError = value; OnPropertyChanged();  } }
+        public bool Foe_bError
+        {
+            get => _Foe_bError; set
+            {
+                _Foe_bError = value;
+                if (value)
+                {
+                    ErrorForeground = Brushes.Red;
+                }
+                else
+                {
+                    ErrorForeground = Brushes.White;
+                }
+            }
+        }
 
         private UInt32 _Foe_nErrID;
         public UInt32 Foe_nErrID { get => _Foe_nErrID; set { _Foe_nErrID = value; OnPropertyChanged(); } }

@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Media;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
 using TwinCAT.TypeSystem;
@@ -26,10 +27,11 @@ namespace FlexMold.MVVM.ViewModel.Setting
         public int MyProperty { get; set; }
         public FoeSettingDiaglogViewModel(uint _MotorNumber)
         {
-            MyFoe = new Foe();
+            MyFoe = new Foe() { BusyForeground = Brushes.White, ErrorForeground = Brushes.White };
             log = LogManager.GetLogger("Motor Firmaware Update");
             UpdateFirmwareCommand = new RelayCommand(o => { UpdateFirmware(); });
             BrowseFirmwareCommand = new RelayCommand(o => { BrowseFirmwareFile(); });
+
 
             TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.foe_bLoad}").FirstOrDefault().WriteValue(0);
             TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.foe_bBusy}").FirstOrDefault().WriteValue(0);

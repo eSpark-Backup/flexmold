@@ -27,7 +27,7 @@ namespace FlexMold.MVVM.ViewModel.Home
         public RelayCommand GenerateErrorD1Command { get; set; }
         public RelayCommand DebugDetailClickCommand { get; set; }
 
-      
+
         void DisplayError(MotorStatusControl o)
         {
             MessageBox.Show(o.ErrorDeatil);
@@ -63,7 +63,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                 SetMotorStatus(value);
             }
         }
-        void SetMotorStatus(UInt32[] _value) 
+        void SetMotorStatus(UInt32[] _value)
         {
             int[] v;
             if (Diag1Value != null)
@@ -144,26 +144,28 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 // Or here we know about UDINT type --> can be marshalled as UINT32
                 var _mysymbol = e.UserData as Symbol;
-                switch (_mysymbol.InstancePath)
+                if (_mysymbol != null)
                 {
-                    case TCVarName.mPosition:
-                        log.Log(LogLevel.Warn, $"Position Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
-                        break;
-                    case TCVarName.mTemperature:
-                        log.Log(LogLevel.Warn, $"Temperature Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
-                        break;
-                    case TCVarName.mDiag1:
-                        Diag1Value = (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[]));
-                        break;
-                    case TCVarName.mDiag2:
-                        log.Log(LogLevel.Warn, $"Diag2 Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
-                        break;
-                    case TCVarName.mDiag3:
-                        log.Log(LogLevel.Warn, $"Diag3 Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
-                        break;
-                    default:
-                        break;
-
+                    switch (_mysymbol.InstancePath)
+                    {
+                        case TCVarName.mPosition:
+                            log.Log(LogLevel.Warn, $"Position Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
+                            break;
+                        case TCVarName.mTemperature:
+                            log.Log(LogLevel.Warn, $"Temperature Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
+                            break;
+                        case TCVarName.mDiag1:
+                            Diag1Value = (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[]));
+                            break;
+                        case TCVarName.mDiag2:
+                            log.Log(LogLevel.Warn, $"Diag2 Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
+                            break;
+                        case TCVarName.mDiag3:
+                            log.Log(LogLevel.Warn, $"Diag3 Updated : {String.Join(",", (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[])))}");
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
             catch (Exception ex)

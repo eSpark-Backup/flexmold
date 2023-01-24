@@ -3,6 +3,8 @@ using NLog;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.ServiceModel.Channels;
+using System.Windows;
 using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
@@ -126,17 +128,27 @@ namespace FlexMold.Utility
             MySymbols = new ObservableCollection<Symbol>();
             dataTypes = _session.SymbolServer.DataTypes;
             var symbols = _session.SymbolServer.Symbols;
-            ISymbolLoader loader = SymbolLoaderFactory.Create(Client, SymbolLoaderSettings.Default);
-
-            foreach (var item in from item in symbols
-                                 where item.InstanceName == "MAIN"
-                                 select item)
+            if (symbols.Count != 0)
             {
-                foreach (var itemsymbols in item.SubSymbols)
+                ISymbolLoader loader = SymbolLoaderFactory.Create(Client, SymbolLoaderSettings.Default);
+
+                foreach (var item in from item in symbols
+                                     where item.InstanceName == "MAIN"
+                                     select item)
                 {
-                    MySymbols.Add((Symbol)loader.Symbols[itemsymbols.InstancePath]);
-                    log.Log(LogLevel.Info, $"Symbol : {itemsymbols.InstancePath}");
+                    foreach (var itemsymbols in item.SubSymbols)
+                    {
+                        MySymbols.Add((Symbol)loader.Symbols[itemsymbols.InstancePath]);
+                        log.Log(LogLevel.Info, $"Symbol : {itemsymbols.InstancePath}");
+                    }
                 }
+            }
+            else
+            {
+                var l_msg = $"{AdsErrorCode.DeviceSymbolNotFound.ToString()}"+
+                    $"TwinCAT Script not running or TwinCAT is Config mode \n " +
+                    $"Please Start/Restart TwinCAT serivce or Build TwinCAT Solution from FCA \n";
+                throw new Exception(l_msg);
             }
         }
 

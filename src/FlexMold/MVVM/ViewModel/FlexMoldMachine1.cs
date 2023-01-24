@@ -91,7 +91,14 @@ namespace FlexMold.MVVM.ViewModel
                 browse(child, worker);
             }
         }
+        private void AddLibrary(string _LibraryName, ITcSmTreeItem plcProject, IWorker worker)
+        {
+            worker.ProgressStatus = string.Format("Adding Library '{0}' ...", _LibraryName);
 
+            ITcSmTreeItem referencesItem = plcProject.LookupChild("References");
+            ITcPlcLibraryManager libraryManager = (ITcPlcLibraryManager)referencesItem;
+            libraryManager.AddLibrary(_LibraryName);
+        }
         /// <summary>
         /// Handler function Executing the Script code.
         /// </summary>
@@ -141,7 +148,9 @@ namespace FlexMold.MVVM.ViewModel
                 ITcSmTreeItem plcProjectItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project"); // PlcProject (PlcControl side) determined via LookupTreeItem
                 ITcSmTreeItem plcPousItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project^POUs");
                 ITcSmTreeItem plcDutsItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project^DUTs");
-
+                ITcSmTreeItem plcProject = plcGenerated.LookupChild("PlcGenerated" + " Project");
+                AddLibrary("Tc2_EtherCAT, * (Beckhoff Automation GmbH)", plcProject, worker);
+                Console.WriteLine();
 
                 /* =================================================================================================
                  * Creating datatypes in \DUTs\
@@ -516,8 +525,30 @@ END_TYPE";
                         "mDiag3 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
                     "END_VAR"
                     ;
+
+
+                string foe_Scrip = "" +
+                      "foe_Download : FB_EcFoeLoad ;\r\n" +
+                      $"foe_dwPass\t: DWORD := 287454020;\r\n" +
+                      $"foe_sNetId     : T_AmsNetId := '192.168.18.191.3.1' ;\r\n" +
+                      $"foe_nSlaveAddr : UINT := 1001;  \r\n" +
+                      $"foe_eMode      : E_EcFoeMode := eFoeMode_Write;\r\n" +
+                      $"foe_sPathName : STRING := 'D:\\LAN9255Updated.bin';\r\n" +
+                      $"foe_bLoad      : BOOL;\r\n" +
+                      $"foe_bBusy      : BOOL;\r\n" +
+                      $"foe_bError     : BOOL;\r\n" +
+                      $"foe_nErrID     : UDINT;\r\n" +
+                      $"foe_nBytesWritten : UDINT;\r\n" +
+                      $"foe_nPercent      : UDINT;";
+
+
+
+                string implfoe = "fbDownload( bExecute := bLoad,\r\n\t\tsNetId  := sNetId,\r\n\t\tnSlaveAddr := nSlaveAddr,\r\n\t\tdwPass  := dwPass,\r\n\t\tsPathName  := sPathName, \r\n        bBusy => bBusy,\r\n        bError => bError,\r\n        nErrId => nErrID,\r\n        cbLoad => nBytesWritten,\r\n        nProgress => nPercent );";
+
+
+
                 pouDecl.DeclarationText = decl1;
-                string impl1 = "";
+                string impl1 = implfoe;
             }
             return programPou;
         }

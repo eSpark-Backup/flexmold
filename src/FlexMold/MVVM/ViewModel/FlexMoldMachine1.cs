@@ -113,7 +113,7 @@ namespace FlexMold.MVVM.ViewModel
                 throw new Exception("Cancelled");
             worker.ProgressStatus = $"Connecting to TwinCAT Via ADS On Port {(int)AmsPort.SystemService}";
             TwinCathelper._sessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
-            TwinCathelper._connectionSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
+            TwinCathelper.ClientSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
             worker.Progress = 8;
 
             worker.ProgressStatus = $"Configuring TwinCAT System into ConfigMode ....";
@@ -348,7 +348,7 @@ namespace FlexMold.MVVM.ViewModel
             {
                 try
                 {
-                    if (TwinCathelper._connectionSystemService.ReadState().AdsState == state)
+                    if (TwinCathelper.ClientSystemService.ReadState().AdsState == state)
                     {
                         return true;
                     }
@@ -509,6 +509,14 @@ END_TYPE";
                     "foe_nBytesWritten : UDINT;\n" +
                     "foe_nPercent      : UDINT;\n";
 
+            string exstate = "fbSetSlaveState: FB_EcSetSlaveState;\r\n" +
+                "ecs_bExecute   : BOOL; \r\n" +
+                "ecs_reqState   : WORD; \r\n" +
+                "ecs_bBusy     : BOOL;\r\n" +
+                "ecs_bError    : BOOL;\r\n" +
+                "ecs_nErrId    : UDINT;\r\n" +
+                "ecs_currState : ST_EcSlaveState;";
+
             string decl1 =
                 "PROGRAM MAIN \n" +
                 "VAR CONSTANT \n" +
@@ -538,14 +546,15 @@ END_TYPE";
 
                 "{attribute 'TcLinkTo' := '" + Diag3Atrib.Trim(';') +
                     "'}\n" +
-                    "mDiag3 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" 
-                    + foe_sAmsNetId.Trim(',') +"];\n"+ foe_sAmsPort.Trim(',') + "];\n"+
-                foe_Scrip +
-                    "END_VAR"
-                ;
+                    "mDiag3 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n"
+                    + foe_sAmsNetId.Trim(',') + "];\n" + foe_sAmsPort.Trim(',') + "];\n" +
+                foe_Scrip + "\n" + exstate+
+                    "END_VAR";
+
             string implfoe = "fbDownload( bExecute := foe_bLoad,\r\n\t\tsNetId  := foe_sNetId,\r\n\t\tnSlaveAddr := foe_nSlaveAddr,\r\n\t\tdwPass  := foe_dwPass,\r\n\t\tsPathName  := foe_sPathName, \r\n        bBusy => foe_bBusy,\r\n        bError => foe_bError,\r\n        nErrId => foe_nErrID,\r\n        cbLoad => foe_nBytesWritten,\r\n        nProgress => foe_nPercent );";
-            pouDecl.DeclarationText = decl1;
-            pouImpl.ImplementationText = implfoe;
+            string implexstate = "fbSetSlaveState(\r\n\tsNetId := foe_sNetId,\r\n\tnSlaveAddr := foe_nSlaveAddr,\r\n\tbExecute := ecs_bExecute,\r\n\treqState := ecs_reqState, \r\n\tnErrId =>ecs_nErrId, \r\n\tbBusy=> ecs_bBusy, \r\n\tbError=>ecs_bError\r\n);";
+                pouDecl.DeclarationText = decl1;
+            pouImpl.ImplementationText = implfoe+"\n"+ implexstate;
 
             return programPou;
         }
@@ -601,6 +610,7 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
         public List<ITcSmTreeItem> AvailableBoxes { get; set; }
         public void ScanDevicesAndBoxes(IWorker worker)
         {
+            FCAModel.MyBoxes = new List<TreeItem>();
             AvailableBoxes = new List<ITcSmTreeItem>();
             //AvaiableDevices = 1;
             //AvaiableBoxesCount = 2;

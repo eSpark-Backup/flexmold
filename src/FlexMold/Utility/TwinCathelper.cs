@@ -2,6 +2,8 @@
 using NLog;
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.ServiceModel.Channels;
 using System.Windows;
@@ -19,7 +21,7 @@ namespace FlexMold.Utility
         static public AdsSession _session { get; private set; }
         static public AdsSession _sessionSystemService { get; set; }
         static public AdsConnection Client { get; private set; }
-        static public AdsConnection _connectionSystemService { get; set; }
+        static public AdsConnection ClientSystemService { get; set; }
         static public ConnectionState MyConnectionStateOld { get; set; }
         static public ConnectionState MyConnectionStateNew { get; set; }
         static public ConnectionStateChangedReason MyConnectionStateChangedReason { get; set; }
@@ -61,6 +63,36 @@ namespace FlexMold.Utility
             structSize = (SymbolEthercatDevice.Size) / TwinCathelper.DeviceCount;
             buffer = new byte[structSize * TwinCathelper.DeviceCount];
             ReadAllEthercatDeviceData();
+            _sessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
+            ClientSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
+        }
+       public static bool WaitForState(AdsState state, int timeOutInMilliSeconds)
+        {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            while (stopwatch.ElapsedMilliseconds <= timeOutInMilliSeconds)
+            {
+                try
+                {
+                    if (TwinCathelper.ClientSystemService.ReadState().AdsState == state)
+                    {
+                        return true;
+                    }
+                }
+                catch (AdsErrorException ex)
+                {
+                    log.Log(LogLevel.Error, ex.Message);
+                }
+                finally
+                {
+                    log.Log(LogLevel.Info, "System Sleeping for 5000ms");
+                    System.Threading.Thread.Sleep(5000);
+                }
+            }
+
+            stopwatch.Stop();
+            return false;
         }
         static void ReadAllEthercatDeviceData()
         {
@@ -99,19 +131,19 @@ namespace FlexMold.Utility
         }
         static public void StartpPLC()
         {
-            _connectionSystemService.WriteControl(new StateInfo(AdsState.Run, _connectionSystemService.ReadState().DeviceState));
+            ClientSystemService.WriteControl(new StateInfo(AdsState.Run, ClientSystemService.ReadState().DeviceState));
         }
         static public void StoppPLC()
         {
-            _connectionSystemService.WriteControl(new StateInfo(AdsState.Stop, _connectionSystemService.ReadState().DeviceState));
+            ClientSystemService.WriteControl(new StateInfo(AdsState.Stop, ClientSystemService.ReadState().DeviceState));
         }
         static public void ConfigPLC()
         {
-            _connectionSystemService.WriteControl(new StateInfo(AdsState.Config, _connectionSystemService.ReadState().DeviceState));
+            ClientSystemService.WriteControl(new StateInfo(AdsState.Config, ClientSystemService.ReadState().DeviceState));
         }
         static public void ReConfigPLC()
         {
-            _connectionSystemService.WriteControl(new StateInfo(AdsState.Reconfig, _connectionSystemService.ReadState().DeviceState));
+            ClientSystemService.WriteControl(new StateInfo(AdsState.Reconfig, ClientSystemService.ReadState().DeviceState));
         }
         public static StateInfo GetTwincatState()
         {
@@ -145,7 +177,7 @@ namespace FlexMold.Utility
             }
             else
             {
-                var l_msg = $"{AdsErrorCode.DeviceSymbolNotFound.ToString()}"+
+                var l_msg = $"{AdsErrorCode.DeviceSymbolNotFound.ToString()}" +
                     $"TwinCAT Script not running or TwinCAT is Config mode \n " +
                     $"Please Start/Restart TwinCAT serivce or Build TwinCAT Solution from FCA \n";
                 throw new Exception(l_msg);

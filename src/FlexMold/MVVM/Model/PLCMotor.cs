@@ -77,7 +77,22 @@ namespace FlexMold.MVVM.Model
         foe_nBytesWritten,
         foe_nPercent,
         foe_sAmsNetId,
-        foe_sAmsPort
+        foe_sAmsPort,
+        ecs_bExecute,
+        ecs_reqState,
+        ecs_bBusy,
+        ecs_bError,
+        ecs_nErrId,
+        ecs_currState,
+    }
+    public enum EreqState
+    {
+        EC_DEVICE_STATE_INIT = 0x01,
+        EC_DEVICE_STATE_PREOP = 0x02,
+        EC_DEVICE_STATE_BOOTSTRAP = 0x03,
+        EC_DEVICE_STATE_SAFEOP = 0x04,
+        EC_DEVICE_STATE_OP = 0x08,
+        EC_DEVICE_STATE_ERROR = 0x10
     }
     public class Foe : ObservableObject
     {
@@ -113,7 +128,9 @@ namespace FlexMold.MVVM.Model
                 }
             }
         }
-
+        public bool Ecs_bBusy { get; set; }
+        public bool Ecs_bError { get; set; }
+        public UInt32 Ecs_nErrId { get; set; }
         private bool _Foe_bError;
         public bool Foe_bError
         {
@@ -140,7 +157,7 @@ namespace FlexMold.MVVM.Model
         private UInt32 _Foe_nPercent;
         public UInt32 Foe_nPercent { get => _Foe_nPercent; set { _Foe_nPercent = value; OnPropertyChanged(); } }
     }
-  
+
     public class MotorStatusControl : ObservableObject
     {
         private int _MotorId;

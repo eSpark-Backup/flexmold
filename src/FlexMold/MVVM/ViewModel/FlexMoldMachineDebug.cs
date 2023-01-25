@@ -113,7 +113,7 @@ namespace FlexMold.MVVM.ViewModel
                 throw new Exception("Cancelled");
             worker.ProgressStatus = $"Connecting to TwinCAT Via ADS On Port {(int)AmsPort.SystemService}";
             TwinCathelper._sessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
-            TwinCathelper._connectionSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
+            TwinCathelper.ClientSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
             worker.Progress = 8;
             worker.ProgressStatus = $"Configuring TwinCAT System into ConfigMode ....";
             TwinCathelper.ReConfigPLC();
@@ -346,7 +346,7 @@ namespace FlexMold.MVVM.ViewModel
             {
                 try
                 {
-                    if (TwinCathelper._connectionSystemService.ReadState().AdsState == state)
+                    if (TwinCathelper.ClientSystemService.ReadState().AdsState == state)
                     {
                         return true;
                     }

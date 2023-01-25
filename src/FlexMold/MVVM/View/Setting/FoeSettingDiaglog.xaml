@@ -64,7 +64,7 @@
                 mah:TextBoxHelper.ClearTextButton="True"
                 mah:TextBoxHelper.Watermark="Revealed PasswordBox">
                 <TextBox.Text>
-                    <Binding Path="MyFoe.Foe_dwPass" UpdateSourceTrigger="PropertyChanged">
+                    <Binding Path="MyFoe.Foe_dwPass">
                         <Binding.ValidationRules>
                             <core:NotEmptyValidationRule ValidatesOnTargetUpdated="True" />
                         </Binding.ValidationRules>
@@ -75,7 +75,7 @@
                 Grid.Row="2"
                 Grid.ColumnSpan="3"
                 Rows="1">
-                <Button Command="{Binding UpdateFirmwareCommand}" IsDefault="True">
+                <Button IsEnabled="{Binding BT_FirmwareEnable}" Command="{Binding UpdateFirmwareCommand}" IsDefault="True">
                     <Button.CommandParameter>
                         <system:Boolean>True</system:Boolean>
                     </Button.CommandParameter>

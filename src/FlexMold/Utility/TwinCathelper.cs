@@ -112,7 +112,7 @@ namespace FlexMold.Utility
                 SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
             PLCMotors[_motorNumber].Unpack(mtarray);
         }
-
+ 
         public static void WriteAllEthercatDeviceData()
         {
             for (int i = 0; i < PLCMotors.Length; i++)

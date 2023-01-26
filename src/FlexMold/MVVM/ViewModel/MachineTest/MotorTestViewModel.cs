@@ -1,10 +1,14 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.Utility;
+using MahApps.Metro.Controls;
 using NLog;
 using System;
 using System.Linq;
+using TwinCAT;
+using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
+using TwinCAT.TypeSystem;
 
 namespace FlexMold.MVVM.ViewModel.MachineTest
 {
@@ -35,6 +39,15 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 OnPropertyChanged();
             }
         }
+        private UInt32 _Position;
+
+        public UInt32 Position
+        {
+            get { return _Position; }
+            set { _Position = value; OnPropertyChanged(); }
+        }
+
+
         private uint _SelectedMotorIndex;
         public uint SelectedMotorIndex
         {
@@ -48,9 +61,15 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 SelectedMotorTimeValue = MyPLCMotor[value].mTime;
                 SelectedMotorDirValue = MyPLCMotor[value].mDirection;
                 SelectedMotorModeValue = MyPLCMotor[value].mMode;
+                var mtarray = new byte[sizeof(UInt32)];
+                 TwinCathelper.Client.Read(PositionSymbol.IndexGroup,
+                    PositionSymbol.IndexOffset + (uint)value * sizeof(UInt32), mtarray.AsMemory());
+                Position = BitConverter.ToUInt32(mtarray);
                 OnPropertyChanged();
             }
         }
+        public Symbol PositionSymbol { get; set; }
+
         private bool _SelectedMotorModeValue;
         public bool SelectedMotorModeValue
         {
@@ -138,6 +157,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         {
             log = LogManager.GetLogger("Motor Test");
             MyPLCMotor = new EthercatDevice[TwinCathelper.DeviceCount];
+            PositionSymbol = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"{TCVarName.mPosition}").FirstOrDefault();
             SymbolEthercatDevice = TwinCathelper.MySymbols.Where(a => a.InstancePath == TCVarName.MainDevice).FirstOrDefault();
             structSize = (SymbolEthercatDevice.Size) / TwinCathelper.DeviceCount;
             buffer = new byte[structSize * TwinCathelper.DeviceCount];

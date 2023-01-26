@@ -185,14 +185,15 @@ namespace FlexMold.MVVM.ViewModel.Setting
                         log.Log(LogLevel.Info, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} Deveice State not set");
                     }
                 }
+                DeviceStatusIndex = $"Completed";
             }
             catch (Exception ex)
             {
+                DeviceStatusIndex = ex.Message;
                 log.Log(LogLevel.Error, $"{ex.Message}");
             }
             finally
             {
-                DeviceStatusIndex = $"Completed";
                 BT_FirmwareEnable = true;
                 DeleteNotifications();
             }
@@ -312,6 +313,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
                         break;
                     case EFoeSymbols.foe_nErrID:
                         MyFoe.Foe_nErrID = (UInt32)_mysymbol.ReadAnyValue(typeof(UInt32));
+                        DeviceStatusIndex = ((AdsErrorCode)MyFoe.Foe_nErrID).ToString();
                         log.Log(MyFoe.Foe_nErrID == 0 ? LogLevel.Info : LogLevel.Error, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} ==> {EFoeSymbols.foe_nErrID} : {(AdsErrorCode)MyFoe.Foe_nErrID}");
                         break;
                     case EFoeSymbols.foe_nBytesWritten:
@@ -336,6 +338,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
                         break;
                     case EFoeSymbols.ecs_nErrId:
                         MyFoe.Ecs_nErrId = (UInt32)_mysymbol.ReadAnyValue(typeof(UInt32));
+                        DeviceStatusIndex = ((AdsErrorCode)MyFoe.Ecs_nErrId).ToString();
                         log.Log(MyFoe.Ecs_nErrId == 0 ? LogLevel.Info : LogLevel.Error, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} ==> {EFoeSymbols.ecs_nErrId} : {(AdsErrorCode)MyFoe.Ecs_nErrId}");
                         break;
                     case EFoeSymbols.ecs_currState:

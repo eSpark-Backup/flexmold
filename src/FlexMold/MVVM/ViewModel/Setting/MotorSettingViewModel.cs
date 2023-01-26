@@ -1,4 +1,5 @@
-﻿using FlexMold.Core;
+﻿using ControlzEx.Standard;
+using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.MVVM.View.Setting;
 using FlexMold.Utility;
@@ -9,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FlexMold.MVVM.ViewModel.Setting
@@ -65,17 +67,13 @@ namespace FlexMold.MVVM.ViewModel.Setting
 
             var view = new FoeSettingDiaglog()
             {
-                DataContext = new FoeSettingDiaglogViewModel(SelectedMotorIndex)
+                DataContext = new FoeSettingDiaglogViewModel()
             };
             var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
          }
 
         private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
-        {
-            Console.WriteLine();
-        }
-        private void ClosedEventHandler(object sender, DialogClosedEventArgs eventArgs)
-        {
+        { 
             Console.WriteLine();
         }
     }

@@ -84,6 +84,11 @@ namespace FlexMold.MVVM.Model
         ecs_bError,
         ecs_nErrId,
         ecs_currState,
+        fbGetSlaveState,
+        ecg_bExecute,
+        state, 
+        ecg_bError,
+        ecg_nErrId
     }
     public enum EreqState
     {
@@ -120,11 +125,11 @@ namespace FlexMold.MVVM.Model
                 _Foe_bBusy = value;
                 if (value)
                 {
-                    _BusyForeground = Brushes.Red;
+                    BusyForeground = Brushes.Red;
                 }
                 else
                 {
-                    _BusyForeground = Brushes.White;
+                    BusyForeground = Brushes.White;
                 }
             }
         }

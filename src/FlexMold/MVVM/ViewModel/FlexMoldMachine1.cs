@@ -456,7 +456,7 @@ END_TYPE";
             ITcPlcImplementation pouImpl = programPou as ITcPlcImplementation;
             ITcXmlDocument pouDoc = programPou as ITcXmlDocument;
             string deviceAtrib = "";
-            string foe_sAmsNetId = $"foe_sAmsNetId: ARRAY[1..deviceCount] OF WSTRING(20) :=[";
+            string foe_sAmsNetId = $"foe_sAmsNetId:  WSTRING(20) :=";
             string foe_sAmsPort = $"foe_sAmsPort: ARRAY[1..deviceCount] OF UINT :=[";
             string mPositionAtrib = "";
             string mTemperatureAtrib = "";
@@ -465,16 +465,16 @@ END_TYPE";
             string Diag3Atrib = "";
             string outStr = "Outputs process data mapping";
             string inpStr = "Inputs process data mapping";
+            foe_sAmsNetId += $"\"{FCAModel.MyBoxes[0].EtherCAT.AmsAddress.AmsNetId}\";";
             foreach (var item in FCAModel.MyBoxes)
             {
-                foe_sAmsNetId += $"\"{item.EtherCAT.AmsAddress.AmsNetId}\",";
                 foe_sAmsPort += $"{item.EtherCAT.AmsAddress.AmsPort},";
             }
             for (int j = 1; j <= AvaiableDevicesCount; j++)
             {
                 for (int i = 1; i <= FCAModel.MyBoxes.Count; i++)
                 {
-                    var boxName = FCAModel.MyBoxes[i - 1].PathName ;
+                    var boxName = FCAModel.MyBoxes[i - 1].PathName;
                     deviceAtrib += $"" +
                         $"[{i}].mDirection :=  {boxName}^{outStr}^Direction;" +
                         $"[{i}].mSpeed := {boxName}^{outStr}^Speed;" +
@@ -516,7 +516,11 @@ END_TYPE";
                 "ecs_bError    : BOOL;\r\n" +
                 "ecs_nErrId    : UDINT;\r\n" +
                 "ecs_currState : ST_EcSlaveState;";
-
+            string getstate = "fbGetSlaveState : FB_EcGetSlaveState;\r\n" +
+                "state           : ST_EcSlaveState;" +
+                "ecg_bExecute : BOOL;" +
+                "ecg_bError          : BOOL;" +
+                "ecg_nErrId          : UDINT;";
             string decl1 =
                 "PROGRAM MAIN \n" +
                 "VAR CONSTANT \n" +
@@ -547,14 +551,15 @@ END_TYPE";
                 "{attribute 'TcLinkTo' := '" + Diag3Atrib.Trim(';') +
                     "'}\n" +
                     "mDiag3 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n"
-                    + foe_sAmsNetId.Trim(',') + "];\n" + foe_sAmsPort.Trim(',') + "];\n" +
-                foe_Scrip + "\n" + exstate+
+                    + foe_sAmsNetId + "\n" + foe_sAmsPort.Trim(',') + "];\n" +
+                foe_Scrip + "\n" + exstate + "\n" + getstate+
                     "END_VAR";
 
             string implfoe = "fbDownload( bExecute := foe_bLoad,\r\n\t\tsNetId  := foe_sNetId,\r\n\t\tnSlaveAddr := foe_nSlaveAddr,\r\n\t\tdwPass  := foe_dwPass,\r\n\t\tsPathName  := foe_sPathName, \r\n        bBusy => foe_bBusy,\r\n        bError => foe_bError,\r\n        nErrId => foe_nErrID,\r\n        cbLoad => foe_nBytesWritten,\r\n        nProgress => foe_nPercent );";
             string implexstate = "fbSetSlaveState(\r\n\tsNetId := foe_sNetId,\r\n\tnSlaveAddr := foe_nSlaveAddr,\r\n\tbExecute := ecs_bExecute,\r\n\treqState := ecs_reqState, \r\n\tnErrId =>ecs_nErrId, \r\n\tbBusy=> ecs_bBusy, \r\n\tbError=>ecs_bError\r\n);";
-                pouDecl.DeclarationText = decl1;
-            pouImpl.ImplementationText = implfoe+"\n"+ implexstate;
+            string implgetstate = "fbGetSlaveState(sNetId:= foe_sNetId, nSlaveAddr:= foe_nSlaveAddr, bExecute:=ecg_bExecute);\r\nstate := fbGetSlaveState.state;\r\n ecg_bError := fbGetSlaveState.bError;\r\n ecg_nErrId := fbGetSlaveState.nErrId;";
+            pouDecl.DeclarationText = decl1;
+            pouImpl.ImplementationText = implfoe + "\n" + implexstate +"\n"+ implgetstate;
 
             return programPou;
         }

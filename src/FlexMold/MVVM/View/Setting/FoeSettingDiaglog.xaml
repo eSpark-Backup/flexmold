@@ -39,8 +39,8 @@
             <TextBox
                 Grid.Row="0"
                 Grid.Column="1"
-                MaxLength="12"
-                Margin="4">
+                Margin="4"
+                MaxLength="12">
                 <TextBox.Text>
                     <Binding Path="MyFoe.Foe_sPathName">
                         <Binding.ValidationRules>
@@ -61,8 +61,7 @@
                 Grid.Row="1"
                 Grid.Column="1"
                 Grid.ColumnSpan="2"
-                mah:TextBoxHelper.ClearTextButton="True"
-                mah:TextBoxHelper.Watermark="Revealed PasswordBox">
+                mah:TextBoxHelper.ClearTextButton="True">
                 <TextBox.Text>
                     <Binding Path="MyFoe.Foe_dwPass">
                         <Binding.ValidationRules>
@@ -75,7 +74,10 @@
                 Grid.Row="2"
                 Grid.ColumnSpan="3"
                 Rows="1">
-                <Button IsEnabled="{Binding BT_FirmwareEnable}" Command="{Binding UpdateFirmwareCommand}" IsDefault="True">
+                <Button
+                    Command="{Binding UpdateFirmwareCommand}"
+                    IsDefault="True"
+                    IsEnabled="{Binding BT_FirmwareEnable}">
                     <Button.CommandParameter>
                         <system:Boolean>True</system:Boolean>
                     </Button.CommandParameter>
@@ -84,7 +86,10 @@
                         <TextBlock VerticalAlignment="Center" Text="Update Firmware" />
                     </StackPanel>
                 </Button>
-                <Button Command="{x:Static wpf:DialogHost.CloseDialogCommand}" IsCancel="True">
+                <Button
+                    Command="{x:Static wpf:DialogHost.CloseDialogCommand}"
+                    IsCancel="True"
+                    IsEnabled="{Binding BT_FirmwareEnable}">
                     <Button.CommandParameter>
                         <system:Boolean>False</system:Boolean>
                     </Button.CommandParameter>
@@ -94,27 +99,40 @@
                     </StackPanel>
                 </Button>
             </UniformGrid>
-            <mah:MetroProgressBar
-                Grid.Row="3"
-                Grid.ColumnSpan="3"
-                Value="{Binding MyFoe.Foe_nPercent}" />
+            <Grid Grid.Row="3" Grid.ColumnSpan="3">
+                <mah:MetroProgressBar Value="{Binding MyFoe.Foe_nPercent}" />
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontSize="16"
+                    Text="{Binding DeviceStatusIndex}"
+                    TextAlignment="Center" />
+            </Grid>
             <StackPanel
                 Grid.Row="4"
                 Grid.ColumnSpan="3"
                 HorizontalAlignment="Center"
                 Orientation="Horizontal">
-                <iconPacks:PackIconMaterial
-                    Width="40"
-                    Height="40"
-                    Foreground="{Binding MyFoe.BusyForeground}"
-                    Kind="AlarmLightOutline"
-                    ToolTip="Busy Indicator" />
-                <iconPacks:PackIconMaterial
-                    Width="40"
-                    Height="40"
-                    Foreground="{Binding MyFoe.ErrorForeground}"
-                    Kind="AlarmLightOutline"
-                    ToolTip="Error Indicator" />
+                <StackPanel Orientation="Vertical">
+                    <iconPacks:PackIconMaterial
+                        Width="40"
+                        Height="40"
+                        HorizontalAlignment="Center"
+                        Foreground="{Binding MyFoe.BusyForeground}"
+                        Kind="ClockAlert"
+                        ToolTip="Busy Indicator" />
+                    <Label Content="FOE Busy" FontSize="8" />
+                </StackPanel>
+                <StackPanel Orientation="Vertical">
+                    <iconPacks:PackIconMaterial
+                        Width="40"
+                        Height="40"
+                        HorizontalAlignment="Center"
+                        Foreground="{Binding MyFoe.ErrorForeground}"
+                        Kind="AlarmLightOutline"
+                        ToolTip="Error Indicator" />
+                    <Label Content="FOE Error" FontSize="8" />
+                </StackPanel>
             </StackPanel>
         </Grid>
     </Border>

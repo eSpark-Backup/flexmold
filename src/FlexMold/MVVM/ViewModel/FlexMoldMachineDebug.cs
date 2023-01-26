@@ -93,6 +93,15 @@ namespace FlexMold.MVVM.ViewModel
             }
         }
 
+        private void AddLibrary(string _LibraryName, ITcSmTreeItem plcProject, IWorker worker)
+        {
+            worker.ProgressStatus = string.Format("Adding Library '{0}' ...", _LibraryName);
+
+            ITcSmTreeItem referencesItem = plcProject.LookupChild("References");
+            ITcPlcLibraryManager libraryManager = (ITcPlcLibraryManager)referencesItem;
+            libraryManager.AddLibrary(_LibraryName);
+        }
+
         /// <summary>
         /// Handler function Executing the Script code.
         /// </summary>
@@ -104,7 +113,7 @@ namespace FlexMold.MVVM.ViewModel
                 throw new Exception("Cancelled");
             worker.ProgressStatus = $"Connecting to TwinCAT Via ADS On Port {(int)AmsPort.SystemService}";
             TwinCathelper._sessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
-            TwinCathelper._connectionSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
+            TwinCathelper.ClientSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
             worker.Progress = 8;
             worker.ProgressStatus = $"Configuring TwinCAT System into ConfigMode ....";
             TwinCathelper.ReConfigPLC();
@@ -129,7 +138,8 @@ namespace FlexMold.MVVM.ViewModel
              * Attach an empty PLC Project using the "TwinCAT Project" template
              * ================================================================================================= */
             worker.ProgressStatus = "Creating empty PLC Project ...";
-            ITcSmTreeItem plcGenerated = plcConfig.CreateChild("PlcGenerated", 0, "", vsXaePlcStandardTemplateName);
+            string plcProjectName = "PlcGenerated";
+            ITcSmTreeItem plcProjectRoot = plcConfig.CreateChild(plcProjectName, 0, "", vsXaePlcStandardTemplateName);
 
             worker.ProgressStatus = "PLC Project created ...";
             worker.Progress = 20;
@@ -141,6 +151,9 @@ namespace FlexMold.MVVM.ViewModel
             ITcSmTreeItem plcProjectItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project"); // PlcProject (PlcControl side) determined via LookupTreeItem
             ITcSmTreeItem plcPousItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project^POUs");
             ITcSmTreeItem plcDutsItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project^DUTs");
+            ITcSmTreeItem plcProject = plcProjectRoot.LookupChild(plcProjectName + " Project");
+            AddLibrary("Tc2_EtherCAT, * (Beckhoff Automation GmbH)", plcProject, worker);
+            Console.WriteLine();
 
 
             /* =================================================================================================
@@ -333,7 +346,7 @@ namespace FlexMold.MVVM.ViewModel
             {
                 try
                 {
-                    if (TwinCathelper._connectionSystemService.ReadState().AdsState == state)
+                    if (TwinCathelper.ClientSystemService.ReadState().AdsState == state)
                     {
                         return true;
                     }
@@ -451,9 +464,9 @@ END_TYPE";
             string deviceName = "LAN9255_EtherCAT_Slave";
             string outStr = "Outputs process data mapping";
             string inpStr = "Inputs process data mapping";
-            for (int j = 1; j <= AvaiableDevices; j++)
+            for (int j = 1; j <= AvaiableDevicesCount; j++)
             {
-                for (int i = 1; i <= AvaiableBoxes; i++)
+                for (int i = 1; i <= AvaiableBoxesCount; i++)
                 {
                     deviceAtrib += $"" +
                         $"[{i}].mDirection := TIID^Device_{j}^Box {i} ({deviceName})^{outStr}^Direction;\n" +
@@ -478,10 +491,24 @@ END_TYPE";
                 }
             }
 
+            string foe_Scrip =
+                    "fbDownload : FB_EcFoeLoad ;\n" +
+                    "dwPass     : DWORD := 287454020; // 0x11223344\n" +
+                    "sNetId     : T_AmsNetId := '192.168.18.191.3.1' ;\n" +
+                    "nSlaveAddr : UINT := 1001;\n" +
+                    "eMode      : E_EcFoeMode := eFoeMode_Write;\n" +
+                    "sPathName : STRING := 'D:\\LAN9255Updated.bin';\n" +
+                    "bLoad      : BOOL;\n" +
+                    "bBusy      : BOOL;\n" +
+                    "bError     : BOOL;\n" +
+                    "nErrID     : UDINT;\n" +
+                    "nBytesWritten : UDINT;\n" +
+                    "nPercent      : UDINT;\n";
+
             string decl1 =
                 "PROGRAM MAIN \n" +
                 "VAR CONSTANT \n" +
-                $"deviceCount : WORD := {AvaiableBoxes}; \n" +
+                $"deviceCount : WORD := {AvaiableBoxesCount}; \n" +
                 "END_VAR \n" +
                 "VAR \n" +
 
@@ -508,11 +535,13 @@ END_TYPE";
                 "{attribute 'TcLinkTo' := '" + Diag3Atrib +
                     "'}\n" +
                     "mDiag3 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
+                    foe_Scrip +
                 "END_VAR"
                 ;
+            string implfoe = "fbDownload( bExecute := bLoad,\r\n\t\tsNetId  := sNetId,\r\n\t\tnSlaveAddr := nSlaveAddr,\r\n\t\tdwPass  := dwPass,\r\n\t\tsPathName  := sPathName, \r\n        bBusy => bBusy,\r\n        bError => bError,\r\n        nErrId => nErrID,\r\n        cbLoad => nBytesWritten,\r\n        nProgress => nPercent );";
 
             pouDecl.DeclarationText = decl1;
-            string impl1 = "";
+            pouImpl.ImplementationText = implfoe;
 
             return programPou;
         }
@@ -564,13 +593,13 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                 return "PLC";
             }
         }
-        public int AvaiableBoxes { get; set; }
-        public int AvaiableDevices { get; set; }
+        public int AvaiableBoxesCount { get; set; }
+        public int AvaiableDevicesCount { get; set; }
 
         public void ScanDevicesAndBoxes(IWorker worker)
         {
-            AvaiableBoxes = 400;
-            AvaiableDevices = 1;
+            AvaiableBoxesCount = 2;
+            AvaiableDevicesCount = 1;
             ITcSmTreeItem ioDevicesItem = systemManager.LookupTreeItem("TIID");
             string scannedXml = ioDevicesItem.ProduceXml(false);
             XmlDocument xmlDoc = new XmlDocument();
@@ -600,12 +629,12 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                 {
                     worker.ProgressStatus = "Warning: " + ex.Message;
                 }
-                AvaiableDevices = AvaiableDevices + 1;
+                AvaiableDevicesCount = AvaiableDevicesCount + 1;
                 foreach (ITcSmTreeItem box in device)
                 {
                     if (box.Name.Contains("sample"))
                     {
-                        AvaiableBoxes = AvaiableBoxes + 1;
+                        AvaiableBoxesCount = AvaiableBoxesCount + 1;
                         worker.ProgressStatus = $"Box Added Name : {box.Name}";
                     }
                 }

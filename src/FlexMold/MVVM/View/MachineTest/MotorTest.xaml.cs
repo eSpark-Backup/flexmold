@@ -13,16 +13,21 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace FlexMold.MVVM.View.MachineSetting
+namespace FlexMold.MVVM.View.MachineTest
 {
     /// <summary>
-    /// Interaction logic for LaserStatusView.xaml
+    /// Interaction logic for MotorTest.xaml
     /// </summary>
-    public partial class RenumberingView : UserControl
+    public partial class MotorTest : UserControl
     {
-        public RenumberingView()
+        public MotorTest()
         {
             InitializeComponent();
+        }
+
+        private void ComboBox_Selected(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

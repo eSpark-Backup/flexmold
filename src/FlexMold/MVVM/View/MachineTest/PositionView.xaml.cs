@@ -13,21 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace FlexMold.MVVM.View.MachineSetting
+namespace FlexMold.MVVM.View.MachineTest
 {
     /// <summary>
-    /// Interaction logic for EmergencyStatusView.xaml
+    /// Interaction logic for MachineDetailView.xaml
     /// </summary>
-    public partial class ReadMotorView : UserControl
+    public partial class PositionView : UserControl
     {
-        public ReadMotorView()
+        public PositionView()
         {
             InitializeComponent();
-        }
-
-        private void NumericUpDown_ValueChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }

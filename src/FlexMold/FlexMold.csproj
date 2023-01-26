@@ -407,10 +407,12 @@
     <PackageReference Include="envdte80" Version="17.4.33103.184" />
     <PackageReference Include="MahApps.Metro" Version="2.4.9" />
     <PackageReference Include="MahApps.Metro.IconPacks" Version="4.11.0" />
+    <PackageReference Include="MaterialDesignThemes.MahApps" Version="0.2.7" />
     <PackageReference Include="Microsoft.CodeCoverage" Version="17.4.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="NLog" Version="5.1.1" />
     <PackageReference Include="NLog.Schema" Version="5.1.0" />
+    <PackageReference Include="ShowMeTheXAML" Version="2.0.0" />
     <PackageReference Include="SMBLibrary" Version="1.4.9" />
     <PackageReference Include="StructPacker" Version="1.0.8" />
     <PackageReference Include="Sylvan.Data.Csv" Version="1.2.4" />

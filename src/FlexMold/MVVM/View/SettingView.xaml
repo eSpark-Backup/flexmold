@@ -28,7 +28,7 @@
                 ScrollViewer.CanContentScroll="True">
 
                 <RadioButton
-                    Command="{Binding MachineSettingCommand}"
+                    Command="{Binding MachineTestCommand}"
                     Content="Machine"
                     IsChecked="True"
                     Style="{StaticResource MenuButtonTheme}" />

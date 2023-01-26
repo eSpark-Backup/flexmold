@@ -41,7 +41,11 @@
                 <DataTemplate>
                     <Grid>
                         <Button
+                            Content="{Binding MotorId}"
+                            MaxWidth="40"
+                            MaxHeight="40"
                             Background="{Binding FillColor}"
+                            BorderBrush="{Binding FillColor}"
                             Command="{Binding ElementName=MyItems, Path=DataContext.DebugDetailClickCommand}"
                             CommandParameter="{Binding}"
                             Style="{StaticResource MahApps.Styles.Button.Circle}"

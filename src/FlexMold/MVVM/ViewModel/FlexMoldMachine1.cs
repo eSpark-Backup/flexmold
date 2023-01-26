@@ -1,5 +1,6 @@
 ﻿using EnvDTE;
 using EnvDTE80;
+using FlexMold.MVVM.Model;
 using FlexMold.Utility;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -7,7 +8,9 @@ using ScriptingTest;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Xml;
+using System.Xml.Serialization;
 using TCatSysManagerLib;
 using TwinCAT;
 using TwinCAT.Ads;
@@ -91,7 +94,14 @@ namespace FlexMold.MVVM.ViewModel
                 browse(child, worker);
             }
         }
+        private void AddLibrary(string _LibraryName, ITcSmTreeItem plcProject, IWorker worker)
+        {
+            worker.ProgressStatus = string.Format("Adding Library '{0}' ...", _LibraryName);
 
+            ITcSmTreeItem referencesItem = plcProject.LookupChild("References");
+            ITcPlcLibraryManager libraryManager = (ITcPlcLibraryManager)referencesItem;
+            libraryManager.AddLibrary(_LibraryName);
+        }
         /// <summary>
         /// Handler function Executing the Script code.
         /// </summary>
@@ -103,7 +113,7 @@ namespace FlexMold.MVVM.ViewModel
                 throw new Exception("Cancelled");
             worker.ProgressStatus = $"Connecting to TwinCAT Via ADS On Port {(int)AmsPort.SystemService}";
             TwinCathelper._sessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
-            TwinCathelper._connectionSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
+            TwinCathelper.ClientSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
             worker.Progress = 8;
 
             worker.ProgressStatus = $"Configuring TwinCAT System into ConfigMode ....";
@@ -123,7 +133,7 @@ namespace FlexMold.MVVM.ViewModel
              * ================================================================================================= */
             ScanDevicesAndBoxes(worker); //custom code
             worker.Progress = 15;
-            if (AvaiableDevices > 0 && AvaiableBoxesCount > 0)
+            if (AvaiableDevicesCount > 0 && AvaiableBoxesCount > 0)
             {
                 /* =================================================================================================
                  * Attach an empty PLC Project using the "TwinCAT Project" template
@@ -141,7 +151,9 @@ namespace FlexMold.MVVM.ViewModel
                 ITcSmTreeItem plcProjectItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project"); // PlcProject (PlcControl side) determined via LookupTreeItem
                 ITcSmTreeItem plcPousItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project^POUs");
                 ITcSmTreeItem plcDutsItem = systemManager.LookupTreeItem("TIPC^PlcGenerated^PlcGenerated Project^DUTs");
-
+                ITcSmTreeItem plcProject = plcGenerated.LookupChild("PlcGenerated" + " Project");
+                AddLibrary("Tc2_EtherCAT, * (Beckhoff Automation GmbH)", plcProject, worker);
+                Console.WriteLine();
 
                 /* =================================================================================================
                  * Creating datatypes in \DUTs\
@@ -336,7 +348,7 @@ namespace FlexMold.MVVM.ViewModel
             {
                 try
                 {
-                    if (TwinCathelper._connectionSystemService.ReadState().AdsState == state)
+                    if (TwinCathelper.ClientSystemService.ReadState().AdsState == state)
                     {
                         return true;
                     }
@@ -436,7 +448,7 @@ END_TYPE";
             ITcSmTreeItem program = AddPOUProgram("Main", parent, language, worker);
         }
 
-        string deviceName = "LAN9255";
+        string deviceName = "LAN9255_EtherCAT_Slave";
         private ITcSmTreeItem AddPOUProgram(string pouName, ITcSmTreeItem parent, IECLanguageType language, IWorker worker)
         {
             ITcSmTreeItem programPou = parent.LookupChild("Main");
@@ -444,6 +456,8 @@ END_TYPE";
             ITcPlcImplementation pouImpl = programPou as ITcPlcImplementation;
             ITcXmlDocument pouDoc = programPou as ITcXmlDocument;
             string deviceAtrib = "";
+            string foe_sAmsNetId = $"foe_sAmsNetId:  WSTRING(20) :=";
+            string foe_sAmsPort = $"foe_sAmsPort: ARRAY[1..deviceCount] OF UINT :=[";
             string mPositionAtrib = "";
             string mTemperatureAtrib = "";
             string Diag1Atrib = "";
@@ -451,74 +465,102 @@ END_TYPE";
             string Diag3Atrib = "";
             string outStr = "Outputs process data mapping";
             string inpStr = "Inputs process data mapping";
-            for (int j = 1; j <= AvaiableDevices; j++)
+            foe_sAmsNetId += $"\"{FCAModel.MyBoxes[0].EtherCAT.AmsAddress.AmsNetId}\";";
+            foreach (var item in FCAModel.MyBoxes)
             {
-                for (int i = 1; i <= AvailableBoxes.Count; i++)
+                foe_sAmsPort += $"{item.EtherCAT.AmsAddress.AmsPort},";
+            }
+            for (int j = 1; j <= AvaiableDevicesCount; j++)
+            {
+                for (int i = 1; i <= FCAModel.MyBoxes.Count; i++)
                 {
+                    var boxName = FCAModel.MyBoxes[i - 1].PathName;
                     deviceAtrib += $"" +
-                  $"[{i}].mDirection := {AvailableBoxes[i - 1].PathName}^{outStr}^Direction;\n" +
-                  $"[{i}].mSpeed := {AvailableBoxes[i - 1].PathName}^{outStr}^Speed;\n" +
-                  $"[{i}].mTime := {AvailableBoxes[i - 1].PathName}^{outStr}^Time;\n" +
-                  $"[{i}].mMode := {AvailableBoxes[i - 1].PathName}^{outStr}^Mode;\n";
-
-                    // "TIID^Device_1^Box 1 (LAN9255_EtherCAT_Slave)"
-                    deviceAtrib += $"" +
-                        $"[{i}].mDirection := {AvailableBoxes[i - 1].PathName}^{outStr}^Direction;\n" +
-                        $"[{i}].mSpeed := {AvailableBoxes[i - 1].PathName}^{outStr}^Speed;\n" +
-                        $"[{i}].mTime := {AvailableBoxes[i - 1].PathName}^{outStr}^Time;\n" +
-                        $"[{i}].mMode := {AvailableBoxes[i - 1].PathName}^{outStr}^Mode;";
-
+                        $"[{i}].mDirection :=  {boxName}^{outStr}^Direction;" +
+                        $"[{i}].mSpeed := {boxName}^{outStr}^Speed;" +
+                        $"[{i}].mTime := {boxName}^{outStr}^Time;" +
+                        $"[{i}].mMode := {boxName}^{outStr}^Mode;";
                     mPositionAtrib += $"" +
-                        $"[{i}]:= {AvailableBoxes[i - 1].PathName}^{inpStr}^Position;";
-
+                        $"[{i}]:= {boxName}^{inpStr}^Position;";
                     mTemperatureAtrib += $"" +
-                        $"[{i}]:= {AvailableBoxes[i - 1].PathName}^{inpStr}^Temperature;";
+                        $"[{i}]:= {boxName}^{inpStr}^Temperature;";
 
                     Diag1Atrib += $"" +
-                        $"[{i}]:= {AvailableBoxes[i - 1].PathName}^{inpStr}^Diag1;";
+                        $"[{i}]:=  {boxName}^{inpStr}^Diag1;";
 
                     Diag2Atrib += $"" +
-                        $"[{i}]:= {AvailableBoxes[i - 1].PathName}^{inpStr}^Diag2;";
+                        $"[{i}]:=  {boxName}^{inpStr}^Diag2;";
 
                     Diag3Atrib += $"" +
-                        $"[{i}]:= {AvailableBoxes[i-1].PathName}^{inpStr}^Diag3;";
+                        $"[{i}]:=  {boxName}^{inpStr}^Diag3;";
                 }
-
-                string decl1 =
-                    "PROGRAM MAIN \n" +
-                    "VAR CONSTANT \n" +
-                    $"deviceCount : WORD := {AvaiableBoxesCount}; \n" +
-                    "END_VAR \n" +
-                    "VAR \n" +
-
-                    "{attribute 'TcLinkTo' := '" + deviceAtrib +
-                        "'}\n" +
-                    "device : ARRAY [1..deviceCount] OF EthercatDevice ; \n" +
-
-                    "{attribute 'TcLinkTo' := '" + mPositionAtrib +
-                        "'}\n" +
-                        "mPosition AT %I* : ARRAY [1..deviceCount] OF DWORD ;\n" +
-
-                    "{attribute 'TcLinkTo' := '" + mTemperatureAtrib +
-                        "'}\n" +
-                        "mTemperature AT %I* : ARRAY [1..deviceCount] OF DWORD ;\n" +
-
-                    "{attribute 'TcLinkTo' := '" + Diag1Atrib +
-                        "'}\n" +
-                        "mDiag1 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
-
-                    "{attribute 'TcLinkTo' := '" + Diag2Atrib +
-                        "'}\n" +
-                        "mDiag2 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
-
-                    "{attribute 'TcLinkTo' := '" + Diag3Atrib +
-                        "'}\n" +
-                        "mDiag3 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
-                    "END_VAR"
-                    ;
-                pouDecl.DeclarationText = decl1;
-                string impl1 = "";
             }
+            string foe_Scrip =
+                    "fbDownload : FB_EcFoeLoad ;\n" +
+                    "foe_dwPass     : DWORD := 0; // 287454020\n" +
+                    "foe_sNetId     : T_AmsNetId := '' ;\n" +
+                    "foe_nSlaveAddr : UINT := 0;\n" +
+                    "foe_eMode      : E_EcFoeMode := eFoeMode_Write;\n" +
+                    "foe_sPathName : STRING := '';\n" +
+                    "foe_bLoad      : BOOL;\n" +
+                    "foe_bBusy      : BOOL;\n" +
+                    "foe_bError     : BOOL;\n" +
+                    "foe_nErrID     : UDINT;\n" +
+                    "foe_nBytesWritten : UDINT;\n" +
+                    "foe_nPercent      : UDINT;\n";
+
+            string exstate = "fbSetSlaveState: FB_EcSetSlaveState;\r\n" +
+                "ecs_bExecute   : BOOL; \r\n" +
+                "ecs_reqState   : WORD; \r\n" +
+                "ecs_bBusy     : BOOL;\r\n" +
+                "ecs_bError    : BOOL;\r\n" +
+                "ecs_nErrId    : UDINT;\r\n" +
+                "ecs_currState : ST_EcSlaveState;";
+            string getstate = "fbGetSlaveState : FB_EcGetSlaveState;\r\n" +
+                "state           : ST_EcSlaveState;" +
+                "ecg_bExecute : BOOL;" +
+                "ecg_bError          : BOOL;" +
+                "ecg_nErrId          : UDINT;";
+            string decl1 =
+                "PROGRAM MAIN \n" +
+                "VAR CONSTANT \n" +
+                $"deviceCount : WORD := {FCAModel.MyBoxes.Count}; \n" +
+                "END_VAR \n" +
+                "VAR \n" +
+
+                "{attribute 'TcLinkTo' := '" + deviceAtrib.Trim(';') +
+                    "'}\n" +
+                "device : ARRAY [1..deviceCount] OF EthercatDevice ; \n" +
+
+                "{attribute 'TcLinkTo' := '" + mPositionAtrib.Trim(';') +
+                    "'}\n" +
+                    "mPosition AT %I* : ARRAY [1..deviceCount] OF DWORD ;\n" +
+
+                "{attribute 'TcLinkTo' := '" + mTemperatureAtrib.Trim(';') +
+                    "'}\n" +
+                    "mTemperature AT %I* : ARRAY [1..deviceCount] OF DWORD ;\n" +
+
+                "{attribute 'TcLinkTo' := '" + Diag1Atrib.Trim(';') +
+                    "'}\n" +
+                    "mDiag1 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
+
+                "{attribute 'TcLinkTo' := '" + Diag2Atrib.Trim(';') +
+                    "'}\n" +
+                    "mDiag2 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
+
+                "{attribute 'TcLinkTo' := '" + Diag3Atrib.Trim(';') +
+                    "'}\n" +
+                    "mDiag3 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n"
+                    + foe_sAmsNetId + "\n" + foe_sAmsPort.Trim(',') + "];\n" +
+                foe_Scrip + "\n" + exstate + "\n" + getstate+
+                    "END_VAR";
+
+            string implfoe = "fbDownload( bExecute := foe_bLoad,\r\n\t\tsNetId  := foe_sNetId,\r\n\t\tnSlaveAddr := foe_nSlaveAddr,\r\n\t\tdwPass  := foe_dwPass,\r\n\t\tsPathName  := foe_sPathName, \r\n        bBusy => foe_bBusy,\r\n        bError => foe_bError,\r\n        nErrId => foe_nErrID,\r\n        cbLoad => foe_nBytesWritten,\r\n        nProgress => foe_nPercent );";
+            string implexstate = "fbSetSlaveState(\r\n\tsNetId := foe_sNetId,\r\n\tnSlaveAddr := foe_nSlaveAddr,\r\n\tbExecute := ecs_bExecute,\r\n\treqState := ecs_reqState, \r\n\tnErrId =>ecs_nErrId, \r\n\tbBusy=> ecs_bBusy, \r\n\tbError=>ecs_bError\r\n);";
+            string implgetstate = "fbGetSlaveState(sNetId:= foe_sNetId, nSlaveAddr:= foe_nSlaveAddr, bExecute:=ecg_bExecute);\r\nstate := fbGetSlaveState.state;\r\n ecg_bError := fbGetSlaveState.bError;\r\n ecg_nErrId := fbGetSlaveState.nErrId;";
+            pouDecl.DeclarationText = decl1;
+            pouImpl.ImplementationText = implfoe + "\n" + implexstate +"\n"+ implgetstate;
+
             return programPou;
         }
         public override string Description
@@ -569,10 +611,11 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
             }
         }
         public int AvaiableBoxesCount { get; set; }
-        public int AvaiableDevices { get; set; }
+        public int AvaiableDevicesCount { get; set; }
         public List<ITcSmTreeItem> AvailableBoxes { get; set; }
         public void ScanDevicesAndBoxes(IWorker worker)
         {
+            FCAModel.MyBoxes = new List<TreeItem>();
             AvailableBoxes = new List<ITcSmTreeItem>();
             //AvaiableDevices = 1;
             //AvaiableBoxesCount = 2;
@@ -580,7 +623,7 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
             {
                 worker.ProgressStatus = "! Warning .......";
                 worker.ProgressStatus = "Simulated Version";
-                worker.ProgressStatus = $"Dummy  {AvaiableDevices} Divices and {AvaiableBoxesCount} Boxes added";
+                worker.ProgressStatus = $"Dummy  {AvaiableDevicesCount} Divices and {AvaiableBoxesCount} Boxes added";
             }
             else
             {
@@ -599,7 +642,7 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                     XmlNode xmlAddress = node.SelectSingleNode("AddressInfo");
                     ITcSmTreeItem device = ioDevicesItem.CreateChild(string.Format("Device_{0}", ++deviceCount), itemSubType, string.Empty, null);
                     string xml = string.Format("<TreeItem><DeviceDef>{0}</DeviceDef></TreeItem>", xmlAddress.OuterXml);
-                    worker.ProgressStatus = $"xmlAddress : {xmlAddress}, itemSubType : {itemSubType}";
+                    worker.ProgressStatus = $"xmlAddress : {xmlAddress.InnerText}, itemSubType : {itemSubType}";
                     device.ConsumeXml(xml);
                     devices.Add(device);
                 }
@@ -614,12 +657,20 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                     {
                         worker.ProgressStatus = "Warning: " + ex.Message;
                     }
-                    AvaiableDevices = AvaiableDevices + 1;
+                    AvaiableDevicesCount = AvaiableDevicesCount + 1;
 
                     foreach (ITcSmTreeItem box in device)
                     {
                         if (box.PathName.Contains(deviceName))
                         {
+                            var boxxml = box.ProduceXml();
+
+                            XmlSerializer serializer = new XmlSerializer(typeof(TreeItem));
+                            using (StringReader reader = new StringReader(boxxml))
+                            {
+                                var test = (TreeItem)serializer.Deserialize(reader);
+                                FCAModel.MyBoxes.Add(test);
+                            }
                             AvailableBoxes.Add(box);
                             AvaiableBoxesCount = AvaiableBoxesCount + 1;
                             worker.ProgressStatus = $"{box.PathName}";

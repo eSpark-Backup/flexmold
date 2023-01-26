@@ -1,14 +1,9 @@
 ﻿using FlexMold.Core;
-using FlexMold.MVVM.View.MachineSetting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FlexMold.MVVM.View.MachineTest;
 
 namespace FlexMold.MVVM.ViewModel
 {
-    class MachineSettingViewModel : ObservableObject
+    class MachineTestViewModel : ObservableObject
     {
         /// <summary>
         /// Relay Commands
@@ -38,7 +33,7 @@ namespace FlexMold.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        public MachineSettingViewModel()
+        public MachineTestViewModel()
         {
             MotorTestVM = new MotorTest();
             ReadMotorVM = new ReadMotorView();

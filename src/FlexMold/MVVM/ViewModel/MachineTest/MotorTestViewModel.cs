@@ -5,6 +5,8 @@ using MahApps.Metro.Controls;
 using NLog;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Threading;
 using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
@@ -62,8 +64,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 SelectedMotorDirValue = MyPLCMotor[value].mDirection;
                 SelectedMotorModeValue = MyPLCMotor[value].mMode;
                 var mtarray = new byte[sizeof(UInt32)];
-                 TwinCathelper.Client.Read(PositionSymbol.IndexGroup,
-                    PositionSymbol.IndexOffset + (uint)value * sizeof(UInt32), mtarray.AsMemory());
+                TwinCathelper.Client.Read(PositionSymbol.IndexGroup,
+                   PositionSymbol.IndexOffset + (uint)SelectedMotorIndex * sizeof(UInt32), mtarray.AsMemory());
                 Position = BitConverter.ToUInt32(mtarray);
                 OnPropertyChanged();
             }
@@ -100,7 +102,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 {
                     _SelectedMotorDirValue = value;
                     MyPLCMotor[SelectedMotorIndex].mDirection = SelectedMotorDirValue;
-                   TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
+                    TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
                 }
                 else
                 {
@@ -152,10 +154,46 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         }
         public byte[] buffer { get; set; }
 
-
+        private async Task RegisterNotification(string _deviceStatusVariableName)
+        {
+            var deviceStatusSymbol = TwinCathelper.MySymbols.Where(a => a.InstancePath == _deviceStatusVariableName).FirstOrDefault();
+            await TwinCathelper.Client.AddDeviceNotificationAsync(deviceStatusSymbol.IndexGroup,
+             deviceStatusSymbol.IndexOffset, (int)(deviceStatusSymbol.Size), NotificationSettings.Default, deviceStatusSymbol, CancellationToken.None);
+            //log.Log(LogLevel.Info, $"{_deviceStatusVariableName} Notification Registered");
+        }
+        private void Client_AdsNotification2(object sender, AdsNotificationEventArgs e)
+        {
+            try
+            {
+                // Or here we know about UDINT type --> can be marshalled as UINT32
+                var _mysymbol = e.UserData as Symbol;
+                if (_mysymbol != null)
+                {
+                    switch (_mysymbol.InstancePath)
+                    {
+                        case TCVarName.mPosition:
+                            var mtarray = new byte[sizeof(UInt32)];
+                            TwinCathelper.Client.Read(PositionSymbol.IndexGroup,
+                               PositionSymbol.IndexOffset + (uint)SelectedMotorIndex * sizeof(UInt32), mtarray.AsMemory());
+                            Position = BitConverter.ToUInt32(mtarray);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Log(LogLevel.Error, ex.Message);
+            }
+        }
         public MotorTestViewModel()
         {
             log = LogManager.GetLogger("Motor Test");
+            TwinCathelper.Client.AdsNotification += Client_AdsNotification2;
+
+            _ = RegisterNotification(TCVarName.mPosition);
+
             MyPLCMotor = new EthercatDevice[TwinCathelper.DeviceCount];
             PositionSymbol = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"{TCVarName.mPosition}").FirstOrDefault();
             SymbolEthercatDevice = TwinCathelper.MySymbols.Where(a => a.InstancePath == TCVarName.MainDevice).FirstOrDefault();

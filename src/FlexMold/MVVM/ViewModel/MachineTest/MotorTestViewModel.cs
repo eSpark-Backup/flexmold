@@ -11,12 +11,15 @@ using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
 using TwinCAT.TypeSystem;
+using System.Collections.Generic;
 
 namespace FlexMold.MVVM.ViewModel.MachineTest
 {
     internal class MotorTestViewModel : ObservableObject
     {
         Logger log;
+        public RelayCommand OnLoadedCommand { get; set; }
+        public RelayCommand OnUnLoadedCommand { get; set; }
         public int structSize { get; set; }
         public bool justread { get; set; }
         public uint DeviceVariableHandle { get; set; }
@@ -41,9 +44,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 OnPropertyChanged();
             }
         }
-        private UInt32 _Position;
-
-        public UInt32 Position
+        private float _Position;
+        public float Position
         {
             get { return _Position; }
             set { _Position = value; OnPropertyChanged(); }
@@ -66,7 +68,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 var mtarray = new byte[sizeof(UInt32)];
                 TwinCathelper.Client.Read(PositionSymbol.IndexGroup,
                    PositionSymbol.IndexOffset + (uint)SelectedMotorIndex * sizeof(UInt32), mtarray.AsMemory());
-                Position = BitConverter.ToUInt32(mtarray);
+                Position = (float)BitConverter.ToUInt32(mtarray) / 1000;
                 OnPropertyChanged();
             }
         }
@@ -153,15 +155,23 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             }
         }
         public byte[] buffer { get; set; }
-
-        private async Task RegisterNotification(string _deviceStatusVariableName)
+        
+        List<uint> NotificatioHandles;
+        public void OnLoaded()
         {
-            var deviceStatusSymbol = TwinCathelper.MySymbols.Where(a => a.InstancePath == _deviceStatusVariableName).FirstOrDefault();
-            await TwinCathelper.Client.AddDeviceNotificationAsync(deviceStatusSymbol.IndexGroup,
-             deviceStatusSymbol.IndexOffset, (int)(deviceStatusSymbol.Size), NotificationSettings.Default, deviceStatusSymbol, CancellationToken.None);
-            //log.Log(LogLevel.Info, $"{_deviceStatusVariableName} Notification Registered");
+            NotificatioHandles = new List<uint>();
+            TwinCathelper.Client.AdsNotification += Client_AdsNotificationMT;
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification(TCVarName.mPosition));
         }
-        private void Client_AdsNotification2(object sender, AdsNotificationEventArgs e)
+        void OnUnLoaded()
+        {
+            foreach (var item in NotificatioHandles)
+            {
+                TwinCathelper.Client.DeleteDeviceNotification(item);
+            }
+        }
+
+        private void Client_AdsNotificationMT(object sender, AdsNotificationEventArgs e)
         {
             try
             {
@@ -172,10 +182,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     switch (_mysymbol.InstancePath)
                     {
                         case TCVarName.mPosition:
-                            var mtarray = new byte[sizeof(UInt32)];
-                            TwinCathelper.Client.Read(PositionSymbol.IndexGroup,
-                               PositionSymbol.IndexOffset + (uint)SelectedMotorIndex * sizeof(UInt32), mtarray.AsMemory());
-                            Position = BitConverter.ToUInt32(mtarray);
+                            Position = (float)BitConverter.ToUInt32(e.Data.ToArray(), (int)SelectedMotorIndex * sizeof(UInt32)) / 1000;
                             break;
                         default:
                             break;
@@ -190,10 +197,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         public MotorTestViewModel()
         {
             log = LogManager.GetLogger("Motor Test");
-            TwinCathelper.Client.AdsNotification += Client_AdsNotification2;
-
-            _ = RegisterNotification(TCVarName.mPosition);
-
+   
             MyPLCMotor = new EthercatDevice[TwinCathelper.DeviceCount];
             PositionSymbol = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"{TCVarName.mPosition}").FirstOrDefault();
             SymbolEthercatDevice = TwinCathelper.MySymbols.Where(a => a.InstancePath == TCVarName.MainDevice).FirstOrDefault();
@@ -209,6 +213,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             SelectedMotorSpeedValue = MyPLCMotor[SelectedMotorIndex].mSpeed;
             SelectedMotorDirValue = Convert.ToBoolean(MyPLCMotor[SelectedMotorIndex].mDirection);
             justread = false;
+            OnLoadedCommand = new RelayCommand(o => { OnLoaded(); });
+            OnUnLoadedCommand = new RelayCommand(o => { OnUnLoaded(); });
         }
     }
 }

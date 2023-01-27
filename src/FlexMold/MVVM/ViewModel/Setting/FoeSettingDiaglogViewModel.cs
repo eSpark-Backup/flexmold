@@ -1,6 +1,7 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.Utility;
+using MahApps.Metro.Controls;
 using Microsoft.VisualStudio.Shell.Interop;
 using NLog;
 using NLog.Fluent;
@@ -105,7 +106,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
         uint NSymbolecs_nErrId = 0;
         void RegisterNotification()
         {
-            TwinCathelper.Client.AdsNotification += Client_AdsNotification2;
+            TwinCathelper.Client.AdsNotification += Client_AdsNotificationFoe;
             var Symbolfoe_nErrID = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.foe_nErrID}").FirstOrDefault();
             NSymbolfoe_nErrID = TwinCathelper.Client.AddDeviceNotification(Symbolfoe_nErrID.IndexGroup, Symbolfoe_nErrID.IndexOffset,
             (int)(Symbolfoe_nErrID.Size), NotificationSettings.Default, Symbolfoe_nErrID);
@@ -208,7 +209,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
             TwinCathelper.Client.DeleteDeviceNotification(NSymbolecs_bBusy);
             TwinCathelper.Client.DeleteDeviceNotification(NSymbolecs_bError);
             TwinCathelper.Client.DeleteDeviceNotification(NSymbolecs_nErrId);
-            TwinCathelper.Client.AdsNotification -= Client_AdsNotification2;
+            TwinCathelper.Client.AdsNotification -= Client_AdsNotificationFoe;
         }
         int retry = 0;
         bool GetSlaveState(EreqState _EreqState)
@@ -278,7 +279,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
             }
         }
         public Foe MyFoe { get; set; }
-        private void Client_AdsNotification2(object sender, AdsNotificationEventArgs e)
+        private void Client_AdsNotificationFoe(object sender, AdsNotificationEventArgs e)
         {
             var pdd = (UInt16)(TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.foe_nSlaveAddr}").FirstOrDefault().ReadAnyValue(typeof(UInt16)));
 
@@ -300,28 +301,28 @@ namespace FlexMold.MVVM.ViewModel.Setting
                     case EFoeSymbols.foe_sPathName:
                         break;
                     case EFoeSymbols.foe_bLoad:
-                        MyFoe.Foe_bLoad = (bool)_mysymbol.ReadAnyValue(typeof(bool));
+                        MyFoe.Foe_bLoad = BitConverter.ToBoolean(e.Data.ToArray());
                         log.Log(LogLevel.Info, $"{EFoeSymbols.foe_bLoad} : {MyFoe.Foe_bLoad}");
                         break;
                     case EFoeSymbols.foe_bBusy:
-                        MyFoe.Foe_bBusy = (bool)_mysymbol.ReadAnyValue(typeof(bool));
+                        MyFoe.Foe_bBusy = BitConverter.ToBoolean(e.Data.ToArray());
                         log.Log(MyFoe.Foe_bBusy == false ? LogLevel.Info : LogLevel.Warn, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} ==> {EFoeSymbols.foe_bBusy} : {MyFoe.Foe_bBusy}");
                         break;
                     case EFoeSymbols.foe_bError:
-                        MyFoe.Foe_bError = (bool)_mysymbol.ReadAnyValue(typeof(bool));
+                        MyFoe.Foe_bError = BitConverter.ToBoolean(e.Data.ToArray());
                         log.Log(MyFoe.Foe_bError == false ? LogLevel.Info : LogLevel.Error, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} ==> {EFoeSymbols.foe_bError} : {MyFoe.Foe_bError}");
                         break;
                     case EFoeSymbols.foe_nErrID:
-                        MyFoe.Foe_nErrID = (UInt32)_mysymbol.ReadAnyValue(typeof(UInt32));
+                        MyFoe.Foe_nErrID = BitConverter.ToUInt32(e.Data.ToArray());
                         DeviceStatusIndex = ((AdsErrorCode)MyFoe.Foe_nErrID).ToString();
                         log.Log(MyFoe.Foe_nErrID == 0 ? LogLevel.Info : LogLevel.Error, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} ==> {EFoeSymbols.foe_nErrID} : {(AdsErrorCode)MyFoe.Foe_nErrID}");
                         break;
                     case EFoeSymbols.foe_nBytesWritten:
-                        MyFoe.Foe_nBytesWritten = (UInt32)_mysymbol.ReadAnyValue(typeof(UInt32));
+                        MyFoe.Foe_nBytesWritten = BitConverter.ToUInt32(e.Data.ToArray());
                         log.Log(LogLevel.Info, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} ==> {EFoeSymbols.foe_nBytesWritten} : {MyFoe.Foe_nBytesWritten}");
                         break;
                     case EFoeSymbols.foe_nPercent:
-                        MyFoe.Foe_nPercent = (UInt32)_mysymbol.ReadAnyValue(typeof(UInt32));
+                        MyFoe.Foe_nPercent = BitConverter.ToUInt32(e.Data.ToArray());
                         log.Log(LogLevel.Info, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} ==> {EFoeSymbols.foe_nPercent} : {MyFoe.Foe_nPercent}");
                         break;
                     case EFoeSymbols.ecs_bExecute:
@@ -329,15 +330,15 @@ namespace FlexMold.MVVM.ViewModel.Setting
                     case EFoeSymbols.ecs_reqState:
                         break;
                     case EFoeSymbols.ecs_bBusy:
-                        MyFoe.Ecs_bBusy = (bool)_mysymbol.ReadAnyValue(typeof(bool));
+                        MyFoe.Ecs_bBusy = BitConverter.ToBoolean(e.Data.ToArray());
                         log.Log(MyFoe.Ecs_bBusy == false ? LogLevel.Info : LogLevel.Warn, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} ==> {EFoeSymbols.ecs_bBusy} : {MyFoe.Ecs_bBusy}");
                         break;
                     case EFoeSymbols.ecs_bError:
-                        MyFoe.Ecs_bError = (bool)_mysymbol.ReadAnyValue(typeof(bool));
+                        MyFoe.Ecs_bError = BitConverter.ToBoolean(e.Data.ToArray());
                         log.Log(MyFoe.Ecs_bError == false ? LogLevel.Info : LogLevel.Error, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} ==> {EFoeSymbols.ecs_bError} : {MyFoe.Ecs_bError}");
                         break;
                     case EFoeSymbols.ecs_nErrId:
-                        MyFoe.Ecs_nErrId = (UInt32)_mysymbol.ReadAnyValue(typeof(UInt32));
+                        MyFoe.Ecs_nErrId = BitConverter.ToUInt32(e.Data.ToArray());
                         DeviceStatusIndex = ((AdsErrorCode)MyFoe.Ecs_nErrId).ToString();
                         log.Log(MyFoe.Ecs_nErrId == 0 ? LogLevel.Info : LogLevel.Error, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} ==> {EFoeSymbols.ecs_nErrId} : {(AdsErrorCode)MyFoe.Ecs_nErrId}");
                         break;

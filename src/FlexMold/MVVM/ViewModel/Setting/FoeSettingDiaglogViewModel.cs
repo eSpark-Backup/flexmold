@@ -104,44 +104,22 @@ namespace FlexMold.MVVM.ViewModel.Setting
         uint NSymbolecs_bBusy = 0;
         uint NSymbolecs_bError = 0;
         uint NSymbolecs_nErrId = 0;
+        List<uint> NotificatioHandles;
         void RegisterNotification()
         {
+            NotificatioHandles = new List<uint>();
             TwinCathelper.Client.AdsNotification += Client_AdsNotificationFoe;
-            var Symbolfoe_nErrID = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.foe_nErrID}").FirstOrDefault();
-            NSymbolfoe_nErrID = TwinCathelper.Client.AddDeviceNotification(Symbolfoe_nErrID.IndexGroup, Symbolfoe_nErrID.IndexOffset,
-            (int)(Symbolfoe_nErrID.Size), NotificationSettings.Default, Symbolfoe_nErrID);
-
-            var Symbolfoe_bBusy = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.foe_bBusy}").FirstOrDefault();
-            NSymbolfoe_bBusy = TwinCathelper.Client.AddDeviceNotification(Symbolfoe_bBusy.IndexGroup, Symbolfoe_bBusy.IndexOffset,
-               (int)(Symbolfoe_bBusy.Size), NotificationSettings.Default, Symbolfoe_bBusy);
-
-            var Symbolfoe_bError = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.foe_bError}").FirstOrDefault();
-            NSymbolfoe_bError = TwinCathelper.Client.AddDeviceNotification(Symbolfoe_bError.IndexGroup, Symbolfoe_bError.IndexOffset,
-               (int)(Symbolfoe_bError.Size), NotificationSettings.Default, Symbolfoe_bError);
-
-            var Symbolfoe_nPercent = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.foe_nPercent}").FirstOrDefault();
-            NSymbolfoe_nPercent = TwinCathelper.Client.AddDeviceNotification(Symbolfoe_nPercent.IndexGroup, Symbolfoe_nPercent.IndexOffset,
-               (int)(Symbolfoe_nPercent.Size), NotificationSettings.Default, Symbolfoe_nPercent);
-
-            var Symbolfoe_nBytesWritten = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.foe_nBytesWritten}").FirstOrDefault();
-            NSymbolfoe_nBytesWritten = TwinCathelper.Client.AddDeviceNotification(Symbolfoe_nBytesWritten.IndexGroup, Symbolfoe_nBytesWritten.IndexOffset,
-               (int)(Symbolfoe_nBytesWritten.Size), NotificationSettings.Default, Symbolfoe_nBytesWritten);
-
-            var Symbolecs_bBusy = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.ecs_bBusy}").FirstOrDefault();
-            NSymbolecs_bBusy = TwinCathelper.Client.AddDeviceNotification(Symbolecs_bBusy.IndexGroup, Symbolecs_bBusy.IndexOffset,
-               (int)(Symbolecs_bBusy.Size), NotificationSettings.Default, Symbolecs_bBusy);
-
-            var Symbolecs_bError = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.ecs_bError}").FirstOrDefault();
-            NSymbolecs_bError = TwinCathelper.Client.AddDeviceNotification(Symbolecs_bError.IndexGroup, Symbolecs_bError.IndexOffset,
-               (int)(Symbolecs_bError.Size), NotificationSettings.Default, Symbolecs_bError);
-
-            var Symbolecs_nErrId = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.ecs_nErrId}").FirstOrDefault();
-            NSymbolecs_nErrId = TwinCathelper.Client.AddDeviceNotification(Symbolecs_nErrId.IndexGroup, Symbolecs_nErrId.IndexOffset,
-               (int)(Symbolecs_nErrId.Size), NotificationSettings.Default, Symbolecs_nErrId);
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{EFoeSymbols.foe_nErrID}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{EFoeSymbols.foe_bBusy}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{EFoeSymbols.foe_bError}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{EFoeSymbols.foe_nPercent}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{EFoeSymbols.foe_nBytesWritten}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{EFoeSymbols.ecs_bBusy}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{EFoeSymbols.ecs_bError}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{EFoeSymbols.ecs_nErrId}"));
         }
         void UpdateFirmwareMeth()
         {
-
             try
             {
                 RegisterNotification();
@@ -201,14 +179,10 @@ namespace FlexMold.MVVM.ViewModel.Setting
         }
         void DeleteNotifications()
         {
-            TwinCathelper.Client.DeleteDeviceNotification(NSymbolfoe_nErrID);
-            TwinCathelper.Client.DeleteDeviceNotification(NSymbolfoe_bBusy);
-            TwinCathelper.Client.DeleteDeviceNotification(NSymbolfoe_bError);
-            TwinCathelper.Client.DeleteDeviceNotification(NSymbolfoe_nPercent);
-            TwinCathelper.Client.DeleteDeviceNotification(NSymbolfoe_nBytesWritten);
-            TwinCathelper.Client.DeleteDeviceNotification(NSymbolecs_bBusy);
-            TwinCathelper.Client.DeleteDeviceNotification(NSymbolecs_bError);
-            TwinCathelper.Client.DeleteDeviceNotification(NSymbolecs_nErrId);
+            foreach (var item in NotificatioHandles)
+            {
+                TwinCathelper.Client.DeleteDeviceNotification(item);
+            }
             TwinCathelper.Client.AdsNotification -= Client_AdsNotificationFoe;
         }
         int retry = 0;

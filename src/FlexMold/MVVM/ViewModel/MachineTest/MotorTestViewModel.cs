@@ -50,8 +50,6 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             get { return _Position; }
             set { _Position = value; OnPropertyChanged(); }
         }
-
-
         private uint _SelectedMotorIndex;
         public uint SelectedMotorIndex
         {
@@ -169,6 +167,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             {
                 TwinCathelper.Client.DeleteDeviceNotification(item);
             }
+            TwinCathelper.Client.AdsNotification -= Client_AdsNotificationMT;
+
         }
 
         private void Client_AdsNotificationMT(object sender, AdsNotificationEventArgs e)

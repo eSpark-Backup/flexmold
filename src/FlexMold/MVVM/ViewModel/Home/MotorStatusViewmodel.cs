@@ -48,7 +48,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             }
             SymbolDiag1Variable.WriteValue(tt);
         }
-       
+
         public UInt32[] OldValue { get; set; }
 
         private UInt32[] _Diag1Value;
@@ -85,13 +85,13 @@ namespace FlexMold.MVVM.ViewModel.Home
                                 MyMotors[v[i]].FillColor = Brushes.Gray;
                                 MyMotors[v[i]].ErrorDeatil = _tmgs;
                                 log.Log(LogLevel.Info, _tmgs);
-                                //ToastNotificationUtil.ShowInformation(_tmgs);
+                                ToastNotificationUtil.ShowInformation(_tmgs);
                                 break;
                             case (int)EmDiag1.Stepper_Driver_Failed:
                                 _tmgs = $"[Err{_value[v[i]]}] Motor #{v[i]} {EmDiag1.Stepper_Driver_Failed.ToString().Replace("_", " ")}";
                                 MyMotors[v[i]].FillColor = Brushes.Red;
                                 MyMotors[v[i]].ErrorDeatil = _tmgs;
-                                log.Log(LogLevel.Warn, _tmgs);
+                                log.Log(LogLevel.Error, _tmgs);
                                 ToastNotificationUtil.ShowError(_tmgs);
                                 break;
                             default:
@@ -120,13 +120,13 @@ namespace FlexMold.MVVM.ViewModel.Home
                             MyMotors[v[i]].FillColor = Brushes.Gray;
                             MyMotors[v[i]].ErrorDeatil = _tmgs;
                             log.Log(LogLevel.Info, _tmgs);
-                            //ToastNotificationUtil.ShowInformation(_tmgs);
+                            ToastNotificationUtil.ShowInformation(_tmgs);
                             break;
                         case (int)EmDiag1.Stepper_Driver_Failed:
                             _tmgs = $"[Err{_value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Stepper_Driver_Failed.ToString().Replace("_", " ")}";
                             MyMotors[v[i]].FillColor = Brushes.Red;
                             MyMotors[v[i]].ErrorDeatil = _tmgs;
-                            log.Log(LogLevel.Warn, _tmgs);
+                            log.Log(LogLevel.Error, _tmgs);
                             //ToastNotificationUtil.ShowError(_tmgs);
                             break;
                         default:
@@ -143,6 +143,7 @@ namespace FlexMold.MVVM.ViewModel.Home
         public UInt32[] MDiag3 = new UInt32[TwinCathelper.DeviceCount];
         private void Client_AdsNotificationMS(object sender, AdsNotificationEventArgs e)
         {
+
             try
             {
                 // Or here we know about UDINT type --> can be marshalled as UINT32
@@ -183,23 +184,19 @@ namespace FlexMold.MVVM.ViewModel.Home
             }
         }
         List<uint> NotificatioHandles;
+        bool Loaded;
         public void OnLoaded()
         {
-            NotificatioHandles = new List<uint>();
-            TwinCathelper.Client.AdsNotification += Client_AdsNotificationMS;
-            log.Log(LogLevel.Info, $"Registring Device Status Notification...");
-            //_ = RegisterNotification(TwinCATVariableIfo.mPositionVariableName);
-            //_ = RegisterNotification(TwinCATVariableIfo.mTemperatureVariableName);
-            NotificatioHandles.Add(TwinCathelper.RegisterNotification(TCVarName.mDiag1));
-            //_ = RegisterNotification(TwinCATVariableIfo.mDiag2VariableName);
-            //_ = RegisterNotification(TwinCATVariableIfo.mDiag3VariableName);
+            Loaded = true;
         }
         void OnUnLoaded()
         {
-            foreach (var item in NotificatioHandles)
-            {
-                TwinCathelper.Client.DeleteDeviceNotification(item);
-            }
+            Loaded = false;
+            //foreach (var item in NotificatioHandles)
+            //{
+            //    TwinCathelper.Client.DeleteDeviceNotification(item);
+            //}
+            //TwinCathelper.Client.AdsNotification -= Client_AdsNotificationMS;
         }
         public MotorStatusViewmodel()
         {
@@ -215,6 +212,15 @@ namespace FlexMold.MVVM.ViewModel.Home
             DebugDetailClickCommand = new RelayCommand(o => { DisplayError(o as MotorStatusControl); });
             OnLoadedCommand = new RelayCommand(o => { OnLoaded(); });
             OnUnLoadedCommand = new RelayCommand(o => { OnUnLoaded(); });
+
+            NotificatioHandles = new List<uint>();
+            TwinCathelper.Client.AdsNotification += Client_AdsNotificationMS;
+            log.Log(LogLevel.Info, $"Registring Device Status Notification...");
+            //_ = RegisterNotification(TwinCATVariableIfo.mPositionVariableName);
+            //_ = RegisterNotification(TwinCATVariableIfo.mTemperatureVariableName);
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification(TCVarName.mDiag1));
+            //_ = RegisterNotification(TwinCATVariableIfo.mDiag2VariableName);
+            //_ = RegisterNotification(TwinCATVariableIfo.mDiag3VariableName);
         }
     }
 

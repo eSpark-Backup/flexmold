@@ -22,9 +22,7 @@ namespace FlexMold.MVVM.View.Home
     {
         public MotorStatusView()
         {
-
             InitializeComponent();
         }
-       
     }
 }

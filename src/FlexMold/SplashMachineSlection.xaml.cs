@@ -16,8 +16,6 @@ namespace FlexMold
     /// </summary>
     public partial class SplashMachineSlection : MetroWindow
     {
-
-
         public SplashMachineSlection()
         {
             InitializeComponent();

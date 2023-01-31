@@ -136,8 +136,8 @@ namespace FlexMold.MVVM.ViewModel.Project
                     }
                     catch (Exception ex)
                     {
-                        log.Log(LogLevel.Error, ex, ex.Message);
-                        throw;
+                        log.Log(LogLevel.Error, ex.Message);
+                        ToastNotificationUtil.ShowError(ex.Message);
                     }
                 }
                 else
@@ -208,7 +208,8 @@ namespace FlexMold.MVVM.ViewModel.Project
                                 }
                                 catch (Exception ex)
                                 {
-                                    log.Log(LogLevel.Error, ex, ex.Message);
+                                    ToastNotificationUtil.ShowError(ex.Message);
+                                    log.Log(LogLevel.Error, ex.Message);
                                 }
                                 finally
                                 {
@@ -216,7 +217,9 @@ namespace FlexMold.MVVM.ViewModel.Project
                                 }
                                 break;
                             case (int)EProjectorComMode.Samba:
-                                log.Log(LogLevel.Info, $"Sending file via samba");
+                                string _tmsg = $"Sending file via samba";
+                                log.Log(LogLevel.Info, _tmsg);
+                                ToastNotificationUtil.ShowInformation(_tmsg);
                                 try
                                 {
                                     log.Log(LogLevel.Info, $"Connecting to {MyPorjector.IpAddres}");
@@ -232,7 +235,8 @@ namespace FlexMold.MVVM.ViewModel.Project
                                 }
                                 catch (Exception ex)
                                 {
-                                    log.Log(LogLevel.Error, ex, ex.Message);
+                                    ToastNotificationUtil.ShowError(ex.Message);
+                                    log.Log(LogLevel.Error,  ex.Message);
                                 }
                                 break;
                             case (int)EProjectorComMode.Telnet:
@@ -251,7 +255,8 @@ namespace FlexMold.MVVM.ViewModel.Project
                                 }
                                 catch (Exception ex)
                                 {
-                                    log.Log(LogLevel.Error, ex, ex.Message);
+                                    ToastNotificationUtil.ShowError(ex.Message);
+                                    log.Log(LogLevel.Error, ex.Message);
                                 }
                                 break;
                             default:
@@ -260,8 +265,8 @@ namespace FlexMold.MVVM.ViewModel.Project
                     }
                     catch (Exception ex)
                     {
-                        log.Log(LogLevel.Error, ex, ex.Message);
-                        throw;
+                        log.Log(LogLevel.Error, ex.Message);
+                        ToastNotificationUtil.ShowError(ex.Message);
                     }
                 }
                 else
@@ -293,8 +298,8 @@ namespace FlexMold.MVVM.ViewModel.Project
             }
             catch (Exception ex)
             {
-                log.Log(LogLevel.Error, ex, ex.Message);
-                throw;
+                log.Log(LogLevel.Error,ex.Message);
+                ToastNotificationUtil.ShowError(ex.Message);
             }
         }
         private void SambaConfigWindow()
@@ -322,7 +327,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             catch (Exception ex)
             {
                 log.Log(LogLevel.Error, ex, ex.Message);
-                throw;
+                ToastNotificationUtil.ShowError(ex.Message);
             }
         }
     }

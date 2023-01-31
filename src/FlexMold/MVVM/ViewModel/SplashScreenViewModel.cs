@@ -1,5 +1,6 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
+using FlexMold.Utility;
 using NLog;
 using ScriptingTest;
 using System;
@@ -8,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace FlexMold.MVVM.ViewModel
 {
@@ -16,13 +18,22 @@ namespace FlexMold.MVVM.ViewModel
     {
         public VSInfo SelectedVS { get; set; }
         private bool _RunButtonEnable;
-
         public bool RunButtonEnable
         {
             get { return _RunButtonEnable; }
             set
             {
                 _RunButtonEnable = value;
+                OnPropertyChanged();
+            }
+        }
+        private bool _CloseButtonEnable;
+        public bool CloseButtonEnable
+        {
+            get { return _CloseButtonEnable; }
+            set
+            {
+                _CloseButtonEnable = value;
                 OnPropertyChanged();
             }
         }
@@ -70,6 +81,7 @@ namespace FlexMold.MVVM.ViewModel
         {
             log.Log(LogLevel.Info, $"Flexmold application loading");
             RunButtonEnable = false;
+            CloseButtonEnable = true;
             SelectedMachine = new Machine();
             MyMachines = new ObservableCollection<Machine>
             {
@@ -122,6 +134,7 @@ namespace FlexMold.MVVM.ViewModel
                             MessageBox.Show($"{msg}");
                             OnRequestClose(this, new EventArgs());
                         }
+
                     }
 
                     break;
@@ -168,10 +181,73 @@ namespace FlexMold.MVVM.ViewModel
         }
         void RunMainWindow()
         {
-            MainWindow mw = new MainWindow(SelectedMachine);
-            OnRequestClose(this, new EventArgs());
-            mw.Show();
-            Application.Current.MainWindow = mw;
+            if (Validataion())
+            {
+                MainWindow mw = new MainWindow(SelectedMachine);
+                OnRequestClose(this, new EventArgs());
+                mw.Show();
+                Application.Current.MainWindow = mw;
+            }
+            else
+            {
+                OnRequestClose(this, new EventArgs());
+            }
+        }
+        bool Validataion()
+        {
+            try
+            {
+                TwinCathelper.TwinCatConnect851();
+                TwinCathelper.InitializeMotors();
+                if (TwinCathelper.Client.IsConnected)
+                {
+                    if (TwinCathelper.Client.IsActive)
+                    {
+                        if (TwinCathelper.MySymbols.Count > 0 && TwinCathelper.MySymbols.Where(a => a.InstancePath == TCVarName.DeviceCount).Count() > 0)
+                        {
+                            if (TwinCathelper.DeviceCount > 0)
+                            {
+                                return true;
+                            }
+                            else
+                            {
+                                var tmsg = "No PLC Device Found";
+                                log.Log(LogLevel.Info, $"{tmsg}");
+                                ToastNotificationUtil.ShowError(tmsg);
+                                MessageBox.Show(tmsg);
+                            }
+                        }
+                        else
+                        {
+                            var tmsg = "Twincat Project Not Running or Properly Configured";
+                            log.Log(LogLevel.Info, $"{tmsg}");
+                            ToastNotificationUtil.ShowError(tmsg);
+                            MessageBox.Show(tmsg);
+                        }
+                    }
+                    else
+                    {
+                        var tmsg = "Twicat Is Not Active \n Compile and run TwinCAT Project First";
+                        log.Log(LogLevel.Info, $"{tmsg}");
+                        ToastNotificationUtil.ShowError(tmsg);
+                        MessageBox.Show(tmsg);
+                    }
+                }
+                else
+                {
+                    var tmsg = "Twicat Not Connected";
+                    log.Log(LogLevel.Info, $"{tmsg}");
+                    ToastNotificationUtil.ShowError(tmsg);
+                    MessageBox.Show(tmsg);
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Log(LogLevel.Error, ex.Message);
+                ToastNotificationUtil.ShowError(ex.Message);
+                MessageBox.Show(ex.Message);
+            }
+            return false;
         }
 
         void _worker_ProgressChanged(object sender, ProgressChangedEventArgs e)

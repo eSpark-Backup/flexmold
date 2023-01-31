@@ -1,0 +1,48 @@
+﻿<UserControl
+    x:Class="FlexMold.MVVM.View.MachineTest.MotorTest"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:convertor="clr-namespace:FlexMold.Convertor"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:FlexMold.MVVM.View.MachineTest"
+    xmlns:machinetest="clr-namespace:FlexMold.MVVM.ViewModel.MachineTest"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="Loaded">
+            <b:InvokeCommandAction Command="{Binding OnLoadedCommand}" />
+        </b:EventTrigger>
+        <b:EventTrigger EventName="Unloaded">
+            <b:InvokeCommandAction Command="{Binding OnUnLoadedCommand}" />
+        </b:EventTrigger>
+    </b:Interaction.Triggers>
+    <UserControl.DataContext>
+        <machinetest:MotorTestViewModel />
+    </UserControl.DataContext>
+    <UserControl.Resources />
+    <UniformGrid Columns="2" Rows="8">
+        <Label Content="Selected Motor" />
+        <ComboBox ItemsSource="{Binding DeviceIds}" SelectedItem="{Binding SelectedMotorIndex}" />
+        <Label Content="Motor Direction : " />
+        <mah:ToggleSwitch
+            IsOn="{Binding SelectedMotorDirValue}"
+            OffContent="Reverese"
+            OnContent="Forward" />
+        <Label Content="Motor Mode : " />
+        <mah:ToggleSwitch
+            IsOn="{Binding SelectedMotorModeValue}"
+            OffContent="Time"
+            OnContent="Direction" />
+        <Label Content="Motor Speed : " />
+        <mah:NumericUpDown Value="{Binding SelectedMotorSpeedValue}" />
+        <Label Content="Motor Time : " />
+        <mah:NumericUpDown Value="{Binding SelectedMotorTimeValue}" />
+        <Label Content="Motor Position : " />
+        <TextBlock Style="{StaticResource LabelTextBlock}" Text="{Binding Position}" />
+
+    </UniformGrid>
+</UserControl>

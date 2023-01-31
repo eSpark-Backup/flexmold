@@ -19,15 +19,11 @@ Executable can be downloaded from [FCA](./Binaries/FlexMoldV1.0.0.8.rar)
 5. Click on "Machine Setting" tab
  
 # Open Issues
-https://github.com/eSpark-Consultants/flexmold/issues/11
+https://github.com/eSpark-Consultants/flexmold/issues/15
 
 # Issue Results
- 
- <!-- ![](img/Issue10d.gif)
- ![](img/R1.png)
- ![](img/R2.png)
- ![](img/R3.png)
- ![](img/R4.png) -->
+ ![](img/17b.gif)
+
 ## External Thanks
 - [For NLogViewer] https://github.com/erizet/NlogViewer
 - [For WPF Panel Control Template] https://www.youtube.com/watch?v=PzP8mw7JUzI&t=1s&ab_channel=Payload

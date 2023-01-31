@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.ServiceModel.Channels;
+using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
 using TwinCAT;
 using TwinCAT.Ads;
@@ -66,7 +68,13 @@ namespace FlexMold.Utility
             _sessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
             ClientSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
         }
-       public static bool WaitForState(AdsState state, int timeOutInMilliSeconds)
+        static public uint RegisterNotification(string _deviceStatusVariableName)
+        {
+            var deviceStatusSymbol = TwinCathelper.MySymbols.Where(a => a.InstancePath == _deviceStatusVariableName).FirstOrDefault();
+            return TwinCathelper.Client.AddDeviceNotification(deviceStatusSymbol.IndexGroup,
+               deviceStatusSymbol.IndexOffset, (int)(deviceStatusSymbol.Size), NotificationSettings.Default, deviceStatusSymbol);
+        }
+        public static bool WaitForState(AdsState state, int timeOutInMilliSeconds)
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -112,7 +120,7 @@ namespace FlexMold.Utility
                 SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
             PLCMotors[_motorNumber].Unpack(mtarray);
         }
-
+ 
         public static void WriteAllEthercatDeviceData()
         {
             for (int i = 0; i < PLCMotors.Length; i++)
@@ -183,7 +191,5 @@ namespace FlexMold.Utility
                 throw new Exception(l_msg);
             }
         }
-
-
     }
 }

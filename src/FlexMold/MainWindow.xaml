@@ -17,6 +17,7 @@
     Icon="flexmold.ico"
     ResizeMode="CanResizeWithGrip"
     WindowStartupLocation="CenterScreen"
+    Closing="MetroWindow_Closing"
     mc:Ignorable="d">
     <Window.Resources>
         <ResourceDictionary>

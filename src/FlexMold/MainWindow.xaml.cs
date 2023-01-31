@@ -182,9 +182,9 @@ namespace FlexMold
                 SystemSounds.Beep.Play();
         }
 
-        //private void Button_Click(object sender, RoutedEventArgs e)
-        //{
-        //    _vm.ShowInformation("sdfsdf");
-        //}
+        private void MetroWindow_Closing(object sender, CancelEventArgs e)
+        {
+            TwinCathelper.Client.Close();
+        }
     }
 }

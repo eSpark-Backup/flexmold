@@ -1,6 +1,7 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.Utility;
+using MahApps.Metro.Controls;
 using Microsoft.VisualStudio.Shell.Interop;
 using NLog;
 using NLog.Fluent;
@@ -103,44 +104,22 @@ namespace FlexMold.MVVM.ViewModel.Setting
         uint NSymbolecs_bBusy = 0;
         uint NSymbolecs_bError = 0;
         uint NSymbolecs_nErrId = 0;
+        List<uint> NotificatioHandles;
         void RegisterNotification()
         {
-            TwinCathelper.Client.AdsNotification += Client_AdsNotification2;
-            var Symbolfoe_nErrID = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.foe_nErrID}").FirstOrDefault();
-            NSymbolfoe_nErrID = TwinCathelper.Client.AddDeviceNotification(Symbolfoe_nErrID.IndexGroup, Symbolfoe_nErrID.IndexOffset,
-            (int)(Symbolfoe_nErrID.Size), NotificationSettings.Default, Symbolfoe_nErrID);
-
-            var Symbolfoe_bBusy = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.foe_bBusy}").FirstOrDefault();
-            NSymbolfoe_bBusy = TwinCathelper.Client.AddDeviceNotification(Symbolfoe_bBusy.IndexGroup, Symbolfoe_bBusy.IndexOffset,
-               (int)(Symbolfoe_bBusy.Size), NotificationSettings.Default, Symbolfoe_bBusy);
-
-            var Symbolfoe_bError = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.foe_bError}").FirstOrDefault();
-            NSymbolfoe_bError = TwinCathelper.Client.AddDeviceNotification(Symbolfoe_bError.IndexGroup, Symbolfoe_bError.IndexOffset,
-               (int)(Symbolfoe_bError.Size), NotificationSettings.Default, Symbolfoe_bError);
-
-            var Symbolfoe_nPercent = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.foe_nPercent}").FirstOrDefault();
-            NSymbolfoe_nPercent = TwinCathelper.Client.AddDeviceNotification(Symbolfoe_nPercent.IndexGroup, Symbolfoe_nPercent.IndexOffset,
-               (int)(Symbolfoe_nPercent.Size), NotificationSettings.Default, Symbolfoe_nPercent);
-
-            var Symbolfoe_nBytesWritten = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.foe_nBytesWritten}").FirstOrDefault();
-            NSymbolfoe_nBytesWritten = TwinCathelper.Client.AddDeviceNotification(Symbolfoe_nBytesWritten.IndexGroup, Symbolfoe_nBytesWritten.IndexOffset,
-               (int)(Symbolfoe_nBytesWritten.Size), NotificationSettings.Default, Symbolfoe_nBytesWritten);
-
-            var Symbolecs_bBusy = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.ecs_bBusy}").FirstOrDefault();
-            NSymbolecs_bBusy = TwinCathelper.Client.AddDeviceNotification(Symbolecs_bBusy.IndexGroup, Symbolecs_bBusy.IndexOffset,
-               (int)(Symbolecs_bBusy.Size), NotificationSettings.Default, Symbolecs_bBusy);
-
-            var Symbolecs_bError = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.ecs_bError}").FirstOrDefault();
-            NSymbolecs_bError = TwinCathelper.Client.AddDeviceNotification(Symbolecs_bError.IndexGroup, Symbolecs_bError.IndexOffset,
-               (int)(Symbolecs_bError.Size), NotificationSettings.Default, Symbolecs_bError);
-
-            var Symbolecs_nErrId = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.ecs_nErrId}").FirstOrDefault();
-            NSymbolecs_nErrId = TwinCathelper.Client.AddDeviceNotification(Symbolecs_nErrId.IndexGroup, Symbolecs_nErrId.IndexOffset,
-               (int)(Symbolecs_nErrId.Size), NotificationSettings.Default, Symbolecs_nErrId);
+            NotificatioHandles = new List<uint>();
+            TwinCathelper.Client.AdsNotification += Client_AdsNotificationFoe;
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{EFoeSymbols.foe_nErrID}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{EFoeSymbols.foe_bBusy}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{EFoeSymbols.foe_bError}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{EFoeSymbols.foe_nPercent}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{EFoeSymbols.foe_nBytesWritten}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{EFoeSymbols.ecs_bBusy}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{EFoeSymbols.ecs_bError}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{EFoeSymbols.ecs_nErrId}"));
         }
         void UpdateFirmwareMeth()
         {
-
             try
             {
                 RegisterNotification();
@@ -185,29 +164,26 @@ namespace FlexMold.MVVM.ViewModel.Setting
                         log.Log(LogLevel.Info, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} Deveice State not set");
                     }
                 }
+                DeviceStatusIndex = $"Completed";
             }
             catch (Exception ex)
             {
+                DeviceStatusIndex = ex.Message;
                 log.Log(LogLevel.Error, $"{ex.Message}");
             }
             finally
             {
-                DeviceStatusIndex = $"Completed";
                 BT_FirmwareEnable = true;
                 DeleteNotifications();
             }
         }
         void DeleteNotifications()
         {
-            TwinCathelper.Client.DeleteDeviceNotification(NSymbolfoe_nErrID);
-            TwinCathelper.Client.DeleteDeviceNotification(NSymbolfoe_bBusy);
-            TwinCathelper.Client.DeleteDeviceNotification(NSymbolfoe_bError);
-            TwinCathelper.Client.DeleteDeviceNotification(NSymbolfoe_nPercent);
-            TwinCathelper.Client.DeleteDeviceNotification(NSymbolfoe_nBytesWritten);
-            TwinCathelper.Client.DeleteDeviceNotification(NSymbolecs_bBusy);
-            TwinCathelper.Client.DeleteDeviceNotification(NSymbolecs_bError);
-            TwinCathelper.Client.DeleteDeviceNotification(NSymbolecs_nErrId);
-            TwinCathelper.Client.AdsNotification -= Client_AdsNotification2;
+            foreach (var item in NotificatioHandles)
+            {
+                TwinCathelper.Client.DeleteDeviceNotification(item);
+            }
+            TwinCathelper.Client.AdsNotification -= Client_AdsNotificationFoe;
         }
         int retry = 0;
         bool GetSlaveState(EreqState _EreqState)
@@ -277,7 +253,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
             }
         }
         public Foe MyFoe { get; set; }
-        private void Client_AdsNotification2(object sender, AdsNotificationEventArgs e)
+        private void Client_AdsNotificationFoe(object sender, AdsNotificationEventArgs e)
         {
             var pdd = (UInt16)(TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{EFoeSymbols.foe_nSlaveAddr}").FirstOrDefault().ReadAnyValue(typeof(UInt16)));
 
@@ -299,27 +275,28 @@ namespace FlexMold.MVVM.ViewModel.Setting
                     case EFoeSymbols.foe_sPathName:
                         break;
                     case EFoeSymbols.foe_bLoad:
-                        MyFoe.Foe_bLoad = (bool)_mysymbol.ReadAnyValue(typeof(bool));
+                        MyFoe.Foe_bLoad = BitConverter.ToBoolean(e.Data.ToArray());
                         log.Log(LogLevel.Info, $"{EFoeSymbols.foe_bLoad} : {MyFoe.Foe_bLoad}");
                         break;
                     case EFoeSymbols.foe_bBusy:
-                        MyFoe.Foe_bBusy = (bool)_mysymbol.ReadAnyValue(typeof(bool));
+                        MyFoe.Foe_bBusy = BitConverter.ToBoolean(e.Data.ToArray());
                         log.Log(MyFoe.Foe_bBusy == false ? LogLevel.Info : LogLevel.Warn, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} ==> {EFoeSymbols.foe_bBusy} : {MyFoe.Foe_bBusy}");
                         break;
                     case EFoeSymbols.foe_bError:
-                        MyFoe.Foe_bError = (bool)_mysymbol.ReadAnyValue(typeof(bool));
+                        MyFoe.Foe_bError = BitConverter.ToBoolean(e.Data.ToArray());
                         log.Log(MyFoe.Foe_bError == false ? LogLevel.Info : LogLevel.Error, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} ==> {EFoeSymbols.foe_bError} : {MyFoe.Foe_bError}");
                         break;
                     case EFoeSymbols.foe_nErrID:
-                        MyFoe.Foe_nErrID = (UInt32)_mysymbol.ReadAnyValue(typeof(UInt32));
+                        MyFoe.Foe_nErrID = BitConverter.ToUInt32(e.Data.ToArray());
+                        DeviceStatusIndex = ((AdsErrorCode)MyFoe.Foe_nErrID).ToString();
                         log.Log(MyFoe.Foe_nErrID == 0 ? LogLevel.Info : LogLevel.Error, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} ==> {EFoeSymbols.foe_nErrID} : {(AdsErrorCode)MyFoe.Foe_nErrID}");
                         break;
                     case EFoeSymbols.foe_nBytesWritten:
-                        MyFoe.Foe_nBytesWritten = (UInt32)_mysymbol.ReadAnyValue(typeof(UInt32));
+                        MyFoe.Foe_nBytesWritten = BitConverter.ToUInt32(e.Data.ToArray());
                         log.Log(LogLevel.Info, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} ==> {EFoeSymbols.foe_nBytesWritten} : {MyFoe.Foe_nBytesWritten}");
                         break;
                     case EFoeSymbols.foe_nPercent:
-                        MyFoe.Foe_nPercent = (UInt32)_mysymbol.ReadAnyValue(typeof(UInt32));
+                        MyFoe.Foe_nPercent = BitConverter.ToUInt32(e.Data.ToArray());
                         log.Log(LogLevel.Info, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} ==> {EFoeSymbols.foe_nPercent} : {MyFoe.Foe_nPercent}");
                         break;
                     case EFoeSymbols.ecs_bExecute:
@@ -327,15 +304,16 @@ namespace FlexMold.MVVM.ViewModel.Setting
                     case EFoeSymbols.ecs_reqState:
                         break;
                     case EFoeSymbols.ecs_bBusy:
-                        MyFoe.Ecs_bBusy = (bool)_mysymbol.ReadAnyValue(typeof(bool));
+                        MyFoe.Ecs_bBusy = BitConverter.ToBoolean(e.Data.ToArray());
                         log.Log(MyFoe.Ecs_bBusy == false ? LogLevel.Info : LogLevel.Warn, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} ==> {EFoeSymbols.ecs_bBusy} : {MyFoe.Ecs_bBusy}");
                         break;
                     case EFoeSymbols.ecs_bError:
-                        MyFoe.Ecs_bError = (bool)_mysymbol.ReadAnyValue(typeof(bool));
+                        MyFoe.Ecs_bError = BitConverter.ToBoolean(e.Data.ToArray());
                         log.Log(MyFoe.Ecs_bError == false ? LogLevel.Info : LogLevel.Error, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} ==> {EFoeSymbols.ecs_bError} : {MyFoe.Ecs_bError}");
                         break;
                     case EFoeSymbols.ecs_nErrId:
-                        MyFoe.Ecs_nErrId = (UInt32)_mysymbol.ReadAnyValue(typeof(UInt32));
+                        MyFoe.Ecs_nErrId = BitConverter.ToUInt32(e.Data.ToArray());
+                        DeviceStatusIndex = ((AdsErrorCode)MyFoe.Ecs_nErrId).ToString();
                         log.Log(MyFoe.Ecs_nErrId == 0 ? LogLevel.Info : LogLevel.Error, $"{EFoeSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} ==> {EFoeSymbols.ecs_nErrId} : {(AdsErrorCode)MyFoe.Ecs_nErrId}");
                         break;
                     case EFoeSymbols.ecs_currState:

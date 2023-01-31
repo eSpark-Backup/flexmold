@@ -1,6 +1,7 @@
 ﻿using ControlzEx.Native;
 using FlexMold.Core;
 using FlexMold.Utility;
+using SMBLibrary.RPC;
 using StructPacker;
 using System;
 using System.Collections.Generic;
@@ -86,7 +87,7 @@ namespace FlexMold.MVVM.Model
         ecs_currState,
         fbGetSlaveState,
         ecg_bExecute,
-        state, 
+        state,
         ecg_bError,
         ecg_nErrId
     }
@@ -106,7 +107,18 @@ namespace FlexMold.MVVM.Model
         private SolidColorBrush _BusyForeground;
         public SolidColorBrush BusyForeground { get => _BusyForeground; set { _BusyForeground = value; OnPropertyChanged(); } }
         private uint _Foe_dwPass;
-        public UInt32 Foe_dwPass { get => _Foe_dwPass; set { _Foe_dwPass = value; OnPropertyChanged(); } }
+        public UInt32 Foe_dwPass
+        {
+            get => _Foe_dwPass;
+            set
+            {
+                _Foe_dwPass = value; 
+                OnPropertyChanged();
+            }
+        }
+        public bool Init_Status { get; set; }
+        public bool Foe_Status { get; set; }
+        public bool Op_Status { get; set; }
         public UInt16 Foe_nSlaveAddr { get; set; }
         private string _Foe_sPathName;
         public string Foe_sPathName
@@ -125,7 +137,7 @@ namespace FlexMold.MVVM.Model
                 _Foe_bBusy = value;
                 if (value)
                 {
-                    BusyForeground = Brushes.Red;
+                    BusyForeground = Brushes.Yellow;
                 }
                 else
                 {
@@ -133,6 +145,7 @@ namespace FlexMold.MVVM.Model
                 }
             }
         }
+        public bool Status{ get; set; }
         public bool Ecs_bBusy { get; set; }
         public bool Ecs_bError { get; set; }
         public UInt32 Ecs_nErrId { get; set; }
@@ -161,6 +174,10 @@ namespace FlexMold.MVVM.Model
 
         private UInt32 _Foe_nPercent;
         public UInt32 Foe_nPercent { get => _Foe_nPercent; set { _Foe_nPercent = value; OnPropertyChanged(); } }
+        public Foe ShallowCopy()
+        {
+            return (Foe)this.MemberwiseClone();
+        }
     }
 
     public class MotorStatusControl : ObservableObject

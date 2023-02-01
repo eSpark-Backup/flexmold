@@ -164,6 +164,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 TwinCathelper.RegisterNotification(TCVarName.mPosition)
             };
             TwinCathelper.Client.AdsNotification += Client_AdsNotificationMT;
+            SelectedMotorIndex = 0;
         }
         void OnUnLoaded()
         {

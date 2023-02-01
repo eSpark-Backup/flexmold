@@ -46,6 +46,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+    <StartupObject>FlexMold.App</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <None Update="External Libs\ToastNotifications.dll">

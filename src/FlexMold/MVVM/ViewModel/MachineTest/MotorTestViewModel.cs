@@ -66,7 +66,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 var mtarray = new byte[sizeof(UInt32)];
                 TwinCathelper.Client.Read(PositionSymbol.IndexGroup,
                    PositionSymbol.IndexOffset + (uint)SelectedMotorIndex * sizeof(UInt32), mtarray.AsMemory());
-                Position = (float)BitConverter.ToUInt32(mtarray) / 1000;
+                Position = BitConverter.ToUInt32(mtarray) / 1000;
                 OnPropertyChanged();
             }
         }
@@ -168,9 +168,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 TwinCathelper.Client.DeleteDeviceNotification(item);
             }
             TwinCathelper.Client.AdsNotification -= Client_AdsNotificationMT;
-
         }
-
         private void Client_AdsNotificationMT(object sender, AdsNotificationEventArgs e)
         {
             try
@@ -182,7 +180,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     switch (_mysymbol.InstancePath)
                     {
                         case TCVarName.mPosition:
-                            Position = (float)BitConverter.ToUInt32(e.Data.ToArray(), (int)SelectedMotorIndex * sizeof(UInt32)) / 1000;
+                            Position = BitConverter.ToUInt32(e.Data.ToArray(), (int)SelectedMotorIndex * sizeof(UInt32)) / 1000;
                             break;
                         default:
                             break;

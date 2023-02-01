@@ -13,6 +13,7 @@ using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
 using TwinCAT.TypeSystem;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FlexMold.Utility
 {
@@ -34,7 +35,7 @@ namespace FlexMold.Utility
         static public Int16 DeviceCount { get; private set; }
         public static EthercatDevice[] PLCMotors { get; private set; }
 
-        static public void TwinCatConnect851()
+        static public bool TwinCatConnect851()
         {
             log = LogManager.GetLogger("TwinCat");
             port = 851;
@@ -44,63 +45,49 @@ namespace FlexMold.Utility
             if (Client.IsConnected)
             {
                 log.Log(LogLevel.Info, $"Connected to : {Client.Address}, Port : {port}");
+                if (Client.IsActive)
+                {
+                    if (GetPLCVariables())
+                    {
+                        return true;
+                    }
+                }
             }
-            else
-            {
-                log.Log(LogLevel.Info, $"Connection Status : {Client.ConnectionState}");
-            }
-
-
-            GetPLCVariables();
+            return false;
         }
         static public Symbol SymbolEthercatDevice { get; private set; }
         static public int structSize { get; private set; }
         static public byte[] buffer { get; private set; }
-        static public void InitializeMotors()
+        static public bool InitializeMotors()
         {
-            TwinCathelper.DeviceCount = (short)TwinCathelper.MySymbols.Where(a =>
-                            a.InstancePath == TCVarName.DeviceCount).FirstOrDefault().ReadAnyValue(typeof(short));
-            PLCMotors = new EthercatDevice[DeviceCount];
-            SymbolEthercatDevice = TwinCathelper.MySymbols.Where(a => a.InstancePath == TCVarName.MainDevice).FirstOrDefault();
-            structSize = (SymbolEthercatDevice.Size) / TwinCathelper.DeviceCount;
-            buffer = new byte[structSize * TwinCathelper.DeviceCount];
-            ReadAllEthercatDeviceData();
-            _sessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
-            ClientSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
+            try
+            {
+                TwinCathelper.DeviceCount = (short)TwinCathelper.MySymbols.Where(a =>
+                           a.InstancePath == TCVarName.DeviceCount).FirstOrDefault().ReadAnyValue(typeof(short));
+                PLCMotors = new EthercatDevice[DeviceCount];
+                SymbolEthercatDevice = TwinCathelper.MySymbols.Where(a => a.InstancePath == TCVarName.MainDevice).FirstOrDefault();
+                structSize = (SymbolEthercatDevice.Size) / TwinCathelper.DeviceCount;
+                buffer = new byte[structSize * TwinCathelper.DeviceCount];
+                ReadAllEthercatDeviceData();
+                if (_sessionSystemService==null)
+                {
+                    _sessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
+                    ClientSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                log.Log(LogLevel.Error, ex.Message);
+                return false;
+            }
+
         }
         static public uint RegisterNotification(string _deviceStatusVariableName)
         {
             var deviceStatusSymbol = TwinCathelper.MySymbols.Where(a => a.InstancePath == _deviceStatusVariableName).FirstOrDefault();
             return TwinCathelper.Client.AddDeviceNotification(deviceStatusSymbol.IndexGroup,
                deviceStatusSymbol.IndexOffset, (int)(deviceStatusSymbol.Size), NotificationSettings.Default, deviceStatusSymbol);
-        }
-        public static bool WaitForState(AdsState state, int timeOutInMilliSeconds)
-        {
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            while (stopwatch.ElapsedMilliseconds <= timeOutInMilliSeconds)
-            {
-                try
-                {
-                    if (TwinCathelper.ClientSystemService.ReadState().AdsState == state)
-                    {
-                        return true;
-                    }
-                }
-                catch (AdsErrorException ex)
-                {
-                    log.Log(LogLevel.Error, ex.Message);
-                }
-                finally
-                {
-                    log.Log(LogLevel.Info, "System Sleeping for 5000ms");
-                    System.Threading.Thread.Sleep(5000);
-                }
-            }
-
-            stopwatch.Stop();
-            return false;
         }
         static void ReadAllEthercatDeviceData()
         {
@@ -120,7 +107,7 @@ namespace FlexMold.Utility
                 SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
             PLCMotors[_motorNumber].Unpack(mtarray);
         }
- 
+
         public static void WriteAllEthercatDeviceData()
         {
             for (int i = 0; i < PLCMotors.Length; i++)
@@ -162,7 +149,7 @@ namespace FlexMold.Utility
             }
             return info;
         }
-        static void GetPLCVariables()
+        static bool GetPLCVariables()
         {
             log.Log(LogLevel.Info, $"Fetching PLC Variables");
             MySymbols = new ObservableCollection<Symbol>();
@@ -182,14 +169,10 @@ namespace FlexMold.Utility
                         log.Log(LogLevel.Info, $"Symbol : {itemsymbols.InstancePath}");
                     }
                 }
+                return true;
             }
-            else
-            {
-                var l_msg = $"{AdsErrorCode.DeviceSymbolNotFound.ToString()}" +
-                    $"TwinCAT Script not running or TwinCAT is Config mode \n " +
-                    $"Please Start/Restart TwinCAT serivce or Build TwinCAT Solution from FCA \n";
-                throw new Exception(l_msg);
-            }
+            log.Log(LogLevel.Error, "No Symbol Found...");
+            return false;
         }
     }
 }

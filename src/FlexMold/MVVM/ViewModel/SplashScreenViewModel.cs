@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using TwinCAT.Ads;
 
 namespace FlexMold.MVVM.ViewModel
 {
@@ -134,7 +135,6 @@ namespace FlexMold.MVVM.ViewModel
                             MessageBox.Show($"{msg}");
                             OnRequestClose(this, new EventArgs());
                         }
-
                     }
 
                     break;
@@ -188,64 +188,32 @@ namespace FlexMold.MVVM.ViewModel
                 mw.Show();
                 Application.Current.MainWindow = mw;
             }
-            else
-            {
-                OnRequestClose(this, new EventArgs());
-            }
         }
         bool Validataion()
         {
             try
             {
-                TwinCathelper.TwinCatConnect851();
-                TwinCathelper.InitializeMotors();
-                if (TwinCathelper.Client.IsConnected)
+                if (TwinCathelper.TwinCatConnect851())
                 {
-                    if (TwinCathelper.Client.IsActive)
+                    if (TwinCathelper.InitializeMotors())
                     {
-                        if (TwinCathelper.MySymbols.Count > 0 && TwinCathelper.MySymbols.Where(a => a.InstancePath == TCVarName.DeviceCount).Count() > 0)
-                        {
-                            if (TwinCathelper.DeviceCount > 0)
-                            {
-                                return true;
-                            }
-                            else
-                            {
-                                var tmsg = "No PLC Device Found";
-                                log.Log(LogLevel.Info, $"{tmsg}");
-                                ToastNotificationUtil.ShowError(tmsg);
-                                MessageBox.Show(tmsg);
-                            }
-                        }
-                        else
-                        {
-                            var tmsg = "Twincat Project Not Running or Properly Configured";
-                            log.Log(LogLevel.Info, $"{tmsg}");
-                            ToastNotificationUtil.ShowError(tmsg);
-                            MessageBox.Show(tmsg);
-                        }
+                        return true;
                     }
                     else
                     {
-                        var tmsg = "Twicat Is Not Active \n Compile and run TwinCAT Project First";
-                        log.Log(LogLevel.Info, $"{tmsg}");
-                        ToastNotificationUtil.ShowError(tmsg);
-                        MessageBox.Show(tmsg);
+                        ProgressStatuses = "Motor initalization failed see logs";
                     }
                 }
                 else
                 {
-                    var tmsg = "Twicat Not Connected";
-                    log.Log(LogLevel.Info, $"{tmsg}");
-                    ToastNotificationUtil.ShowError(tmsg);
-                    MessageBox.Show(tmsg);
+                   ProgressStatuses = $"{AdsErrorCode.DeviceSymbolNotFound.ToString()}\n" +
+               $"TwinCAT Script not running or TwinCAT is Config mode \n" +
+               $"Please Start/Restart TwinCAT serivce or Build TwinCAT Solution from FCA \n";
                 }
             }
             catch (Exception ex)
             {
-                log.Log(LogLevel.Error, ex.Message);
-                ToastNotificationUtil.ShowError(ex.Message);
-                MessageBox.Show(ex.Message);
+                ProgressStatuses = ex.Message;
             }
             return false;
         }
@@ -260,7 +228,6 @@ namespace FlexMold.MVVM.ViewModel
                 RunButtonEnable = true;
             }
         }
-
         void _worker_ProgressStatusChanged(object sender, ProgressStatusChangedArgs e)
         {
             ProgressStatuses = e.Status;

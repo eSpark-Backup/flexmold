@@ -113,7 +113,7 @@ namespace FlexMold.Utility
             PLCMotors[_motorNumber].Unpack(mtarray);
         }
 
-        public static void WriteAllEthercatDeviceData()
+        public static void WriteEthercatDeviceData()
         {
             for (int i = 0; i < PLCMotors.Length; i++)
             {

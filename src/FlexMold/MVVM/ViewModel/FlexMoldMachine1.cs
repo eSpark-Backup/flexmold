@@ -521,6 +521,15 @@ END_TYPE";
                 "ecg_bExecute : BOOL;" +
                 "ecg_bError          : BOOL;" +
                 "ecg_nErrId          : UDINT;";
+
+            var fbGetSlaveState = "" +
+         "fbGetAllSlaveStates : FB_EcGetAllSlaveStates;\n" +
+         "    ECAbExecute            : BOOL;\n" +
+         "    ECAdevStates           : ARRAY[0..deviceCount] OF ST_EcSlaveState;\n" +
+         "    ECAnSlaves             : UINT := 0;\n" +
+         "    ECAbError              : BOOL;\n" +
+         "    ECAnErrId              : UDINT;";
+
             string decl1 =
                 "PROGRAM MAIN \n" +
                 "VAR CONSTANT \n" +
@@ -552,14 +561,14 @@ END_TYPE";
                     "'}\n" +
                     "mDiag3 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n"
                     + foe_sAmsNetId + "\n" + foe_sAmsPort.Trim(',') + "];\n" +
-                foe_Scrip + "\n" + exstate + "\n" + getstate+
-                    "END_VAR";
-
+                foe_Scrip + "\n" + exstate + "\n" + getstate+ "\n"+ fbGetSlaveState+
+                    "\nEND_VAR";
+            string fbgetslaveIpl = "fbGetAllSlaveStates(sNetId:= foe_sNetId, pStateBuf := ADR(ECAdevStates), cbBufLen:=SIZEOF(ECAdevStates), bExecute:=ECAbExecute);\r\nECAnSlaves := fbGetAllSlaveStates.nSlaves;\r\nECAbError := fbGetAllSlaveStates.bError;\r\nECAnErrId := fbGetAllSlaveStates.nErrId;";
             string implfoe = "fbDownload( bExecute := foe_bLoad,\r\n\t\tsNetId  := foe_sNetId,\r\n\t\tnSlaveAddr := foe_nSlaveAddr,\r\n\t\tdwPass  := foe_dwPass,\r\n\t\tsPathName  := foe_sPathName, \r\n        bBusy => foe_bBusy,\r\n        bError => foe_bError,\r\n        nErrId => foe_nErrID,\r\n        cbLoad => foe_nBytesWritten,\r\n        nProgress => foe_nPercent );";
             string implexstate = "fbSetSlaveState(\r\n\tsNetId := foe_sNetId,\r\n\tnSlaveAddr := foe_nSlaveAddr,\r\n\tbExecute := ecs_bExecute,\r\n\treqState := ecs_reqState, \r\n\tnErrId =>ecs_nErrId, \r\n\tbBusy=> ecs_bBusy, \r\n\tbError=>ecs_bError\r\n);";
             string implgetstate = "fbGetSlaveState(sNetId:= foe_sNetId, nSlaveAddr:= foe_nSlaveAddr, bExecute:=ecg_bExecute);\r\nstate := fbGetSlaveState.state;\r\n ecg_bError := fbGetSlaveState.bError;\r\n ecg_nErrId := fbGetSlaveState.nErrId;";
             pouDecl.DeclarationText = decl1;
-            pouImpl.ImplementationText = implfoe + "\n" + implexstate +"\n"+ implgetstate;
+            pouImpl.ImplementationText = implfoe + "\n" + implexstate +"\n"+ implgetstate +"\n"+ fbgetslaveIpl;
 
             return programPou;
         }

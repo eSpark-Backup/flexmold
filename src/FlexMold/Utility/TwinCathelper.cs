@@ -69,7 +69,7 @@ namespace FlexMold.Utility
                 structSize = (SymbolEthercatDevice.Size) / TwinCathelper.DeviceCount;
                 buffer = new byte[structSize * TwinCathelper.DeviceCount];
                 ReadAllEthercatDeviceData();
-                if (_sessionSystemService==null)
+                if (_sessionSystemService == null)
                 {
                     _sessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
                     ClientSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
@@ -83,11 +83,16 @@ namespace FlexMold.Utility
             }
 
         }
-        static public uint RegisterNotification(string _deviceStatusVariableName)
+        static public int RegisterNotification(string _deviceStatusVariableName)
         {
-            var deviceStatusSymbol = TwinCathelper.MySymbols.Where(a => a.InstancePath == _deviceStatusVariableName).FirstOrDefault();
-            return TwinCathelper.Client.AddDeviceNotification(deviceStatusSymbol.IndexGroup,
-               deviceStatusSymbol.IndexOffset, (int)(deviceStatusSymbol.Size), NotificationSettings.Default, deviceStatusSymbol);
+            if (TwinCathelper.Client.State==ConnectionState.Connected)
+            {
+                var deviceStatusSymbol = TwinCathelper.MySymbols.Where(a => a.InstancePath == _deviceStatusVariableName).FirstOrDefault();
+                return (int)TwinCathelper.Client.AddDeviceNotification(deviceStatusSymbol.IndexGroup,
+                   deviceStatusSymbol.IndexOffset, (int)(deviceStatusSymbol.Size), NotificationSettings.Default, deviceStatusSymbol);
+            }
+            log.Log(LogLevel.Error, $"TwinCAT Connection is {TwinCathelper.Client.State}");
+            return -1;
         }
         static void ReadAllEthercatDeviceData()
         {

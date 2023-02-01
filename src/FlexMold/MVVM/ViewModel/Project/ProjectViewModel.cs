@@ -148,38 +148,46 @@ namespace FlexMold.MVVM.ViewModel.Project
         }
         void BrowseProject()
         {
-            Logger log = LogManager.GetLogger("Browse Project");
-            using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
+            try
             {
-                log.Log(LogLevel.Info, $"Select Project Folder");
-                System.Windows.Forms.DialogResult result = dialog.ShowDialog();
-                if (result == System.Windows.Forms.DialogResult.OK)
+                Logger log = LogManager.GetLogger("Browse Project");
+                using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
                 {
-                    myDataModels = new Porjects();
-                    //string selectedPath = @"D:\smhraza\Projects\FLEXMOLD\flexmolddata\FlexMain\Projects\";
-                    string selectedPath = dialog.SelectedPath;
-                    Regex reg = new Regex(@".las$|.csv$");
-                    DirectoryInfo di = new DirectoryInfo(selectedPath);
-                    var laserFilesPath = di.GetFiles("*", SearchOption.AllDirectories)
-                             .Where(path => reg.IsMatch(path.FullName))
-                             .ToList();
-                    var panels = laserFilesPath.GroupBy(p => p.Directory.Name);
-                    var projectsTemp = laserFilesPath.GroupBy(p => p.Directory.Parent.Name);
-                    log.Log(LogLevel.Info, $"{projectsTemp.Count()} Projects Found");
-                    log.Log(LogLevel.Info, $"{panels.Count()} Panels Found");
-                    log.Log(LogLevel.Info, $"{laserFilesPath.Count()} Files Found");
-                    foreach (var item in panels)
+                    log.Log(LogLevel.Info, $"Select Project Folder");
+                    System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+                    if (result == System.Windows.Forms.DialogResult.OK)
                     {
-                        myDataModels.Add(new Model.Project()
+                        myDataModels = new Porjects();
+                        //string selectedPath = @"D:\smhraza\Projects\FLEXMOLD\flexmolddata\FlexMain\Projects\";
+                        string selectedPath = dialog.SelectedPath;
+                        Regex reg = new Regex(@".las$|.csv$");
+                        DirectoryInfo di = new DirectoryInfo(selectedPath);
+                        var laserFilesPath = di.GetFiles("*", SearchOption.AllDirectories)
+                                 .Where(path => reg.IsMatch(path.FullName))
+                                 .ToList();
+                        var panels = laserFilesPath.GroupBy(p => p.Directory.Name);
+                        var projectsTemp = laserFilesPath.GroupBy(p => p.Directory.Parent.Name);
+                        log.Log(LogLevel.Info, $"{projectsTemp.Count()} Projects Found");
+                        log.Log(LogLevel.Info, $"{panels.Count()} Panels Found");
+                        log.Log(LogLevel.Info, $"{laserFilesPath.Count()} Files Found");
+                        foreach (var item in panels)
                         {
-                            Panel = item.Key,
-                            ProjectName = item.FirstOrDefault().Directory.Parent.Name,
-                            LaserFile = item.ToList(),
-                            Complete = false
-                        });
+                            myDataModels.Add(new Model.Project()
+                            {
+                                Panel = item.Key,
+                                ProjectName = item.FirstOrDefault().Directory.Parent.Name,
+                                LaserFile = item.ToList(),
+                                Complete = false
+                            });
+                        }
                     }
+                    else
+                        log.Log(LogLevel.Warn, $"User Cancelled Project Browser");
                 }
-                else log.Log(LogLevel.Warn, $"User Cancelled Project Browser");
+            }
+            catch (Exception ex)
+            {
+                log.Log(LogLevel.Error, ex.Message);
             }
         }
         public async Task sendLasFileAsync(FileInfo _slectedFile)
@@ -236,7 +244,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                                 catch (Exception ex)
                                 {
                                     ToastNotificationUtil.ShowError(ex.Message);
-                                    log.Log(LogLevel.Error,  ex.Message);
+                                    log.Log(LogLevel.Error, ex.Message);
                                 }
                                 break;
                             case (int)EProjectorComMode.Telnet:
@@ -298,7 +306,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             }
             catch (Exception ex)
             {
-                log.Log(LogLevel.Error,ex.Message);
+                log.Log(LogLevel.Error, ex.Message);
                 ToastNotificationUtil.ShowError(ex.Message);
             }
         }

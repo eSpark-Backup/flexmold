@@ -69,6 +69,10 @@ namespace FlexMold
             {
                 TwinCATSystemUpdate();
             });
+            TwinCathelper.MyConnectionStateOld = e.OldState;
+            TwinCathelper.MyConnectionStateNew = e.NewState;
+            TwinCathelper.MyConnectionStateChangedReason = e.Reason;
+            log.Log(LogLevel.Info, $"Session Connection Status : {TwinCathelper.MyConnectionStateNew}");
         }
 
         void _connection_AdsStateChanged(object sender, AdsStateChangedEventArgs e)
@@ -100,80 +104,73 @@ namespace FlexMold
             TwinCathelper.MyConnectionStateOld = e.OldState;
             TwinCathelper.MyConnectionStateNew = e.NewState;
             TwinCathelper.MyConnectionStateChangedReason = e.Reason;
-            log.Log(LogLevel.Info, $"Connection Status Old : {TwinCathelper.MyConnectionStateOld}");
-            log.Log(LogLevel.Info, $"Connection Status New : {TwinCathelper.MyConnectionStateNew}");
-            log.Log(LogLevel.Info, $"Connection Status Reason : {TwinCathelper.MyConnectionStateChangedReason}");
-        }
-
-        void _session_ConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                TwinCATSystemUpdate();
-            });
-            TwinCathelper.MyConnectionStateOld = e.OldState;
-            TwinCathelper.MyConnectionStateNew = e.NewState;
-            TwinCathelper.MyConnectionStateChangedReason = e.Reason;
-            log.Log(LogLevel.Info, $"Connection State Old : {TwinCathelper.MyConnectionStateOld}");
-            log.Log(LogLevel.Info, $"Connection State New : {TwinCathelper.MyConnectionStateNew}");
-            log.Log(LogLevel.Info, $"Connection State Reason : {TwinCathelper.MyConnectionStateChangedReason}");
+            log.Log(LogLevel.Info, $"Connection Status : {TwinCathelper.MyConnectionStateNew}");
         }
         private void TwinCATSystemUpdate()
         {
-
             if (TwinCathelper.Client != null)
             {
-                tBConnectionState.Text = TwinCathelper.Client.State.ToString();
+                bt_TCC.Content = TwinCathelper.Client.State.ToString();
 
                 switch (TwinCathelper.Client.State)
                 {
                     case ConnectionState.None:
-                        tBConnectionState.Background = new SolidColorBrush();
+                        bt_TCC.Background = new SolidColorBrush();
                         break;
                     case ConnectionState.Disconnected:
-                        borCon.Background = new SolidColorBrush(Colors.LightGray);
-                        tBConnectionState.Foreground = new SolidColorBrush(Colors.Black);
+                        bt_TCC.Background = new SolidColorBrush(Colors.LightGray);
+                        bt_TCC.Foreground = new SolidColorBrush(Colors.Black);
                         break;
                     case ConnectionState.Connected:
-                        borCon.Background = new SolidColorBrush(Colors.LightGreen);
-                        tBConnectionState.Foreground = new SolidColorBrush(Colors.Black);
+                        bt_TCC.Background = new SolidColorBrush(Colors.LightGreen);
+                        bt_TCC.Foreground = new SolidColorBrush(Colors.Black);
                         break;
                     case ConnectionState.Lost:
-                        borCon.Background = new SolidColorBrush(Colors.Yellow);
-                        tBConnectionState.Foreground = new SolidColorBrush(Colors.Black);
+                        bt_TCC.Background = new SolidColorBrush(Colors.Yellow);
+                        bt_TCC.Foreground = new SolidColorBrush(Colors.Black);
                         break;
                     default:
                         break;
                 }
                 var info = TwinCathelper.GetTwincatState();
-
-                tBAdsState.Text = info.AdsState.ToString();
-
+                bt_TCS.Content = info.AdsState.ToString();
                 switch (info.AdsState)
                 {
                     case AdsState.Run:
-                        borState.Background = new SolidColorBrush(Colors.DarkGreen);
-                        tBAdsState.Foreground = new SolidColorBrush(Colors.White);
-
-                        break;
-                    case AdsState.Stop:
-                    case AdsState.Error:
-                        borState.Background = new SolidColorBrush(Colors.DarkRed);
-                        tBAdsState.Foreground = new SolidColorBrush(Colors.White);
-
+                        bt_TCS.Background = new SolidColorBrush(Colors.DarkGreen);
+                        bt_TCS.Foreground = new SolidColorBrush(Colors.White);
                         break;
                     case AdsState.Config:
-                        borState.Background = new SolidColorBrush(Colors.DarkBlue);
-                        tBAdsState.Foreground = new SolidColorBrush(Colors.White);
+                    case AdsState.Stop:
+                    case AdsState.Error:
+                    case AdsState.Invalid:
+                    case AdsState.Idle:
+                    case AdsState.Reset:
+                    case AdsState.Init:
+                    case AdsState.Start:
+                    case AdsState.SaveConfig:
+                    case AdsState.LoadConfig:
+                    case AdsState.PowerFailure:
+                    case AdsState.PowerGood:
+                    case AdsState.Shutdown:
+                    case AdsState.Suspend:
+                    case AdsState.Resume:
+                    case AdsState.Reconfig:
+                    case AdsState.Stopping:
+                    case AdsState.Incompatible:
+                    case AdsState.Exception:
+                        bt_TCS.Background = new SolidColorBrush(Colors.DarkRed);
+                        bt_TCS.Foreground = new SolidColorBrush(Colors.White);
                         break;
                 }
             }
             else
             {
-                tBConnectionState.Text = ConnectionState.None.ToString();
-                tBAdsState.Text = AdsState.Invalid.ToString();
+                bt_TCC.Content = ConnectionState.None.ToString();
+                bt_TCC.Content = AdsState.Invalid.ToString();
             }
         }
+
         private void OnLogMessageItemAdded(object o, EventArgs Args)
         {
             // Do what you want :)

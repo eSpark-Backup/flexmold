@@ -16,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Media;
+using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
 using TwinCAT.TypeSystem;
@@ -96,18 +97,10 @@ namespace FlexMold.MVVM.ViewModel.Setting
             MyFoe.Ecs_bBusy = false;
             MyFoe.Ecs_nErrId = 0;
         }
-        uint NSymbolfoe_nErrID = 0;
-        uint NSymbolfoe_bBusy = 0;
-        uint NSymbolfoe_bError = 0;
-        uint NSymbolfoe_nPercent = 0;
-        uint NSymbolfoe_nBytesWritten = 0;
-        uint NSymbolecs_bBusy = 0;
-        uint NSymbolecs_bError = 0;
-        uint NSymbolecs_nErrId = 0;
-        List<uint> NotificatioHandles;
+        List<int> NotificatioHandles;
         void RegisterNotification()
         {
-            NotificatioHandles = new List<uint>();
+            NotificatioHandles = new List<int>();
             TwinCathelper.Client.AdsNotification += Client_AdsNotificationFoe;
             NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{EFoeSymbols.foe_nErrID}"));
             NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{EFoeSymbols.foe_bBusy}"));
@@ -204,11 +197,17 @@ namespace FlexMold.MVVM.ViewModel.Setting
         }
         void DeleteNotifications()
         {
-            foreach (var item in NotificatioHandles)
+            if (TwinCathelper.Client.State == ConnectionState.Connected)
             {
-                TwinCathelper.Client.DeleteDeviceNotification(item);
+                foreach (var item in NotificatioHandles)
+                {
+                    if (item!=-1)
+                    {
+                        TwinCathelper.Client.DeleteDeviceNotification((uint)item);
+                    }
+                }
+                TwinCathelper.Client.AdsNotification -= Client_AdsNotificationFoe;
             }
-            TwinCathelper.Client.AdsNotification -= Client_AdsNotificationFoe;
         }
         int retry = 0;
         bool GetSlaveState(EreqState _EreqState)

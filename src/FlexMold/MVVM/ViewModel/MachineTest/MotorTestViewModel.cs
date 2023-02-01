@@ -12,6 +12,8 @@ using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
 using TwinCAT.TypeSystem;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using LogLevel = NLog.LogLevel;
 
 namespace FlexMold.MVVM.ViewModel.MachineTest
 {
@@ -154,20 +156,28 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         }
         public byte[] buffer { get; set; }
         
-        List<uint> NotificatioHandles;
+        List<int> NotificatioHandles;
         public void OnLoaded()
         {
-            NotificatioHandles = new List<uint>();
+            NotificatioHandles = new List<int>
+            {
+                TwinCathelper.RegisterNotification(TCVarName.mPosition)
+            };
             TwinCathelper.Client.AdsNotification += Client_AdsNotificationMT;
-            NotificatioHandles.Add(TwinCathelper.RegisterNotification(TCVarName.mPosition));
         }
         void OnUnLoaded()
         {
-            foreach (var item in NotificatioHandles)
+            if (TwinCathelper.Client.State == ConnectionState.Connected)
             {
-                TwinCathelper.Client.DeleteDeviceNotification(item);
+                foreach (var item in NotificatioHandles)
+                {
+                    if (item != -1)
+                    {
+                        TwinCathelper.Client.DeleteDeviceNotification((uint)item);
+                    }
+                }
+                TwinCathelper.Client.AdsNotification -= Client_AdsNotificationMT;
             }
-            TwinCathelper.Client.AdsNotification -= Client_AdsNotificationMT;
         }
         private void Client_AdsNotificationMT(object sender, AdsNotificationEventArgs e)
         {
@@ -189,7 +199,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             }
             catch (Exception ex)
             {
-                log.Log(LogLevel.Error, ex.Message);
+                log.Log(NLog.LogLevel.Error, ex.Message);
             }
         }
         public MotorTestViewModel()

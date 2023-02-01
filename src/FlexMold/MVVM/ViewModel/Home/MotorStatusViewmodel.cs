@@ -183,21 +183,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                 log.Log(LogLevel.Error, ex.Message);
             }
         }
-        List<uint> NotificatioHandles;
-        bool Loaded;
-        public void OnLoaded()
-        {
-            Loaded = true;
-        }
-        void OnUnLoaded()
-        {
-            Loaded = false;
-            //foreach (var item in NotificatioHandles)
-            //{
-            //    TwinCathelper.Client.DeleteDeviceNotification(item);
-            //}
-            //TwinCathelper.Client.AdsNotification -= Client_AdsNotificationMS;
-        }
+        List<int> NotificatioHandles;
         public MotorStatusViewmodel()
         {
             log = LogManager.GetLogger("Motor Status");
@@ -210,10 +196,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             }
             GenerateErrorD1Command = new RelayCommand(o => { GenerateD1Error(); });
             DebugDetailClickCommand = new RelayCommand(o => { DisplayError(o as MotorStatusControl); });
-            OnLoadedCommand = new RelayCommand(o => { OnLoaded(); });
-            OnUnLoadedCommand = new RelayCommand(o => { OnUnLoaded(); });
-
-            NotificatioHandles = new List<uint>();
+            NotificatioHandles = new List<int>();
             TwinCathelper.Client.AdsNotification += Client_AdsNotificationMS;
             log.Log(LogLevel.Info, $"Registring Device Status Notification...");
             //_ = RegisterNotification(TwinCATVariableIfo.mPositionVariableName);

@@ -20,6 +20,8 @@ using TwinCAT.TypeSystem;
 using StructPacker;
 using System.Runtime.InteropServices;
 using TwinCAT;
+using NLog.LayoutRenderers.Wrappers;
+using System.Timers;
 
 namespace FlexMold.MVVM.ViewModel.Home
 {
@@ -32,7 +34,6 @@ namespace FlexMold.MVVM.ViewModel.Home
         public RelayCommand OnLoadedCommand { get; set; }
         public RelayCommand OnUnLoadedCommand { get; set; }
 
-
         void DisplayError(MotorStatusControl o)
         {
             MessageBox.Show(o.ErrorDeatil);
@@ -40,7 +41,7 @@ namespace FlexMold.MVVM.ViewModel.Home
         }
         void GenerateD1Error()
         {
-            var SymbolDiag1Variable = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ECAbError}").FirstOrDefault();
+            var SymbolDiag1Variable = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.mDiag1}").FirstOrDefault();
             var tt = new UInt32[TwinCathelper.DeviceCount];
             Random rnd = new Random();
             for (int i = 0; i < tt.Length; i++)
@@ -135,23 +136,23 @@ namespace FlexMold.MVVM.ViewModel.Home
                     }
                 }
             }
-
         }
         public UInt32[] MPostion = new UInt32[TwinCathelper.DeviceCount];
         public UInt32[] MTemperature = new UInt32[TwinCathelper.DeviceCount];
         public UInt32[] MDiag1 = new UInt32[TwinCathelper.DeviceCount];
         public UInt32[] MDiag2 = new UInt32[TwinCathelper.DeviceCount];
         public UInt32[] MDiag3 = new UInt32[TwinCathelper.DeviceCount];
+        List<int> NotificatioHandles;
         private void Client_AdsNotificationMS(object sender, AdsNotificationEventArgs e)
         {
             try
             {
                 // Or here we know about UDINT type --> can be marshalled as UINT32
                 var _mysymbol = e.UserData as Symbol;
-                TCSymbols aa;
-                Enum.TryParse(_mysymbol.InstancePath.Replace("MAIN.", ""), out aa);
                 if (_mysymbol != null)
                 {
+                    TCSymbols aa;
+                    Enum.TryParse(_mysymbol.InstancePath.Replace("MAIN.", ""), out aa);
                     switch (aa)
                     {
                         //case TCVarName.mPosition:
@@ -165,28 +166,16 @@ namespace FlexMold.MVVM.ViewModel.Home
                         case TCSymbols.mDiag1:
                             Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag1, 0, e.Data.Length);
                             log.Log(LogLevel.Warn, $"Diag1 Updated : {String.Join(",", MDiag1)}");
-                            Diag1Value = (UInt32[])_mysymbol.ReadAnyValue(typeof(UInt32[]));
+                            Diag1Value = MDiag1;
                             break;
-                        //case TCVarName.mDiag2:
-                        //    Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag2, 0, e.Data.Length);
-                        //    log.Log(LogLevel.Warn, $"Diag2 Updated : {String.Join(",", MDiag2)}");
-                        //    break;
-                        //case TCVarName.mDiag3:
-                        //    Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag3, 0, e.Data.Length);$"MAIN.{TCSymbols.ECAbError}"
-                        //    log.Log(LogLevel.Warn, $"Diag3 Updated : {String.Join(",", MDiag3)}");
-                        //    break;
-                        case TCSymbols.ECAbExecute:
-                            break;
-                        case TCSymbols.ECAdevStates:
-                            break;
-                        case TCSymbols.ECAnSlaves:
-                            break;
-                        case TCSymbols.ECAbError:
-                            break;
-                        case TCSymbols.ECAnErrId:
-                            break;
-                        default:
-                            break;
+                            //case TCVarName.mDiag2:
+                            //    Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag2, 0, e.Data.Length);
+                            //    log.Log(LogLevel.Warn, $"Diag2 Updated : {String.Join(",", MDiag2)}");
+                            //    break;
+                            //case TCVarName.mDiag3:
+                            //    Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag3, 0, e.Data.Length);$"MAIN.{TCSymbols.ECAbError}"
+                            //    log.Log(LogLevel.Warn, $"Diag3 Updated : {String.Join(",", MDiag3)}");
+                            //    break;
                     }
                 }
             }
@@ -195,14 +184,12 @@ namespace FlexMold.MVVM.ViewModel.Home
                 log.Log(LogLevel.Error, ex.Message);
             }
         }
-        List<int> NotificatioHandles;
         public MotorStatusViewmodel()
         {
             log = LogManager.GetLogger("Motor Status");
             MyMotors = new ObservableCollection<MotorStatusControl>() { };
             int mcount = 0;
             RegisterNotification();
-            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ECAbExecute}").FirstOrDefault().WriteValue(1);
             for (int j = 0; j < TwinCathelper.DeviceCount; j++)
             {
                 MyMotors.Add(new MotorStatusControl() { MotorID = j, FillColor = Brushes.Transparent, ErrorDeatil = $"Motor #{mcount} \n No anomaly found" });
@@ -210,18 +197,12 @@ namespace FlexMold.MVVM.ViewModel.Home
             }
             GenerateErrorD1Command = new RelayCommand(o => { GenerateD1Error(); });
             DebugDetailClickCommand = new RelayCommand(o => { DisplayError(o as MotorStatusControl); });
-            
         }
         void RegisterNotification()
         {
             log.Log(LogLevel.Info, $"Registring Device Status Notification...");
             NotificatioHandles = new List<int>();
             TwinCathelper.Client.AdsNotification += Client_AdsNotificationMS;
-
-            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.ECAdevStates}"));
-            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.ECAnSlaves}"));
-            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.ECAnErrId}"));
-            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.ECAbError}"));
             //_ = RegisterNotification(TwinCATVariableIfo.mPositionVariableName);
             //_ = RegisterNotification(TwinCATVariableIfo.mTemperatureVariableName);
             NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.mDiag1}"));

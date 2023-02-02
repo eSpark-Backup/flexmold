@@ -124,7 +124,6 @@ namespace FlexMold.MVVM.ViewModel.Setting
                     DeviceStatusIndex = $"Updating {i + 1}/{TwinCathelper.sAmsPort.Length}";
                     MyFoe.Foe_nSlaveAddr = TwinCathelper.sAmsPort[i];
                     TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(0);
-                    TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sNetId}").FirstOrDefault().WriteValue(MyFoe.Foe_sNetId);
                     TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nSlaveAddr}").FirstOrDefault().WriteValue(MyFoe.Foe_nSlaveAddr);
                     TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bBusy}").FirstOrDefault().WriteValue(0);
                     TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bError}").FirstOrDefault().WriteValue(0);
@@ -309,8 +308,6 @@ namespace FlexMold.MVVM.ViewModel.Setting
                 switch (aa)
                 {
                     case TCSymbols.foe_dwPass:
-                        break;
-                    case TCSymbols.foe_sNetId:
                         break;
                     case TCSymbols.foe_nSlaveAddr:
                         break;

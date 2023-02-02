@@ -66,6 +66,12 @@ namespace FlexMold.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        private bool _ICEnable;
+        public bool ICEnable
+        {
+            get { return _ICEnable; }
+            set { _ICEnable = value; OnPropertyChanged(); }
+        }
         public bool ComRegistration { get; set; }
         public IWorker _worker { get; set; }
         public ConfigurationFactory _factory { get; set; }
@@ -76,10 +82,10 @@ namespace FlexMold.MVVM.ViewModel
         public RelayCommand RunButtonCommand { get; set; }
         public ObservableCollection<Machine> MyMachines { get; set; }
         public List<VSInfo> AvailableVS { get; private set; }
-
         public event EventHandler OnRequestClose;
         public SplashScreenViewModel()
         {
+            ICEnable = true;
             log.Log(LogLevel.Info, $"Flexmold application loading");
             RunButtonEnable = false;
             CloseButtonEnable = true;
@@ -226,6 +232,11 @@ namespace FlexMold.MVVM.ViewModel
                 if (_worker != null)
                     _worker.CancelAndWait(TimeSpan.FromSeconds(1.0));
                 RunButtonEnable = true;
+
+            }
+            else if (ProgressPercentage == 0)
+            {
+                ICEnable = true;
             }
         }
         void _worker_ProgressStatusChanged(object sender, ProgressStatusChangedArgs e)
@@ -234,6 +245,7 @@ namespace FlexMold.MVVM.ViewModel
         }
         public void RunScript()
         {
+            ICEnable = false;
             RunButtonEnable = false;
             if (this.SelectedScript != null)
             {

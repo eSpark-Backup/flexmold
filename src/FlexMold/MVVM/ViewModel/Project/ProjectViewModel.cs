@@ -157,7 +157,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                             {
                                 for (int i = 0; i < csvr.FieldCount; i++)
                                 {
-                                    data.Add(Math.Ceiling(csvr.GetDouble(i)));
+                                    data.Add(csvr.GetDouble(i)/2);
                                 }
                             }
                         }

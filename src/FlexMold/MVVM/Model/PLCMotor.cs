@@ -48,7 +48,6 @@ namespace FlexMold.MVVM.Model
     public enum TCSymbols
     {
         foe_dwPass,
-        foe_sNetId,
         foe_nSlaveAddr,
         foe_eMode,
         foe_sPathName,
@@ -87,7 +86,31 @@ namespace FlexMold.MVVM.Model
         EC_DEVICE_STATE_BOOTSTRAP = 0x03,
         EC_DEVICE_STATE_SAFEOP = 0x04,
         EC_DEVICE_STATE_OP = 0x08,
-        EC_DEVICE_STATE_ERROR = 0x10
+        EC_DEVICE_STATE_ERROR = 0x10,
+        EC_DEVICE_STATE_INVALID_VPRS = 0x20,
+        EC_DEVICE_STATE_INITCMD_ERROR = 0x40,
+        EC_DEVICE_STATE_DISABLED = 0x80
+    }
+    public enum ElinkState
+    {
+        EC_LINK_STATE_OK = 0x00,
+        EC_LINK_STATE_NOT_PRESENT = 0x01,
+        EC_LINK_STATE_LINK_WITHOUT_COMM = 0x02,
+        EC_LINK_STATE_MISSING_LINK = 0x04,
+        EC_LINK_STATE_ADDITIONAL_LINK = 0x08,
+        EC_LINK_STATE_PORT_A = 0x10,
+        EC_LINK_STATE_PORT_B = 0x20,
+        EC_LINK_STATE_PORT_C = 0x40,
+        EC_LINK_STATE_PORT_D = 0x80
+    }
+    class ST_EcSlaveState : ObservableObject
+    {
+        private string slaveName;
+        private EreqState deviceState1;
+        private ElinkState linkState1;
+        public string SlaveName { get => slaveName; set { slaveName = value; OnPropertyChanged(); } }
+        public EreqState deviceState { get => deviceState1; set {deviceState1 = value; OnPropertyChanged(); } }
+        public ElinkState linkState { get => linkState1; set { linkState1 = value; OnPropertyChanged(); } }
     }
     public class Foe : ObservableObject
     {
@@ -170,8 +193,8 @@ namespace FlexMold.MVVM.Model
     }
     public class MotorStatusControl : ObservableObject
     {
-        private string _StateMachine;
-        public string StateMachine
+        private EreqState _StateMachine;
+        public EreqState StateMachine
         {
             get { return _StateMachine; }
             set

@@ -19,10 +19,6 @@
             <RowDefinition Height="Auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
-        <UniformGrid>
-            <Label Content="Generate Debug1 Error : " />
-            <Button Command="{Binding GenerateErrorD1Command}" Content="Generate" />
-        </UniformGrid>
         <ItemsControl
             x:Name="MyItems"
             Grid.Row="1"
@@ -48,7 +44,8 @@
                             BorderBrush="{Binding FillColor}"
                             Command="{Binding ElementName=MyItems, Path=DataContext.DebugDetailClickCommand}"
                             CommandParameter="{Binding}"
-                            Content="{Binding MotorId}"
+                            Content="{Binding MotorID}"
+                            Foreground="Black"
                             Style="{StaticResource MahApps.Styles.Button.Circle}"
                             ToolTip="{Binding ErrorDeatil}" />
                     </Grid>

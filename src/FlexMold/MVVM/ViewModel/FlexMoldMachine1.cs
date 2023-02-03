@@ -215,7 +215,7 @@ namespace FlexMold.MVVM.ViewModel
                 dte.Solution.SolutionBuild.Build(true);
                 waitForBuildAndCheckErrors(worker, out errors);
                 worker.Progress = 60;
-                if (errors.Count != 0)
+                if (errors.Count == 0)
                 {
                     /* =================================================================================================
                      * Generating Boot Project

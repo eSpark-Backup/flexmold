@@ -1,25 +1,18 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.Utility;
-using MahApps.Metro.Controls;
-using Microsoft.VisualStudio.Shell.Interop;
 using NLog;
-using NLog.Fluent;
-using SMBLibrary;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Media;
 using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
-using TwinCAT.TypeSystem;
 
 namespace FlexMold.MVVM.ViewModel.Setting
 {
@@ -132,11 +125,11 @@ namespace FlexMold.MVVM.ViewModel.Setting
                     TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nPercent}").FirstOrDefault().WriteValue(0);
                     Thread.Sleep(1000);
                     DeviceStatusIndex = $"Initializing {i + 1}/{TwinCathelper.sAmsPort.Length}";
-                    if (ChengeBoxState(EreqState.EC_DEVICE_STATE_INIT))
+                    if (ChengeBoxState(ESlaveStateMachine.EC_DEVICE_STATE_INIT))
                     {
                         Init_Status = true;
                         TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_bExecute}").FirstOrDefault().WriteValue(0);
-                        DeviceStatusIndex = $"Setted into : {EreqState.EC_DEVICE_STATE_INIT} {i + 1}/{TwinCathelper.sAmsPort.Length}";
+                        DeviceStatusIndex = $"Setted into : {ESlaveStateMachine.EC_DEVICE_STATE_INIT} {i + 1}/{TwinCathelper.sAmsPort.Length}";
                         log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} State Updated");
                         TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(1);
                         DeviceStatusIndex = $"Downloading {i + 1}/{TwinCathelper.sAmsPort.Length}";
@@ -204,7 +197,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
             }
         }
         int retry = 0;
-        bool GetSlaveState(EreqState _EreqState)
+        bool GetSlaveState(ESlaveStateMachine _EreqState)
         {
             log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} Requesting Slave Box State....");
             TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecg_bExecute}").FirstOrDefault().WriteValue(0);
@@ -216,7 +209,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
             {
                 log.Log(LogLevel.Warn, $"{(retry != 0 ? ("Retrying : " + retry) : "")} Requesting Slave State Please Wait ....");
                 retry++;
-                if ((EreqState)state[0] != _EreqState)
+                if ((ESlaveStateMachine)state[0] != _EreqState)
                 {
                     Thread.Sleep(2000);
                     return GetSlaveState(_EreqState);
@@ -229,12 +222,12 @@ namespace FlexMold.MVVM.ViewModel.Setting
             }
             else
             {
-                if (_EreqState == EreqState.EC_DEVICE_STATE_OP)
+                if (_EreqState == ESlaveStateMachine.EC_DEVICE_STATE_OP)
                 {
-                    if (ChengeBoxState(EreqState.EC_DEVICE_STATE_OP))
+                    if (ChengeBoxState(ESlaveStateMachine.EC_DEVICE_STATE_OP))
                     {
                         log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr}" +
-                            $" Configuraing Device State To {EreqState.EC_DEVICE_STATE_OP}");
+                            $" Configuraing Device State To {ESlaveStateMachine.EC_DEVICE_STATE_OP}");
                         return true;
                     }
                     else
@@ -246,7 +239,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
                 return false;
             }
         }
-        bool ChengeBoxState(EreqState _EreqState)
+        bool ChengeBoxState(ESlaveStateMachine _EreqState)
         {
             log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} Changing Box State : {_EreqState}");
             TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_bExecute}").FirstOrDefault().WriteValue(0);
@@ -268,7 +261,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
                 {
                     Foe_Status = true;
                     retry = 0;
-                    return GetSlaveState(EreqState.EC_DEVICE_STATE_OP);
+                    return GetSlaveState(ESlaveStateMachine.EC_DEVICE_STATE_OP);
                 }
             }
             else
@@ -277,7 +270,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
                 return false;
             }
         }
-        bool EcsWait(EreqState _EreqState)
+        bool EcsWait(ESlaveStateMachine _EreqState)
         {
             Thread.Sleep(2000);
             if (!MyFoe.Ecs_bError)

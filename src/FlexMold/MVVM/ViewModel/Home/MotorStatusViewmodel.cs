@@ -1,27 +1,15 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.Utility;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Shapes;
-using TwinCAT.Ads.TypeSystem;
 using TwinCAT.Ads;
-using NLog;
-using System.Reflection.Metadata.Ecma335;
-using TwinCAT.TypeSystem;
-using StructPacker;
-using System.Runtime.InteropServices;
-using TwinCAT;
-using NLog.LayoutRenderers.Wrappers;
-using System.Timers;
+using TwinCAT.Ads.TypeSystem;
 
 namespace FlexMold.MVVM.ViewModel.Home
 {
@@ -129,7 +117,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                             MyMotors[v[i]].FillColor = Brushes.Red;
                             MyMotors[v[i]].ErrorDeatil = _tmgs;
                             log.Log(LogLevel.Error, _tmgs);
-                            //ToastNotificationUtil.ShowError(_tmgs);
+                            ToastNotificationUtil.ShowError(_tmgs);
                             break;
                         default:
                             break;
@@ -139,7 +127,7 @@ namespace FlexMold.MVVM.ViewModel.Home
         }
         public UInt32[] MPostion = new UInt32[TwinCathelper.DeviceCount];
         public UInt32[] MTemperature = new UInt32[TwinCathelper.DeviceCount];
-        public UInt32[] MDiag1 = new UInt32[TwinCathelper.DeviceCount];
+        UInt32[] MDiag1;
         public UInt32[] MDiag2 = new UInt32[TwinCathelper.DeviceCount];
         public UInt32[] MDiag3 = new UInt32[TwinCathelper.DeviceCount];
         List<int> NotificatioHandles;
@@ -164,6 +152,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                         //    log.Log(LogLevel.Warn, $"Temperature Updated : {String.Join(",", MTemperature)}");
                         //    break;
                         case TCSymbols.mDiag1:
+                            MDiag1 = new UInt32[TwinCathelper.DeviceCount];
                             Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag1, 0, e.Data.Length);
                             log.Log(LogLevel.Warn, $"Diag1 Updated : {String.Join(",", MDiag1)}");
                             Diag1Value = MDiag1;
@@ -192,7 +181,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             RegisterNotification();
             for (int j = 0; j < TwinCathelper.DeviceCount; j++)
             {
-                MyMotors.Add(new MotorStatusControl() { MotorID = j, FillColor = Brushes.Transparent, ErrorDeatil = $"Motor #{mcount} \n No anomaly found" });
+                MyMotors.Add(new MotorStatusControl() { MotorID = j+1, FillColor = Brushes.Transparent, ErrorDeatil = $"Motor #{mcount} \n No anomaly found" });
                 mcount++;
             }
             GenerateErrorD1Command = new RelayCommand(o => { GenerateD1Error(); });

@@ -13,6 +13,40 @@
         <home:MachineDetailViewModel />
     </UserControl.DataContext>
     <Grid>
-
+        <Grid.RowDefinitions>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <ItemsControl
+            x:Name="MyItems"
+            Grid.Row="0"
+            ItemsSource="{Binding MySlaves}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemContainerStyle>
+                <Style>
+                    <Setter Property="Grid.Row" Value="{Binding Row}" />
+                    <Setter Property="Grid.Column" Value="{Binding Column}" />
+                </Style>
+            </ItemsControl.ItemContainerStyle>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Button
+                            MaxWidth="40"
+                            MaxHeight="40"
+                            Background="{Binding FillColor}"
+                            BorderBrush="{Binding FillColor}"
+                            Foreground="Black"
+                            Content="{Binding SlaveID}"
+                            Style="{StaticResource MahApps.Styles.Button.Circle}"
+                            ToolTip="{Binding ErrorDeatil}">
+                        </Button>
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </Grid>
 </UserControl>

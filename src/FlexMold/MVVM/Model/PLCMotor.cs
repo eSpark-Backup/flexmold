@@ -1,15 +1,7 @@
-﻿using ControlzEx.Native;
-using FlexMold.Core;
-using FlexMold.Utility;
-using SMBLibrary.RPC;
+﻿using FlexMold.Core;
 using StructPacker;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace FlexMold.MVVM.Model
@@ -79,7 +71,7 @@ namespace FlexMold.MVVM.Model
         mDiag2,
         mDiag3,
     }
-    public enum EreqState
+    public enum ESlaveStateMachine
     {
         EC_DEVICE_STATE_INIT = 0x01,
         EC_DEVICE_STATE_PREOP = 0x02,
@@ -105,12 +97,59 @@ namespace FlexMold.MVVM.Model
     }
     class ST_EcSlaveState : ObservableObject
     {
+        private int slaveID;
+
+        public int SlaveID
+        {
+            get { return slaveID; }
+            set { slaveID = value; }
+        }
+
         private string slaveName;
-        private EreqState deviceState1;
+        private ESlaveStateMachine deviceState1;
         private ElinkState linkState1;
         public string SlaveName { get => slaveName; set { slaveName = value; OnPropertyChanged(); } }
-        public EreqState deviceState { get => deviceState1; set {deviceState1 = value; OnPropertyChanged(); } }
-        public ElinkState linkState { get => linkState1; set { linkState1 = value; OnPropertyChanged(); } }
+        public ESlaveStateMachine deviceState
+        {
+            get => deviceState1;
+            set
+            {
+                deviceState1 = value;
+                OnPropertyChanged();
+            }
+        }
+        public ElinkState linkState
+        {
+            get => linkState1;
+
+            set
+            {
+                linkState1 = value;
+                OnPropertyChanged();
+            }
+        }
+        private string _ErrorDeatil;
+        public string ErrorDeatil
+        {
+            get { return _ErrorDeatil; }
+            set
+            {
+                _ErrorDeatil = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private SolidColorBrush _FillColor;
+
+        public SolidColorBrush FillColor
+        {
+            get { return _FillColor; }
+            set
+            {
+                _FillColor = value;
+                OnPropertyChanged();
+            }
+        }
     }
     public class Foe : ObservableObject
     {
@@ -193,20 +232,12 @@ namespace FlexMold.MVVM.Model
     }
     public class MotorStatusControl : ObservableObject
     {
-        private EreqState _StateMachine;
-        public EreqState StateMachine
-        {
-            get { return _StateMachine; }
-            set
-            {
-                _StateMachine = value; OnPropertyChanged();
-            }
-        }
-        public int MotorID { get; set; }
+        public int MotorID { get => motorID; set { motorID = value; OnPropertyChanged(); } }
 
-        private Brush _FillColor;
+        private int motorID;
+        private SolidColorBrush _FillColor;
 
-        public Brush FillColor
+        public SolidColorBrush FillColor
         {
             get { return _FillColor; }
             set
@@ -216,6 +247,7 @@ namespace FlexMold.MVVM.Model
             }
         }
         private string _ErrorDeatil;
+
         public string ErrorDeatil
         {
             get { return _ErrorDeatil; }

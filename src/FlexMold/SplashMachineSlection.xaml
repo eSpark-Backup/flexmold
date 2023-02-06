@@ -63,6 +63,7 @@
             x:Name="MyItems"
             Grid.Row="1"
             Grid.Column="1"
+            IsEnabled="{Binding ICEnable}"
             ItemsSource="{Binding MyMachines}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>

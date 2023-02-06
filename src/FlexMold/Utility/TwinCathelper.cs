@@ -20,6 +20,8 @@ namespace FlexMold.Utility
     static class TwinCathelper
     {
         static private Logger log;
+        static public string SAmsNetId { get; private set; }
+        public static ushort[] sAmsPort { get; private set; }
         static public int port { get; private set; }
         static public AdsSession _session { get; private set; }
         static public AdsSession _sessionSystemService { get; set; }
@@ -49,6 +51,7 @@ namespace FlexMold.Utility
                 {
                     if (GetPLCVariables())
                     {
+                        InitializeVarables();
                         return true;
                     }
                 }
@@ -104,6 +107,13 @@ namespace FlexMold.Utility
                 Array.Copy(buffer, structSize * i, mtarray, 0, structSize);
                 PLCMotors[i].Unpack(mtarray);
             }
+        }
+        
+        static void InitializeVarables() 
+        {
+            SAmsNetId = (string)TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sAmsNetId}").FirstOrDefault().ReadAnyValue(typeof(string));
+            sAmsPort = (UInt16[])TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sAmsPort}").FirstOrDefault().ReadAnyValue(typeof(UInt16[]));
+
         }
         public static void ReadEthercatDeviceData(uint _motorNumber)
         {

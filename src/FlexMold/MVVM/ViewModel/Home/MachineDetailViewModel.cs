@@ -96,7 +96,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                                     break;
                                 case ESlaveStateMachine.EC_DEVICE_STATE_SAFEOP:
                                     MySlaves[index].FillColor = Brushes.Yellow;
-                                    _tmgs = $"Slave {MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
+                                    _tmgs = $"Motor {MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
                                     log.Log(LogLevel.Warn, _tmgs);
                                     ToastNotificationUtil.ShowWarning(_tmgs); break;
                                 case ESlaveStateMachine.EC_DEVICE_STATE_OP:
@@ -107,25 +107,25 @@ namespace FlexMold.MVVM.ViewModel.Home
                                     break;
                                 case ESlaveStateMachine.EC_DEVICE_STATE_ERROR:
                                     MySlaves[index].FillColor = Brushes.Red;
-                                    _tmgs = $"Slave {MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
+                                    _tmgs = $"Motor {MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
                                     log.Log(LogLevel.Error, _tmgs);
                                     ToastNotificationUtil.ShowError(_tmgs);
                                     break;
                                 case ESlaveStateMachine.EC_DEVICE_STATE_INVALID_VPRS:
                                     MySlaves[index].FillColor = Brushes.Red;
-                                    _tmgs = $"Slave {MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
+                                    _tmgs = $"Motor {MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
                                     log.Log(LogLevel.Error, _tmgs);
                                     ToastNotificationUtil.ShowError(_tmgs);
                                     break;
                                 case ESlaveStateMachine.EC_DEVICE_STATE_INITCMD_ERROR:
                                     MySlaves[index].FillColor = Brushes.Red;
-                                    _tmgs = $"Slave {MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
+                                    _tmgs = $"Motor {MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
                                     log.Log(LogLevel.Error, _tmgs);
                                     ToastNotificationUtil.ShowError(_tmgs);
                                     break;
                                 case ESlaveStateMachine.EC_DEVICE_STATE_DISABLED:
                                     MySlaves[index].FillColor = Brushes.Red;
-                                    _tmgs = $"Slave {MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
+                                    _tmgs = $"Motor {MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
                                     log.Log(LogLevel.Error, _tmgs);
                                     ToastNotificationUtil.ShowError(_tmgs);
                                     break;
@@ -140,23 +140,23 @@ namespace FlexMold.MVVM.ViewModel.Home
                             {
                                 case ElinkState.EC_LINK_STATE_OK:
                                     MySlaves[index].FillColor = Brushes.OrangeRed;
-                                    var _tmgs = $"Slave {MySlaves[index].SlaveName} : Link State {MySlaves[index].linkState}";
+                                    var _tmgs = $"Motor {MySlaves[index].SlaveName} : Link State {MySlaves[index].linkState}";
                                     log.Log(LogLevel.Info, _tmgs);
                                     ToastNotificationUtil.ShowSuccess(_tmgs);
                                     break;
                                 case ElinkState.EC_LINK_STATE_NOT_PRESENT:
                                     MySlaves[index].FillColor = Brushes.OrangeRed;
-                                    _tmgs = $"Slave {MySlaves[index].SlaveName} : Link State {MySlaves[index].linkState}";
+                                    _tmgs = $"Motor {MySlaves[index].SlaveName} : Link State {MySlaves[index].linkState}";
                                     log.Log(LogLevel.Info, _tmgs);
-                                    ToastNotificationUtil.ShowSuccess(_tmgs);
+                                    ToastNotificationUtil.ShowError(_tmgs);
                                     break;
                                 case ElinkState.EC_LINK_STATE_LINK_WITHOUT_COMM:
                                     break;
                                 case ElinkState.EC_LINK_STATE_MISSING_LINK:
                                     MySlaves[index].FillColor = Brushes.OrangeRed;
-                                    _tmgs = $"Slave {MySlaves[index].SlaveName} : Link State {MySlaves[index].linkState}";
+                                    _tmgs = $"Motor {MySlaves[index].SlaveName} : Link State {MySlaves[index].linkState}";
                                     log.Log(LogLevel.Info, _tmgs);
-                                    ToastNotificationUtil.ShowSuccess(_tmgs);
+                                    ToastNotificationUtil.ShowError(_tmgs);
                                     break;
                                 case ElinkState.EC_LINK_STATE_ADDITIONAL_LINK:
                                     break;

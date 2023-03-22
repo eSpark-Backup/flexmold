@@ -19,7 +19,7 @@ namespace FlexMold.Utility
 {
     static class TwinCathelper
     {
-        static private Logger log;
+        static private Logger log = LogManager.GetLogger("TwinCat");
         static public string SAmsNetId { get; private set; }
         public static ushort[] sAmsPort { get; private set; }
         static public int port { get; private set; }
@@ -36,10 +36,10 @@ namespace FlexMold.Utility
         static public ObservableCollection<Symbol> MySymbols { get; private set; }
         static public Int16 DeviceCount { get; private set; }
         public static EthercatDevice[] PLCMotors { get; private set; }
-
+        public static AdsState CurrentAdsState { get; set; }
+        public static ConnectionState CurrentConnectionState { get; set; }
         static public bool TwinCatConnect851()
         {
-            log = LogManager.GetLogger("TwinCat");
             port = 851;
             log.Log(LogLevel.Info, $"Connecting to Local Host, Port : {port}");
             _session = new AdsSession(TwinCAT.Ads.AmsNetId.Local, port);
@@ -141,7 +141,8 @@ namespace FlexMold.Utility
         }
         static public void StartpPLC()
         {
-            ClientSystemService.WriteControl(new StateInfo(AdsState.Run, ClientSystemService.ReadState().DeviceState));
+            log.Log(LogLevel.Info, $"Resuming PLC ....");
+            Client.WriteControl(new StateInfo(AdsState.Run, ClientSystemService.ReadState().DeviceState));
         }
         static public void StoppPLC()
         {

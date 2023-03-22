@@ -33,7 +33,6 @@ namespace FlexMold.MVVM.Model
     public enum EmDiag1
     {
         Healthy,
-        Recovered,
         Stepper_Driver_Failed,
     }
 

@@ -1,7 +1,11 @@
 ﻿using FlexMold.MVVM.Model;
+using FlexMold.MVVM.View;
+using FlexMold.MVVM.View.Setting;
 using FlexMold.MVVM.ViewModel;
+using FlexMold.MVVM.ViewModel.Setting;
 using FlexMold.Utility;
 using MahApps.Metro.Controls;
+using MaterialDesignThemes.Wpf;
 using NLog;
 using System;
 using System.ComponentModel;
@@ -111,23 +115,19 @@ namespace FlexMold
             if (TwinCathelper.Client != null)
             {
                 bt_TCC.Content = TwinCathelper.Client.State.ToString();
-
+                TwinCathelper.CurrentConnectionState = TwinCathelper.Client.State;
                 switch (TwinCathelper.Client.State)
                 {
-                    case ConnectionState.None:
-                        bt_TCC.Background = new SolidColorBrush();
-                        break;
-                    case ConnectionState.Disconnected:
-                        bt_TCC.Background = new SolidColorBrush(Colors.LightGray);
-                        bt_TCC.Foreground = new SolidColorBrush(Colors.Black);
-                        break;
                     case ConnectionState.Connected:
                         bt_TCC.Background = new SolidColorBrush(Colors.LightGreen);
                         bt_TCC.Foreground = new SolidColorBrush(Colors.Black);
                         break;
+                    case ConnectionState.None:
+                    case ConnectionState.Disconnected:
                     case ConnectionState.Lost:
-                        bt_TCC.Background = new SolidColorBrush(Colors.Yellow);
-                        bt_TCC.Foreground = new SolidColorBrush(Colors.Black);
+                        bt_TCC.Background = new SolidColorBrush(Colors.Red);
+                        bt_TCC.Foreground = new SolidColorBrush(Colors.White);
+                        ConnectionLost("Connection State Lost");
                         break;
                     default:
                         break;
@@ -161,6 +161,7 @@ namespace FlexMold
                     case AdsState.Exception:
                         bt_TCS.Background = new SolidColorBrush(Colors.DarkRed);
                         bt_TCS.Foreground = new SolidColorBrush(Colors.White);
+                        ConnectionLost("Ads State Lost");
                         break;
                 }
             }
@@ -170,7 +171,14 @@ namespace FlexMold
                 bt_TCC.Content = AdsState.Invalid.ToString();
             }
         }
-
+        async void ConnectionLost(string _msg) 
+        {
+            var view = new ConnectionLostDialog()
+            {
+                DataContext = new ConnectionLostViewModel(_msg)
+            };
+            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
+        }
         private void OnLogMessageItemAdded(object o, EventArgs Args)
         {
             // Do what you want :)
@@ -178,7 +186,10 @@ namespace FlexMold
             if (logInfo.Level >= LogLevel.Error)
                 SystemSounds.Beep.Play();
         }
-
+        private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
+        {
+            Console.WriteLine();
+        }
         private void MetroWindow_Closing(object sender, CancelEventArgs e)
         {
             TwinCathelper.Client.Close();

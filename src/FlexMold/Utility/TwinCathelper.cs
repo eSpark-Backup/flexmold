@@ -13,12 +13,15 @@ using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
 using TwinCAT.TypeSystem;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FlexMold.Utility
 {
     static class TwinCathelper
     {
-        static private Logger log;
+        static private Logger log = LogManager.GetLogger("TwinCat");
+        static public string SAmsNetId { get; private set; }
+        public static ushort[] sAmsPort { get; private set; }
         static public int port { get; private set; }
         static public AdsSession _session { get; private set; }
         static public AdsSession _sessionSystemService { get; set; }
@@ -33,10 +36,10 @@ namespace FlexMold.Utility
         static public ObservableCollection<Symbol> MySymbols { get; private set; }
         static public Int16 DeviceCount { get; private set; }
         public static EthercatDevice[] PLCMotors { get; private set; }
-
-        static public void TwinCatConnect851()
+        public static AdsState CurrentAdsState { get; set; }
+        public static ConnectionState CurrentConnectionState { get; set; }
+        static public bool TwinCatConnect851()
         {
-            log = LogManager.GetLogger("TwinCat");
             port = 851;
             log.Log(LogLevel.Info, $"Connecting to Local Host, Port : {port}");
             _session = new AdsSession(TwinCAT.Ads.AmsNetId.Local, port);
@@ -44,63 +47,55 @@ namespace FlexMold.Utility
             if (Client.IsConnected)
             {
                 log.Log(LogLevel.Info, $"Connected to : {Client.Address}, Port : {port}");
+                if (Client.IsActive)
+                {
+                    if (GetPLCVariables())
+                    {
+                        InitializeVarables();
+                        return true;
+                    }
+                }
             }
-            else
-            {
-                log.Log(LogLevel.Info, $"Connection Status : {Client.ConnectionState}");
-            }
-
-
-            GetPLCVariables();
+            return false;
         }
         static public Symbol SymbolEthercatDevice { get; private set; }
         static public int structSize { get; private set; }
         static public byte[] buffer { get; private set; }
-        static public void InitializeMotors()
+        static public bool InitializeMotors()
         {
-            TwinCathelper.DeviceCount = (short)TwinCathelper.MySymbols.Where(a =>
-                            a.InstancePath == TCVarName.DeviceCount).FirstOrDefault().ReadAnyValue(typeof(short));
-            PLCMotors = new EthercatDevice[DeviceCount];
-            SymbolEthercatDevice = TwinCathelper.MySymbols.Where(a => a.InstancePath == TCVarName.MainDevice).FirstOrDefault();
-            structSize = (SymbolEthercatDevice.Size) / TwinCathelper.DeviceCount;
-            buffer = new byte[structSize * TwinCathelper.DeviceCount];
-            ReadAllEthercatDeviceData();
-            _sessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
-            ClientSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
-        }
-        static public uint RegisterNotification(string _deviceStatusVariableName)
-        {
-            var deviceStatusSymbol = TwinCathelper.MySymbols.Where(a => a.InstancePath == _deviceStatusVariableName).FirstOrDefault();
-            return TwinCathelper.Client.AddDeviceNotification(deviceStatusSymbol.IndexGroup,
-               deviceStatusSymbol.IndexOffset, (int)(deviceStatusSymbol.Size), NotificationSettings.Default, deviceStatusSymbol);
-        }
-        public static bool WaitForState(AdsState state, int timeOutInMilliSeconds)
-        {
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            while (stopwatch.ElapsedMilliseconds <= timeOutInMilliSeconds)
+            try
             {
-                try
+                TwinCathelper.DeviceCount = (short)TwinCathelper.MySymbols.Where(a =>
+                           a.InstancePath == TCVarName.DeviceCount).FirstOrDefault().ReadAnyValue(typeof(short));
+                PLCMotors = new EthercatDevice[DeviceCount];
+                SymbolEthercatDevice = TwinCathelper.MySymbols.Where(a => a.InstancePath == TCVarName.MainDevice).FirstOrDefault();
+                structSize = (SymbolEthercatDevice.Size) / TwinCathelper.DeviceCount;
+                buffer = new byte[structSize * TwinCathelper.DeviceCount];
+                ReadAllEthercatDeviceData();
+                if (_sessionSystemService == null)
                 {
-                    if (TwinCathelper.ClientSystemService.ReadState().AdsState == state)
-                    {
-                        return true;
-                    }
+                    _sessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
+                    ClientSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
                 }
-                catch (AdsErrorException ex)
-                {
-                    log.Log(LogLevel.Error, ex.Message);
-                }
-                finally
-                {
-                    log.Log(LogLevel.Info, "System Sleeping for 5000ms");
-                    System.Threading.Thread.Sleep(5000);
-                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                log.Log(LogLevel.Error, ex.Message);
+                return false;
             }
 
-            stopwatch.Stop();
-            return false;
+        }
+        static public int RegisterNotification(string _deviceStatusVariableName)
+        {
+            if (TwinCathelper.Client.State==ConnectionState.Connected)
+            {
+                var deviceStatusSymbol = TwinCathelper.MySymbols.Where(a => a.InstancePath == _deviceStatusVariableName).FirstOrDefault();
+                return (int)TwinCathelper.Client.AddDeviceNotification(deviceStatusSymbol.IndexGroup,
+                   deviceStatusSymbol.IndexOffset, (int)(deviceStatusSymbol.Size), NotificationSettings.Default, deviceStatusSymbol);
+            }
+            log.Log(LogLevel.Error, $"TwinCAT Connection is {TwinCathelper.Client.State}");
+            return -1;
         }
         static void ReadAllEthercatDeviceData()
         {
@@ -113,6 +108,13 @@ namespace FlexMold.Utility
                 PLCMotors[i].Unpack(mtarray);
             }
         }
+        
+        static void InitializeVarables() 
+        {
+            SAmsNetId = (string)TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sAmsNetId}").FirstOrDefault().ReadAnyValue(typeof(string));
+            sAmsPort = (UInt16[])TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sAmsPort}").FirstOrDefault().ReadAnyValue(typeof(UInt16[]));
+
+        }
         public static void ReadEthercatDeviceData(uint _motorNumber)
         {
             var mtarray = new byte[structSize];
@@ -120,8 +122,8 @@ namespace FlexMold.Utility
                 SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
             PLCMotors[_motorNumber].Unpack(mtarray);
         }
- 
-        public static void WriteAllEthercatDeviceData()
+
+        public static void WriteEthercatDeviceData()
         {
             for (int i = 0; i < PLCMotors.Length; i++)
             {
@@ -139,7 +141,8 @@ namespace FlexMold.Utility
         }
         static public void StartpPLC()
         {
-            ClientSystemService.WriteControl(new StateInfo(AdsState.Run, ClientSystemService.ReadState().DeviceState));
+            log.Log(LogLevel.Info, $"Resuming PLC ....");
+            Client.WriteControl(new StateInfo(AdsState.Run, ClientSystemService.ReadState().DeviceState));
         }
         static public void StoppPLC()
         {
@@ -162,7 +165,7 @@ namespace FlexMold.Utility
             }
             return info;
         }
-        static void GetPLCVariables()
+        static bool GetPLCVariables()
         {
             log.Log(LogLevel.Info, $"Fetching PLC Variables");
             MySymbols = new ObservableCollection<Symbol>();
@@ -182,14 +185,10 @@ namespace FlexMold.Utility
                         log.Log(LogLevel.Info, $"Symbol : {itemsymbols.InstancePath}");
                     }
                 }
+                return true;
             }
-            else
-            {
-                var l_msg = $"{AdsErrorCode.DeviceSymbolNotFound.ToString()}" +
-                    $"TwinCAT Script not running or TwinCAT is Config mode \n " +
-                    $"Please Start/Restart TwinCAT serivce or Build TwinCAT Solution from FCA \n";
-                throw new Exception(l_msg);
-            }
+            log.Log(LogLevel.Error, "No Symbol Found...");
+            return false;
         }
     }
 }

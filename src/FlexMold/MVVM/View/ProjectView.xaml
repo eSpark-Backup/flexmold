@@ -181,10 +181,10 @@
                             Grid.Column="0"
                             Command="{Binding ReadCSVFileCommand}">
                             <StackPanel Orientation="Horizontal">
-                                <iconPacks:PackIconMaterial Margin="6" Kind="SmartCardReader" />
+                                <iconPacks:PackIconMaterial Margin="6" Kind="Send" />
                                 <TextBlock
                                     VerticalAlignment="Center"
-                                    Text="Read CSV"
+                                    Text="Write CSV"
                                     TextWrapping="Wrap" />
                             </StackPanel>
                         </Button>

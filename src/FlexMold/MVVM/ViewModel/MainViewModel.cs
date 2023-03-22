@@ -27,7 +27,6 @@ namespace FlexMold.MVVM.ViewModel
 {
     public class MainViewModel : ObservableObject
     {
-        public event EventHandler OnRequestClose;
         private readonly Notifier _notifier;
         public MainViewModel()
         {

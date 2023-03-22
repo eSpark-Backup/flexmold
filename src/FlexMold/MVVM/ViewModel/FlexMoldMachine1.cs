@@ -215,19 +215,20 @@ namespace FlexMold.MVVM.ViewModel
                 dte.Solution.SolutionBuild.Build(true);
                 waitForBuildAndCheckErrors(worker, out errors);
                 worker.Progress = 60;
+                if (errors.Count == 0)
+                {
+                    /* =================================================================================================
+                     * Generating Boot Project
+                     * ================================================================================================= */
+                    worker.ProgressStatus = "Generating boot project ...";
+                    iecProjectRoot.GenerateBootProject(true);
+                    worker.Progress = 65;
 
-                /* =================================================================================================
-                 * Generating Boot Project
-                 * ================================================================================================= */
-                worker.ProgressStatus = "Generating boot project ...";
-                iecProjectRoot.GenerateBootProject(true);
-                worker.Progress = 65;
 
-
-                /* =================================================================================================
-                 * Prepare XML for PLC Login
-                 * ================================================================================================= */
-                string xmlLogin = @"<TreeItem>
+                    /* =================================================================================================
+                     * Prepare XML for PLC Login
+                     * ================================================================================================= */
+                    string xmlLogin = @"<TreeItem>
                                     <IECProjectDef>
                                         <OnlineSettings>
                                                 <Commands>
@@ -242,10 +243,10 @@ namespace FlexMold.MVVM.ViewModel
                                     </IECProjectDef>
                                 </TreeItem>";
 
-                /* =================================================================================================
-                 * Prepare XML for PLC Start
-                 * ================================================================================================= */
-                string xmlStart = @"<TreeItem>
+                    /* =================================================================================================
+                     * Prepare XML for PLC Start
+                     * ================================================================================================= */
+                    string xmlStart = @"<TreeItem>
                                     <IECProjectDef>
                                         <OnlineSettings>
                                                 <Commands>
@@ -260,10 +261,10 @@ namespace FlexMold.MVVM.ViewModel
                                     </IECProjectDef>
                                 </TreeItem>";
 
-                /* =================================================================================================
-                 * Prepare XML for PLC Stop
-                 * ================================================================================================= */
-                string xmlStop = @"<TreeItem>
+                    /* =================================================================================================
+                     * Prepare XML for PLC Stop
+                     * ================================================================================================= */
+                    string xmlStop = @"<TreeItem>
                                     <IECProjectDef>
                                         <OnlineSettings>
                                                 <Commands>
@@ -278,10 +279,10 @@ namespace FlexMold.MVVM.ViewModel
                                     </IECProjectDef>
                                 </TreeItem>";
 
-                /* =================================================================================================
-                 * Prepare XML for PLC Logout
-                 * ================================================================================================= */
-                string xmlLogout = @"<TreeItem>
+                    /* =================================================================================================
+                     * Prepare XML for PLC Logout
+                     * ================================================================================================= */
+                    string xmlLogout = @"<TreeItem>
                                     <IECProjectDef>
                                         <OnlineSettings>
                                                 <Commands>
@@ -296,42 +297,46 @@ namespace FlexMold.MVVM.ViewModel
                                     </IECProjectDef>
                                 </TreeItem>";
 
-                /* =================================================================================================
-                 * Activate configuration and restart TwinCAT
-                 * ================================================================================================= */
-                worker.ProgressStatus = "Activating configuration ...";
-                systemManager.ActivateConfiguration();
-                worker.ProgressStatus = "Restarting TwinCAT ...";
-                systemManager.StartRestartTwinCAT();
-                worker.Progress = 70;
+                    /* =================================================================================================
+                     * Activate configuration and restart TwinCAT
+                     * ================================================================================================= */
+                    worker.ProgressStatus = "Activating configuration ...";
+                    systemManager.ActivateConfiguration();
+                    worker.ProgressStatus = "Restarting TwinCAT ...";
+                    systemManager.StartRestartTwinCAT();
+                    worker.Progress = 70;
 
-                /* =================================================================================================
-                 * Execute PLC Login, Start, Logout, ...
-                 * ================================================================================================= */
-                System.Threading.Thread.Sleep(5000);
-                worker.Progress = 75;
+                    /* =================================================================================================
+                     * Execute PLC Login, Start, Logout, ...
+                     * ================================================================================================= */
+                    System.Threading.Thread.Sleep(5000);
+                    worker.Progress = 75;
 
-                worker.ProgressStatus = "Logging in to PLC runtime ...";
-                System.Threading.Thread.Sleep(5000);
-                plcProjectItem.ConsumeXml(xmlLogin);
-                worker.Progress = 80;
+                    worker.ProgressStatus = "Logging in to PLC runtime ...";
+                    System.Threading.Thread.Sleep(5000);
+                    plcProjectItem.ConsumeXml(xmlLogin);
+                    worker.Progress = 80;
 
-                worker.ProgressStatus = "Stopping PLC runtime ...";
-                System.Threading.Thread.Sleep(5000);
-                plcProjectItem.ConsumeXml(xmlStop);
-                worker.Progress = 85;
+                    worker.ProgressStatus = "Stopping PLC runtime ...";
+                    System.Threading.Thread.Sleep(5000);
+                    plcProjectItem.ConsumeXml(xmlStop);
+                    worker.Progress = 85;
 
-                worker.ProgressStatus = "Starting PLC runtime ...";
-                System.Threading.Thread.Sleep(5000);
-                plcProjectItem.ConsumeXml(xmlStart);
-                worker.Progress = 90;
+                    worker.ProgressStatus = "Starting PLC runtime ...";
+                    System.Threading.Thread.Sleep(5000);
+                    plcProjectItem.ConsumeXml(xmlStart);
+                    worker.Progress = 90;
 
-                worker.ProgressStatus = "Logging out of PLC runtime ...";
-                System.Threading.Thread.Sleep(5000);
-                plcProjectItem.ConsumeXml(xmlLogout);
-
-
-                worker.Progress = 95;
+                    worker.ProgressStatus = "Logging out of PLC runtime ...";
+                    System.Threading.Thread.Sleep(5000);
+                    plcProjectItem.ConsumeXml(xmlLogout);
+                    worker.Progress = 95;
+                }
+                else
+                {
+                    worker.ProgressStatus = "TwinCAT Project build Failed";
+                    worker.Progress = 0;
+                } 
             }
             else
             {
@@ -456,7 +461,7 @@ END_TYPE";
             ITcPlcImplementation pouImpl = programPou as ITcPlcImplementation;
             ITcXmlDocument pouDoc = programPou as ITcXmlDocument;
             string deviceAtrib = "";
-            string foe_sAmsNetId = $"foe_sAmsNetId:  WSTRING(20) :=";
+            string foe_sAmsNetId = $"foe_sAmsNetId: T_AmsNetId :=";
             string foe_sAmsPort = $"foe_sAmsPort: ARRAY[1..deviceCount] OF UINT :=[";
             string mPositionAtrib = "";
             string mTemperatureAtrib = "";
@@ -465,7 +470,7 @@ END_TYPE";
             string Diag3Atrib = "";
             string outStr = "Outputs process data mapping";
             string inpStr = "Inputs process data mapping";
-            foe_sAmsNetId += $"\"{FCAModel.MyBoxes[0].EtherCAT.AmsAddress.AmsNetId}\";";
+            foe_sAmsNetId += $"'{FCAModel.MyBoxes[0].EtherCAT.AmsAddress.AmsNetId}';";
             foreach (var item in FCAModel.MyBoxes)
             {
                 foe_sAmsPort += $"{item.EtherCAT.AmsAddress.AmsPort},";
@@ -498,7 +503,6 @@ END_TYPE";
             string foe_Scrip =
                     "fbDownload : FB_EcFoeLoad ;\n" +
                     "foe_dwPass     : DWORD := 0; // 287454020\n" +
-                    "foe_sNetId     : T_AmsNetId := '' ;\n" +
                     "foe_nSlaveAddr : UINT := 0;\n" +
                     "foe_eMode      : E_EcFoeMode := eFoeMode_Write;\n" +
                     "foe_sPathName : STRING := '';\n" +
@@ -521,6 +525,15 @@ END_TYPE";
                 "ecg_bExecute : BOOL;" +
                 "ecg_bError          : BOOL;" +
                 "ecg_nErrId          : UDINT;";
+
+            var fbGetSlaveState = "" +
+         "fbGetAllSlaveStates : FB_EcGetAllSlaveStates;\n" +
+         "    ECAbExecute            : BOOL;\n" +
+         "    ECAdevStates           : ARRAY[1..deviceCount] OF ST_EcSlaveState;\n" +
+         "    ECAnSlaves             : UINT := 0;\n" +
+         "    ECAbError              : BOOL;\n" +
+         "    ECAnErrId              : UDINT;";
+
             string decl1 =
                 "PROGRAM MAIN \n" +
                 "VAR CONSTANT \n" +
@@ -552,14 +565,14 @@ END_TYPE";
                     "'}\n" +
                     "mDiag3 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n"
                     + foe_sAmsNetId + "\n" + foe_sAmsPort.Trim(',') + "];\n" +
-                foe_Scrip + "\n" + exstate + "\n" + getstate+
-                    "END_VAR";
-
-            string implfoe = "fbDownload( bExecute := foe_bLoad,\r\n\t\tsNetId  := foe_sNetId,\r\n\t\tnSlaveAddr := foe_nSlaveAddr,\r\n\t\tdwPass  := foe_dwPass,\r\n\t\tsPathName  := foe_sPathName, \r\n        bBusy => foe_bBusy,\r\n        bError => foe_bError,\r\n        nErrId => foe_nErrID,\r\n        cbLoad => foe_nBytesWritten,\r\n        nProgress => foe_nPercent );";
-            string implexstate = "fbSetSlaveState(\r\n\tsNetId := foe_sNetId,\r\n\tnSlaveAddr := foe_nSlaveAddr,\r\n\tbExecute := ecs_bExecute,\r\n\treqState := ecs_reqState, \r\n\tnErrId =>ecs_nErrId, \r\n\tbBusy=> ecs_bBusy, \r\n\tbError=>ecs_bError\r\n);";
-            string implgetstate = "fbGetSlaveState(sNetId:= foe_sNetId, nSlaveAddr:= foe_nSlaveAddr, bExecute:=ecg_bExecute);\r\nstate := fbGetSlaveState.state;\r\n ecg_bError := fbGetSlaveState.bError;\r\n ecg_nErrId := fbGetSlaveState.nErrId;";
+                foe_Scrip + "\n" + exstate + "\n" + getstate + "\n" + fbGetSlaveState +
+                    "\nEND_VAR";
+            string fbgetslaveIpl = "fbGetAllSlaveStates(sNetId:= foe_sAmsNetId, pStateBuf := ADR(ECAdevStates), cbBufLen:=SIZEOF(ECAdevStates), bExecute:=ECAbExecute);\r\nECAnSlaves := fbGetAllSlaveStates.nSlaves;\r\nECAbError := fbGetAllSlaveStates.bError;\r\nECAnErrId := fbGetAllSlaveStates.nErrId;";
+            string implfoe = "fbDownload( bExecute := foe_bLoad,\r\n\t\tsNetId  := foe_sAmsNetId,\r\n\t\tnSlaveAddr := foe_nSlaveAddr,\r\n\t\tdwPass  := foe_dwPass,\r\n\t\tsPathName  := foe_sPathName, \r\n        bBusy => foe_bBusy,\r\n        bError => foe_bError,\r\n        nErrId => foe_nErrID,\r\n        cbLoad => foe_nBytesWritten,\r\n        nProgress => foe_nPercent );";
+            string implexstate = "fbSetSlaveState(\r\n\tsNetId := foe_sAmsNetId,\r\n\tnSlaveAddr := foe_nSlaveAddr,\r\n\tbExecute := ecs_bExecute,\r\n\treqState := ecs_reqState, \r\n\tnErrId =>ecs_nErrId, \r\n\tbBusy=> ecs_bBusy, \r\n\tbError=>ecs_bError\r\n);";
+            string implgetstate = "fbGetSlaveState(sNetId:= foe_sAmsNetId, nSlaveAddr:= foe_nSlaveAddr, bExecute:=ecg_bExecute);\r\nstate := fbGetSlaveState.state;\r\n ecg_bError := fbGetSlaveState.bError;\r\n ecg_nErrId := fbGetSlaveState.nErrId;";
             pouDecl.DeclarationText = decl1;
-            pouImpl.ImplementationText = implfoe + "\n" + implexstate +"\n"+ implgetstate;
+            pouImpl.ImplementationText = implfoe + "\n" + implexstate + "\n" + implgetstate + "\n" + fbgetslaveIpl;
 
             return programPou;
         }

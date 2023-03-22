@@ -2,6 +2,7 @@
 using FlexMold.MVVM.Model;
 using FlexMold.MVVM.View.Project;
 using FlexMold.Utility;
+using Microsoft.VisualStudio.Shell.Interop;
 using NLog;
 using Sylvan.Data.Csv;
 using System;
@@ -78,10 +79,36 @@ namespace FlexMold.MVVM.ViewModel.Project
                 _SelectedSerialPort = value;
             }
         }
-
+        void WriteCSVData()
+        {
+            var data = readCsvFile();
+            if (data.Count != 0)
+            {
+                if (TwinCathelper.PLCMotors.Length == data.Count)
+                {
+                    for (int i = 0; i < data.Count; i++)
+                    {
+                        TwinCathelper.PLCMotors[i].mSpeed = (uint)data[i];
+                    }
+                    TwinCathelper.WriteEthercatDeviceData();
+                    log.Log(LogLevel.Info, $"{data.Count} value/s has been written sucessfully");
+                }
+                else
+                {
+                    log.Log(LogLevel.Error, $"Please select correct CSV\n " +
+                        $"CSV Data & Box count not equal \n " +
+                        $"Data Count : {data.Count} | Device Count : {TwinCathelper.PLCMotors.Length}");
+                }
+            }
+            else
+            {
+                log.Log(LogLevel.Error, $"Please select correct CSV\n" +
+                    $" File doesn't conatain desired data");
+            }
+        }
         public ProjectViewModel()
         {
-            ReadCSVFileCommand = new RelayCommand(o => { readCsvFile(); });
+            ReadCSVFileCommand = new RelayCommand(o => { WriteCSVData(); });
             SendLasFileCommand = new RelayCommand(o => { _ = sendLasFileAsync(slectedFile); });
             SerialConfigCommand = new RelayCommand(o => { SerialConfigWindow(); });
             SambaConfigCommand = new RelayCommand(o => { SambaConfigWindow(); });
@@ -105,8 +132,9 @@ namespace FlexMold.MVVM.ViewModel.Project
             }
         }
 
-        void readCsvFile()
+        List<double> readCsvFile()
         {
+            var data = new List<double>();
             if (slectedFile != null)
             {
                 if (slectedFile.FullName.EndsWith(".csv"))
@@ -124,12 +152,12 @@ namespace FlexMold.MVVM.ViewModel.Project
                                 BufferSize = 0x10000,
                             };
                             var csvr = CsvDataReader.Create(reader, options);
-                            var data = new List<double>();
+
                             while (csvr.Read())
                             {
                                 for (int i = 0; i < csvr.FieldCount; i++)
                                 {
-                                    data.Add(Math.Ceiling(csvr.GetDouble(i)));
+                                    data.Add(csvr.GetDouble(i)/2);
                                 }
                             }
                         }
@@ -145,135 +173,151 @@ namespace FlexMold.MVVM.ViewModel.Project
             }
             else
                 log.Log(LogLevel.Warn, $"Please Select File First");
+            return data;
         }
         void BrowseProject()
         {
             Logger log = LogManager.GetLogger("Browse Project");
-            using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
+            try
             {
-                log.Log(LogLevel.Info, $"Select Project Folder");
-                System.Windows.Forms.DialogResult result = dialog.ShowDialog();
-                if (result == System.Windows.Forms.DialogResult.OK)
+                using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
                 {
-                    myDataModels = new Porjects();
-                    //string selectedPath = @"D:\smhraza\Projects\FLEXMOLD\flexmolddata\FlexMain\Projects\";
-                    string selectedPath = dialog.SelectedPath;
-                    Regex reg = new Regex(@".las$|.csv$");
-                    DirectoryInfo di = new DirectoryInfo(selectedPath);
-                    var laserFilesPath = di.GetFiles("*", SearchOption.AllDirectories)
-                             .Where(path => reg.IsMatch(path.FullName))
-                             .ToList();
-                    var panels = laserFilesPath.GroupBy(p => p.Directory.Name);
-                    var projectsTemp = laserFilesPath.GroupBy(p => p.Directory.Parent.Name);
-                    log.Log(LogLevel.Info, $"{projectsTemp.Count()} Projects Found");
-                    log.Log(LogLevel.Info, $"{panels.Count()} Panels Found");
-                    log.Log(LogLevel.Info, $"{laserFilesPath.Count()} Files Found");
-                    foreach (var item in panels)
+                    log.Log(LogLevel.Info, $"Select Project Folder");
+                    System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+                    if (result == System.Windows.Forms.DialogResult.OK)
                     {
-                        myDataModels.Add(new Model.Project()
+                        myDataModels = new Porjects();
+                        //string selectedPath = @"D:\smhraza\Projects\FLEXMOLD\flexmolddata\FlexMain\Projects\";
+                        string selectedPath = dialog.SelectedPath;
+                        Regex reg = new Regex(@".las$|.csv$");
+                        DirectoryInfo di = new DirectoryInfo(selectedPath);
+                        var laserFilesPath = di.GetFiles("*", SearchOption.AllDirectories)
+                                 .Where(path => reg.IsMatch(path.FullName))
+                                 .ToList();
+                        var panels = laserFilesPath.GroupBy(p => p.Directory.Name);
+                        var projectsTemp = laserFilesPath.GroupBy(p => p.Directory.Parent.Name);
+                        log.Log(LogLevel.Info, $"{projectsTemp.Count()} Projects Found");
+                        log.Log(LogLevel.Info, $"{panels.Count()} Panels Found");
+                        log.Log(LogLevel.Info, $"{laserFilesPath.Count()} Files Found");
+                        foreach (var item in panels)
                         {
-                            Panel = item.Key,
-                            ProjectName = item.FirstOrDefault().Directory.Parent.Name,
-                            LaserFile = item.ToList(),
-                            Complete = false
-                        });
+                            myDataModels.Add(new Model.Project()
+                            {
+                                Panel = item.Key,
+                                ProjectName = item.FirstOrDefault().Directory.Parent.Name,
+                                LaserFile = item.ToList(),
+                                Complete = false
+                            });
+                        }
                     }
+                    else
+                        log.Log(LogLevel.Warn, $"User Cancelled Project Browser");
                 }
-                else log.Log(LogLevel.Warn, $"User Cancelled Project Browser");
+            }
+            catch (Exception ex)
+            {
+                log.Log(LogLevel.Error, ex.Message);
             }
         }
         public async Task sendLasFileAsync(FileInfo _slectedFile)
         {
             Logger log = LogManager.GetLogger("Las File Send");
-            if (_slectedFile != null)
+            try
             {
-                if (_slectedFile.FullName.EndsWith(".las"))
+                if (_slectedFile != null)
                 {
-                    try
+                    if (_slectedFile.FullName.EndsWith(".las"))
                     {
-                        switch (LaserProjectorComMode)
+                        try
                         {
-                            case (int)EProjectorComMode.Serial:
-                                log.Log(LogLevel.Info, $"Sending file via serial");
-                                try
-                                {
-                                    using (FileStream fs = File.OpenRead(_slectedFile.FullName))
+                            switch (LaserProjectorComMode)
+                            {
+                                case (int)EProjectorComMode.Serial:
+                                    log.Log(LogLevel.Info, $"Sending file via serial");
+                                    try
                                     {
-                                        log.Log(LogLevel.Info, $"Opening Port {SelectedSerialPort.PortName} Baud rate {SelectedSerialPort.BaudRate}");
-                                        SelectedSerialPort.Open();
-                                        SelectedSerialPort.WriteTimeout = 2000;
-                                        SelectedSerialPort.Write((new BinaryReader(fs)).ReadBytes((int)fs.Length), 0, (int)fs.Length);
-                                        log.Log(LogLevel.Info, $"File Write Sucessfully");
+                                        using (FileStream fs = File.OpenRead(_slectedFile.FullName))
+                                        {
+                                            log.Log(LogLevel.Info, $"Opening Port {SelectedSerialPort.PortName} Baud rate {SelectedSerialPort.BaudRate}");
+                                            SelectedSerialPort.Open();
+                                            SelectedSerialPort.WriteTimeout = 2000;
+                                            SelectedSerialPort.Write((new BinaryReader(fs)).ReadBytes((int)fs.Length), 0, (int)fs.Length);
+                                            log.Log(LogLevel.Info, $"File Write Sucessfully");
+                                        }
                                     }
-                                }
-                                catch (Exception ex)
-                                {
-                                    ToastNotificationUtil.ShowError(ex.Message);
-                                    log.Log(LogLevel.Error, ex.Message);
-                                }
-                                finally
-                                {
-                                    SelectedSerialPort.Close();
-                                }
-                                break;
-                            case (int)EProjectorComMode.Samba:
-                                string _tmsg = $"Sending file via samba";
-                                log.Log(LogLevel.Info, _tmsg);
-                                ToastNotificationUtil.ShowInformation(_tmsg);
-                                try
-                                {
-                                    log.Log(LogLevel.Info, $"Connecting to {MyPorjector.IpAddres}");
-                                    using (NetworkShareAccesser.Access(MyPorjector.IpAddres, MyPorjector.UserName, MyPorjector.Password))
+                                    catch (Exception ex)
                                     {
-                                        log.Log(LogLevel.Info, $"Credentials Accepted");
-                                        log.Log(LogLevel.Info, $"Copying File");
-                                        File.Copy(_slectedFile.FullName,
-                                            $@"\\{MyPorjector.IpAddres}\{MyPorjector.PlotFolderName}\{_slectedFile.Name}",
-                                            true);
-                                        log.Log(LogLevel.Info, $"File Copied Sucessfully");
+                                        ToastNotificationUtil.ShowError(ex.Message);
+                                        log.Log(LogLevel.Error, ex.Message);
                                     }
-                                }
-                                catch (Exception ex)
-                                {
-                                    ToastNotificationUtil.ShowError(ex.Message);
-                                    log.Log(LogLevel.Error,  ex.Message);
-                                }
-                                break;
-                            case (int)EProjectorComMode.Telnet:
-                                log.Log(LogLevel.Info, $"Sending file via Telnet");
-                                try
-                                {
-                                    TelnetHelper th = new TelnetHelper();
+                                    finally
+                                    {
+                                        SelectedSerialPort.Close();
+                                    }
+                                    break;
+                                case (int)EProjectorComMode.Samba:
+                                    string _tmsg = $"Sending file via samba";
+                                    log.Log(LogLevel.Info, _tmsg);
+                                    ToastNotificationUtil.ShowInformation(_tmsg);
+                                    try
+                                    {
+                                        log.Log(LogLevel.Info, $"Connecting to {MyPorjector.IpAddres}");
+                                        using (NetworkShareAccesser.Access(MyPorjector.IpAddres, MyPorjector.UserName, MyPorjector.Password))
+                                        {
+                                            log.Log(LogLevel.Info, $"Credentials Accepted");
+                                            log.Log(LogLevel.Info, $"Copying File");
+                                            File.Copy(_slectedFile.FullName,
+                                                $@"\\{MyPorjector.IpAddres}\{MyPorjector.PlotFolderName}\{_slectedFile.Name}",
+                                                true);
+                                            log.Log(LogLevel.Info, $"File Copied Sucessfully");
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        ToastNotificationUtil.ShowError(ex.Message);
+                                        log.Log(LogLevel.Error, ex.Message);
+                                    }
+                                    break;
+                                case (int)EProjectorComMode.Telnet:
+                                    log.Log(LogLevel.Info, $"Sending file via Telnet");
+                                    try
+                                    {
+                                        TelnetHelper th = new TelnetHelper();
 
-                                    //th.SendMessage = "echo "; //
+                                        //th.SendMessage = "echo "; //
 
-                                    th.SendMessage += await MixUtil.ReadTextFromFileAsync(_slectedFile.FullName);
-                                    var ii = await th.ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
-                                    //th.SendMessage = "ss";
-                                    await th.SendTelnetMessgae();
-                                    th.DisconnectTelnet();
-                                }
-                                catch (Exception ex)
-                                {
-                                    ToastNotificationUtil.ShowError(ex.Message);
-                                    log.Log(LogLevel.Error, ex.Message);
-                                }
-                                break;
-                            default:
-                                break;
+                                        th.SendMessage += await MixUtil.ReadTextFromFileAsync(_slectedFile.FullName);
+                                        var ii = await th.ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
+                                        //th.SendMessage = "ss";
+                                        await th.SendTelnetMessgae();
+                                        th.DisconnectTelnet();
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        ToastNotificationUtil.ShowError(ex.Message);
+                                        log.Log(LogLevel.Error, ex.Message);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            log.Log(LogLevel.Error, ex.Message);
+                            ToastNotificationUtil.ShowError(ex.Message);
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        log.Log(LogLevel.Error, ex.Message);
-                        ToastNotificationUtil.ShowError(ex.Message);
-                    }
+                    else
+                        log.Log(LogLevel.Warn, $"Selected File Not a .las File {_slectedFile.Name}");
                 }
                 else
-                    log.Log(LogLevel.Warn, $"Selected File Not a .las File {_slectedFile.Name}");
+                    log.Log(LogLevel.Warn, $"Please Select File First");
             }
-            else
-                log.Log(LogLevel.Warn, $"Please Select File First");
+            catch (Exception ex)
+            {
+                log.Log(LogLevel.Error, ex.Message);
+            }
         }
 
         private void SerialConfigWindow()
@@ -298,7 +342,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             }
             catch (Exception ex)
             {
-                log.Log(LogLevel.Error,ex.Message);
+                log.Log(LogLevel.Error, ex.Message);
                 ToastNotificationUtil.ShowError(ex.Message);
             }
         }

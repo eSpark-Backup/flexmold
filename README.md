@@ -19,10 +19,9 @@ Executable can be downloaded from [FCA](./Binaries/FlexMoldV1.0.0.8.rar)
 5. Click on "Machine Setting" tab
  
 # Open Issues
-https://github.com/eSpark-Consultants/flexmold/issues/15
 
 # Issue Results
- ![](img/17b.gif)
+ ![](img/19.gif)
 
 ## External Thanks
 - [For NLogViewer] https://github.com/erizet/NlogViewer

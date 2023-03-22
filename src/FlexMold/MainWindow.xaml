@@ -14,10 +14,10 @@
     xmlns:viewmodel="clr-namespace:FlexMold.MVVM.ViewModel"
     Width="800"
     Height="600"
+    Closing="MetroWindow_Closing"
     Icon="flexmold.ico"
     ResizeMode="CanResizeWithGrip"
     WindowStartupLocation="CenterScreen"
-    Closing="MetroWindow_Closing"
     mc:Ignorable="d">
     <Window.Resources>
         <ResourceDictionary>
@@ -91,38 +91,8 @@
     </mah:MetroWindow.LeftWindowCommands>
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands ShowLastSeparator="False">
-            <Border x:Name="borCon" Margin="0">
-                <DockPanel>
-                    <iconPacks:PackIconMaterial
-                        Width="28"
-                        Height="28"
-                        Kind="Connection" />
-                    <TextBox
-                        Name="tBConnectionState"
-                        Margin="0"
-                        HorizontalAlignment="Stretch"
-                        Background="Transparent"
-                        BorderBrush="Transparent"
-                        FontSize="16"
-                        IsReadOnly="True" />
-                </DockPanel>
-            </Border>
-            <Border x:Name="borState">
-                <DockPanel>
-                    <iconPacks:PackIconMaterial
-                        Width="28"
-                        Height="28"
-                        Kind="Play" />
-                    <TextBox
-                        Name="tBAdsState"
-                        Margin="0"
-                        HorizontalAlignment="Stretch"
-                        Background="Transparent"
-                        BorderBrush="Transparent"
-                        FontSize="16"
-                        IsReadOnly="True" />
-                </DockPanel>
-            </Border>
+            <Button x:Name="bt_TCC" Margin="0" />
+            <Button x:Name="bt_TCS" />
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
     <materialDesignMahApps:DialogHost DialogTheme="Inherit" Identifier="RootDialog">

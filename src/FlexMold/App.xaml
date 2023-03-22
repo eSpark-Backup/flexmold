@@ -18,6 +18,9 @@
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Dark.Blue.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/ToastNotifications.Messages;component/Themes/Default.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.DialogHost.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ToggleButton.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ProgressBar.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <Style BasedOn="{StaticResource MahApps.Styles.TextBox}" TargetType="TextBox">
                 <Setter Property="FontSize" Value="16" />
@@ -51,7 +54,7 @@
                 <Setter Property="Margin" Value="5" />
                 <Setter Property="HorizontalAlignment" Value="Left" />
             </Style>
-            <Style TargetType="{x:Type TextBlock}"  x:Key="LabelTextBlock">
+            <Style x:Key="LabelTextBlock" TargetType="{x:Type TextBlock}">
                 <Setter Property="FontSize" Value="20" />
                 <Setter Property="Margin" Value="5" />
                 <Setter Property="HorizontalAlignment" Value="Left" />

@@ -118,7 +118,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 MyPorjector = new LaserProjector()
                 {
                     Name = "p1",
-                    IpAddres = "telehack.com",
+                    IpAddres = "192.168.50.22",
                     UserName = "123",
                     Status = 1,
                     TelnetPort = 23,
@@ -157,7 +157,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                             {
                                 for (int i = 0; i < csvr.FieldCount; i++)
                                 {
-                                    data.Add(csvr.GetDouble(i)/2);
+                                    data.Add(csvr.GetDouble(i) / 2);
                                 }
                             }
                         }
@@ -224,95 +224,95 @@ namespace FlexMold.MVVM.ViewModel.Project
             Logger log = LogManager.GetLogger("Las File Send");
             try
             {
-                if (_slectedFile != null)
+                if (_slectedFile == null)
                 {
-                    if (_slectedFile.FullName.EndsWith(".las"))
-                    {
-                        try
-                        {
-                            switch (LaserProjectorComMode)
-                            {
-                                case (int)EProjectorComMode.Serial:
-                                    log.Log(LogLevel.Info, $"Sending file via serial");
-                                    try
-                                    {
-                                        using (FileStream fs = File.OpenRead(_slectedFile.FullName))
-                                        {
-                                            log.Log(LogLevel.Info, $"Opening Port {SelectedSerialPort.PortName} Baud rate {SelectedSerialPort.BaudRate}");
-                                            SelectedSerialPort.Open();
-                                            SelectedSerialPort.WriteTimeout = 2000;
-                                            SelectedSerialPort.Write((new BinaryReader(fs)).ReadBytes((int)fs.Length), 0, (int)fs.Length);
-                                            log.Log(LogLevel.Info, $"File Write Sucessfully");
-                                        }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        ToastNotificationUtil.ShowError(ex.Message);
-                                        log.Log(LogLevel.Error, ex.Message);
-                                    }
-                                    finally
-                                    {
-                                        SelectedSerialPort.Close();
-                                    }
-                                    break;
-                                case (int)EProjectorComMode.Samba:
-                                    string _tmsg = $"Sending file via samba";
-                                    log.Log(LogLevel.Info, _tmsg);
-                                    ToastNotificationUtil.ShowInformation(_tmsg);
-                                    try
-                                    {
-                                        log.Log(LogLevel.Info, $"Connecting to {MyPorjector.IpAddres}");
-                                        using (NetworkShareAccesser.Access(MyPorjector.IpAddres, MyPorjector.UserName, MyPorjector.Password))
-                                        {
-                                            log.Log(LogLevel.Info, $"Credentials Accepted");
-                                            log.Log(LogLevel.Info, $"Copying File");
-                                            File.Copy(_slectedFile.FullName,
-                                                $@"\\{MyPorjector.IpAddres}\{MyPorjector.PlotFolderName}\{_slectedFile.Name}",
-                                                true);
-                                            log.Log(LogLevel.Info, $"File Copied Sucessfully");
-                                        }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        ToastNotificationUtil.ShowError(ex.Message);
-                                        log.Log(LogLevel.Error, ex.Message);
-                                    }
-                                    break;
-                                case (int)EProjectorComMode.Telnet:
-                                    log.Log(LogLevel.Info, $"Sending file via Telnet");
-                                    try
-                                    {
-                                        TelnetHelper th = new TelnetHelper();
-
-                                        //th.SendMessage = "echo "; //
-
-                                        th.SendMessage += await MixUtil.ReadTextFromFileAsync(_slectedFile.FullName);
-                                        var ii = await th.ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
-                                        //th.SendMessage = "ss";
-                                        await th.SendTelnetMessgae();
-                                        th.DisconnectTelnet();
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        ToastNotificationUtil.ShowError(ex.Message);
-                                        log.Log(LogLevel.Error, ex.Message);
-                                    }
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            log.Log(LogLevel.Error, ex.Message);
-                            ToastNotificationUtil.ShowError(ex.Message);
-                        }
-                    }
-                    else
-                        log.Log(LogLevel.Warn, $"Selected File Not a .las File {_slectedFile.Name}");
-                }
-                else
                     log.Log(LogLevel.Warn, $"Please Select File First");
+                    return;
+                }
+                if (_slectedFile.FullName.EndsWith(".las"))
+                {
+                    log.Log(LogLevel.Warn, $"Selected File Not a .las File {_slectedFile.Name}");
+                    return;
+                }
+                try
+                {
+                    switch (LaserProjectorComMode)
+                    {
+                        case (int)EProjectorComMode.Serial:
+                            log.Log(LogLevel.Info, $"Sending file via serial");
+                            try
+                            {
+                                using (FileStream fs = File.OpenRead(_slectedFile.FullName))
+                                {
+                                    log.Log(LogLevel.Info, $"Opening Port {SelectedSerialPort.PortName} Baud rate {SelectedSerialPort.BaudRate}");
+                                    SelectedSerialPort.Open();
+                                    SelectedSerialPort.WriteTimeout = 2000;
+                                    SelectedSerialPort.Write((new BinaryReader(fs)).ReadBytes((int)fs.Length), 0, (int)fs.Length);
+                                    log.Log(LogLevel.Info, $"File Write Sucessfully");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                ToastNotificationUtil.ShowError(ex.Message);
+                                log.Log(LogLevel.Error, ex.Message);
+                            }
+                            finally
+                            {
+                                SelectedSerialPort.Close();
+                            }
+                            break;
+                        case (int)EProjectorComMode.Samba:
+                            string _tmsg = $"Sending file via samba";
+                            log.Log(LogLevel.Info, _tmsg);
+                            ToastNotificationUtil.ShowInformation(_tmsg);
+                            try
+                            {
+                                log.Log(LogLevel.Info, $"Connecting to {MyPorjector.IpAddres}");
+                                using (NetworkShareAccesser.Access(MyPorjector.IpAddres, MyPorjector.UserName, MyPorjector.Password))
+                                {
+                                    log.Log(LogLevel.Info, $"Credentials Accepted");
+                                    log.Log(LogLevel.Info, $"Copying File");
+                                    File.Copy(_slectedFile.FullName,
+                                        $@"\\{MyPorjector.IpAddres}\{MyPorjector.PlotFolderName}\{_slectedFile.Name}",
+                                        true);
+                                    log.Log(LogLevel.Info, $"File Copied Sucessfully");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                ToastNotificationUtil.ShowError(ex.Message);
+                                log.Log(LogLevel.Error, ex.Message);
+                            }
+                            break;
+                        case (int)EProjectorComMode.Telnet:
+                            log.Log(LogLevel.Info, $"Sending file via Telnet");
+                            try
+                            {
+                                TelnetHelper th = new TelnetHelper();
+
+                                //th.SendMessage = "echo "; //
+
+                                th.SendMessage += await MixUtil.ReadTextFromFileAsync(_slectedFile.FullName);
+                                var ii = await th.ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
+                                //th.SendMessage = "ss";
+                                await th.SendTelnetMessgae();
+                                th.DisconnectTelnet();
+                            }
+                            catch (Exception ex)
+                            {
+                                ToastNotificationUtil.ShowError(ex.Message);
+                                log.Log(LogLevel.Error, ex.Message);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    log.Log(LogLevel.Error, ex.Message);
+                    ToastNotificationUtil.ShowError(ex.Message);
+                }
             }
             catch (Exception ex)
             {

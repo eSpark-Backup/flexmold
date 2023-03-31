@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace FlexMold.MVVM.ViewModel.Setting
 {
@@ -54,6 +55,10 @@ namespace FlexMold.MVVM.ViewModel.Setting
         }
         public MotorSettingViewModel()
         {
+            if (TwinCathelper.Client == null)
+            {
+                return;
+            }
             log = LogManager.GetLogger("Motor Setting");
             DeviceIds = new uint[TwinCathelper.DeviceCount];
             for (uint i = 0; i < TwinCathelper.DeviceCount; i++)

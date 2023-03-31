@@ -26,22 +26,7 @@ namespace FlexMold.MVVM.Model
                 OnPropertyChanged();
             }
         }
-
-
-        private bool m_Complete = false;
-        public bool Complete
-        {
-            get { return this.m_Complete; }
-            set
-            {
-                if (value != this.m_Complete)
-                {
-                    this.m_Complete = value;
-                    OnPropertyChanged();
-
-                }
-            }
-        }
+     
         private string _Panel;
         public string Panel
         {

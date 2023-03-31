@@ -35,6 +35,10 @@ namespace FlexMold.MVVM.ViewModel.Home
 
         public MachineDetailViewModel()
         {
+            if (TwinCathelper.Client == null)
+            {
+                return;
+            }
             log = LogManager.GetLogger("Motor Status");
             MySlaves = new ST_EcSlaveState[TwinCathelper.DeviceCount];
             for (int i = 0; i < TwinCathelper.DeviceCount; i++)

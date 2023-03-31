@@ -118,7 +118,8 @@ namespace FlexMold.MVVM.ViewModel
                 case EMachineType.Motor:
                     if (MessageBox.Show("Do You Want to build TwinCAT Solution?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
                     {
-                        RunMainWindow();
+                        if (Validataion())
+                            RunMainWindow();
                     }
                     else
                     {
@@ -145,6 +146,7 @@ namespace FlexMold.MVVM.ViewModel
 
                     break;
                 case EMachineType.Projector:
+                    RunMainWindow();
                     break;
                 default:
                     break;
@@ -187,13 +189,10 @@ namespace FlexMold.MVVM.ViewModel
         }
         void RunMainWindow()
         {
-            if (Validataion())
-            {
-                MainWindow mw = new MainWindow(SelectedMachine);
-                OnRequestClose(this, new EventArgs());
-                mw.Show();
-                Application.Current.MainWindow = mw;
-            }
+            MainWindow mw = new MainWindow(SelectedMachine);
+            OnRequestClose(this, new EventArgs());
+            mw.Show();
+            Application.Current.MainWindow = mw;
         }
         bool Validataion()
         {
@@ -212,9 +211,9 @@ namespace FlexMold.MVVM.ViewModel
                 }
                 else
                 {
-                   ProgressStatuses = $"{AdsErrorCode.DeviceSymbolNotFound.ToString()}\n" +
-               $"TwinCAT Script not running or TwinCAT is Config mode \n" +
-               $"Please Start/Restart TwinCAT serivce or Build TwinCAT Solution from FCA \n";
+                    ProgressStatuses = $"{AdsErrorCode.DeviceSymbolNotFound.ToString()}\n" +
+                $"TwinCAT Script not running or TwinCAT is Config mode \n" +
+                $"Please Start/Restart TwinCAT serivce or Build TwinCAT Solution from FCA \n";
                 }
             }
             catch (Exception ex)

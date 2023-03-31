@@ -14,6 +14,7 @@ using TwinCAT.TypeSystem;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using LogLevel = NLog.LogLevel;
+using System.Windows;
 
 namespace FlexMold.MVVM.ViewModel.MachineTest
 {
@@ -205,6 +206,10 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         }
         public MotorTestViewModel()
         {
+            if (TwinCathelper.Client == null)
+            {
+                return;
+            }
             log = LogManager.GetLogger("Motor Test");
    
             MyPLCMotor = new EthercatDevice[TwinCathelper.DeviceCount];

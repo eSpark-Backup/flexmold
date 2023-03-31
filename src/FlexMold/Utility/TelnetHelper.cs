@@ -39,7 +39,7 @@ namespace FlexMold.Utility
         public TelnetHelper()
         {
             log = LogManager.GetLogger("Laser Projector");
-            SendMessage = "echo";
+            //SendMessage = "echo";
         }
 
         public void DisconnectTelnet()
@@ -56,7 +56,6 @@ namespace FlexMold.Utility
         }
         public async Task<bool> ConnectTelnet(string IpAddres, int TelnetPort)
         {
-            log.Log(LogLevel.Info, $"Testing TelNet Connection....");
             ReceivedMessage = "";
             // CancellationTokenSource provides the token and have authority to cancel the token
             try

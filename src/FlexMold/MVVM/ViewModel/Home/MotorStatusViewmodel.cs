@@ -177,6 +177,10 @@ namespace FlexMold.MVVM.ViewModel.Home
         }
         public MotorStatusViewmodel()
         {
+            if (TwinCathelper.Client == null)
+            {
+                return;
+            }
             log = LogManager.GetLogger("Motor Status");
             MyMotors = new ObservableCollection<MotorStatusControl>() { };
             int mcount = 0;

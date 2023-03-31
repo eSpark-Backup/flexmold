@@ -125,7 +125,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     Password = "123456",
                 };
             }
-            LaserProjectorComMode = 0;
+            LaserProjectorComMode = (int)EProjectorComMode.Telnet;
             if (SelectedSerialPort == null)
             {
                 SelectedSerialPort = new SerialPort();
@@ -206,7 +206,6 @@ namespace FlexMold.MVVM.ViewModel.Project
                                 Panel = item.Key,
                                 ProjectName = item.FirstOrDefault().Directory.Parent.Name,
                                 LaserFile = item.ToList(),
-                                Complete = false
                             });
                         }
                     }
@@ -295,6 +294,13 @@ namespace FlexMold.MVVM.ViewModel.Project
                                 th.SendMessage += await MixUtil.ReadTextFromFileAsync(_slectedFile.FullName);
                                 var ii = await th.ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
                                 //th.SendMessage = "ss";
+                                if (!ii)
+                                {
+                                    var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
+                                    log.Log(LogLevel.Error, tmsg);
+                                    ToastNotificationUtil.ShowError(tmsg);
+                                    return;
+                                }
                                 await th.SendTelnetMessgae();
                                 th.DisconnectTelnet();
                             }

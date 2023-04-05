@@ -2,7 +2,6 @@
 using FlexMold.MVVM.Model;
 using FlexMold.MVVM.View.Project;
 using FlexMold.Utility;
-using Microsoft.VisualStudio.Shell.Interop;
 using NLog;
 using Sylvan.Data.Csv;
 using System;

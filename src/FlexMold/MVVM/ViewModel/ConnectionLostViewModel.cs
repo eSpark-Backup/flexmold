@@ -1,9 +1,7 @@
 ﻿using FlexMold.Core;
-using FlexMold.MVVM.Model;
 using FlexMold.Utility;
 using NLog;
 using System;
-using System.ServiceModel.Channels;
 using System.Threading;
 using System.Windows;
 using TwinCAT.Ads;

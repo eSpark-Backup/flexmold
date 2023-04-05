@@ -1,20 +1,13 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.Utility;
-using MahApps.Metro.Controls;
 using NLog;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Threading;
 using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
-using TwinCAT.TypeSystem;
 using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
-using LogLevel = NLog.LogLevel;
-using System.Windows;
 
 namespace FlexMold.MVVM.ViewModel.MachineTest
 {

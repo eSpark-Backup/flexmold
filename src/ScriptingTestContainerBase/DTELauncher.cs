@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.Setup.Configuration;
 using EnvDTE;
 using ScriptingTest;

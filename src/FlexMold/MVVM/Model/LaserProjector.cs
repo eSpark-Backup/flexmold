@@ -1,6 +1,4 @@
-﻿using System.IO.Ports;
-
-namespace FlexMold.MVVM.Model
+﻿namespace FlexMold.MVVM.Model
 {
     public class LaserProjector
     {

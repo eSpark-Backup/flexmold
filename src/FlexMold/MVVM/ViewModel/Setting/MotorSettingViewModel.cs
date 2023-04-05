@@ -1,18 +1,9 @@
-﻿using ControlzEx.Standard;
-using FlexMold.Core;
-using FlexMold.MVVM.Model;
+﻿using FlexMold.Core;
 using FlexMold.MVVM.View.Setting;
 using FlexMold.Utility;
 using MaterialDesignThemes.Wpf;
 using NLog;
-using SMBLibrary.RPC;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace FlexMold.MVVM.ViewModel.Setting
 {

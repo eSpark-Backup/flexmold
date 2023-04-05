@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NLog;
 
 namespace NLog
 {
-   public class NLogEvent : EventArgs
+    public class NLogEvent : EventArgs
    {
       public LogEventInfo EventInfo;
 

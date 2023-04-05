@@ -1,24 +1,12 @@
 ﻿using FlexMold.MVVM.Model;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TwinCAT.Ads.TypeSystem;
-using TwinCAT.Ads;
 using NLog;
 using System.Timers;
 using FlexMold.Utility;
-using System.Collections;
 using System.Reactive.Linq;
 using FlexMold.Core;
-using System.Diagnostics;
-using System.ComponentModel;
-using System.Windows.Data;
-using TwinCAT.TypeSystem;
 using System.Windows.Media;
-using System.Windows.Forms;
-using System.Reflection;
 
 namespace FlexMold.MVVM.ViewModel.Home
 {

@@ -1,15 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using EnvDTE80;
-using EnvDTE100;
-using System.Reflection;
-using System.IO;
 using System.ComponentModel;
-using System.Threading;
-using System.Diagnostics;
-using System.Globalization;
 
 namespace ScriptingTest
 {

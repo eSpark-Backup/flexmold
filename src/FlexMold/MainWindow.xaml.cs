@@ -1,8 +1,6 @@
 ﻿using FlexMold.MVVM.Model;
 using FlexMold.MVVM.View;
-using FlexMold.MVVM.View.Setting;
 using FlexMold.MVVM.ViewModel;
-using FlexMold.MVVM.ViewModel.Setting;
 using FlexMold.Utility;
 using MahApps.Metro.Controls;
 using MaterialDesignThemes.Wpf;
@@ -10,17 +8,10 @@ using NLog;
 using System;
 using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
 using System.Media;
 using System.Reflection;
 using System.Threading;
-using System.Windows;
 using System.Windows.Media;
-using ToastNotifications;
-using ToastNotifications.Core;
-using ToastNotifications.Lifetime;
-using ToastNotifications.Messages;
-using ToastNotifications.Position;
 using TwinCAT;
 using TwinCAT.Ads;
 

@@ -2,8 +2,6 @@
 using EnvDTE80;
 using FlexMold.MVVM.Model;
 using FlexMold.Utility;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.Shell.Interop;
 using ScriptingTest;
 using System;
 using System.Collections.Generic;
@@ -12,7 +10,6 @@ using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
 using TCatSysManagerLib;
-using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.SystemManager;
 

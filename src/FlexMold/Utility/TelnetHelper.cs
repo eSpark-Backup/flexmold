@@ -60,7 +60,7 @@ namespace FlexMold.Utility
                 MyTelnetClient = new TelnetClient(IpAddres, TelnetPort, TimeSpan.FromSeconds(3), cancellationTokenSource.Token);
                 MyTelnetClient.ConnectionClosed += HandleConnectionClosed;
                 MyTelnetClient.MessageReceived += HandleMessageReceived;
-                log.Log(LogLevel.Info, $"Connecting....");
+                log.Log(LogLevel.Info, $"Connecting to {IpAddres}:{TelnetPort}...");
                 await MyTelnetClient.Connect();
                 return true;
             }

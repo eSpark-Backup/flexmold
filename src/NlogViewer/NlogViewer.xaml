@@ -53,13 +53,9 @@
                                 DisplayMemberBinding="{Binding Level}"
                                 Header="Level" />
                             <GridViewColumn
-                                Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type nlogViewer:NlogViewer}}, Path=MessageWidth}"
+                                Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type nlogViewer:NlogViewer}}, Path=LevelWidth}"
                                 DisplayMemberBinding="{Binding FormattedMessage}"
                                 Header="Message" />
-                            <GridViewColumn
-                                Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type nlogViewer:NlogViewer}}, Path=ExceptionWidth}"
-                                DisplayMemberBinding="{Binding Exception}"
-                                Header="Exception" />
                         </GridView.Columns>
                     </GridView>
                 </ListView.View>

@@ -149,10 +149,9 @@
             <nlogviewer:NlogViewer
                 x:Name="logCtrl"
                 Grid.Row="2"
-                ExceptionWidth="600"
-                LevelWidth="auto"
-                LoggerNameWidth="auto"
-                MessageWidth="auto"
+                LevelWidth="Auto"
+                LoggerNameWidth="Auto"
+                MessageWidth="500"
                 TimeWidth="AUTO" />
         </Grid>
     </materialDesignMahApps:DialogHost>

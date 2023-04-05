@@ -19,22 +19,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         Logger log = LogManager.GetLogger("Project");
         public RelayCommand ReadCSVFileCommand { get; set; }
         public RelayCommand BrowseProjectCommand { get; set; }
-        public RelayCommand ProjectorModeSelectionCommand { get; set; }
-        public RelayCommand SendLasFileCommand { get; set; }
-        public RelayCommand SerialConfigCommand { get; set; }
-        public RelayCommand SambaConfigCommand { get; set; }
-
-        private int _LaserProjectorComMode;
-        public int LaserProjectorComMode
-        {
-            get { return _LaserProjectorComMode; }
-            set
-            {
-                _LaserProjectorComMode = value;
-                OnPropertyChanged();
-            }
-        }
-        public LaserProjector MyPorjector { get; set; }
+     
         private Model.Project _selectedMyDataModel;
         public Model.Project selectedMyDataModel
         {
@@ -66,18 +51,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 OnPropertyChanged();
             }
         }
-        private SerialPort _SelectedSerialPort;
-        public SerialPort SelectedSerialPort
-        {
-            get
-            {
-                return _SelectedSerialPort;
-            }
-            set
-            {
-                _SelectedSerialPort = value;
-            }
-        }
+        public LaserProjectorViewModel lVM { get; set; }
         void WriteCSVData()
         {
             var data = readCsvFile();
@@ -107,28 +81,9 @@ namespace FlexMold.MVVM.ViewModel.Project
         }
         public ProjectViewModel()
         {
+            lVM = new LaserProjectorViewModel(this);
             ReadCSVFileCommand = new RelayCommand(o => { WriteCSVData(); });
-            SendLasFileCommand = new RelayCommand(o => { _ = sendLasFileAsync(slectedFile); });
-            SerialConfigCommand = new RelayCommand(o => { SerialConfigWindow(); });
-            SambaConfigCommand = new RelayCommand(o => { SambaConfigWindow(); });
             BrowseProjectCommand = new RelayCommand(o => { BrowseProject(); });
-            if (MyPorjector == null)
-            {
-                MyPorjector = new LaserProjector()
-                {
-                    Name = "p1",
-                    IpAddres = "192.168.50.22",
-                    UserName = "123",
-                    Status = 1,
-                    TelnetPort = 23,
-                    Password = "123456",
-                };
-            }
-            LaserProjectorComMode = (int)EProjectorComMode.Telnet;
-            if (SelectedSerialPort == null)
-            {
-                SelectedSerialPort = new SerialPort();
-            }
         }
 
         List<double> readCsvFile()
@@ -217,167 +172,6 @@ namespace FlexMold.MVVM.ViewModel.Project
                 log.Log(LogLevel.Error, ex.Message);
             }
         }
-        public async Task sendLasFileAsync(FileInfo _slectedFile)
-        {
-            Logger log = LogManager.GetLogger("Las File Send");
-            try
-            {
-                if (_slectedFile == null)
-                {
-                    log.Log(LogLevel.Warn, $"Please Select File First");
-                    return;
-                }
-                if (_slectedFile.FullName.EndsWith(".las"))
-                {
-                    log.Log(LogLevel.Warn, $"Selected File Not a .las File {_slectedFile.Name}");
-                    return;
-                }
-                try
-                {
-                    switch (LaserProjectorComMode)
-                    {
-                        case (int)EProjectorComMode.Serial:
-                            log.Log(LogLevel.Info, $"Sending file via serial");
-                            try
-                            {
-                                using (FileStream fs = File.OpenRead(_slectedFile.FullName))
-                                {
-                                    log.Log(LogLevel.Info, $"Opening Port {SelectedSerialPort.PortName} Baud rate {SelectedSerialPort.BaudRate}");
-                                    SelectedSerialPort.Open();
-                                    SelectedSerialPort.WriteTimeout = 2000;
-                                    SelectedSerialPort.Write((new BinaryReader(fs)).ReadBytes((int)fs.Length), 0, (int)fs.Length);
-                                    log.Log(LogLevel.Info, $"File Write Sucessfully");
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                ToastNotificationUtil.ShowError(ex.Message);
-                                log.Log(LogLevel.Error, ex.Message);
-                            }
-                            finally
-                            {
-                                SelectedSerialPort.Close();
-                            }
-                            break;
-                        case (int)EProjectorComMode.Samba:
-                            string _tmsg = $"Sending file via samba";
-                            log.Log(LogLevel.Info, _tmsg);
-                            ToastNotificationUtil.ShowInformation(_tmsg);
-                            try
-                            {
-                                log.Log(LogLevel.Info, $"Connecting to {MyPorjector.IpAddres}");
-                                using (NetworkShareAccesser.Access(MyPorjector.IpAddres, MyPorjector.UserName, MyPorjector.Password))
-                                {
-                                    log.Log(LogLevel.Info, $"Credentials Accepted");
-                                    log.Log(LogLevel.Info, $"Copying File");
-                                    File.Copy(_slectedFile.FullName,
-                                        $@"\\{MyPorjector.IpAddres}\{MyPorjector.PlotFolderName}\{_slectedFile.Name}",
-                                        true);
-                                    log.Log(LogLevel.Info, $"File Copied Sucessfully");
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                ToastNotificationUtil.ShowError(ex.Message);
-                                log.Log(LogLevel.Error, ex.Message);
-                            }
-                            break;
-                        case (int)EProjectorComMode.Telnet:
-                            log.Log(LogLevel.Info, $"Sending file via Telnet");
-                            try
-                            {
-                                TelnetHelper th = new TelnetHelper();
-
-                                //th.SendMessage = "echo "; //
-
-                                th.SendMessage += await MixUtil.ReadTextFromFileAsync(_slectedFile.FullName);
-                                var ii = await th.ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
-                                //th.SendMessage = "ss";
-                                if (!ii)
-                                {
-                                    var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
-                                    log.Log(LogLevel.Error, tmsg);
-                                    ToastNotificationUtil.ShowError(tmsg);
-                                    return;
-                                }
-                                await th.SendTelnetMessgae();
-                                th.DisconnectTelnet();
-                            }
-                            catch (Exception ex)
-                            {
-                                ToastNotificationUtil.ShowError(ex.Message);
-                                log.Log(LogLevel.Error, ex.Message);
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    log.Log(LogLevel.Error, ex.Message);
-                    ToastNotificationUtil.ShowError(ex.Message);
-                }
-            }
-            catch (Exception ex)
-            {
-                log.Log(LogLevel.Error, ex.Message);
-            }
-        }
-
-        private void SerialConfigWindow()
-        {
-            Logger log = LogManager.GetLogger("Serial Port Config");
-            try
-            {
-                log.Log(LogLevel.Info, $"Current port {SelectedSerialPort.PortName} Baud {SelectedSerialPort.BaudRate}");
-                log.Log(LogLevel.Info, $"Please Select Port params from available list ");
-                var main = App.Current.MainWindow as MainWindow;
-                var sv = new SerialPortConfigView(main, SelectedSerialPort);
-                sv.ShowDialog();
-                if (sv.SaveData)
-                {
-                    SelectedSerialPort = sv.CurrentPort;
-                    log.Log(LogLevel.Info, $"Saved Port {SelectedSerialPort.PortName} Baud {SelectedSerialPort.BaudRate}");
-                }
-                else
-                {
-                    log.Log(LogLevel.Warn, $"Closing without saving");
-                }
-            }
-            catch (Exception ex)
-            {
-                log.Log(LogLevel.Error, ex.Message);
-                ToastNotificationUtil.ShowError(ex.Message);
-            }
-        }
-        private void SambaConfigWindow()
-        {
-            Logger log = LogManager.GetLogger("Samba Config");
-            try
-            {
-                log.Log(LogLevel.Info, $"Current IP {MyPorjector.IpAddres} UserName {MyPorjector.UserName}");
-                log.Log(LogLevel.Info, $"Please Enter Samba params");
-                var main = App.Current.MainWindow as MainWindow;
-                var sv = new SambaConfigWindow(main, MyPorjector);
-                sv.ShowDialog();
-                if (sv.SaveData)
-                {
-                    MyPorjector = sv.CurrentProjector;
-                    log.Log(LogLevel.Info, $"Saved IP {MyPorjector.IpAddres}");
-                    log.Log(LogLevel.Info, $"Saved PlotFolderName {MyPorjector.PlotFolderName}");
-                    log.Log(LogLevel.Info, $"Saved UserName {MyPorjector.UserName}");
-                }
-                else
-                {
-                    log.Log(LogLevel.Warn, $"Closing without saving");
-                }
-            }
-            catch (Exception ex)
-            {
-                log.Log(LogLevel.Error, ex, ex.Message);
-                ToastNotificationUtil.ShowError(ex.Message);
-            }
-        }
+      
     }
 }

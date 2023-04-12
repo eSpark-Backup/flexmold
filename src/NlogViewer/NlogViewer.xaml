@@ -9,7 +9,20 @@
     d:DesignWidth="457"
     DataContext="{Binding RelativeSource={RelativeSource Self}}"
     mc:Ignorable="d">
-    <UserControl.Resources />
+    <UserControl.Resources>
+        <Style TargetType="ToolTip">
+            <Style.Resources>
+                <Style TargetType="ContentPresenter">
+                    <Style.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextWrapping" Value="Wrap" />
+                        </Style>
+                    </Style.Resources>
+                </Style>
+            </Style.Resources>
+            <Setter Property="MaxWidth" Value="300" />
+        </Style>
+    </UserControl.Resources>
     <Grid>
         <Expander Name="MyExpander" MaxHeight="200">
             <ListView Name="logView" ItemsSource="{Binding LogEntries}">

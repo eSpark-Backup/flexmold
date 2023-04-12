@@ -49,7 +49,7 @@
                 <Button Command="{Binding ProjectionOnCommand}" Content="Projection On" />
                 <Button Command="{Binding ProjectionOffCommand}" Content="Projection Off" />
                 <Button Command="{Binding CallibrateProjectorCommand}" Content="Calibrate Projector" />
-                <Button Command="{Binding TelnetDisConnectCommand}" Content="Launch LPM" />
+                <Button Command="{Binding LaunchLPMCommand}" Content="Launch LPM" />
                 <Button Grid.Row="2" Command="{Binding SendLasFileCommand}">
                     <StackPanel Orientation="Horizontal">
                         <iconPacks:PackIconMaterial Margin="6" Kind="Send" />

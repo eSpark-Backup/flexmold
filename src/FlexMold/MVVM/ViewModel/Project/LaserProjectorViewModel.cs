@@ -7,6 +7,7 @@ using Humanizer;
 using NLog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
@@ -27,6 +28,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         public RelayCommand SerialConfigCommand { get; set; }
         public RelayCommand SambaConfigCommand { get; set; }
         public RelayCommand ProjectionOnCommand { get; set; }
+        public RelayCommand LaunchLPMCommand { get; set; }
         public RelayCommand ProjectionOffCommand { get; set; }
         public RelayCommand CallibrateProjectorCommand { get; set; }
         public RelayCommand LaunchLMPCommand { get; set; }
@@ -73,50 +75,69 @@ namespace FlexMold.MVVM.ViewModel.Project
             _parent = parent;
             SendLasFileCommand = new RelayCommand(o => { _ = sendLasFileAsync(Parent.slectedFile); });
             SerialConfigCommand = new RelayCommand(o => { SerialConfigWindow(); });
+            LaunchLPMCommand = new RelayCommand(o =>
+            {
+                Process secondProc = new Process();
+                secondProc.StartInfo.FileName = @"C:\Z-LASER\LPM 9.0\LPM.exe";
+                secondProc.Start();
+            });
             SambaConfigCommand = new RelayCommand(o => { SambaConfigWindow(); });
             ProjectionOnCommand = new RelayCommand(async o =>
             {
-                if (MyTelnetClient == null)
+                if (ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort) == null)
                 {
-                    if (await ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort))
+                    var ii = await ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
+                    if (!ii)
                     {
-                        SendMessage = "ZN; " + "\r\n";
-                        _ = SendTelnetMessgae();
+                        var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
+                        log.Log(LogLevel.Error, tmsg);
+                        ToastNotificationUtil.ShowError(tmsg);
+                        return;
                     }
-                    else
-                    {
-                        log.Log(LogLevel.Error, ErrorMessages.Connection_Failure);
-                    }
+                }
+                else
+                {
+                    SendMessage = "ZN; " + "\r\n";
+                    _ = SendTelnetMessgae();
                 }
             });
             ProjectionOffCommand = new RelayCommand(async o =>
             {
-                if (MyTelnetClient == null)
+                if (ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort) == null)
                 {
-                    if (await ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort))
+                    var ii = await ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
+                    if (!ii)
                     {
-                        SendMessage = "ZF; " + "\r\n";
-                        _ = SendTelnetMessgae();
+                        var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
+                        log.Log(LogLevel.Error, tmsg);
+                        ToastNotificationUtil.ShowError(tmsg);
+                        return;
                     }
-                    else
-                    {
-                        log.Log(LogLevel.Error, ErrorMessages.Connection_Failure.Humanize());
-                    }
+                }
+                else
+                {
+
+                    SendMessage = "ZF; " + "\r\n";
+                    _ = SendTelnetMessgae();
                 }
             });
             CallibrateProjectorCommand = new RelayCommand(async o =>
             {
-                if (MyTelnetClient == null)
+                if (ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort) == null)
                 {
-                    if (await ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort))
+                    var ii = await ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
+                    if (!ii)
                     {
-                        SendMessage = "ZD; " + "\r\n";
-                        _ = SendTelnetMessgae();
+                        var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
+                        log.Log(LogLevel.Error, tmsg);
+                        ToastNotificationUtil.ShowError(tmsg);
+                        return;
                     }
-                    else
-                    {
-                        log.Log(LogLevel.Error, ErrorMessages.Connection_Failure.Humanize());
-                    }
+                }
+                else
+                {
+                    SendMessage = "ZD; " + "\r\n";
+                    _ = SendTelnetMessgae();
                 }
             });
             LaunchLMPCommand = new RelayCommand(o => { DisconnectTelnet(); });
@@ -206,22 +227,24 @@ namespace FlexMold.MVVM.ViewModel.Project
                             log.Log(LogLevel.Info, $"Sending file via Telnet");
                             try
                             {
-                                TelnetHelper th = new TelnetHelper();
-
-                                //th.SendMessage = "echo "; //
-
-                                th.SendMessage += await MixUtil.ReadTextFromFileAsync(_slectedFile.FullName);
-                                var ii = await th.ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
-                                //th.SendMessage = "ss";
-                                if (!ii)
+                                if (ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort) == null)
                                 {
-                                    var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
-                                    log.Log(LogLevel.Error, tmsg);
-                                    ToastNotificationUtil.ShowError(tmsg);
+                                    var ii = await ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
+                                    if (!ii)
+                                    {
+                                        var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
+                                        log.Log(LogLevel.Error, tmsg);
+                                        ToastNotificationUtil.ShowError(tmsg);
+                                        return;
+                                    }
+                                }
+                                else
+                                {
+                                    SendMessage = await MixUtil.ReadTextFromFileAsync(_slectedFile.FullName);
+                                    _ = SendTelnetMessgae();
                                     return;
                                 }
-                                await th.SendTelnetMessgae();
-                                th.DisconnectTelnet();
+                                return;
                             }
                             catch (Exception ex)
                             {

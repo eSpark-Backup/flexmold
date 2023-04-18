@@ -1,11 +1,7 @@
-﻿using FlexMold.MVVM.Model;
-using System;
+﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace FlexMold.Convertor

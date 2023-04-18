@@ -1,8 +1,6 @@
 ﻿using FlexMold.MVVM.Model;
 using FlexMold.MVVM.View;
-using FlexMold.MVVM.View.Setting;
 using FlexMold.MVVM.ViewModel;
-using FlexMold.MVVM.ViewModel.Setting;
 using FlexMold.Utility;
 using MahApps.Metro.Controls;
 using MaterialDesignThemes.Wpf;
@@ -10,17 +8,10 @@ using NLog;
 using System;
 using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
 using System.Media;
 using System.Reflection;
 using System.Threading;
-using System.Windows;
 using System.Windows.Media;
-using ToastNotifications;
-using ToastNotifications.Core;
-using ToastNotifications.Lifetime;
-using ToastNotifications.Messages;
-using ToastNotifications.Position;
 using TwinCAT;
 using TwinCAT.Ads;
 
@@ -32,6 +23,7 @@ namespace FlexMold
     public partial class MainWindow : MetroWindow
     {
         Logger log = LogManager.GetLogger("Main");
+
         //MainViewModel _vm;
         public MainWindow(Machine SelectedMachine)
         {
@@ -42,14 +34,23 @@ namespace FlexMold
             //_vm = DataContext as MainViewModel;
             //_vm.OnRequestClose += (s, e) => this.Close();
             //Unloaded += OnUnload;
+            switch (SelectedMachine.MachineType)
+            {
+                case EMachineType.Motor:
+                    TwinCathelper._session.ConnectionStateChanged += session_ConnectionStateChanged;
+                    TwinCathelper.Client.ConnectionStateChanged += _connection_ConnectionStatusChanged;
+                    TwinCathelper.Client.RouterStateChanged += _connection_RouterStateChanged;
+                    TwinCathelper.Client.RegisterAdsStateChangedAsync(_connection_AdsStateChanged, CancellationToken.None);
+                    break;
+                case EMachineType.Projector:
+                    break;
+                default:
+                    break;
+            }
             logCtrl.ItemAdded += OnLogMessageItemAdded;
-            TwinCathelper._session.ConnectionStateChanged += session_ConnectionStateChanged;
-            TwinCathelper.Client.ConnectionStateChanged += _connection_ConnectionStatusChanged;
-            TwinCathelper.Client.RouterStateChanged += _connection_RouterStateChanged;
-            TwinCathelper.Client.RegisterAdsStateChangedAsync(_connection_AdsStateChanged, CancellationToken.None);
             log.Log(LogLevel.Info, $"Application Loaded Sucessfully.....");
             log.Log(LogLevel.Info, $"Selected Machine Type : {SelectedMachine.MachineType} Name : {SelectedMachine.Name} ID : {SelectedMachine.ID}");
-            
+
         }
         //private void OnUnload(object sender, RoutedEventArgs e)
         //{
@@ -171,7 +172,7 @@ namespace FlexMold
                 bt_TCC.Content = AdsState.Invalid.ToString();
             }
         }
-        async void ConnectionLost(string _msg) 
+        async void ConnectionLost(string _msg)
         {
             var view = new ConnectionLostDialog()
             {
@@ -192,7 +193,10 @@ namespace FlexMold
         }
         private void MetroWindow_Closing(object sender, CancelEventArgs e)
         {
-            TwinCathelper.Client.Close();
+            if (TwinCathelper.Client != null)
+            {
+                TwinCathelper.Client.Close();
+            }
         }
     }
 }

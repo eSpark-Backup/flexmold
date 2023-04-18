@@ -22,8 +22,6 @@
         <projectvm:ProjectViewModel />
     </UserControl.DataContext>
     <UserControl.Resources>
-        <convertor:RadioBoolToIntConverter x:Key="radioBoolToIntConverter" />
-
         <convertor:HeightConverter x:Key="HeightConverter" />
         <convertor:BoolInverterConverter x:Key="BoolInverterConverter" />
     </UserControl.Resources>
@@ -31,9 +29,11 @@
         <Grid RenderOptions.ClearTypeHint="Enabled" TextOptions.TextFormattingMode="Display">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="250" />
-                <ColumnDefinition Width="230" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
             <GroupBox
                 Grid.Column="0"
                 Height="{Binding Path=ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UIElement}}"
@@ -52,71 +52,23 @@
                     <projectview:ProjectGridView />
                 </DockPanel>
             </GroupBox>
-            <DockPanel Grid.Column="1" Height="{Binding Path=ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UIElement}}">
+            <Grid Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="250" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
                 <GroupBox
-                    Margin="0,0,8,0"
-                    DockPanel.Dock="Bottom"
-                    Header="Projector Controls">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <UniformGrid
-                            Grid.ColumnSpan="3"
-                            Columns="3"
-                            Rows="2">
-                            <RadioButton
-                                Margin="5,0,0,0"
-                                Content="Serial"
-                                GroupName="Group1"
-                                IsChecked="{Binding LaserProjectorComMode, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=0}" />
-                            <RadioButton
-                                Margin="5,0,0,0"
-                                Content="Samba"
-                                GroupName="Group1"
-                                IsChecked="{Binding LaserProjectorComMode, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=1}" />
-                            <RadioButton
-                                Margin="5,0,0,0"
-                                Content="TelNet"
-                                GroupName="Group1"
-                                IsChecked="{Binding LaserProjectorComMode, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=2}" />
-
-                            <Button
-                                Margin="0"
-                                HorizontalAlignment="Left"
-                                Background="Transparent"
-                                Command="{Binding SerialConfigCommand}">
-                                <StackPanel Orientation="Vertical">
-                                    <iconPacks:PackIconMaterial Foreground="White" Kind="SettingsHelper" />
-                                </StackPanel>
-                            </Button>
-                            <Button
-                                Margin="0"
-                                HorizontalAlignment="Left"
-                                Background="Transparent"
-                                Command="{Binding SambaConfigCommand}">
-                                <StackPanel Orientation="Vertical">
-                                    <iconPacks:PackIconMaterial Foreground="White" Kind="SettingsHelper" />
-                                </StackPanel>
-                            </Button>
-                        </UniformGrid>
-                        <Button Grid.Row="1" Command="{Binding SendLasFileCommand}">
-                            <StackPanel Orientation="Horizontal">
-                                <iconPacks:PackIconMaterial Margin="6" Kind="Send" />
-                                <TextBlock
-                                    VerticalAlignment="Center"
-                                    Text="Send Las File"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-                        </Button>
-                    </Grid>
-                </GroupBox>
-                <GroupBox Header="Available Files(Selected Panel)">
+                    Grid.RowSpan="2"
+                    Grid.Column="0"
+                    VerticalAlignment="Top"
+                    Header="Available Files(Selected Panel)">
                     <DataGrid
+                        Height="320"
                         Margin="5"
                         AutoGenerateColumns="False"
                         CanUserAddRows="False"
@@ -133,28 +85,17 @@
                             <DataGridTextColumn Binding="{Binding LastWriteTime}" Header="Last Modified" />
                         </DataGrid.Columns>
                     </DataGrid>
-
                 </GroupBox>
-
-            </DockPanel>
-            <StackPanel Grid.Column="2" Orientation="Vertical">
-
-                <GroupBox Margin="0,0,8,0" Header="Motor Sensor Chart Info">
-                    <StackPanel Orientation="Vertical">
-                        <TextBox
-                            Grid.Row="0"
-                            Grid.Column="0"
-                            Grid.ColumnSpan="2" />
-                        <TextBox
-                            Grid.Row="1"
-                            Grid.Column="0"
-                            Grid.ColumnSpan="2"
-                            Text="Motor Max Travel" />
-                        <TextBox
-                            Grid.Row="2"
-                            Grid.Column="0"
-                            Text="Travel Time : 1min 20sec" />
-                        <Button Grid.Row="2" Grid.Column="1">
+                <GroupBox
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Margin="0,0,8,0"
+                    Header="Motor Sensor Chart Info">
+                    <UniformGrid Rows="4">
+                        <TextBox />
+                        <TextBox Text="Motor Max Travel" />
+                        <TextBox Text="Travel Time : 1min 20sec" />
+                        <Button>
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconMaterial Margin="6" Kind="Clock" />
                                 <TextBlock
@@ -163,23 +104,15 @@
                                     TextWrapping="Wrap" />
                             </StackPanel>
                         </Button>
-                    </StackPanel>
+                    </UniformGrid>
                 </GroupBox>
-                <GroupBox Margin="0,0,8,0" Header="Motor Sensor Controls">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition />
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                        <Button
-                            Grid.Row="0"
-                            Grid.Column="0"
-                            Command="{Binding ReadCSVFileCommand}">
+                <GroupBox
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="0,0,8,0"
+                    Header="Motor Controls">
+                    <UniformGrid Columns="2">
+                        <Button Command="{Binding ReadCSVFileCommand}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconMaterial Margin="6" Kind="Send" />
                                 <TextBlock
@@ -188,21 +121,15 @@
                                     TextWrapping="Wrap" />
                             </StackPanel>
                         </Button>
-                        <Button
-                            Grid.Row="0"
-                            Grid.Column="1"
-                            Content="Shape A" />
-                        <Button
-                            Grid.Row="1"
-                            Grid.Column="0"
-                            Content="Shape B" />
+                        <Button Content="Shape A" />
+                        <Button Content="Shape B" />
                         <Button Grid.Row="1" Grid.Column="1">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconMaterial Margin="6" Kind="StopCircle" />
                                 <TextBlock Text="Stop" TextWrapping="Wrap" />
                             </StackPanel>
                         </Button>
-                        <Button Grid.Row="2" Grid.Column="0">
+                        <Button>
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconMaterial Margin="6" Kind="Home" />
                                 <TextBlock
@@ -211,9 +138,14 @@
                                     TextWrapping="Wrap" />
                             </StackPanel>
                         </Button>
-                    </Grid>
+                    </UniformGrid>
                 </GroupBox>
-            </StackPanel>
+                <projectview:LaserProjectorView
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    DataContext="{Binding lVM}" />
+            </Grid>
         </Grid>
     </Border>
 </UserControl>

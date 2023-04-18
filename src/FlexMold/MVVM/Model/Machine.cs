@@ -1,5 +1,4 @@
-﻿using FlexMold.Core;
-using MahApps.Metro.IconPacks;
+﻿using MahApps.Metro.IconPacks;
 using System.Windows.Controls;
 
 namespace FlexMold.MVVM.Model

@@ -1,11 +1,8 @@
-﻿    using System;
-    using System.Xml;
-    using System.IO;
-    using System.Collections;
+﻿using System.Xml;
 
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Globalization;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 
 namespace ScriptingTest
 {

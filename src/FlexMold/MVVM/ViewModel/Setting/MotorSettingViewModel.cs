@@ -1,17 +1,9 @@
-﻿using ControlzEx.Standard;
-using FlexMold.Core;
-using FlexMold.MVVM.Model;
+﻿using FlexMold.Core;
 using FlexMold.MVVM.View.Setting;
 using FlexMold.Utility;
 using MaterialDesignThemes.Wpf;
 using NLog;
-using SMBLibrary.RPC;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace FlexMold.MVVM.ViewModel.Setting
 {
@@ -54,6 +46,10 @@ namespace FlexMold.MVVM.ViewModel.Setting
         }
         public MotorSettingViewModel()
         {
+            if (TwinCathelper.Client == null)
+            {
+                return;
+            }
             log = LogManager.GetLogger("Motor Setting");
             DeviceIds = new uint[TwinCathelper.DeviceCount];
             for (uint i = 0; i < TwinCathelper.DeviceCount; i++)

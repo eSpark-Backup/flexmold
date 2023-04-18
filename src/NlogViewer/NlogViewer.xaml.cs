@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using NLog;
 using NLog.Common;
 
@@ -43,7 +42,10 @@ namespace NlogViewer
         public double LevelWidth
         {
             get { return _LevelWidth; }
-            set { _LevelWidth = value; }
+            set
+            {
+                _LevelWidth = value;
+            }
         }
 
         private double _MessageWidth = 200;
@@ -52,16 +54,10 @@ namespace NlogViewer
         public double MessageWidth
         {
             get { return _MessageWidth; }
-            set { _MessageWidth = value; }
-        }
-
-        private double _ExceptionWidth = 75;
-        [Description("Width of Exception column in pixels"), Category("Data")]
-        [TypeConverter(typeof(LengthConverter))]
-        public double ExceptionWidth
-        {
-            get { return _ExceptionWidth; }
-            set { _ExceptionWidth = value; }
+            set
+            {
+                _MessageWidth = value;
+            }
         }
 
         private int _MaxRowCount = 50;

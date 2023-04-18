@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace FlexMold.Convertor
 {
-        [ValueConversion(typeof(Boolean), typeof(String))]
+    [ValueConversion(typeof(Boolean), typeof(String))]
         public class CompleteConverter : IValueConverter
         {
             // This converter changes the value of a Tasks Complete status from true/false to a string value of

@@ -1,16 +1,12 @@
 ﻿using EnvDTE;
 using EnvDTE80;
 using FlexMold.Utility;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.Shell.Interop;
 using ScriptingTest;
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Diagnostics;
 using System.Xml;
 using TCatSysManagerLib;
-using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.SystemManager;
 

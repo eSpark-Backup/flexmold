@@ -2,18 +2,11 @@
 using NLog;
 using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
-using System.ServiceModel.Channels;
-using System.Threading.Tasks;
-using System.Threading;
-using System.Windows;
 using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
 using TwinCAT.TypeSystem;
-using Microsoft.AspNetCore.Mvc;
 
 namespace FlexMold.Utility
 {

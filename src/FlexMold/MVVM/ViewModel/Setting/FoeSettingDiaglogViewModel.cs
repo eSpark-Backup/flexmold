@@ -33,6 +33,10 @@ namespace FlexMold.MVVM.ViewModel.Setting
         public int MyProperty { get; set; }
         public FoeSettingDiaglogViewModel()
         {
+            if (TwinCathelper.Client == null)
+            {
+                return;
+            }
             BT_FirmwareEnable = true;
             MyFoe = new Foe() { BusyForeground = Brushes.White, ErrorForeground = Brushes.White };
             MyFoe.Foe_dwPass = 287454020;

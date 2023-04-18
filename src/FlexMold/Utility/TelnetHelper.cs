@@ -1,9 +1,6 @@
 ﻿using FlexMold.Core;
 using NLog;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,7 +36,7 @@ namespace FlexMold.Utility
         public TelnetHelper()
         {
             log = LogManager.GetLogger("Laser Projector");
-            SendMessage = "echo";
+            //SendMessage = "echo";
         }
 
         public void DisconnectTelnet()
@@ -56,7 +53,6 @@ namespace FlexMold.Utility
         }
         public async Task<bool> ConnectTelnet(string IpAddres, int TelnetPort)
         {
-            log.Log(LogLevel.Info, $"Testing TelNet Connection....");
             ReceivedMessage = "";
             // CancellationTokenSource provides the token and have authority to cancel the token
             try
@@ -64,7 +60,7 @@ namespace FlexMold.Utility
                 MyTelnetClient = new TelnetClient(IpAddres, TelnetPort, TimeSpan.FromSeconds(3), cancellationTokenSource.Token);
                 MyTelnetClient.ConnectionClosed += HandleConnectionClosed;
                 MyTelnetClient.MessageReceived += HandleMessageReceived;
-                log.Log(LogLevel.Info, $"Connecting....");
+                log.Log(LogLevel.Info, $"Connecting to {IpAddres}:{TelnetPort}...");
                 await MyTelnetClient.Connect();
                 return true;
             }

@@ -333,7 +333,7 @@ namespace FlexMold.MVVM.ViewModel
                 {
                     worker.ProgressStatus = "TwinCAT Project build Failed";
                     worker.Progress = 0;
-                } 
+                }
             }
             else
             {
@@ -472,31 +472,29 @@ END_TYPE";
             {
                 foe_sAmsPort += $"{item.EtherCAT.AmsAddress.AmsPort},";
             }
-            for (int j = 1; j <= AvaiableDevicesCount; j++)
+            for (int i = 1; i <= FCAModel.MyBoxes.Count; i++)
             {
-                for (int i = 1; i <= FCAModel.MyBoxes.Count; i++)
-                {
-                    var boxName = FCAModel.MyBoxes[i - 1].PathName;
-                    deviceAtrib += $"" +
-                        $"[{i}].mDirection :=  {boxName}^{outStr}^Direction;" +
-                        $"[{i}].mSpeed := {boxName}^{outStr}^Speed;" +
-                        $"[{i}].mTime := {boxName}^{outStr}^Time;" +
-                        $"[{i}].mMode := {boxName}^{outStr}^Mode;";
-                    mPositionAtrib += $"" +
-                        $"[{i}]:= {boxName}^{inpStr}^Position;";
-                    mTemperatureAtrib += $"" +
-                        $"[{i}]:= {boxName}^{inpStr}^Temperature;";
+                var boxName = FCAModel.MyBoxes[i - 1].PathName;
+                deviceAtrib += $"" +
+                    $"[{i}].mDirection :=  {boxName}^{outStr}^Direction;" +
+                    $"[{i}].mSpeed := {boxName}^{outStr}^Speed;" +
+                    $"[{i}].mTime := {boxName}^{outStr}^Time;" +
+                    $"[{i}].mMode := {boxName}^{outStr}^Mode;";
+                mPositionAtrib += $"" +
+                    $"[{i}]:= {boxName}^{inpStr}^Position;";
+                mTemperatureAtrib += $"" +
+                    $"[{i}]:= {boxName}^{inpStr}^Temperature;";
 
-                    Diag1Atrib += $"" +
-                        $"[{i}]:=  {boxName}^{inpStr}^Diag1;";
+                Diag1Atrib += $"" +
+                    $"[{i}]:=  {boxName}^{inpStr}^Diag1;";
 
-                    Diag2Atrib += $"" +
-                        $"[{i}]:=  {boxName}^{inpStr}^Diag2;";
+                Diag2Atrib += $"" +
+                    $"[{i}]:=  {boxName}^{inpStr}^Diag2;";
 
-                    Diag3Atrib += $"" +
-                        $"[{i}]:=  {boxName}^{inpStr}^Diag3;";
-                }
+                Diag3Atrib += $"" +
+                    $"[{i}]:=  {boxName}^{inpStr}^Diag3;";
             }
+
             string foe_Scrip =
                     "fbDownload : FB_EcFoeLoad ;\n" +
                     "foe_dwPass     : DWORD := 0; // 287454020\n" +

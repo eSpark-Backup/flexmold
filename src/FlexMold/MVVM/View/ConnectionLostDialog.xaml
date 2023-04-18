@@ -20,7 +20,7 @@
                     IsIndeterminate="True"
                     Style="{StaticResource MaterialDesignCircularProgressBar}"
                     Value="0" />
-                <TextBlock Text="Trying to restore TwinCAT...." />
+                <TextBlock Text="TwinCAT Stopped FCA closing...." />
                 <Button
                     HorizontalAlignment="Center"
                     Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"

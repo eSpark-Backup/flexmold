@@ -113,7 +113,7 @@ namespace FlexMold
         }
         private void TwinCATSystemUpdate()
         {
-            if (TwinCathelper.Client != null)
+            if (TwinCathelper.Client != null && TwinCathelper.Client.IsConnected)
             {
                 bt_TCC.Content = TwinCathelper.Client.State.ToString();
                 TwinCathelper.CurrentConnectionState = TwinCathelper.Client.State;

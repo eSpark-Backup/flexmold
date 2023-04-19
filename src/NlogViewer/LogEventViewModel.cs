@@ -1,6 +1,6 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Windows.Media;
+using Humanizer;
 using NLog;
 
 namespace NlogViewer
@@ -16,13 +16,12 @@ namespace NlogViewer
 
             ToolTip = logEventInfo.FormattedMessage;
             Level = logEventInfo.Level.ToString();
-            FormattedMessage = logEventInfo.FormattedMessage;
+            FormattedMessage = logEventInfo.FormattedMessage.Humanize();
             LoggerName = logEventInfo.LoggerName;
             Time = logEventInfo.TimeStamp.ToString(CultureInfo.InvariantCulture);
 
             SetupColors(logEventInfo);
         }
-
 
         public string Time { get; private set; }
         public string LoggerName { get; private set; }

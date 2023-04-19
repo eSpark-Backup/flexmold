@@ -6,14 +6,10 @@ using FlexMold.Utility;
 using Humanizer;
 using NLog;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Ports;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace FlexMold.MVVM.ViewModel.Project
 {
@@ -69,9 +65,12 @@ namespace FlexMold.MVVM.ViewModel.Project
                 _SelectedSerialPort = value;
             }
         }
+        private  ToastNotificationUtil _TstN;
+
         public LaserProjectorViewModel(ProjectViewModel parent)
         {
             log = LogManager.GetLogger("LaseProjector");
+            _TstN= new ToastNotificationUtil();
             _parent = parent;
             SendLasFileCommand = new RelayCommand(o => { _ = sendLasFileAsync(Parent.slectedFile); });
             SerialConfigCommand = new RelayCommand(o => { SerialConfigWindow(); });
@@ -91,7 +90,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     {
                         var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
                         log.Log(LogLevel.Error, tmsg);
-                        ToastNotificationUtil.ShowError(tmsg);
+                        _TstN.ShowError(tmsg);
                         return;
                     }
                 }
@@ -110,7 +109,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     {
                         var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
                         log.Log(LogLevel.Error, tmsg);
-                        ToastNotificationUtil.ShowError(tmsg);
+                        _TstN.ShowError(tmsg);
                         return;
                     }
                 }
@@ -130,7 +129,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     {
                         var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
                         log.Log(LogLevel.Error, tmsg);
-                        ToastNotificationUtil.ShowError(tmsg);
+                        _TstN.ShowError(tmsg);
                         return;
                     }
                 }
@@ -192,7 +191,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                             }
                             catch (Exception ex)
                             {
-                                ToastNotificationUtil.ShowError(ex.Message);
+                                _TstN.ShowError(ex.Message);
                                 log.Log(LogLevel.Error, ex.Message);
                             }
                             finally
@@ -203,7 +202,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                         case (int)EProjectorComMode.Samba:
                             string _tmsg = $"Sending file via samba";
                             log.Log(LogLevel.Info, _tmsg);
-                            ToastNotificationUtil.ShowInformation(_tmsg);
+                            _TstN.ShowInformation(_tmsg);
                             try
                             {
                                 log.Log(LogLevel.Info, $"Connecting to {MyPorjector.IpAddres}");
@@ -219,7 +218,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                             }
                             catch (Exception ex)
                             {
-                                ToastNotificationUtil.ShowError(ex.Message);
+                                _TstN.ShowError(ex.Message);
                                 log.Log(LogLevel.Error, ex.Message);
                             }
                             break;
@@ -234,7 +233,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                                     {
                                         var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
                                         log.Log(LogLevel.Error, tmsg);
-                                        ToastNotificationUtil.ShowError(tmsg);
+                                        _TstN.ShowError(tmsg);
                                         return;
                                     }
                                 }
@@ -248,7 +247,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                             }
                             catch (Exception ex)
                             {
-                                ToastNotificationUtil.ShowError(ex.Message);
+                                _TstN.ShowError(ex.Message);
                                 log.Log(LogLevel.Error, ex.Message);
                             }
                             break;
@@ -259,7 +258,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 catch (Exception ex)
                 {
                     log.Log(LogLevel.Error, ex.Message);
-                    ToastNotificationUtil.ShowError(ex.Message);
+                    _TstN   .ShowError(ex.Message);
                 }
             }
             catch (Exception ex)
@@ -291,7 +290,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             catch (Exception ex)
             {
                 log.Log(LogLevel.Error, ex.Message);
-                ToastNotificationUtil.ShowError(ex.Message);
+                _TstN.ShowError(ex.Message);
             }
         }
         private void SambaConfigWindow()
@@ -319,7 +318,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             catch (Exception ex)
             {
                 log.Log(LogLevel.Error, ex, ex.Message);
-                ToastNotificationUtil.ShowError(ex.Message);
+                _TstN.ShowError(ex.Message);
             }
         }
     }

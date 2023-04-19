@@ -1,16 +1,13 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
-using FlexMold.MVVM.View.Project;
 using FlexMold.Utility;
 using NLog;
 using Sylvan.Data.Csv;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Ports;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace FlexMold.MVVM.ViewModel.Project
 {
@@ -51,6 +48,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 OnPropertyChanged();
             }
         }
+        private ToastNotificationUtil _TstN;
         public LaserProjectorViewModel lVM { get; set; }
         void WriteCSVData()
         {
@@ -81,6 +79,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         }
         public ProjectViewModel()
         {
+            _TstN =  new ToastNotificationUtil();
             lVM = new LaserProjectorViewModel(this);
             ReadCSVFileCommand = new RelayCommand(o => { WriteCSVData(); });
             BrowseProjectCommand = new RelayCommand(o => { BrowseProject(); });
@@ -119,7 +118,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     catch (Exception ex)
                     {
                         log.Log(LogLevel.Error, ex.Message);
-                        ToastNotificationUtil.ShowError(ex.Message);
+                        _TstN.ShowError(ex.Message);
                     }
                 }
                 else

@@ -100,7 +100,11 @@ namespace FlexMold.MVVM.ViewModel
             };
             log.Log(LogLevel.Info, $"{MyMachines.Count} Machines Found");
             MachineClickCommand = new RelayCommand(o => MachineSelectMethod(o as Machine));
-            RunButtonCommand = new RelayCommand(o => RunMainWindow());
+            RunButtonCommand = new RelayCommand(o =>
+            {
+                if (Validataion())
+                    RunMainWindow();
+            });
             CloseButtonCommand = new RelayCommand(o =>
             {
                 OnRequestClose(this, new EventArgs());
@@ -122,27 +126,24 @@ namespace FlexMold.MVVM.ViewModel
                     }
                     else
                     {
-                        if (Validataion())
-                        {
-                            SelectedScript = new FlexMoldMachine1();
-                            //SelectedScript = new FlexMoldMachineDebug();
-                            ComRegistration = true;
-                            updateVSInstallations();
+                        SelectedScript = new FlexMoldMachine1();
+                        //SelectedScript = new FlexMoldMachineDebug();
+                        ComRegistration = true;
+                        updateVSInstallations();
 
-                            string TCVS = "TcXaeShell 15.0";
-                            log.Log(LogLevel.Info, $"TwinCAT IDE : {TCVS}");
-                            SelectedVS = AvailableVS.Where(a => a.Name == TCVS).FirstOrDefault();
-                            if (SelectedVS != null)
-                            {
-                                RunScript();
-                            }
-                            else
-                            {
-                                string msg = $"IDE Not Found Please Install {TCVS}";
-                                log.Log(LogLevel.Error, $"{msg}");
-                                MessageBox.Show($"{msg}");
-                                OnRequestClose(this, new EventArgs());
-                            }
+                        string TCVS = "TcXaeShell 15.0";
+                        log.Log(LogLevel.Info, $"TwinCAT IDE : {TCVS}");
+                        SelectedVS = AvailableVS.Where(a => a.Name == TCVS).FirstOrDefault();
+                        if (SelectedVS != null)
+                        {
+                            RunScript();
+                        }
+                        else
+                        {
+                            string msg = $"IDE Not Found Please Install {TCVS}";
+                            log.Log(LogLevel.Error, $"{msg}");
+                            MessageBox.Show($"{msg}");
+                            OnRequestClose(this, new EventArgs());
                         }
                     }
 

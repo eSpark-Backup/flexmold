@@ -33,9 +33,11 @@ namespace FlexMold.Utility
         public TelnetClient MyTelnetClient { get; set; }
 
         Logger log;
+        private ToastNotificationUtil _TstN;
         public TelnetHelper()
         {
             log = LogManager.GetLogger("Laser Projector");
+            _TstN = new ToastNotificationUtil();
             //SendMessage = "echo";
         }
 
@@ -66,7 +68,7 @@ namespace FlexMold.Utility
             }
             catch (Exception err)
             {
-                ToastNotificationUtil.ShowError(err.Message);
+                _TstN.ShowError(err.Message);
                 log.Log(LogLevel.Error, err.Message);
                 return false;
             }

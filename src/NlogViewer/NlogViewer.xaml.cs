@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using Humanizer;
 using NLog;
 using NLog.Common;
 
@@ -108,7 +109,7 @@ namespace NlogViewer
                 else ScrollToFirst();
                 MyExpander.Header = new TextBlock
                 {
-                    Text = $"Last Log {log.LogEvent.TimeStamp.ToShortTimeString()} {log.LogEvent.LoggerName} | {log.LogEvent.Level} | {log.LogEvent.FormattedMessage}",
+                    Text = $"Last Log {log.LogEvent.TimeStamp.ToShortTimeString()} {log.LogEvent.LoggerName} | {log.LogEvent.Level} | {log.LogEvent.FormattedMessage.Humanize()}",
                     Height = 20,
                     ToolTip = vm.ToolTip,
                     Foreground = vm.Background
@@ -140,6 +141,10 @@ namespace NlogViewer
             LogView.ScrollIntoView(item);
         }
 
+        private void logView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 
 }

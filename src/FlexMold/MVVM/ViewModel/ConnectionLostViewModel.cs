@@ -35,8 +35,8 @@ namespace FlexMold.MVVM.ViewModel
                 switch (EventMessage)
                 {
                     case "Connection State Lost":
-                        TwinCathelper.TwinCatConnect851();
-
+                        Thread.Sleep(500);
+                        TwinCathelper.Client.Close();
                         break;
                     case "Ads State Lost":
                         retry = 0;

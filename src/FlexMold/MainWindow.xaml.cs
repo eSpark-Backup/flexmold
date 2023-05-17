@@ -38,7 +38,7 @@ namespace FlexMold
             {
                 case EMachineType.Motor:
                     TwinCathelper._session.ConnectionStateChanged += session_ConnectionStateChanged;
-                    TwinCathelper.Client.ConnectionStateChanged += _connection_ConnectionStatusChanged;
+                    TwinCathelper.ClientSystemService.ConnectionStateChanged += _connection_ConnectionStatusChanged;
                     TwinCathelper.Client.RouterStateChanged += _connection_RouterStateChanged;
                     TwinCathelper.Client.RegisterAdsStateChangedAsync(_connection_AdsStateChanged, CancellationToken.None);
                     break;
@@ -113,7 +113,7 @@ namespace FlexMold
         }
         private void TwinCATSystemUpdate()
         {
-            if (TwinCathelper.Client != null)
+            if (TwinCathelper.Client != null && TwinCathelper.Client.IsConnected)
             {
                 bt_TCC.Content = TwinCathelper.Client.State.ToString();
                 TwinCathelper.CurrentConnectionState = TwinCathelper.Client.State;

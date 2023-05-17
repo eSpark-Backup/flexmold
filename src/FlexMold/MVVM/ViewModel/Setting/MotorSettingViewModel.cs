@@ -66,7 +66,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
                 DataContext = new FoeSettingDiaglogViewModel()
             };
             var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
-         }
+        }
 
         private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
         { 

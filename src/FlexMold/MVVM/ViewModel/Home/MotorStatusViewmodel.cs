@@ -69,7 +69,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                                 MyMotors[v[i]].FillColor = Brushes.Green;
                                 MyMotors[v[i]].ErrorDeatil = _tmgs;
                                 log.Log(LogLevel.Info, _tmgs);
-                                ToastNotificationUtil.ShowSuccess(_tmgs);
+                                _TstN.ShowSuccess(_tmgs);
                                 break;
                             //case (int)EmDiag1.Recovered:
                             //    _tmgs = $"[Info{_value[v[i]]}] Motor #{v[i]} {EmDiag1.Recovered}";
@@ -83,7 +83,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                                 MyMotors[v[i]].FillColor = Brushes.Red;
                                 MyMotors[v[i]].ErrorDeatil = _tmgs;
                                 log.Log(LogLevel.Error, _tmgs);
-                                ToastNotificationUtil.ShowError(_tmgs);
+                                _TstN.ShowError(_tmgs);
                                 break;
                             default:
                                 break;
@@ -105,7 +105,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                             MyMotors[v[i]].FillColor = Brushes.Green;
                             MyMotors[v[i]].ErrorDeatil = _tmgs;
                             log.Log(LogLevel.Info, _tmgs);
-                            ToastNotificationUtil.ShowSuccess(_tmgs);
+                            _TstN.ShowSuccess(_tmgs);
                             break;
                         //case (int)EmDiag1.Recovered:
                         //    _tmgs = $"[Info{_value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Recovered}";
@@ -119,7 +119,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                             MyMotors[v[i]].FillColor = Brushes.Red;
                             MyMotors[v[i]].ErrorDeatil = _tmgs;
                             log.Log(LogLevel.Error, _tmgs);
-                            ToastNotificationUtil.ShowError(_tmgs);
+                            _TstN.ShowError(_tmgs);
                             break;
                         default:
                             break;
@@ -175,6 +175,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                 log.Log(LogLevel.Error, ex.Message);
             }
         }
+        private ToastNotificationUtil _TstN;
         public MotorStatusViewmodel()
         {
             if (TwinCathelper.Client == null)
@@ -182,6 +183,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                 return;
             }
             log = LogManager.GetLogger("Motor Status");
+            _TstN = new ToastNotificationUtil();
             MyMotors = new ObservableCollection<MotorStatusControl>() { };
             int mcount = 0;
             RegisterNotification();

@@ -100,7 +100,11 @@ namespace FlexMold.MVVM.ViewModel
             };
             log.Log(LogLevel.Info, $"{MyMachines.Count} Machines Found");
             MachineClickCommand = new RelayCommand(o => MachineSelectMethod(o as Machine));
-            RunButtonCommand = new RelayCommand(o => RunMainWindow());
+            RunButtonCommand = new RelayCommand(o =>
+            {
+                if (Validataion())
+                    RunMainWindow();
+            });
             CloseButtonCommand = new RelayCommand(o =>
             {
                 OnRequestClose(this, new EventArgs());
@@ -211,7 +215,7 @@ namespace FlexMold.MVVM.ViewModel
                 else
                 {
                     ProgressStatuses = $"{AdsErrorCode.DeviceSymbolNotFound.ToString()}\n" +
-                $"TwinCAT Script not running or TwinCAT is Config mode \n" +
+                $"TwinCAT Script is not running or TwinCAT is in Config mode \n" +
                 $"Please Start/Restart TwinCAT serivce or Build TwinCAT Solution from FCA \n";
                 }
             }

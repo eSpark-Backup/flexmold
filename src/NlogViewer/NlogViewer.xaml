@@ -25,7 +25,7 @@
     </UserControl.Resources>
     <Grid>
         <Expander Name="MyExpander" MaxHeight="200">
-            <ListView Name="logView" ItemsSource="{Binding LogEntries}">
+            <ListView Name="logView" ItemsSource="{Binding LogEntries}" SelectionChanged="logView_SelectionChanged">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="{x:Type ListViewItem}">
                         <Setter Property="ToolTip" Value="{Binding ToolTip}" />

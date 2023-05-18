@@ -24,7 +24,6 @@
         <ControlTemplate x:Key="MultipleChoiceFilter">
             <core:MultipleChoiceFilter Filter="{Binding Path=Filter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=dgx:DataGridFilterColumnControl}}" />
         </ControlTemplate>
-
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>

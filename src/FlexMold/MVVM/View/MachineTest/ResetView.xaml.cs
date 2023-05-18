@@ -9,9 +9,7 @@ namespace FlexMold.MVVM.View.MachineTest
     {
         public ResetView()
         {
-
             InitializeComponent();
         }
-
     }
 }

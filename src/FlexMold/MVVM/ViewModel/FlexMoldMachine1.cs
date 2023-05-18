@@ -16,14 +16,14 @@ using TwinCAT.SystemManager;
 namespace FlexMold.MVVM.ViewModel
 {
     /// <summary>
-    /// Demonstrates the generation + compilation of PLC projects. 
+    /// Demonstrates the generation + compilation of PLC projects.
     /// The method Execute() will be called by ScriptingContainer and will execute the actual script code.
     /// </summary>
     public class FlexMoldMachine1
         : ScriptEarlyBound
     {
-        ITcSysManager4 systemManager = null;
-        EnvDTE.Project project = null;
+        private ITcSysManager4 systemManager = null;
+        private EnvDTE.Project project = null;
 
         /// <summary>
         /// Handler function Initializing the Script (Configuration preparations)
@@ -54,7 +54,6 @@ namespace FlexMold.MVVM.ViewModel
             base.OnCleanUp(worker);
         }
 
-
         /// <summary>
         /// Insertion Mode for creating PLC projects.
         /// </summary>
@@ -64,10 +63,12 @@ namespace FlexMold.MVVM.ViewModel
             /// Copies a PLC Project
             /// </summary>
             Copy = 0,
+
             /// <summary>
             /// Moves a PLC Project
             /// </summary>
             Move = 1,
+
             /// <summary>
             /// References a PLC Project
             /// </summary>
@@ -91,6 +92,7 @@ namespace FlexMold.MVVM.ViewModel
                 browse(child, worker);
             }
         }
+
         private void AddLibrary(string _LibraryName, ITcSmTreeItem plcProject, IWorker worker)
         {
             worker.ProgressStatus = string.Format("Adding Library '{0}' ...", _LibraryName);
@@ -99,13 +101,13 @@ namespace FlexMold.MVVM.ViewModel
             ITcPlcLibraryManager libraryManager = (ITcPlcLibraryManager)referencesItem;
             libraryManager.AddLibrary(_LibraryName);
         }
+
         /// <summary>
         /// Handler function Executing the Script code.
         /// </summary>
         /// <param name="worker">The worker.</param>
         protected override void OnExecute(IWorker worker)
         {
-
             if (worker.CancellationPending)
                 throw new Exception("Cancelled");
             worker.ProgressStatus = $"Connecting to TwinCAT Via ADS On Port {(int)AmsPort.SystemService}";
@@ -123,7 +125,6 @@ namespace FlexMold.MVVM.ViewModel
              * ================================================================================================= */
             ITcSmTreeItem plcConfig = systemManager.LookupTreeItem("TIPC"); // Getting PLC Configuration item
             ITcSmTreeItem devices = systemManager.LookupTreeItem("TIID"); // Getting IO-Configuration item
-
 
             /* =================================================================================================
              * Scans the Fieldbus interfaces and adds an EtherCAT Device.
@@ -203,9 +204,8 @@ namespace FlexMold.MVVM.ViewModel
                 worker.Progress = 55;
                 iecProjectRoot.BootProjectAutostart = true;
 
-
                 /* =================================================================================================
-                 * Compiling project using Visual Studio DTE methods 
+                 * Compiling project using Visual Studio DTE methods
                  * ================================================================================================= */
                 errors = null;
                 worker.ProgressStatus = "Compiling project (3) ...";
@@ -220,7 +220,6 @@ namespace FlexMold.MVVM.ViewModel
                     worker.ProgressStatus = "Generating boot project ...";
                     iecProjectRoot.GenerateBootProject(true);
                     worker.Progress = 65;
-
 
                     /* =================================================================================================
                      * Prepare XML for PLC Login
@@ -341,6 +340,7 @@ namespace FlexMold.MVVM.ViewModel
                 worker.Progress = 0;
             }
         }
+
         private bool WaitForState(AdsState state, int timeOutInMilliSeconds)
         {
             var stopwatch = new Stopwatch();
@@ -368,9 +368,10 @@ namespace FlexMold.MVVM.ViewModel
             stopwatch.Stop();
             return false;
         }
+
         private ITcSmTreeItem CreateDut(ITcSmTreeItem parent, TreeItemType treeItemType, string typeName, string baseType, IWorker worker)
         {
-            string declarationCode = @"TYPE EthercatDevice : 
+            string declarationCode = @"TYPE EthercatDevice :
 STRUCT
     mDirection AT %Q*: BOOL;
     mSpeed AT %Q*: DWORD;
@@ -378,7 +379,6 @@ STRUCT
     mMode AT %Q*: BOOL;
 END_STRUCT
 END_TYPE";
-
 
             /* =================================================================================================
              * Creating the DUT using CreateChild()
@@ -436,10 +436,10 @@ END_TYPE";
                     messages++;
                     worker.ProgressStatus = "Compiler message: " + item.Description;
                 }
-
             }
             return buildSucceeded;
         }
+
         private void CreatePOUsST(ITcSmTreeItem parent, IWorker worker)
         {
             /* =================================================================================================
@@ -450,7 +450,8 @@ END_TYPE";
             ITcSmTreeItem program = AddPOUProgram("Main", parent, language, worker);
         }
 
-        string deviceName = "LAN9255_EtherCAT_Slave";
+        private string deviceName = "LAN9255_EtherCAT_Slave";
+
         private ITcSmTreeItem AddPOUProgram(string pouName, ITcSmTreeItem parent, IECLanguageType language, IWorker worker)
         {
             ITcSmTreeItem programPou = parent.LookupChild("Main");
@@ -571,6 +572,7 @@ END_TYPE";
 
             return programPou;
         }
+
         public override string Description
         {
             get { return "Demonstrates the creation of PLC projects, POUs etc., Setting of Solution Configurations."; }
@@ -618,9 +620,11 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                 return "PLC";
             }
         }
+
         public int AvaiableBoxesCount { get; set; }
         public int AvaiableDevicesCount { get; set; }
         public List<ITcSmTreeItem> AvailableBoxes { get; set; }
+
         public void ScanDevicesAndBoxes(IWorker worker)
         {
             FCAModel.MyBoxes = new List<TreeItem>();

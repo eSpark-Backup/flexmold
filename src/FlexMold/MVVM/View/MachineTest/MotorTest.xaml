@@ -43,6 +43,5 @@
         <mah:NumericUpDown Value="{Binding SelectedMotorTimeValue}" />
         <Label Content="Motor Position : " />
         <TextBlock Style="{StaticResource LabelTextBlock}" Text="{Binding Position}" />
-
     </UniformGrid>
 </UserControl>

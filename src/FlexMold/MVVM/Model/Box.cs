@@ -3,11 +3,9 @@ using System.Xml.Serialization;
 
 namespace FlexMold.MVVM.Model
 {
-
     [XmlRoot(ElementName = "AmsAddress")]
     public class AmsAddress
     {
-
         [XmlElement(ElementName = "AmsPort")]
         public int AmsPort { get; set; }
 
@@ -21,7 +19,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "BoxDef")]
     public class BoxDef
     {
-
         [XmlElement(ElementName = "FieldbusAddress")]
         public int FieldbusAddress { get; set; }
 
@@ -32,7 +29,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "Info")]
     public class Info
     {
-
         [XmlElement(ElementName = "Name")]
         public string Name { get; set; }
 
@@ -61,7 +57,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "Send")]
     public class Send
     {
-
         [XmlElement(ElementName = "BitStart")]
         public int BitStart { get; set; }
 
@@ -78,7 +73,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "Recv")]
     public class Recv
     {
-
         [XmlElement(ElementName = "BitStart")]
         public int BitStart { get; set; }
 
@@ -98,7 +92,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "Sm2")]
     public class Sm2
     {
-
         [XmlElement(ElementName = "Type")]
         public string Type { get; set; }
 
@@ -121,7 +114,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "Sm3")]
     public class Sm3
     {
-
         [XmlElement(ElementName = "Type")]
         public string Type { get; set; }
 
@@ -144,7 +136,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "AdsInfo")]
     public class AdsInfo
     {
-
         [XmlElement(ElementName = "AmsAddress")]
         public AmsAddress AmsAddress { get; set; }
 
@@ -161,7 +152,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "Entry")]
     public class Entry
     {
-
         [XmlElement(ElementName = "Index")]
         public string Index { get; set; }
 
@@ -184,7 +174,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "TxPdo")]
     public class TxPdo
     {
-
         [XmlElement(ElementName = "Index")]
         public string Index { get; set; }
 
@@ -210,7 +199,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "RxPdo")]
     public class RxPdo
     {
-
         [XmlElement(ElementName = "Index")]
         public string Index { get; set; }
 
@@ -236,7 +224,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "ProcessData")]
     public class ProcessData
     {
-
         [XmlElement(ElementName = "Send")]
         public Send Send { get; set; }
 
@@ -259,7 +246,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "Timeout")]
     public class Timeout
     {
-
         [XmlElement(ElementName = "ReturningRequest")]
         public int ReturningRequest { get; set; }
 
@@ -282,7 +268,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "BootStrap")]
     public class BootStrap
     {
-
         [XmlElement(ElementName = "Send")]
         public Send Send { get; set; }
 
@@ -293,7 +278,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "ChannelInfo")]
     public class ChannelInfo
     {
-
         [XmlElement(ElementName = "ProfileNo")]
         public int ProfileNo { get; set; }
 
@@ -304,7 +288,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "Profile")]
     public class Profile
     {
-
         [XmlElement(ElementName = "ChannelInfo")]
         public ChannelInfo ChannelInfo { get; set; }
     }
@@ -312,7 +295,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "CoE")]
     public class CoE
     {
-
         [XmlElement(ElementName = "CanOpenType")]
         public int CanOpenType { get; set; }
 
@@ -323,7 +305,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "Mailbox")]
     public class Mailbox
     {
-
         [XmlElement(ElementName = "Send")]
         public Send Send { get; set; }
 
@@ -352,7 +333,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "InitCmd")]
     public class InitCmd
     {
-
         [XmlElement(ElementName = "Transition")]
         public List<string> Transition { get; set; }
 
@@ -390,7 +370,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "Validate")]
     public class Validate
     {
-
         [XmlElement(ElementName = "Data")]
         public string Data { get; set; }
 
@@ -404,7 +383,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "InitCmds")]
     public class InitCmds
     {
-
         [XmlElement(ElementName = "InitCmd")]
         public List<InitCmd> InitCmd { get; set; }
     }
@@ -412,7 +390,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "CycleTimeSync0")]
     public class CycleTimeSync0
     {
-
         [XmlAttribute(AttributeName = "Factor")]
         public int Factor { get; set; }
 
@@ -423,7 +400,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "CycleTimeSync1")]
     public class CycleTimeSync1
     {
-
         [XmlAttribute(AttributeName = "Factor")]
         public int Factor { get; set; }
 
@@ -434,7 +410,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "OpMode")]
     public class OpMode
     {
-
         [XmlElement(ElementName = "Name")]
         public string Name { get; set; }
 
@@ -466,7 +441,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "DC")]
     public class DC
     {
-
         [XmlElement(ElementName = "PotentialReferenceClock")]
         public bool PotentialReferenceClock { get; set; }
 
@@ -480,7 +454,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "StateMachine")]
     public class StateMachine
     {
-
         [XmlElement(ElementName = "AutoRestoreStates")]
         public bool AutoRestoreStates { get; set; }
 
@@ -518,7 +491,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "Divider0400")]
     public class Divider0400
     {
-
         [XmlAttribute(AttributeName = "Enabled")]
         public bool Enabled { get; set; }
 
@@ -529,7 +501,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "PdiTime0410")]
     public class PdiTime0410
     {
-
         [XmlAttribute(AttributeName = "Enabled")]
         public bool Enabled { get; set; }
 
@@ -540,7 +511,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "SmTime0420")]
     public class SmTime0420
     {
-
         [XmlAttribute(AttributeName = "Enabled")]
         public bool Enabled { get; set; }
 
@@ -551,7 +521,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "Watchdog")]
     public class Watchdog
     {
-
         [XmlElement(ElementName = "Divider0400")]
         public Divider0400 Divider0400 { get; set; }
 
@@ -565,7 +534,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "PdoSettings")]
     public class PdoSettings
     {
-
         [XmlElement(ElementName = "PdoAssign")]
         public int PdoAssign { get; set; }
 
@@ -576,7 +544,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "InfoData")]
     public class InfoData
     {
-
         [XmlElement(ElementName = "State")]
         public bool State { get; set; }
 
@@ -596,7 +563,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "Settings")]
     public class Settings
     {
-
         [XmlElement(ElementName = "StateMachine")]
         public StateMachine StateMachine { get; set; }
 
@@ -613,7 +579,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "TwinCAT")]
     public class TwinCAT
     {
-
         [XmlElement(ElementName = "ExtensionSupportFlags")]
         public int ExtensionSupportFlags { get; set; }
     }
@@ -621,7 +586,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "Slave")]
     public class Slave
     {
-
         [XmlElement(ElementName = "Info")]
         public Info Info { get; set; }
 
@@ -650,7 +614,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "EtherCAT")]
     public class EtherCAT
     {
-
         [XmlElement(ElementName = "Slave")]
         public Slave Slave { get; set; }
 
@@ -661,7 +624,6 @@ namespace FlexMold.MVVM.Model
     [XmlRoot(ElementName = "TreeItem")]
     public class TreeItem
     {
-
         [XmlElement(ElementName = "ItemName")]
         public string ItemName { get; set; }
 
@@ -698,8 +660,4 @@ namespace FlexMold.MVVM.Model
         [XmlElement(ElementName = "EtherCAT")]
         public EtherCAT EtherCAT { get; set; }
     }
-
-
-
-
 }

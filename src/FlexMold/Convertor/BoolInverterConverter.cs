@@ -27,6 +27,6 @@ namespace FlexMold.Convertor
             return value;
         }
 
-        #endregion
+        #endregion IValueConverter Members
     }
 }

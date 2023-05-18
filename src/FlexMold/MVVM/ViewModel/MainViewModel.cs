@@ -3,14 +3,15 @@ using System;
 using System.Windows;
 using ToastNotifications;
 using ToastNotifications.Lifetime;
-using ToastNotifications.Position;
 using ToastNotifications.Messages;
+using ToastNotifications.Position;
 
 namespace FlexMold.MVVM.ViewModel
 {
     public class MainViewModel : ObservableObject
     {
         private readonly Notifier _notifier;
+
         public MainViewModel()
         {
             _notifier = new Notifier(cfg =>
@@ -31,14 +32,15 @@ namespace FlexMold.MVVM.ViewModel
                 cfg.DisplayOptions.Width = 250;
             });
         }
+
         public void OnUnloaded()
         {
             _notifier.Dispose();
         }
+
         public void ShowInformation(string message)
         {
             _notifier.ShowInformation(message);
         }
     }
-
 }

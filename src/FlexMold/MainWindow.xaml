@@ -76,7 +76,7 @@
         </ResourceDictionary>
     </Window.Resources>
     <!--<mah:MetroWindow.DataContext>
-        <viewmodel:MainViewModel/>
+        <viewmodel:MainViewModel />
     </mah:MetroWindow.DataContext>-->
 
     <mah:MetroWindow.LeftWindowCommands>

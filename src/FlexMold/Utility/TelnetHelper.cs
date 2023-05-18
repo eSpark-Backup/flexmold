@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FlexMold.Utility
 {
-    class TelnetHelper : ObservableObject
+    internal class TelnetHelper : ObservableObject
     {
         public string ReceivedMessage
         {
@@ -17,9 +17,11 @@ namespace FlexMold.Utility
                 OnPropertyChanged();
             }
         }
+
         private string _ReceivedMessage;
 
         private string _SendMessage;
+
         public string SendMessage
         {
             get { return _SendMessage; }
@@ -29,11 +31,13 @@ namespace FlexMold.Utility
                 OnPropertyChanged();
             }
         }
-        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+        private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         public TelnetClient MyTelnetClient { get; set; }
 
-        Logger log;
+        private Logger log;
         private ToastNotificationUtil _TstN;
+
         public TelnetHelper()
         {
             log = LogManager.GetLogger("Laser Projector");
@@ -53,6 +57,7 @@ namespace FlexMold.Utility
                 log.Log(LogLevel.Info, $"No Active Connection Found");
             }
         }
+
         public async Task<bool> ConnectTelnet(string IpAddres, int TelnetPort)
         {
             ReceivedMessage = "";
@@ -73,6 +78,7 @@ namespace FlexMold.Utility
                 return false;
             }
         }
+
         public async Task SendTelnetMessgae()
         {
             if (MyTelnetClient != null)
@@ -88,6 +94,7 @@ namespace FlexMold.Utility
                 log.Log(LogLevel.Error, $"Connect First");
             }
         }
+
         private void HandleConnectionClosed(object sender, EventArgs e)
         {
             log.Log(LogLevel.Info, $"Connection Closed");

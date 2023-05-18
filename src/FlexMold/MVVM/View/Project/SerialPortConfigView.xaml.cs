@@ -10,10 +10,10 @@ namespace FlexMold.MVVM.View.Project
     /// </summary>
     public partial class SerialPortConfigView : MetroWindow
     {
-
         public MainWindow main { get; set; }
         public SerialPort CurrentPort { get; set; }
         public bool SaveData { get; set; }
+
         public SerialPortConfigView(MainWindow _main, SerialPort _SelectedSerialPort)
         {
             main = _main;
@@ -29,7 +29,6 @@ namespace FlexMold.MVVM.View.Project
             CB_SerialPortName.SelectedItem = _SelectedSerialPort.PortName;
             if (CB_SerialPortName.SelectedItem == null)
                 CB_SerialPortName.SelectedIndex = 0;
-
         }
 
         private void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

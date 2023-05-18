@@ -3,17 +3,17 @@ using FlexMold.MVVM.Model;
 using FlexMold.Utility;
 using NLog;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
-using System.Collections.Generic;
 
 namespace FlexMold.MVVM.ViewModel.MachineTest
 {
     internal class MotorTestViewModel : ObservableObject
     {
-        Logger log;
+        private Logger log;
         public RelayCommand OnLoadedCommand { get; set; }
         public RelayCommand OnUnLoadedCommand { get; set; }
         public int structSize { get; set; }
@@ -21,6 +21,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         public uint DeviceVariableHandle { get; set; }
         public Symbol SymbolEthercatDevice { get; private set; }
         private EthercatDevice[] _MyPLCMotor;
+
         public EthercatDevice[] MyPLCMotor
         {
             get { return _MyPLCMotor; }
@@ -30,7 +31,9 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 OnPropertyChanged();
             }
         }
+
         private uint[] _DeviceIds;
+
         public uint[] DeviceIds
         {
             get { return _DeviceIds; }
@@ -40,13 +43,17 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 OnPropertyChanged();
             }
         }
+
         private float _Position;
+
         public float Position
         {
             get { return _Position; }
             set { _Position = value; OnPropertyChanged(); }
         }
+
         private uint _SelectedMotorIndex;
+
         public uint SelectedMotorIndex
         {
             get { return _SelectedMotorIndex; }
@@ -66,9 +73,11 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 OnPropertyChanged();
             }
         }
+
         public Symbol PositionSymbol { get; set; }
 
         private bool _SelectedMotorModeValue;
+
         public bool SelectedMotorModeValue
         {
             get { return _SelectedMotorModeValue; }
@@ -88,7 +97,9 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 OnPropertyChanged();
             }
         }
+
         private bool _SelectedMotorDirValue;
+
         public bool SelectedMotorDirValue
         {
             get { return _SelectedMotorDirValue; }
@@ -108,7 +119,9 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 OnPropertyChanged();
             }
         }
+
         private UInt32 _SelectedMotorTimeValue;
+
         public UInt32 SelectedMotorTimeValue
         {
             get { return _SelectedMotorTimeValue; }
@@ -128,7 +141,9 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 OnPropertyChanged();
             }
         }
+
         private UInt32 _SelectedMotorSpeedValue;
+
         public UInt32 SelectedMotorSpeedValue
         {
             get { return _SelectedMotorSpeedValue; }
@@ -148,9 +163,11 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 OnPropertyChanged();
             }
         }
+
         public byte[] buffer { get; set; }
-        
-        List<int> NotificatioHandles;
+
+        private List<int> NotificatioHandles;
+
         public void OnLoaded()
         {
             NotificatioHandles = new List<int>
@@ -160,7 +177,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             TwinCathelper.Client.AdsNotification += Client_AdsNotificationMT;
             SelectedMotorIndex = 0;
         }
-        void OnUnLoaded()
+
+        private void OnUnLoaded()
         {
             if (TwinCathelper.Client.State == ConnectionState.Connected)
             {
@@ -174,6 +192,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 TwinCathelper.Client.AdsNotification -= Client_AdsNotificationMT;
             }
         }
+
         private void Client_AdsNotificationMT(object sender, AdsNotificationEventArgs e)
         {
             try
@@ -187,6 +206,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                         case TCVarName.mPosition:
                             Position = BitConverter.ToUInt32(e.Data.ToArray(), (int)SelectedMotorIndex * sizeof(UInt32)) / 1000;
                             break;
+
                         default:
                             break;
                     }
@@ -197,6 +217,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 log.Log(NLog.LogLevel.Error, ex.Message);
             }
         }
+
         public MotorTestViewModel()
         {
             if (TwinCathelper.Client == null)
@@ -204,7 +225,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 return;
             }
             log = LogManager.GetLogger("Motor Test");
-   
+
             MyPLCMotor = new EthercatDevice[TwinCathelper.DeviceCount];
             PositionSymbol = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"{TCVarName.mPosition}").FirstOrDefault();
             SymbolEthercatDevice = TwinCathelper.MySymbols.Where(a => a.InstancePath == TCVarName.MainDevice).FirstOrDefault();

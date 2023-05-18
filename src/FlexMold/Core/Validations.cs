@@ -15,6 +15,7 @@ namespace FlexMold.Core
             return new ValidationResult(false, "Option must be checked");
         }
     }
+
     public class NotEmptyValidationRule : ValidationRule
     {
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
@@ -24,6 +25,7 @@ namespace FlexMold.Core
                 : ValidationResult.ValidResult;
         }
     }
+
     public class SimpleDateValidationRule : ValidationRule
     {
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)

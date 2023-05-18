@@ -17,6 +17,7 @@
             PlotFolderName = "Plot";
         }
     }
+
     public enum EProjectorComMode
     {
         Serial,

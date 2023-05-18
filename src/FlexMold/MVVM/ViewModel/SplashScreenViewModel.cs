@@ -13,11 +13,11 @@ using TwinCAT.Ads;
 
 namespace FlexMold.MVVM.ViewModel
 {
-
-    class SplashScreenViewModel : ObservableObject
+    internal class SplashScreenViewModel : ObservableObject
     {
         public VSInfo SelectedVS { get; set; }
         private bool _RunButtonEnable;
+
         public bool RunButtonEnable
         {
             get { return _RunButtonEnable; }
@@ -27,7 +27,9 @@ namespace FlexMold.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+
         private bool _CloseButtonEnable;
+
         public bool CloseButtonEnable
         {
             get { return _CloseButtonEnable; }
@@ -37,8 +39,9 @@ namespace FlexMold.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        Logger log = LogManager.GetLogger("Machine Selection");
-        Logger logtb = LogManager.GetLogger("TwiCAT Builder");
+
+        private Logger log = LogManager.GetLogger("Machine Selection");
+        private Logger logtb = LogManager.GetLogger("TwiCAT Builder");
         public Script SelectedScript { get; set; }
 
         private int _ProgressPercentage;
@@ -65,12 +68,15 @@ namespace FlexMold.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+
         private bool _ICEnable;
+
         public bool ICEnable
         {
             get { return _ICEnable; }
             set { _ICEnable = value; OnPropertyChanged(); }
         }
+
         public bool ComRegistration { get; set; }
         public IWorker _worker { get; set; }
         public ConfigurationFactory _factory { get; set; }
@@ -81,7 +87,9 @@ namespace FlexMold.MVVM.ViewModel
         public RelayCommand RunButtonCommand { get; set; }
         public ObservableCollection<Machine> MyMachines { get; set; }
         public List<VSInfo> AvailableVS { get; private set; }
+
         public event EventHandler OnRequestClose;
+
         public SplashScreenViewModel()
         {
             ICEnable = true;
@@ -113,7 +121,7 @@ namespace FlexMold.MVVM.ViewModel
             );
         }
 
-        void MachineSelectMethod(Machine _a)
+        private void MachineSelectMethod(Machine _a)
         {
             SelectedMachine = _a;
             switch (SelectedMachine.MachineType)
@@ -148,13 +156,16 @@ namespace FlexMold.MVVM.ViewModel
                     }
 
                     break;
+
                 case EMachineType.Projector:
                     RunMainWindow();
                     break;
+
                 default:
                     break;
             }
         }
+
         public void updateVSInstallations()
         {
             VSInfo[] vsInstallations = null;
@@ -170,9 +181,9 @@ namespace FlexMold.MVVM.ViewModel
             }
             UpdateVSInfos(vsInstallations);
         }
+
         private void UpdateVSInfos(VSInfo[] progIdDict2)
         {
-
             int CompareTo(VSInfo info1, VSInfo info2)
             {
                 return info1.Version.CompareTo(info2.Version);
@@ -190,14 +201,16 @@ namespace FlexMold.MVVM.ViewModel
                 AvailableVS.Add(vsInfo);
             }
         }
-        void RunMainWindow()
+
+        private void RunMainWindow()
         {
             MainWindow mw = new MainWindow(SelectedMachine);
             OnRequestClose(this, new EventArgs());
             mw.Show();
             Application.Current.MainWindow = mw;
         }
-        bool Validataion()
+
+        private bool Validataion()
         {
             try
             {
@@ -226,7 +239,7 @@ namespace FlexMold.MVVM.ViewModel
             return false;
         }
 
-        void _worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void _worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             ProgressPercentage = e.ProgressPercentage;
             if (ProgressPercentage == 100)
@@ -234,17 +247,18 @@ namespace FlexMold.MVVM.ViewModel
                 if (_worker != null)
                     _worker.CancelAndWait(TimeSpan.FromSeconds(1.0));
                 RunButtonEnable = true;
-
             }
             else if (ProgressPercentage == 0)
             {
                 ICEnable = true;
             }
         }
-        void _worker_ProgressStatusChanged(object sender, ProgressStatusChangedArgs e)
+
+        private void _worker_ProgressStatusChanged(object sender, ProgressStatusChangedArgs e)
         {
             ProgressStatuses = e.Status;
         }
+
         public void RunScript()
         {
             ICEnable = false;

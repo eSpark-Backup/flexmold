@@ -13,4 +13,3 @@ namespace FlexMold.MVVM.View.Home
         }
     }
 }
-

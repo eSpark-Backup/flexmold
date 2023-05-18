@@ -9,10 +9,10 @@ using ToastNotifications.Position;
 
 namespace FlexMold.Utility
 {
-
     public class ToastNotificationUtil
     {
         public Notifier Notifier { get; private set; }
+
         public ToastNotificationUtil()
         {
             _messageCounter = 5;
@@ -34,6 +34,7 @@ namespace FlexMold.Utility
                 cfg.DisplayOptions.Width = 200;
             });
         }
+
         private string _lastMessage = "";
         private int _messageCounter;
 
@@ -44,6 +45,7 @@ namespace FlexMold.Utility
                 _lastMessage = message.Humanize();
             }
         }
+
         public void ShowInformation(string message)
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -52,6 +54,7 @@ namespace FlexMold.Utility
                 RememberMessage(message);
             });
         }
+
         public void ShowError(string message)
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -60,6 +63,7 @@ namespace FlexMold.Utility
                 RememberMessage(message);
             });
         }
+
         public void ShowSuccess(string message)
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -68,6 +72,7 @@ namespace FlexMold.Utility
                 RememberMessage(message);
             });
         }
+
         public void ShowWarning(string message)
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -76,6 +81,7 @@ namespace FlexMold.Utility
                 RememberMessage(message);
             });
         }
+
         private MessageOptions CreateOptions()
         {
             return new MessageOptions
@@ -85,6 +91,7 @@ namespace FlexMold.Utility
                 Tag = ++_messageCounter % 2
             };
         }
+
         public bool? FreezeOnMouseEnter { get; set; } = false;
         public bool? ShowCloseButton { get; set; } = true;
     }

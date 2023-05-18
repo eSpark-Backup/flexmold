@@ -1,26 +1,29 @@
-﻿using FlexMold.MVVM.Model;
+﻿using FlexMold.Core;
+using FlexMold.MVVM.Model;
+using FlexMold.Utility;
+using NLog;
 using System;
 using System.Linq;
-using NLog;
-using System.Timers;
-using FlexMold.Utility;
 using System.Reactive.Linq;
-using FlexMold.Core;
+using System.Timers;
 using System.Windows.Media;
 
 namespace FlexMold.MVVM.ViewModel.Home
 {
-    class MachineDetailViewModel : ObservableObject
+    internal class MachineDetailViewModel : ObservableObject
     {
-        Logger log;
+        private Logger log;
         public UInt16 ECAnSlaves { get; set; }
         public bool ECAbError { get; set; }
         public UInt32 ECAnErrId { get; set; }
-        public ST_EcSlaveState[] MySlaves { get => _MySlaves; set { _MySlaves = value; OnPropertyChanged(); } }
+
+        public ST_EcSlaveState[] MySlaves
+        { get => _MySlaves; set { _MySlaves = value; OnPropertyChanged(); } }
 
         private ST_EcSlaveState[] _MySlaves;
-        byte[] ECAdevStatesB;
-        private  ToastNotificationUtil _TstN;
+        private byte[] ECAdevStatesB;
+        private ToastNotificationUtil _TstN;
+
         public MachineDetailViewModel()
         {
             if (TwinCathelper.Client == null)
@@ -47,11 +50,13 @@ namespace FlexMold.MVVM.ViewModel.Home
             timer.Start();
             timer.Elapsed += Timer_Elapsed;
         }
+
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             GetSlaveMachineState();
         }
-        void GetSlaveMachineState()
+
+        private void GetSlaveMachineState()
         {
             try
             {
@@ -74,18 +79,21 @@ namespace FlexMold.MVVM.ViewModel.Home
                                     log.Log(LogLevel.Warn, _tmgs);
                                     _TstN.ShowWarning(_tmgs);
                                     break;
+
                                 case ESlaveStateMachine.EC_DEVICE_STATE_PREOP:
                                     MySlaves[index].FillColor = Brushes.Yellow;
                                     _tmgs = $"Slave {MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
                                     log.Log(LogLevel.Warn, _tmgs);
                                     _TstN.ShowWarning(_tmgs);
                                     break;
+
                                 case ESlaveStateMachine.EC_DEVICE_STATE_BOOTSTRAP:
                                     MySlaves[index].FillColor = Brushes.Yellow;
                                     _tmgs = $"Slave {MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
                                     log.Log(LogLevel.Warn, _tmgs);
                                     _TstN.ShowWarning(_tmgs);
                                     break;
+
                                 case ESlaveStateMachine.EC_DEVICE_STATE_SAFEOP:
                                     MySlaves[index].FillColor = Brushes.Yellow;
                                     _tmgs = $"Motor {MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
@@ -97,30 +105,35 @@ namespace FlexMold.MVVM.ViewModel.Home
                                     log.Log(LogLevel.Info, _tmgs);
                                     _TstN.ShowSuccess(_tmgs);
                                     break;
+
                                 case ESlaveStateMachine.EC_DEVICE_STATE_ERROR:
                                     MySlaves[index].FillColor = Brushes.Red;
                                     _tmgs = $"Motor {MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
                                     log.Log(LogLevel.Error, _tmgs);
                                     _TstN.ShowError(_tmgs);
                                     break;
+
                                 case ESlaveStateMachine.EC_DEVICE_STATE_INVALID_VPRS:
                                     MySlaves[index].FillColor = Brushes.Red;
                                     _tmgs = $"Motor {MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
                                     log.Log(LogLevel.Error, _tmgs);
                                     _TstN.ShowError(_tmgs);
                                     break;
+
                                 case ESlaveStateMachine.EC_DEVICE_STATE_INITCMD_ERROR:
                                     MySlaves[index].FillColor = Brushes.Red;
                                     _tmgs = $"Motor {MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
                                     log.Log(LogLevel.Error, _tmgs);
                                     _TstN.ShowError(_tmgs);
                                     break;
+
                                 case ESlaveStateMachine.EC_DEVICE_STATE_DISABLED:
                                     MySlaves[index].FillColor = Brushes.Red;
                                     _tmgs = $"Motor {MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
                                     log.Log(LogLevel.Error, _tmgs);
                                     _TstN.ShowError(_tmgs);
                                     break;
+
                                 default:
                                     break;
                             }
@@ -136,30 +149,39 @@ namespace FlexMold.MVVM.ViewModel.Home
                                     log.Log(LogLevel.Info, _tmgs);
                                     _TstN.ShowSuccess(_tmgs);
                                     break;
+
                                 case ElinkState.EC_LINK_STATE_NOT_PRESENT:
                                     MySlaves[index].FillColor = Brushes.OrangeRed;
                                     _tmgs = $"Motor {MySlaves[index].SlaveName} : Link State {MySlaves[index].linkState}";
                                     log.Log(LogLevel.Error, _tmgs);
                                     _TstN.ShowError(_tmgs);
                                     break;
+
                                 case ElinkState.EC_LINK_STATE_LINK_WITHOUT_COMM:
                                     break;
+
                                 case ElinkState.EC_LINK_STATE_MISSING_LINK:
                                     MySlaves[index].FillColor = Brushes.OrangeRed;
                                     _tmgs = $"Motor {MySlaves[index].SlaveName} : Link State {MySlaves[index].linkState}";
                                     log.Log(LogLevel.Info, _tmgs);
                                     _TstN.ShowError(_tmgs);
                                     break;
+
                                 case ElinkState.EC_LINK_STATE_ADDITIONAL_LINK:
                                     break;
+
                                 case ElinkState.EC_LINK_STATE_PORT_A:
                                     break;
+
                                 case ElinkState.EC_LINK_STATE_PORT_B:
                                     break;
+
                                 case ElinkState.EC_LINK_STATE_PORT_C:
                                     break;
+
                                 case ElinkState.EC_LINK_STATE_PORT_D:
                                     break;
+
                                 default:
                                     break;
                             }
@@ -175,9 +197,6 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 log.Log(LogLevel.Error, ex.Message);
             }
-
         }
-
-
     }
 }

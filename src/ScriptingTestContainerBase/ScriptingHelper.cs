@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using ScriptingTest;
+using System;
+using System.Collections.Generic;
 using System.Xml;
 using TCatSysManagerLib;
 using TwinCAT.SystemManager;
-using ScriptingTest;
-using System;
 
 namespace Scripting.CSharp
 {
@@ -119,12 +119,11 @@ namespace Scripting.CSharp
         public VarDeclaration(PLC_VARDECL_SCOPE scope, string name, string type, string address)
             : this(scope, name, type, address, string.Empty, string.Empty, (PLC_VARDECL_FLAGS)0)
         {
-
         }
 
         #region ITcPlcVarDeclaration Members
 
-        string _address;
+        private string _address;
 
         /// <summary>
         /// Gets the address.
@@ -135,7 +134,8 @@ namespace Scripting.CSharp
             get { return _address; }
         }
 
-        string _comment;
+        private string _comment;
+
         /// <summary>
         /// Gets the comment.
         /// </summary>
@@ -145,7 +145,7 @@ namespace Scripting.CSharp
             get { return _comment; }
         }
 
-        PLC_VARDECL_FLAGS _flags;
+        private PLC_VARDECL_FLAGS _flags;
 
         /// <summary>
         /// Gets the flags.
@@ -156,7 +156,7 @@ namespace Scripting.CSharp
             get { return _flags; }
         }
 
-        string _initValue;
+        private string _initValue;
 
         /// <summary>
         /// Gets the init value.
@@ -167,7 +167,7 @@ namespace Scripting.CSharp
             get { return _initValue; }
         }
 
-        string _name;
+        private string _name;
 
         /// <summary>
         /// Gets the name.
@@ -178,7 +178,7 @@ namespace Scripting.CSharp
             get { return _name; }
         }
 
-        PLC_VARDECL_SCOPE _scope;
+        private PLC_VARDECL_SCOPE _scope;
 
         /// <summary>
         /// Gets the scope.
@@ -189,7 +189,7 @@ namespace Scripting.CSharp
             get { return _scope; }
         }
 
-        string _type;
+        private string _type;
 
         /// <summary>
         /// Gets the type.
@@ -200,9 +200,8 @@ namespace Scripting.CSharp
             get { return _type; }
         }
 
-        #endregion
+        #endregion ITcPlcVarDeclaration Members
     }
-
 
     /// <summary>
     /// Converter class converting instances of the <see cref="PLCACCESS"/> enumeration
@@ -220,12 +219,16 @@ namespace Scripting.CSharp
             {
                 case PLCACCESS.PLCACCESS_INTERNAL:
                     return "INTERNAL";
+
                 case PLCACCESS.PLCACCESS_PRIVATE:
                     return "PRIVATE";
+
                 case PLCACCESS.PLCACCESS_PROTECTED:
                     return "PROTECTED";
+
                 case PLCACCESS.PLCACCESS_PUBLIC:
                     return "PUBLIC";
+
                 default:
                     throw new NotImplementedException();
             }

@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Humanizer;
+using NLog;
+using NLog.Common;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using Humanizer;
-using NLog;
-using NLog.Common;
 
 namespace NlogViewer
 {
@@ -15,11 +15,15 @@ namespace NlogViewer
     /// </summary>
     public partial class NlogViewer : UserControl
     {
-        public ListView LogView { get { return logView; } }
+        public ListView LogView
+        { get { return logView; } }
+
         public event EventHandler ItemAdded = delegate { };
+
         public ObservableCollection<LogEventViewModel> LogEntries { get; private set; }
         public bool IsTargetConfigured { get; private set; }
         private double _TimeWidth = 120;
+
         [Description("Width of time column in pixels"), Category("Data")]
         [TypeConverter(typeof(LengthConverter))]
         public double TimeWidth
@@ -29,6 +33,7 @@ namespace NlogViewer
         }
 
         private double _LoggerNameWidth = 50;
+
         [Description("Width of Logger column in pixels, or auto if not specified"), Category("Data")]
         [TypeConverter(typeof(LengthConverter))]
         public double LoggerNameWidth
@@ -38,6 +43,7 @@ namespace NlogViewer
         }
 
         private double _LevelWidth = 50;
+
         [Description("Width of Level column in pixels"), Category("Data")]
         [TypeConverter(typeof(LengthConverter))]
         public double LevelWidth
@@ -50,6 +56,7 @@ namespace NlogViewer
         }
 
         private double _MessageWidth = 200;
+
         [Description("Width of Message column in pixels"), Category("Data")]
         [TypeConverter(typeof(LengthConverter))]
         public double MessageWidth
@@ -62,6 +69,7 @@ namespace NlogViewer
         }
 
         private int _MaxRowCount = 50;
+
         [Description("The maximum number of row count. The oldest log gets deleted. Set to 0 for unlimited count."), Category("Data")]
         [TypeConverter(typeof(Int32Converter))]
         public int MaxRowCount
@@ -71,6 +79,7 @@ namespace NlogViewer
         }
 
         private bool _autoScrollToLast = false;
+
         [Description("Automatically scrolls to the last log item in the viewer. Default is true."), Category("Data")]
         [TypeConverter(typeof(BooleanConverter))]
         public bool AutoScrollToLast
@@ -95,6 +104,7 @@ namespace NlogViewer
                 }
             }
         }
+
         protected void LogReceived(AsyncLogEventInfo log)
         {
             LogEventViewModel vm = new LogEventViewModel(log.LogEvent);
@@ -117,6 +127,7 @@ namespace NlogViewer
                 ItemAdded(this, (NLogEvent)log.LogEvent);
             }));
         }
+
         public void Clear()
         {
             LogEntries.Clear();
@@ -129,6 +140,7 @@ namespace NlogViewer
             ScrollToItem(LogView.SelectedItem);
             LogView.UnselectAll();
         }
+
         public void ScrollToLast()
         {
             if (LogView.Items.Count <= 0) return;
@@ -143,8 +155,6 @@ namespace NlogViewer
 
         private void logView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
         }
     }
-
 }

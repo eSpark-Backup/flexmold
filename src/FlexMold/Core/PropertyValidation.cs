@@ -5,12 +5,13 @@ using System.Linq;
 
 namespace FlexMold.Core
 {
-    class PropertyValidation : IDataErrorInfo
+    internal class PropertyValidation : IDataErrorInfo
     {
-        // check for general model error    
-        public string Error { get { return null; } }
+        // check for general model error
+        public string Error
+        { get { return null; } }
 
-        // check for property errors    
+        // check for property errors
         public string this[string columnName]
         {
             get

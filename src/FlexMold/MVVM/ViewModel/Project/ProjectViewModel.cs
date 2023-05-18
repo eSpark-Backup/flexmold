@@ -11,13 +11,14 @@ using System.Text.RegularExpressions;
 
 namespace FlexMold.MVVM.ViewModel.Project
 {
-    class ProjectViewModel : ObservableObject
+    internal class ProjectViewModel : ObservableObject
     {
-        Logger log = LogManager.GetLogger("Project");
+        private Logger log = LogManager.GetLogger("Project");
         public RelayCommand ReadCSVFileCommand { get; set; }
         public RelayCommand BrowseProjectCommand { get; set; }
-     
+
         private Model.Project _selectedMyDataModel;
+
         public Model.Project selectedMyDataModel
         {
             get { return _selectedMyDataModel; }
@@ -28,7 +29,9 @@ namespace FlexMold.MVVM.ViewModel.Project
                 OnPropertyChanged();
             }
         }
+
         private Porjects _myDataModels;
+
         public Porjects myDataModels
         {
             get { return _myDataModels; }
@@ -38,7 +41,9 @@ namespace FlexMold.MVVM.ViewModel.Project
                 OnPropertyChanged();
             }
         }
+
         private FileInfo _slectedFile;
+
         public FileInfo slectedFile
         {
             get { return _slectedFile; }
@@ -48,9 +53,11 @@ namespace FlexMold.MVVM.ViewModel.Project
                 OnPropertyChanged();
             }
         }
+
         private ToastNotificationUtil _TstN;
         public LaserProjectorViewModel lVM { get; set; }
-        void WriteCSVData()
+
+        private void WriteCSVData()
         {
             var data = readCsvFile();
             if (data.Count != 0)
@@ -69,7 +76,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     log.Log(LogLevel.Error, $"Please select correct CSV\n " +
                         $"CSV Data & Box count not equal \n " +
                         $"Data Count : {data.Count} | Device Count : {TwinCathelper.PLCMotors.Length}");
-                    _TstN.ShowError($"CSV Failed\nDevice:{TwinCathelper.PLCMotors.Length} Data:{data.Count}");
+                    _TstN.ShowError($"CSV Failed\nDevice:{TwinCathelper.PLCMotors.Length} != Data:{data.Count}");
                 }
             }
             else
@@ -79,15 +86,16 @@ namespace FlexMold.MVVM.ViewModel.Project
                 _TstN.ShowError($"CSV Failed");
             }
         }
+
         public ProjectViewModel()
         {
-            _TstN =  new ToastNotificationUtil();
+            _TstN = new ToastNotificationUtil();
             lVM = new LaserProjectorViewModel(this);
             ReadCSVFileCommand = new RelayCommand(o => { WriteCSVData(); });
             BrowseProjectCommand = new RelayCommand(o => { BrowseProject(); });
         }
 
-        List<double> readCsvFile()
+        private List<double> readCsvFile()
         {
             var data = new List<double>();
             if (slectedFile != null)
@@ -130,7 +138,8 @@ namespace FlexMold.MVVM.ViewModel.Project
                 log.Log(LogLevel.Warn, $"Please Select File First");
             return data;
         }
-        void BrowseProject()
+
+        private void BrowseProject()
         {
             Logger log = LogManager.GetLogger("Browse Project");
             try
@@ -173,6 +182,5 @@ namespace FlexMold.MVVM.ViewModel.Project
                 log.Log(LogLevel.Error, ex.Message);
             }
         }
-      
     }
 }

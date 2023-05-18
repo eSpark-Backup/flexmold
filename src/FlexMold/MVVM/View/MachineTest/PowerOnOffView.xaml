@@ -22,18 +22,16 @@
         <Label
             Grid.Row="0"
             Grid.Column="0"
-            Content="Motor No :"
-             />
+            Content="Motor No :" />
         <Label
             Grid.Row="1"
             Grid.Column="0"
-            Content="All Motor Power :"
-            />
+            Content="All Motor Power :" />
         <mah:NumericUpDown
             Grid.Row="0"
             Grid.Column="1"
             Maximum="65535"
-            Minimum="0"/>
+            Minimum="0" />
         <mah:ToggleSwitch Grid.Row="0" Grid.Column="2" />
         <mah:ToggleSwitch
             Grid.Row="1"

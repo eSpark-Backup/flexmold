@@ -1,11 +1,11 @@
-﻿using System;
-using System.IO;
-using System.Reflection;
+﻿using EnvDTE;
 using EnvDTE100;
 using EnvDTE80;
-using System.Diagnostics;
-using EnvDTE;
 using Microsoft.Win32;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 
 namespace ScriptingTest
 {
@@ -18,14 +18,17 @@ namespace ScriptingTest
         /// None / Uninitialized
         /// </summary>
         None,
+
         /// <summary>
         /// Initializing the Script and its initial configuration
         /// </summary>
         Initializing,
+
         /// <summary>
         /// Cleaning up the Script / Configuration
         /// </summary>
         Cleanup,
+
         /// <summary>
         /// Script currently executing.
         /// </summary>
@@ -80,13 +83,13 @@ namespace ScriptingTest
                 this._ex = ex;
                 this._result = ScriptResult.Fail;
                 throw ex;
-            }   
+            }
         }
 
         /// <summary>
         /// Script status
         /// </summary>
-        ScriptStatus _status;
+        private ScriptStatus _status;
 
         /// <summary>
         /// Gets the Script Status
@@ -117,7 +120,7 @@ namespace ScriptingTest
             catch (Exception ex)
             {
                 this._result = ScriptResult.Fail;
-                this._ex = ex;  
+                this._ex = ex;
                 throw ex;
             }
             finally
@@ -146,11 +149,10 @@ namespace ScriptingTest
             }
         }
 
-
         /// <summary>
         /// Script Start time
         /// </summary>
-        DateTime _startTime = DateTime.MinValue;
+        private DateTime _startTime = DateTime.MinValue;
 
         /// <summary>
         /// Gets the start time of the Script
@@ -159,7 +161,7 @@ namespace ScriptingTest
         /// The start time.
         /// </value>
         protected DateTime StartTime
-        { 
+        {
             get { return _startTime; }
         }
 
@@ -174,7 +176,7 @@ namespace ScriptingTest
         /// <summary>
         /// Script stop time
         /// </summary>
-        DateTime _stopTime = DateTime.MinValue;
+        private DateTime _stopTime = DateTime.MinValue;
 
         /// <summary>
         /// Gets the Script stop time
@@ -183,7 +185,7 @@ namespace ScriptingTest
         /// The stop time.
         /// </value>
         protected DateTime StopTime
-        { 
+        {
             get { return _stopTime; }
         }
 
@@ -201,7 +203,8 @@ namespace ScriptingTest
         /// <value>
         /// The duration.
         /// </value>
-        public TimeSpan Duration { get { return (StopTime - StartTime); } }
+        public TimeSpan Duration
+        { get { return (StopTime - StartTime); } }
 
         /// <summary>
         /// Handler function Before Initializing the Script (Configuration preparations)
@@ -216,7 +219,7 @@ namespace ScriptingTest
         /// <param name="context">The Script Context</param>
         /// <remarks>Usually used to to the open a prepared or new XAE configuration</remarks>
         protected abstract void OnInitialize(IContext context);
-        
+
         /// <summary>
         /// Handler function Executing the Script code.
         /// </summary>
@@ -250,9 +253,8 @@ namespace ScriptingTest
         /// <value>The keywords.</value>
         public virtual string Keywords
         {
-            get { return string.Empty;  }
+            get { return string.Empty; }
         }
-
 
         /// <summary>
         /// Gets the programming language of the Script
@@ -260,7 +262,7 @@ namespace ScriptingTest
         /// <value>The programming language.</value>
         public virtual string Language
         {
-            get { return "C#";  }
+            get { return "C#"; }
         }
 
         /// <summary>
@@ -317,7 +319,8 @@ namespace ScriptingTest
             }
         }
 
-        Exception _ex = null;
+        private Exception _ex = null;
+
         /// <summary>
         /// Gets the last execution Exception.
         /// </summary>
@@ -366,7 +369,6 @@ namespace ScriptingTest
         {
             get
             {
-
                 string path = Path.Combine(TwinCATInstallDir, @"Components\Base\PrjTemplate", vsXaeTemplateName);
 
                 if (!File.Exists(path))
@@ -385,6 +387,7 @@ namespace ScriptingTest
         /// Template Name for the XAE PLC Empty template
         /// </summary>
         public static string vsXaePlcEmptyTemplateName = "Empty PLC Template.plcproj";
+
         /// <summary>
         /// Template Name for the XAE PLC Standard template
         /// </summary>
@@ -393,11 +396,10 @@ namespace ScriptingTest
         /// <summary>
         /// Template Name for the XAE Saftey Standard template
         /// </summary>
-        /// 
+        ///
         //public static string vsXaeSafTemplateName = "TcTemplateDrv.splcproj";
 
         public static string vsXaeSafePlcWizard = "TcSafePlcWizard.vsz";
-
 
         /// <summary>
         /// Gets the TwinCAT Installation Directory
@@ -418,7 +420,7 @@ namespace ScriptingTest
                 else
                     path = "Software\\Beckhoff\\TwinCAT3";
 
-                using (RegistryKey key = Registry.LocalMachine.OpenSubKey(string.Format("{0}\\{1}",path,tcVer.ToString(2))))
+                using (RegistryKey key = Registry.LocalMachine.OpenSubKey(string.Format("{0}\\{1}", path, tcVer.ToString(2))))
                 {
                     ret = (string)key.GetValue("InstallDir");
                 }
@@ -508,14 +510,12 @@ namespace ScriptingTest
         {
         }
 
-
         /// <summary>
         /// Creates the new project.
         /// </summary>
         /// <param name="projectName">Name of the project.</param>
         /// <returns></returns>
         protected abstract object CreateNewProject(string projectName);
-
 
         /// <summary>
         /// Creates the new project.
@@ -538,8 +538,6 @@ namespace ScriptingTest
         ///// Opens the Visual Studio Solution
         ///// </summary>
         //public abstract void OpenSolution();
-
-        
 
         ///// <summary>
         ///// Deletes the specified directory
@@ -652,12 +650,10 @@ namespace ScriptingTest
                 if (Directory.Exists(element))
                     CopyDirectory(element, dst + Path.GetFileName(element));
                 // Files in directory
-
                 else
                     File.Copy(element, dst + Path.GetFileName(element), true);
             }
         }
-
 
         /// <summary>
         /// Sets the Script Status
@@ -693,6 +689,7 @@ namespace ScriptingTest
         /// Script Result
         /// </summary>
         private ScriptResult _result;
+
         /// <summary>
         /// Gets the Script Result
         /// </summary>
@@ -701,7 +698,6 @@ namespace ScriptingTest
         {
             get { return _result; }
         }
-
 
         /// <summary>
         /// Sets the result.
@@ -736,10 +732,12 @@ namespace ScriptingTest
         /// None / Initialized / Script not processed
         /// </summary>
         None,
+
         /// <summary>
         /// Script Succeeded
         /// </summary>
         Ok,
+
         /// <summary>
         /// Script Failed
         /// </summary>
@@ -774,7 +772,6 @@ namespace ScriptingTest
             this.NewState = newState;
         }
     }
-
 
     /// <summary>
     /// Late Bound Script (uses only late bound variables)
@@ -858,13 +855,13 @@ namespace ScriptingTest
         /// <returns></returns>
         protected override object CreateNewProject(string projectName, string templatePath)
         {
-            _context.Worker.ProgressStatus = string.Format("Creating project {0} from template ...",projectName, templatePath);
+            _context.Worker.ProgressStatus = string.Format("Creating project {0} from template ...", projectName, templatePath);
             //bool exists = File.Exists(VsXaeTemplatePath);
 
             //dynamic project = this.solution.AddFromTemplate(templatePath, this.ScriptRootFolder, projectName, false);
             //return project;
             //return CreateNewProject(projectName, templatePath, this.ScriptRootFolder);
-            return this.Context.Factory.VsFactory.CreateNewProject(this.Context.DTE,projectName, templatePath, this.ScriptRootFolder);
+            return this.Context.Factory.VsFactory.CreateNewProject(this.Context.DTE, projectName, templatePath, this.ScriptRootFolder);
         }
 
         /// <summary>
@@ -1031,7 +1028,6 @@ namespace ScriptingTest
         /// </value>
         public static bool Is64BitOperatingSystem
         {
-
             get
             {
                 return Environment.Is64BitOperatingSystem;
@@ -1065,4 +1061,3 @@ namespace ScriptingTest
         }
     }
 }
-

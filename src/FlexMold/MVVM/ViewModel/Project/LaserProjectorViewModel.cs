@@ -13,12 +13,12 @@ using System.Threading.Tasks;
 
 namespace FlexMold.MVVM.ViewModel.Project
 {
-    class LaserProjectorViewModel : TelnetHelper
+    internal class LaserProjectorViewModel : TelnetHelper
     {
         private readonly ProjectViewModel _parent;
 
         public ProjectViewModel Parent => _parent;
-        Logger log;
+        private Logger log;
         public RelayCommand ProjectorModeSelectionCommand { get; set; }
         public RelayCommand SendLasFileCommand { get; set; }
         public RelayCommand SerialConfigCommand { get; set; }
@@ -29,31 +29,36 @@ namespace FlexMold.MVVM.ViewModel.Project
         public RelayCommand CallibrateProjectorCommand { get; set; }
         public RelayCommand LaunchLMPCommand { get; set; }
         private int _LaserProjectorComMode;
+
         public int LaserProjectorComMode
         {
             get { return _LaserProjectorComMode; }
             set
             {
-
                 _LaserProjectorComMode = value;
                 switch ((EProjectorComMode)value)
                 {
                     case EProjectorComMode.Serial:
                         SerialConfigWindow();
                         break;
+
                     case EProjectorComMode.Samba:
                         SambaConfigWindow();
                         break;
+
                     case EProjectorComMode.Telnet:
                         break;
+
                     default:
                         break;
                 }
                 OnPropertyChanged();
             }
         }
+
         public LaserProjector MyPorjector { get; set; }
         private SerialPort _SelectedSerialPort;
+
         public SerialPort SelectedSerialPort
         {
             get
@@ -65,12 +70,13 @@ namespace FlexMold.MVVM.ViewModel.Project
                 _SelectedSerialPort = value;
             }
         }
-        private  ToastNotificationUtil _TstN;
+
+        private ToastNotificationUtil _TstN;
 
         public LaserProjectorViewModel(ProjectViewModel parent)
         {
             log = LogManager.GetLogger("LaseProjector");
-            _TstN= new ToastNotificationUtil();
+            _TstN = new ToastNotificationUtil();
             _parent = parent;
             SendLasFileCommand = new RelayCommand(o => { _ = sendLasFileAsync(Parent.slectedFile); });
             SerialConfigCommand = new RelayCommand(o => { SerialConfigWindow(); });
@@ -115,7 +121,6 @@ namespace FlexMold.MVVM.ViewModel.Project
                 }
                 else
                 {
-
                     SendMessage = "ZF; " + "\r\n";
                     _ = SendTelnetMessgae();
                 }
@@ -158,6 +163,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 SelectedSerialPort = new SerialPort();
             }
         }
+
         public async Task sendLasFileAsync(FileInfo _slectedFile)
         {
             try
@@ -199,6 +205,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                                 SelectedSerialPort.Close();
                             }
                             break;
+
                         case (int)EProjectorComMode.Samba:
                             string _tmsg = $"Sending file via samba";
                             log.Log(LogLevel.Info, _tmsg);
@@ -222,6 +229,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                                 log.Log(LogLevel.Error, ex.Message);
                             }
                             break;
+
                         case (int)EProjectorComMode.Telnet:
                             log.Log(LogLevel.Info, $"Sending file via Telnet");
                             try
@@ -251,6 +259,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                                 log.Log(LogLevel.Error, ex.Message);
                             }
                             break;
+
                         default:
                             break;
                     }
@@ -258,7 +267,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 catch (Exception ex)
                 {
                     log.Log(LogLevel.Error, ex.Message);
-                    _TstN   .ShowError(ex.Message);
+                    _TstN.ShowError(ex.Message);
                 }
             }
             catch (Exception ex)
@@ -293,6 +302,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 _TstN.ShowError(ex.Message);
             }
         }
+
         private void SambaConfigWindow()
         {
             Logger log = LogManager.GetLogger("Samba Config");

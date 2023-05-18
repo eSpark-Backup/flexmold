@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.IO;
-using System.Diagnostics;
 
 namespace ScriptingTest
 {
@@ -12,23 +12,23 @@ namespace ScriptingTest
     /// </summary>
     public static class ScriptLoader
     {
-        static Func<Type, bool> _scriptFilter = null;
+        private static Func<Type, bool> _scriptFilter = null;
 
         /// <summary>
         /// Gets or sets the script filter.
         /// </summary>
         /// <value>The script filter.</value>
-        public static Func<Type,bool> ScriptFilter
+        public static Func<Type, bool> ScriptFilter
         {
-            get { return _scriptFilter;  }
-            set { _scriptFilter = value;  }
+            get { return _scriptFilter; }
+            set { _scriptFilter = value; }
         }
 
         /// <summary>
         /// Loads the script intances from Assemblies within the Executable folder.
         /// </summary>
         /// <param name="scriptTypeFilter">The script type filter (or null if not filtered).</param>
-        private static void load(Func<Type,bool> scriptTypeFilter)
+        private static void load(Func<Type, bool> scriptTypeFilter)
         {
             List<Script> scripts = new List<Script>();
 
@@ -42,7 +42,6 @@ namespace ScriptingTest
             string location = assembly.Location;
             DirectoryInfo dir = new DirectoryInfo(System.IO.Path.GetDirectoryName(location));
             FileInfo[] assemblies = dir.GetFiles("*.*"); // Getting all Dlls
-
 
             IEnumerable<FileInfo> a = assemblies.Where<FileInfo>(x =>
                 {
@@ -58,7 +57,7 @@ namespace ScriptingTest
                     try
                     {
                         assembly = Assembly.LoadFile(file.FullName);
-                        assScripts = createScripts(assembly,scriptTypeFilter);
+                        assScripts = createScripts(assembly, scriptTypeFilter);
                         scripts.AddRange(assScripts);
                     }
                     catch (Exception ex)
@@ -71,7 +70,7 @@ namespace ScriptingTest
             _scripts = scripts;
         }
 
-        static IList<Script> _scripts = null;
+        private static IList<Script> _scripts = null;
 
         /// <summary>
         /// Gets the scripts.
@@ -83,7 +82,7 @@ namespace ScriptingTest
             {
                 if (_scripts == null)
                     load(_scriptFilter);
-                
+
                 return _scripts;
             }
         }
@@ -114,7 +113,7 @@ namespace ScriptingTest
         /// <param name="assembly">The assembly.</param>
         /// <param name="filter">Type filter (or null)</param>
         /// <returns>IEnumerable&lt;Script&gt;.</returns>
-        private static IEnumerable<Script> createScripts(Assembly assembly, Func<Type,bool> filter)
+        private static IEnumerable<Script> createScripts(Assembly assembly, Func<Type, bool> filter)
         {
             List<Script> scripts = new List<Script>();
             IEnumerable<Type> types = null;

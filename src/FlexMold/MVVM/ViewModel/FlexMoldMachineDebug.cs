@@ -13,14 +13,14 @@ using TwinCAT.SystemManager;
 namespace FlexMold.MVVM.ViewModel
 {
     /// <summary>
-    /// Demonstrates the generation + compilation of PLC projects. 
+    /// Demonstrates the generation + compilation of PLC projects.
     /// The method Execute() will be called by ScriptingContainer and will execute the actual script code.
     /// </summary>
     public class FlexMoldMachineDebug
         : ScriptEarlyBound
     {
-        ITcSysManager4 systemManager = null;
-        EnvDTE.Project project = null;
+        private ITcSysManager4 systemManager = null;
+        private EnvDTE.Project project = null;
 
         /// <summary>
         /// Handler function Initializing the Script (Configuration preparations)
@@ -51,7 +51,6 @@ namespace FlexMold.MVVM.ViewModel
             base.OnCleanUp(worker);
         }
 
-
         /// <summary>
         /// Insertion Mode for creating PLC projects.
         /// </summary>
@@ -61,10 +60,12 @@ namespace FlexMold.MVVM.ViewModel
             /// Copies a PLC Project
             /// </summary>
             Copy = 0,
+
             /// <summary>
             /// Moves a PLC Project
             /// </summary>
             Move = 1,
+
             /// <summary>
             /// References a PLC Project
             /// </summary>
@@ -104,7 +105,6 @@ namespace FlexMold.MVVM.ViewModel
         /// <param name="worker">The worker.</param>
         protected override void OnExecute(IWorker worker)
         {
-
             if (worker.CancellationPending)
                 throw new Exception("Cancelled");
             worker.ProgressStatus = $"Connecting to TwinCAT Via ADS On Port {(int)AmsPort.SystemService}";
@@ -121,7 +121,6 @@ namespace FlexMold.MVVM.ViewModel
              * ================================================================================================= */
             ITcSmTreeItem plcConfig = systemManager.LookupTreeItem("TIPC"); // Getting PLC Configuration item
             ITcSmTreeItem devices = systemManager.LookupTreeItem("TIID"); // Getting IO-Configuration item
-
 
             /* =================================================================================================
              * Scans the Fieldbus interfaces and adds an EtherCAT Device.
@@ -151,16 +150,12 @@ namespace FlexMold.MVVM.ViewModel
             AddLibrary("Tc2_EtherCAT, * (Beckhoff Automation GmbH)", plcProject, worker);
             Console.WriteLine();
 
-
             /* =================================================================================================
              * Creating datatypes in \DUTs\
              * ================================================================================================= */
 
-
             ITcSmTreeItem plcDutStruct = CreateDut(plcDutsItem, TreeItemType.PlcDutStruct, "EthercatDevice", null, worker);
             worker.Progress = 30;
-
-
 
             /* =================================================================================================
              * Creating POUs under folder "MyPous"
@@ -206,9 +201,8 @@ namespace FlexMold.MVVM.ViewModel
             worker.Progress = 55;
             iecProjectRoot.BootProjectAutostart = true;
 
-
             /* =================================================================================================
-             * Compiling project using Visual Studio DTE methods 
+             * Compiling project using Visual Studio DTE methods
              * ================================================================================================= */
             errors = null;
             worker.ProgressStatus = "Compiling project (3) ...";
@@ -222,7 +216,6 @@ namespace FlexMold.MVVM.ViewModel
             worker.ProgressStatus = "Generating boot project ...";
             iecProjectRoot.GenerateBootProject(true);
             worker.Progress = 65;
-
 
             /* =================================================================================================
              * Prepare XML for PLC Login
@@ -330,9 +323,9 @@ namespace FlexMold.MVVM.ViewModel
             System.Threading.Thread.Sleep(5000);
             plcProjectItem.ConsumeXml(xmlLogout);
 
-
             worker.Progress = 95;
         }
+
         private bool WaitForState(AdsState state, int timeOutInMilliSeconds)
         {
             var stopwatch = new Stopwatch();
@@ -360,9 +353,10 @@ namespace FlexMold.MVVM.ViewModel
             stopwatch.Stop();
             return false;
         }
+
         private ITcSmTreeItem CreateDut(ITcSmTreeItem parent, TreeItemType treeItemType, string typeName, string baseType, IWorker worker)
         {
-            string declarationCode = @"TYPE EthercatDevice : 
+            string declarationCode = @"TYPE EthercatDevice :
 STRUCT
     mDirection AT %Q*: BOOL;
     mSpeed AT %Q*: DWORD;
@@ -370,7 +364,6 @@ STRUCT
     mMode AT %Q*: BOOL;
 END_STRUCT
 END_TYPE";
-
 
             /* =================================================================================================
              * Creating the DUT using CreateChild()
@@ -428,10 +421,10 @@ END_TYPE";
                     messages++;
                     worker.ProgressStatus = "Compiler message: " + item.Description;
                 }
-
             }
             return buildSucceeded;
         }
+
         private void CreatePOUsST(ITcSmTreeItem parent, IWorker worker)
         {
             /* =================================================================================================
@@ -442,10 +435,8 @@ END_TYPE";
             ITcSmTreeItem program = AddPOUProgram("Main", parent, language, worker);
         }
 
-
         private ITcSmTreeItem AddPOUProgram(string pouName, ITcSmTreeItem parent, IECLanguageType language, IWorker worker)
         {
-
             ITcSmTreeItem programPou = parent.LookupChild("Main");
             ITcPlcDeclaration pouDecl = programPou as ITcPlcDeclaration;
             ITcPlcImplementation pouImpl = programPou as ITcPlcImplementation;
@@ -589,6 +580,7 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                 return "PLC";
             }
         }
+
         public int AvaiableBoxesCount { get; set; }
         public int AvaiableDevicesCount { get; set; }
 

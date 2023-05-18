@@ -15,7 +15,6 @@ namespace FlexMold.MVVM.View.MachineTest
 
         private void ComboBox_Selected(object sender, RoutedEventArgs e)
         {
-
         }
     }
 }

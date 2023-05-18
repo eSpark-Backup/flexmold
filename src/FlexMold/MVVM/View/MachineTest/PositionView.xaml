@@ -11,11 +11,11 @@
     mc:Ignorable="d">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition  />
             <ColumnDefinition />
             <ColumnDefinition />
             <ColumnDefinition />
-            <ColumnDefinition/>
+            <ColumnDefinition />
+            <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -27,13 +27,12 @@
         <Label
             Grid.Row="0"
             Grid.Column="0"
-            Content="Motor No"
-            />
+            Content="Motor No" />
         <Label
             Grid.Row="0"
             Grid.Column="1"
             Grid.ColumnSpan="2"
-            Content="From:"/>
+            Content="From:" />
         <mah:NumericUpDown
             Grid.Row="0"
             Grid.Column="2"
@@ -42,7 +41,7 @@
         <Label
             Grid.Row="0"
             Grid.Column="3"
-            Content="To :"/>
+            Content="To :" />
         <mah:NumericUpDown
             Grid.Row="0"
             Grid.Column="4"
@@ -67,7 +66,7 @@
             Grid.Row="2"
             Grid.Column="2"
             Maximum="65535"
-            Minimum="0"/>
+            Minimum="0" />
         <Button
             Grid.Row="2"
             Grid.Column="3"
@@ -84,7 +83,7 @@
             Grid.Row="3"
             Grid.Column="2"
             Maximum="65535"
-            Minimum="0"/>
+            Minimum="0" />
         <Button
             Grid.Row="3"
             Grid.Column="3"

@@ -15,7 +15,6 @@ namespace FlexMold.MVVM.View.MachineTest
 
         private void NumericUpDown_ValueChanged(object sender, EventArgs e)
         {
-
         }
     }
 }

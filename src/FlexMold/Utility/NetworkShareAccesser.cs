@@ -30,6 +30,7 @@ namespace FlexMold.Utility
             get;
             set;
         }
+
         public string Password
         {
             get;
@@ -56,7 +57,6 @@ namespace FlexMold.Utility
         private const int RESOURCEUSAGE_CONNECTABLE = 0x00000001;
         private const int RESOURCEUSAGE_CONTAINER = 0x00000002;
 
-
         private const int CONNECT_INTERACTIVE = 0x00000008;
         private const int CONNECT_PROMPT = 0x00000010;
         private const int CONNECT_REDIRECT = 0x00000080;
@@ -66,7 +66,7 @@ namespace FlexMold.Utility
 
         private const int CONNECT_LOCALDRIVE = 0x00000100;
 
-        #endregion
+        #endregion Consts
 
         #region Errors
 
@@ -93,7 +93,7 @@ namespace FlexMold.Utility
         private const int ERROR_NOT_CONNECTED = 2250;
         private const int ERROR_OPEN_FILES = 2401;
 
-        #endregion
+        #endregion Errors
 
         #region PInvoke Signatures
 
@@ -129,7 +129,7 @@ namespace FlexMold.Utility
             public string lpProvider = "";
         }
 
-        #endregion
+        #endregion PInvoke Signatures
 
         /// <summary>
         /// Creates a NetworkShareAccesser for the given computer name. The user will be promted to enter credentials

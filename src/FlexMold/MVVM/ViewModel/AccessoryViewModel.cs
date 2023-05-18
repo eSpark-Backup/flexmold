@@ -3,12 +3,13 @@ using FlexMold.MVVM.View.Accessory;
 
 namespace FlexMold.MVVM.ViewModel
 {
-    class AccessoryViewModel : ObservableObject
+    internal class AccessoryViewModel : ObservableObject
     {
         /// <summary>
         /// Relay Commands
         /// </summary>
         public RelayCommand HeaterStatusCommand { get; set; }
+
         public RelayCommand LaserStatusCommand { get; set; }
 
         public HeaterStatusView HeaterStatusVM { get; set; }
@@ -25,6 +26,7 @@ namespace FlexMold.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+
         public AccessoryViewModel()
         {
             HeaterStatusVM = new HeaterStatusView();
@@ -35,6 +37,5 @@ namespace FlexMold.MVVM.ViewModel
             HeaterStatusCommand = new RelayCommand(o => { CurrentView = HeaterStatusVM; });
             LaserStatusCommand = new RelayCommand(o => { CurrentView = LaserStatusVM; });
         }
-
     }
 }

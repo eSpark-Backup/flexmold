@@ -7,9 +7,9 @@ using System;
 
 namespace FlexMold.MVVM.ViewModel.Setting
 {
-    class MotorSettingViewModel : ObservableObject
+    internal class MotorSettingViewModel : ObservableObject
     {
-        Logger log;
+        private Logger log;
         public RelayCommand FirmwareCommand { get; set; }
         private uint _SelectedMotorIndex;
         private bool _IsDialogOpen;
@@ -35,6 +35,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
         }
 
         private uint[] _DeviceIds;
+
         public uint[] DeviceIds
         {
             get { return _DeviceIds; }
@@ -44,6 +45,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
                 OnPropertyChanged();
             }
         }
+
         public MotorSettingViewModel()
         {
             if (TwinCathelper.Client == null)
@@ -58,9 +60,9 @@ namespace FlexMold.MVVM.ViewModel.Setting
             }
             FirmwareCommand = new RelayCommand(o => { UpdateFirmware(); });
         }
-        async void UpdateFirmware()
-        {
 
+        private async void UpdateFirmware()
+        {
             var view = new FoeSettingDiaglog()
             {
                 DataContext = new FoeSettingDiaglogViewModel()
@@ -69,7 +71,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
         }
 
         private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
-        { 
+        {
             Console.WriteLine();
         }
     }

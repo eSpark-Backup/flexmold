@@ -4,7 +4,7 @@ using FlexMold.Utility;
 
 namespace FlexMold.MVVM.ViewModel.Setting
 {
-    class LaserProjectorSettingViewModel : TelnetHelper
+    internal class LaserProjectorSettingViewModel : TelnetHelper
     {
         public RelayCommand TelnetConnectCommand { get; set; }
         public RelayCommand TelnetMessageSendCommand { get; set; }
@@ -16,6 +16,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
         public RelayCommand SaveCommand { get; set; }
 
         private LaserProjector _LP;
+
         public LaserProjector LP
         {
             get { return _LP; }
@@ -25,6 +26,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
                 OnPropertyChanged();
             }
         }
+
         public LaserProjectorSettingViewModel()
         {
             LP = new LaserProjector();
@@ -54,12 +56,9 @@ namespace FlexMold.MVVM.ViewModel.Setting
             SaveCommand = new RelayCommand(o => { SaveSettings(); });
         }
 
-        void SaveSettings()
+        private void SaveSettings()
         {
             //log.Log(LogLevel.Error, $"Not Implemented");
         }
-
-
-
     }
 }

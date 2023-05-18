@@ -22,7 +22,7 @@ namespace FlexMold
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
-        Logger log = LogManager.GetLogger("Main");
+        private Logger log = LogManager.GetLogger("Main");
 
         //MainViewModel _vm;
         public MainWindow(Machine SelectedMachine)
@@ -42,16 +42,18 @@ namespace FlexMold
                     TwinCathelper.Client.RouterStateChanged += _connection_RouterStateChanged;
                     TwinCathelper.Client.RegisterAdsStateChangedAsync(_connection_AdsStateChanged, CancellationToken.None);
                     break;
+
                 case EMachineType.Projector:
                     break;
+
                 default:
                     break;
             }
             logCtrl.ItemAdded += OnLogMessageItemAdded;
             log.Log(LogLevel.Info, $"Application Loaded Sucessfully.....");
             log.Log(LogLevel.Info, $"Selected Machine Type : {SelectedMachine.MachineType} Name : {SelectedMachine.Name} ID : {SelectedMachine.ID}");
-
         }
+
         //private void OnUnload(object sender, RoutedEventArgs e)
         //{
         //    _vm.OnUnloaded();
@@ -68,6 +70,7 @@ namespace FlexMold
                 return Assembly.GetExecutingAssembly().GetName().Version;
             }
         }
+
         private void session_ConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
         {
             Dispatcher.Invoke(() =>
@@ -80,7 +83,7 @@ namespace FlexMold
             log.Log(LogLevel.Info, $"Session Connection Status : {TwinCathelper.MyConnectionStateNew}");
         }
 
-        void _connection_AdsStateChanged(object sender, AdsStateChangedEventArgs e)
+        private void _connection_AdsStateChanged(object sender, AdsStateChangedEventArgs e)
         {
             Dispatcher.Invoke(() =>
             {
@@ -90,7 +93,7 @@ namespace FlexMold
             log.Log(LogLevel.Info, $"AdsState : {TwinCathelper.MyAdsState}");
         }
 
-        void _connection_RouterStateChanged(object sender, AmsRouterNotificationEventArgs e)
+        private void _connection_RouterStateChanged(object sender, AmsRouterNotificationEventArgs e)
         {
             Dispatcher.Invoke(() =>
             {
@@ -100,7 +103,7 @@ namespace FlexMold
             log.Log(LogLevel.Info, $"Router State : {TwinCathelper.MyAmsRouterState}");
         }
 
-        void _connection_ConnectionStatusChanged(object sender, ConnectionStateChangedEventArgs e)
+        private void _connection_ConnectionStatusChanged(object sender, ConnectionStateChangedEventArgs e)
         {
             Dispatcher.Invoke(() =>
             {
@@ -111,6 +114,7 @@ namespace FlexMold
             TwinCathelper.MyConnectionStateChangedReason = e.Reason;
             log.Log(LogLevel.Info, $"Connection Status : {TwinCathelper.MyConnectionStateNew}");
         }
+
         private void TwinCATSystemUpdate()
         {
             if (TwinCathelper.Client != null && TwinCathelper.Client.IsConnected)
@@ -123,6 +127,7 @@ namespace FlexMold
                         bt_TCC.Background = new SolidColorBrush(Colors.LightGreen);
                         bt_TCC.Foreground = new SolidColorBrush(Colors.Black);
                         break;
+
                     case ConnectionState.None:
                     case ConnectionState.Disconnected:
                     case ConnectionState.Lost:
@@ -130,6 +135,7 @@ namespace FlexMold
                         bt_TCC.Foreground = new SolidColorBrush(Colors.White);
                         ConnectionLost("Connection State Lost");
                         break;
+
                     default:
                         break;
                 }
@@ -141,6 +147,7 @@ namespace FlexMold
                         bt_TCS.Background = new SolidColorBrush(Colors.DarkGreen);
                         bt_TCS.Foreground = new SolidColorBrush(Colors.White);
                         break;
+
                     case AdsState.Config:
                     case AdsState.Stop:
                     case AdsState.Error:
@@ -172,7 +179,8 @@ namespace FlexMold
                 bt_TCC.Content = AdsState.Invalid.ToString();
             }
         }
-        async void ConnectionLost(string _msg)
+
+        private async void ConnectionLost(string _msg)
         {
             var view = new ConnectionLostDialog()
             {
@@ -180,6 +188,7 @@ namespace FlexMold
             };
             var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
         }
+
         private void OnLogMessageItemAdded(object o, EventArgs Args)
         {
             // Do what you want :)
@@ -187,10 +196,12 @@ namespace FlexMold
             if (logInfo.Level >= LogLevel.Error)
                 SystemSounds.Beep.Play();
         }
+
         private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
         {
             Console.WriteLine();
         }
+
         private void MetroWindow_Closing(object sender, CancelEventArgs e)
         {
             if (TwinCathelper.Client != null)

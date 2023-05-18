@@ -3,12 +3,13 @@ using FlexMold.MVVM.View.Home;
 
 namespace FlexMold.MVVM.ViewModel
 {
-    class HomeViewModel : ObservableObject
+    internal class HomeViewModel : ObservableObject
     {
         /// <summary>
         /// Relay Commands
         /// </summary>
         public RelayCommand VisualDisplayCommand { get; set; }
+
         public RelayCommand VaccumStatusCommand { get; set; }
         public RelayCommand MachineDetailCommand { get; set; }
         public RelayCommand MotorStatusCommand { get; set; }
@@ -16,8 +17,6 @@ namespace FlexMold.MVVM.ViewModel
         public RelayCommand PowerStatusCommand { get; set; }
         public RelayCommand EmergencyStatusCommand { get; set; }
         public RelayCommand LaserStatusCommand { get; set; }
-
-
 
         public VisualDisplayView VisualDisplayVM { get; set; }
         public VaccumStatusView VaccumStatusVM { get; set; }
@@ -39,6 +38,7 @@ namespace FlexMold.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+
         public HomeViewModel()
         {
             VisualDisplayVM = new VisualDisplayView();
@@ -61,6 +61,5 @@ namespace FlexMold.MVVM.ViewModel
             EmergencyStatusCommand = new RelayCommand(o => { CurrentView = EmergencyStatusVM; });
             LaserStatusCommand = new RelayCommand(o => { CurrentView = LaserStatusVM; });
         }
-
     }
 }

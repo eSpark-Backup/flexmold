@@ -30,6 +30,5 @@
                     Style="{StaticResource MaterialDesignFlatButton}" />
             </StackPanel>
         </Border>
-
     </Grid>
 </UserControl>

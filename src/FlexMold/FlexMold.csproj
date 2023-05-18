@@ -41,7 +41,6 @@
 		<Folder Include="images\" />
 		<Folder Include="MVVM\ViewModel\Accessory\" />
 		<Folder Include="MVVM\View\Diaglog\" />
-		<Folder Include="Common\" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\NlogViewer\NlogViewer.csproj" />

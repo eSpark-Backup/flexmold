@@ -3,7 +3,6 @@ using System.Runtime.CompilerServices;
 
 namespace FlexMold.Core
 {
-
     public class ObservableObject : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;

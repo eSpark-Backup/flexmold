@@ -37,12 +37,12 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 MySlaves[i] = new ST_EcSlaveState()
                 {
-                    SlaveID = i + 1,
-                    SlaveName = $"Box_{i + 1}",
+                    SlaveID = i,
+                    SlaveName = $"Box_{i}",
                     deviceState = ESlaveStateMachine.EC_DEVICE_STATE_OP,
                     linkState = ElinkState.EC_LINK_STATE_OK,
                     FillColor = Brushes.Green,
-                    ErrorDeatil = $"Slave : {$"Box_{i + 1}"} \n Machine State : {ESlaveStateMachine.EC_DEVICE_STATE_OP}\n Link State : {ElinkState.EC_LINK_STATE_OK}"
+                    ErrorDeatil = $"Slave : {$"Box_{i}"} \n Machine State : {ESlaveStateMachine.EC_DEVICE_STATE_OP}\n Link State : {ElinkState.EC_LINK_STATE_OK}"
                 };
             }
             ECAdevStatesB = new byte[TwinCathelper.DeviceCount * sizeof(ElinkState) * 2];
@@ -138,9 +138,9 @@ namespace FlexMold.MVVM.ViewModel.Home
                                     break;
                             }
                         }
-                        if (MySlaves[index].linkState != (ElinkState)ECAdevStatesB[i + 1])
+                        if (MySlaves[index].linkState != (ElinkState)ECAdevStatesB[i])
                         {
-                            MySlaves[index].linkState = (ElinkState)ECAdevStatesB[i + 1];
+                            MySlaves[index].linkState = (ElinkState)ECAdevStatesB[i];
                             switch (MySlaves[index].linkState)
                             {
                                 case ElinkState.EC_LINK_STATE_OK:

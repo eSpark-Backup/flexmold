@@ -336,7 +336,7 @@ namespace FlexMold.MVVM.ViewModel
             }
             else
             {
-                worker.ProgressStatus = "No Divice & Box Found";
+                worker.ProgressStatus = "No Device or Box Found";
                 worker.Progress = 0;
             }
         }

@@ -197,7 +197,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             RegisterNotification();
             for (int j = 0; j < TwinCathelper.DeviceCount; j++)
             {
-                MyMotors.Add(new MotorStatusControl() { MotorID = j + 1, FillColor = Brushes.Transparent, ErrorDeatil = $"Motor #{mcount} \n No anomaly found" });
+                MyMotors.Add(new MotorStatusControl() { MotorID = j, FillColor = Brushes.Transparent, ErrorDeatil = $"Motor #{mcount} \n No anomaly found" });
                 mcount++;
             }
             GenerateErrorD1Command = new RelayCommand(o => { GenerateD1Error(); });

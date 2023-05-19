@@ -17,7 +17,6 @@ namespace FlexMold.MVVM.ViewModel
     {
         public VSInfo SelectedVS { get; set; }
         private bool _RunButtonEnable;
-
         public bool RunButtonEnable
         {
             get { return _RunButtonEnable; }
@@ -29,7 +28,6 @@ namespace FlexMold.MVVM.ViewModel
         }
 
         private bool _CloseButtonEnable;
-
         public bool CloseButtonEnable
         {
             get { return _CloseButtonEnable; }
@@ -91,6 +89,7 @@ namespace FlexMold.MVVM.ViewModel
         public event EventHandler OnRequestClose;
 
         public SplashScreenViewModel()
+
         {
             ICEnable = true;
             log.Log(LogLevel.Info, $"Flexmold application loading");
@@ -107,7 +106,9 @@ namespace FlexMold.MVVM.ViewModel
                 { ID = 3, Location = "R2", MachineType = EMachineType.Projector, Name = "P1" },
             };
             log.Log(LogLevel.Info, $"{MyMachines.Count} Machines Found");
+
             MachineClickCommand = new RelayCommand(o => MachineSelectMethod(o as Machine));
+
             RunButtonCommand = new RelayCommand(o =>
             {
                 if (Validataion())
@@ -115,8 +116,9 @@ namespace FlexMold.MVVM.ViewModel
             });
             CloseButtonCommand = new RelayCommand(o =>
             {
-                OnRequestClose(this, new EventArgs());
                 log.Log(LogLevel.Info, $"Closing ....");
+
+                OnRequestClose(this, new EventArgs());
             }
             );
         }
@@ -127,7 +129,8 @@ namespace FlexMold.MVVM.ViewModel
             switch (SelectedMachine.MachineType)
             {
                 case EMachineType.Motor:
-                    if (MessageBox.Show("Do You Want to build TwinCAT Solution?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                    if (MessageBox.Show("Do You Want to build TwinCAT Solution?", "Question",
+                        MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
                     {
                         if (Validataion())
                             RunMainWindow();
@@ -141,7 +144,9 @@ namespace FlexMold.MVVM.ViewModel
 
                         string TCVS = "TcXaeShell 15.0";
                         log.Log(LogLevel.Info, $"TwinCAT IDE : {TCVS}");
+
                         SelectedVS = AvailableVS.Where(a => a.Name == TCVS).FirstOrDefault();
+
                         if (SelectedVS != null)
                         {
                             RunScript();
@@ -169,6 +174,7 @@ namespace FlexMold.MVVM.ViewModel
         public void updateVSInstallations()
         {
             VSInfo[] vsInstallations = null;
+
             if (ComRegistration)
             {
                 int currentIndex;
@@ -231,6 +237,7 @@ namespace FlexMold.MVVM.ViewModel
                 $"TwinCAT Script is not running or TwinCAT is in Config mode \n" +
                 $"Please Start/Restart TwinCAT serivce or Build TwinCAT Solution from FCA \n";
                 }
+                TwinCathelper.TwinCatDiconnectConnect851();
             }
             catch (Exception ex)
             {
@@ -242,7 +249,7 @@ namespace FlexMold.MVVM.ViewModel
         private void _worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             ProgressPercentage = e.ProgressPercentage;
-            if (ProgressPercentage == 100)
+            if (ProgressPercentage == 100 && _worker.IsBuildSucceeded)
             {
                 if (_worker != null)
                     _worker.CancelAndWait(TimeSpan.FromSeconds(1.0));
@@ -288,7 +295,9 @@ namespace FlexMold.MVVM.ViewModel
                 ROTAccess.CloseRunningDTETable(_runningScript.ScriptRootFolder + @"\" + _runningScript.ScriptName + ".sln");
 
                 _worker.ProgressChanged += new ProgressChangedEventHandler(_worker_ProgressChanged);
+
                 _worker.ProgressStatusChanged += new EventHandler<ProgressStatusChangedArgs>(_worker_ProgressStatusChanged);
+
 #if OLD
                 _factory.AppID = this.DTEInfo.ProgId;
 #else

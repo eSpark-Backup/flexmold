@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using TwinCAT.Ads;
@@ -16,6 +17,7 @@ namespace FlexMold.MVVM.ViewModel.Home
     internal class MotorStatusViewmodel : ObservableObject
     {
         private Logger log;
+        private readonly IMachineDetailViewModel _IMachineDetailViewModel;
         public ObservableCollection<MotorStatusControl> MyMotors { get; set; }
         public RelayCommand GenerateErrorD1Command { get; set; }
         public RelayCommand DebugDetailClickCommand { get; set; }
@@ -37,6 +39,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 tt[i] = (uint)rnd.Next(0, 3);
             }
+
             SymbolDiag1Variable.WriteValue(tt);
         }
 
@@ -68,21 +71,15 @@ namespace FlexMold.MVVM.ViewModel.Home
                         switch (_value[v[i]])
                         {
                             case (int)EmDiag1.Healthy:
-                                _tmgs = $"[Info{_value[v[i]]}] Motor #{v[i]} {EmDiag1.Healthy}";
+                                _tmgs = $"Motor #{v[i]} : {EmDiag1.Healthy}";
                                 MyMotors[v[i]].FillColor = Brushes.Green;
                                 MyMotors[v[i]].ErrorDeatil = _tmgs;
                                 log.Log(LogLevel.Info, _tmgs);
                                 _TstN.ShowSuccess(_tmgs);
                                 break;
-                            //case (int)EmDiag1.Recovered:
-                            //    _tmgs = $"[Info{_value[v[i]]}] Motor #{v[i]} {EmDiag1.Recovered}";
-                            //    MyMotors[v[i]].FillColor = Brushes.Gray;
-                            //    MyMotors[v[i]].ErrorDeatil = _tmgs;
-                            //    log.Log(LogLevel.Info, _tmgs);
-                            //    ToastNotificationUtil.ShowInformation(_tmgs);
-                            //    break;
+
                             case (int)EmDiag1.Stepper_Driver_Failed:
-                                _tmgs = $"[Err{_value[v[i]]}] Motor #{v[i]} {EmDiag1.Stepper_Driver_Failed.ToString().Replace("_", " ")}";
+                                _tmgs = $"Motor #{v[i]} : {EmDiag1.Stepper_Driver_Failed}";
                                 MyMotors[v[i]].FillColor = Brushes.Red;
                                 MyMotors[v[i]].ErrorDeatil = _tmgs;
                                 log.Log(LogLevel.Error, _tmgs);
@@ -100,36 +97,49 @@ namespace FlexMold.MVVM.ViewModel.Home
                 v = Enumerable.Range(0, TwinCathelper.DeviceCount).ToArray();
                 for (int i = 0; i < v.Length; i++)
                 {
+
                     var _tmgs = "";
                     switch (_value[v[i]])
                     {
                         case (int)EmDiag1.Healthy:
-                            _tmgs = $"[Info{_value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Healthy}";
+                            _tmgs = $"Motor #{v[i]} : {EmDiag1.Healthy}";
                             MyMotors[v[i]].FillColor = Brushes.Green;
                             MyMotors[v[i]].ErrorDeatil = _tmgs;
                             log.Log(LogLevel.Info, _tmgs);
                             _TstN.ShowSuccess(_tmgs);
                             break;
-                        //case (int)EmDiag1.Recovered:
-                        //    _tmgs = $"[Info{_value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Recovered}";
-                        //    MyMotors[v[i]].FillColor = Brushes.Gray;
-                        //    MyMotors[v[i]].ErrorDeatil = _tmgs;
-                        //    log.Log(LogLevel.Info, _tmgs);
-                        //    ToastNotificationUtil.ShowInformation(_tmgs);
-                        //    break;
+
                         case (int)EmDiag1.Stepper_Driver_Failed:
-                            _tmgs = $"[Err{_value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Stepper_Driver_Failed.ToString().Replace("_", " ")}";
+                            _tmgs = $"Motor #{v[i]} : {EmDiag1.Stepper_Driver_Failed}";
                             MyMotors[v[i]].FillColor = Brushes.Red;
                             MyMotors[v[i]].ErrorDeatil = _tmgs;
                             log.Log(LogLevel.Error, _tmgs);
                             _TstN.ShowError(_tmgs);
                             break;
-
                         default:
                             break;
                     }
                 }
             }
+        }
+        private bool LinkStatus(int[] daigArray, int motorIndex)
+        {
+            if (_IMachineDetailViewModel != null)
+            {
+                if (_IMachineDetailViewModel.MySlaves[motorIndex].linkState == ElinkState.EC_LINK_STATE_OK)
+                {
+                    return true;
+                }
+                else
+                {
+                    MyMotors[daigArray[motorIndex]].FillColor = Brushes.Red;
+                    MyMotors[daigArray[motorIndex]].ErrorDeatil = _IMachineDetailViewModel.MySlaves[motorIndex].linkState.ToString();
+                    return false;
+                }
+            }
+            MyMotors[daigArray[motorIndex]].ErrorDeatil = "Box link Failed";
+            MyMotors[daigArray[motorIndex]].FillColor = Brushes.Red;
+            return false;
         }
 
         public UInt32[] MPostion = new UInt32[TwinCathelper.DeviceCount];
@@ -162,7 +172,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                         case TCSymbols.mDiag1:
                             MDiag1 = new UInt32[TwinCathelper.DeviceCount];
                             Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag1, 0, e.Data.Length);
-                            log.Log(LogLevel.Warn, $"Diag1 Updated : {String.Join(",", MDiag1)}");
+                            log.Log(LogLevel.Info, $"Diag0 Updated : {String.Join(",", MDiag1)}");
                             Diag1Value = MDiag1;
                             break;
                             //case TCVarName.mDiag2:
@@ -185,6 +195,7 @@ namespace FlexMold.MVVM.ViewModel.Home
         private ToastNotificationUtil _TstN;
 
         public MotorStatusViewmodel()
+
         {
             if (TwinCathelper.Client == null)
             {
@@ -197,22 +208,25 @@ namespace FlexMold.MVVM.ViewModel.Home
             RegisterNotification();
             for (int j = 0; j < TwinCathelper.DeviceCount; j++)
             {
-                MyMotors.Add(new MotorStatusControl() { MotorID = j, FillColor = Brushes.Transparent, ErrorDeatil = $"Motor #{mcount} \n No anomaly found" });
+                MyMotors.Add(new MotorStatusControl() { MotorID = j, FillColor = Brushes.Red, ErrorDeatil = "" });
                 mcount++;
             }
             GenerateErrorD1Command = new RelayCommand(o => { GenerateD1Error(); });
+
             DebugDetailClickCommand = new RelayCommand(o => { DisplayError(o as MotorStatusControl); });
         }
 
-        private void RegisterNotification()
+        private async void RegisterNotification()
         {
             log.Log(LogLevel.Info, $"Registring Device Status Notification...");
             NotificatioHandles = new List<int>();
+
             TwinCathelper.Client.AdsNotification += Client_AdsNotificationMS;
+
             //_ = RegisterNotification(TwinCATVariableIfo.mPositionVariableName);
             //_ = RegisterNotification(TwinCATVariableIfo.mTemperatureVariableName);
-            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.mDiag1}"));
             //_ = RegisterNotification(TwinCATVariableIfo.mDiag2VariableName);
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.mDiag1}"));
             //_ = RegisterNotification(TwinCATVariableIfo.mDiag3VariableName);
         }
     }

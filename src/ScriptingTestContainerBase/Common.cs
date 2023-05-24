@@ -8,6 +8,7 @@ namespace ScriptingTest
     /// </summary>
     public interface IProgressProvider
     {
+        bool IsBuildSucceeded { get; set; }
         /// <summary>
         /// Sets the progress.
         /// </summary>

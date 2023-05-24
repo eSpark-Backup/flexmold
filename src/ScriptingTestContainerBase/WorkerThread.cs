@@ -390,6 +390,15 @@ namespace ScriptingTest
         /// </summary>
         public event EventHandler<ProgressStatusChangedArgs> ProgressStatusChanged;
 
+        private bool _isBuildSucceeded;
+
+        public bool IsBuildSucceeded
+        {
+            get { return _isBuildSucceeded; }
+            set { _isBuildSucceeded = value; }
+        }
+
+
         /// <summary>
         /// Current Progress
         /// </summary>

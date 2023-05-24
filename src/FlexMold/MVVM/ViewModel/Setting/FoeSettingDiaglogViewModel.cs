@@ -121,11 +121,11 @@ namespace FlexMold.MVVM.ViewModel.Setting
                 TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_dwPass}").FirstOrDefault().WriteValue(MyFoe.Foe_dwPass);
                 TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sPathName}").FirstOrDefault().WriteValue(MyFoe.Foe_sPathName);
                 MyFoe.Foe_sNetId = TwinCathelper.SAmsNetId;
-                for (UInt16 i = 0; i < TwinCathelper.sAmsPort.Length; i++)
+                for (UInt16 i = 0; i < TwinCathelper.SAmsPort.Length; i++)
                 {
                     ResetSetContols();
-                    DeviceStatusIndex = $"Updating {i + 1}/{TwinCathelper.sAmsPort.Length}";
-                    MyFoe.Foe_nSlaveAddr = TwinCathelper.sAmsPort[i];
+                    DeviceStatusIndex = $"Updating {i + 1}/{TwinCathelper.SAmsPort.Length}";
+                    MyFoe.Foe_nSlaveAddr = TwinCathelper.SAmsPort[i];
                     TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(0);
                     TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nSlaveAddr}").FirstOrDefault().WriteValue(MyFoe.Foe_nSlaveAddr);
                     TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bBusy}").FirstOrDefault().WriteValue(0);
@@ -134,15 +134,15 @@ namespace FlexMold.MVVM.ViewModel.Setting
                     TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nBytesWritten}").FirstOrDefault().WriteValue(0);
                     TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nPercent}").FirstOrDefault().WriteValue(0);
                     Thread.Sleep(1000);
-                    DeviceStatusIndex = $"Initializing {i + 1}/{TwinCathelper.sAmsPort.Length}";
+                    DeviceStatusIndex = $"Initializing {i + 1}/{TwinCathelper.SAmsPort.Length}";
                     if (ChengeBoxState(ESlaveStateMachine.EC_DEVICE_STATE_INIT))
                     {
                         Init_Status = true;
                         TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_bExecute}").FirstOrDefault().WriteValue(0);
-                        DeviceStatusIndex = $"Setted into : {ESlaveStateMachine.EC_DEVICE_STATE_INIT} {i + 1}/{TwinCathelper.sAmsPort.Length}";
+                        DeviceStatusIndex = $"Setted into : {ESlaveStateMachine.EC_DEVICE_STATE_INIT} {i + 1}/{TwinCathelper.SAmsPort.Length}";
                         log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr} State Updated");
                         TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(1);
-                        DeviceStatusIndex = $"Downloading {i + 1}/{TwinCathelper.sAmsPort.Length}";
+                        DeviceStatusIndex = $"Downloading {i + 1}/{TwinCathelper.SAmsPort.Length}";
                         if (FoeWait())
                         {
                             Op_Status = true;

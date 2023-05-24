@@ -111,8 +111,8 @@ namespace FlexMold.MVVM.ViewModel
             if (worker.CancellationPending)
                 throw new Exception("Cancelled");
             worker.ProgressStatus = $"Connecting to TwinCAT Via ADS On Port {(int)AmsPort.SystemService}";
-            TwinCathelper._sessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
-            TwinCathelper.ClientSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
+            TwinCathelper.SessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
+            TwinCathelper.ClientSystemService = (AdsConnection)TwinCathelper.SessionSystemService.Connect();
             worker.Progress = 8;
 
             worker.ProgressStatus = $"Configuring TwinCAT System into ConfigMode ....";
@@ -327,16 +327,19 @@ namespace FlexMold.MVVM.ViewModel
                     System.Threading.Thread.Sleep(5000);
                     plcProjectItem.ConsumeXml(xmlLogout);
                     worker.Progress = 95;
+                    worker.IsBuildSucceeded = true;
                 }
                 else
                 {
                     worker.ProgressStatus = "TwinCAT Project build Failed";
                     worker.Progress = 0;
+                    worker.IsBuildSucceeded = false;
                 }
             }
             else
             {
-                worker.ProgressStatus = "No Divice & Box Found";
+                worker.ProgressStatus = "No Device or Box Found";
+                worker.IsBuildSucceeded = false;
                 worker.Progress = 0;
             }
         }

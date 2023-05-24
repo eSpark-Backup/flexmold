@@ -37,7 +37,7 @@ namespace FlexMold
             switch (SelectedMachine.MachineType)
             {
                 case EMachineType.Motor:
-                    TwinCathelper._session.ConnectionStateChanged += session_ConnectionStateChanged;
+                    TwinCathelper.Session.ConnectionStateChanged += session_ConnectionStateChanged;
                     TwinCathelper.ClientSystemService.ConnectionStateChanged += _connection_ConnectionStatusChanged;
                     TwinCathelper.Client.RouterStateChanged += _connection_RouterStateChanged;
                     TwinCathelper.Client.RegisterAdsStateChangedAsync(_connection_AdsStateChanged, CancellationToken.None);

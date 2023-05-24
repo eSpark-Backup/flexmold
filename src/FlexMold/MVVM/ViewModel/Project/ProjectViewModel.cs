@@ -14,8 +14,9 @@ namespace FlexMold.MVVM.ViewModel.Project
     internal class ProjectViewModel : ObservableObject
     {
         private Logger log = LogManager.GetLogger("Project");
-        public RelayCommand ReadCSVFileCommand { get; set; }
+        public RelayCommand SendCSVCommand { get; set; }
         public RelayCommand BrowseProjectCommand { get; set; }
+        public RelayCommand StopMotorsCommand { get; set; }
 
         private Model.Project _selectedMyDataModel;
 
@@ -25,7 +26,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             set
             {
                 _selectedMyDataModel = value;
-                slectedFile = null;
+                SelectedFile = null;
                 OnPropertyChanged();
             }
         }
@@ -42,14 +43,14 @@ namespace FlexMold.MVVM.ViewModel.Project
             }
         }
 
-        private FileInfo _slectedFile;
+        private FileInfo _selectedFile;
 
-        public FileInfo slectedFile
+        public FileInfo SelectedFile
         {
-            get { return _slectedFile; }
+            get { return _selectedFile; }
             set
             {
-                _slectedFile = value;
+                _selectedFile = value;
                 OnPropertyChanged();
             }
         }
@@ -57,9 +58,8 @@ namespace FlexMold.MVVM.ViewModel.Project
         private ToastNotificationUtil _TstN;
         public LaserProjectorViewModel lVM { get; set; }
 
-        private void WriteCSVData()
+        private void WriteCSVData(IList<double> data)
         {
-            var data = readCsvFile();
             if (data.Count != 0)
             {
                 if (TwinCathelper.PLCMotors.Length == data.Count)
@@ -73,9 +73,9 @@ namespace FlexMold.MVVM.ViewModel.Project
                 }
                 else
                 {
-                    log.Log(LogLevel.Error, $"Please select correct CSV\n " +
-                        $"CSV Data & Box count not equal \n " +
-                        $"Data Count : {data.Count} | Device Count : {TwinCathelper.PLCMotors.Length}");
+                    log.Log(LogLevel.Error, $"Please select correct CSV");
+                    log.Log(LogLevel.Error, $"Data and Box count are not equal");
+                      log.Log(LogLevel.Error, $"Data Count : {data.Count} | Device Count : {TwinCathelper.PLCMotors.Length}");
                     _TstN.ShowError($"CSV Failed\nDevice:{TwinCathelper.PLCMotors.Length} != Data:{data.Count}");
                 }
             }
@@ -91,23 +91,36 @@ namespace FlexMold.MVVM.ViewModel.Project
         {
             _TstN = new ToastNotificationUtil();
             lVM = new LaserProjectorViewModel(this);
-            ReadCSVFileCommand = new RelayCommand(o => { WriteCSVData(); });
+            SendCSVCommand = new RelayCommand(o => { WriteCSVData(readCsvFile(SelectedFile)); });
             BrowseProjectCommand = new RelayCommand(o => { BrowseProject(); });
+            StopMotorsCommand = new RelayCommand(o => {
+                log.Log(LogLevel.Warn, $"Stopping Motors");
+                WriteCSVData(StopCsv(TwinCathelper.DeviceCount));
+            });
         }
-
-        private List<double> readCsvFile()
+        private List<double> StopCsv(int dataLength)
         {
             var data = new List<double>();
-            if (slectedFile != null)
+            for (int i = 0; i < dataLength; i++)
             {
-                if (slectedFile.FullName.EndsWith(".csv"))
+                data.Add(0);
+            }
+            return data;
+
+        }
+        private List<double> readCsvFile(FileInfo filename)
+        {
+            var data = new List<double>();
+            if (filename != null)
+            {
+                if (SelectedFile.FullName.EndsWith(".csv"))
                 {
-                    log.Log(LogLevel.Info, $"Reading CSV File {slectedFile.Name}");
+                    log.Log(LogLevel.Info, $"Reading CSV File {filename.Name}");
                     try
                     {
                         //var csv = @"C:\Users\123\Downloads\Sylvan-main\Sylvan-main\source\Sylvan.Data.Csv.Tests\Data\Quote.csv";
                         //var csv = @"D:\smhraza\Projects\FLEXMOLD\flexmolddata\FlexMain\Projects\M&M\S3.2\S3.2.csv";
-                        using (var reader = new StreamReader(slectedFile.FullName))
+                        using (var reader = new StreamReader(SelectedFile.FullName))
                         {
                             var options = new CsvDataReaderOptions
                             {
@@ -132,7 +145,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     }
                 }
                 else
-                    log.Log(LogLevel.Warn, $"Selected File Not a .csv File {slectedFile.Name}");
+                    log.Log(LogLevel.Warn, $"Selected File Not a .csv File {SelectedFile.Name}");
             }
             else
                 log.Log(LogLevel.Warn, $"Please Select File First");

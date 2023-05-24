@@ -23,25 +23,57 @@
     <UserControl.DataContext>
         <machinetest:MotorTestViewModel />
     </UserControl.DataContext>
-    <UserControl.Resources />
+    <UserControl.Resources>
+        <convertor:RadioBoolToIntConverter x:Key="radioBoolToIntConverter" />
+    </UserControl.Resources>
     <UniformGrid Columns="2" Rows="8">
         <Label Content="Selected Motor" />
         <ComboBox ItemsSource="{Binding DeviceIds}" SelectedItem="{Binding SelectedMotorIndex}" />
         <Label Content="Motor Direction : " />
-        <mah:ToggleSwitch
-            IsOn="{Binding SelectedMotorDirValue}"
-            OffContent="Reverese"
-            OnContent="Forward" />
+        <Border
+            Margin="5"
+            Padding="5,0,0,0"
+            BorderBrush="#FFCCCCCC"
+            BorderThickness="1">
+            <UniformGrid Columns="2">
+                <RadioButton
+                    Content="Clockwise"
+                    GroupName="g1"
+                    IsChecked="{Binding SelectedMotorDirValue, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=0}" />
+                <RadioButton
+                    Content="Anti-Clockwise"
+                    GroupName="g1"
+                    IsChecked="{Binding SelectedMotorDirValue, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=1}" />
+            </UniformGrid>
+        </Border>
         <Label Content="Motor Mode : " />
-        <mah:ToggleSwitch
-            IsOn="{Binding SelectedMotorModeValue}"
-            OffContent="Time"
-            OnContent="Direction" />
+        <Border
+            Margin="5"
+            Padding="5,0,0,0"
+            BorderBrush="#FFCCCCCC"
+            BorderThickness="1">
+            <UniformGrid Columns="2">
+                <RadioButton
+                    Content="Speed"
+                    GroupName="g1"
+                    IsChecked="{Binding SelectedMotorModeValue, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=0}" />
+                <RadioButton
+                    Content="Time"
+                    GroupName="g1"
+                    IsChecked="{Binding SelectedMotorModeValue, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=1}" />
+            </UniformGrid>
+        </Border>
         <Label Content="Motor Speed : " />
         <mah:NumericUpDown Value="{Binding SelectedMotorSpeedValue}" />
         <Label Content="Motor Time : " />
         <mah:NumericUpDown Value="{Binding SelectedMotorTimeValue}" />
         <Label Content="Motor Position : " />
-        <TextBlock Style="{StaticResource LabelTextBlock}" Text="{Binding Position}" />
+        <Border
+            Margin="5"
+            Padding="5,0,0,0"
+            BorderBrush="#FFCCCCCC"
+            BorderThickness="1">
+            <TextBlock Style="{StaticResource LabelTextBlock}" Text="{Binding Position}" />
+        </Border>
     </UniformGrid>
 </UserControl>

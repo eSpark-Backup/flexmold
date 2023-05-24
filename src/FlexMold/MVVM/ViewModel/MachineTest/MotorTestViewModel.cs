@@ -64,8 +64,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 TwinCathelper.ReadEthercatDeviceData(value);
                 SelectedMotorSpeedValue = MyPLCMotor[value].mSpeed;
                 SelectedMotorTimeValue = MyPLCMotor[value].mTime;
-                SelectedMotorDirValue = MyPLCMotor[value].mDirection;
-                SelectedMotorModeValue = MyPLCMotor[value].mMode;
+                SelectedMotorDirValue = MyPLCMotor[value].mDirection == false ? 0 : 1;
+                SelectedMotorModeValue = MyPLCMotor[value].mMode == false ? 0 : 1;
                 var mtarray = new byte[sizeof(UInt32)];
                 TwinCathelper.Client.Read(PositionSymbol.IndexGroup,
                    PositionSymbol.IndexOffset + (uint)SelectedMotorIndex * sizeof(UInt32), mtarray.AsMemory());
@@ -76,9 +76,9 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
 
         public Symbol PositionSymbol { get; set; }
 
-        private bool _SelectedMotorModeValue;
+        private int _SelectedMotorModeValue;
 
-        public bool SelectedMotorModeValue
+        public int SelectedMotorModeValue
         {
             get { return _SelectedMotorModeValue; }
             set
@@ -86,7 +86,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 if (!justread)
                 {
                     _SelectedMotorModeValue = value;
-                    MyPLCMotor[SelectedMotorIndex].mMode = SelectedMotorModeValue;
+                    MyPLCMotor[SelectedMotorIndex].mMode = SelectedMotorModeValue == 0 ? false : true;
                     TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
                 }
                 else
@@ -98,9 +98,9 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             }
         }
 
-        private bool _SelectedMotorDirValue;
+        private int _SelectedMotorDirValue;
 
-        public bool SelectedMotorDirValue
+        public int SelectedMotorDirValue
         {
             get { return _SelectedMotorDirValue; }
             set
@@ -108,7 +108,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 if (!justread)
                 {
                     _SelectedMotorDirValue = value;
-                    MyPLCMotor[SelectedMotorIndex].mDirection = SelectedMotorDirValue;
+                    MyPLCMotor[SelectedMotorIndex].mDirection = SelectedMotorDirValue == 0 ? false : true;
                     TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
                 }
                 else
@@ -127,15 +127,14 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             get { return _SelectedMotorTimeValue; }
             set
             {
+                _SelectedMotorTimeValue = value;
                 if (!justread)
                 {
-                    _SelectedMotorTimeValue = value;
-                    MyPLCMotor[SelectedMotorIndex].mTime = SelectedMotorTimeValue;
+                    MyPLCMotor[SelectedMotorIndex].mTime = SelectedMotorTimeValue*1600;
                     TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
                 }
                 else
                 {
-                    _SelectedMotorSpeedValue = value;
                     justread = false;
                 }
                 OnPropertyChanged();
@@ -149,15 +148,14 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             get { return _SelectedMotorSpeedValue; }
             set
             {
+                _SelectedMotorSpeedValue = value;
                 if (!justread)
                 {
-                    _SelectedMotorSpeedValue = value;
-                    MyPLCMotor[SelectedMotorIndex].mSpeed = SelectedMotorSpeedValue;
+                    MyPLCMotor[SelectedMotorIndex].mSpeed = SelectedMotorSpeedValue/2;
                     TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
                 }
                 else
                 {
-                    _SelectedMotorSpeedValue = value;
                     justread = false;
                 }
                 OnPropertyChanged();
@@ -239,7 +237,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             MyPLCMotor = TwinCathelper.PLCMotors;
             justread = true;
             SelectedMotorSpeedValue = MyPLCMotor[SelectedMotorIndex].mSpeed;
-            SelectedMotorDirValue = Convert.ToBoolean(MyPLCMotor[SelectedMotorIndex].mDirection);
+            SelectedMotorDirValue = Convert.ToBoolean(MyPLCMotor[SelectedMotorIndex].mDirection) == false ? 0 : 1;
             justread = false;
             OnLoadedCommand = new RelayCommand(o => { OnLoaded(); });
             OnUnLoadedCommand = new RelayCommand(o => { OnUnLoaded(); });

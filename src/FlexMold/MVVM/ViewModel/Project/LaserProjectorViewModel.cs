@@ -78,7 +78,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             log = LogManager.GetLogger("LaseProjector");
             _TstN = new ToastNotificationUtil();
             _parent = parent;
-            SendLasFileCommand = new RelayCommand(o => { _ = sendLasFileAsync(Parent.slectedFile); });
+            SendLasFileCommand = new RelayCommand(o => { _ = sendLasFileAsync(Parent.SelectedFile); });
             SerialConfigCommand = new RelayCommand(o => { SerialConfigWindow(); });
             LaunchLPMCommand = new RelayCommand(o =>
             {

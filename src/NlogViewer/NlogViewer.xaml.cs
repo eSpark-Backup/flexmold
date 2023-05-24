@@ -119,7 +119,7 @@ namespace NlogViewer
                 else ScrollToFirst();
                 MyExpander.Header = new TextBlock
                 {
-                    Text = $"Last Log {log.LogEvent.TimeStamp.ToShortTimeString()} {log.LogEvent.LoggerName} | {log.LogEvent.Level} | {log.LogEvent.FormattedMessage.Humanize()}",
+                    Text = $"Last Log {log.LogEvent.TimeStamp.ToShortTimeString()} {log.LogEvent.LoggerName} | {log.LogEvent.Level} | {log.LogEvent.FormattedMessage}",
                     Height = 20,
                     ToolTip = vm.ToolTip,
                     Foreground = vm.Background

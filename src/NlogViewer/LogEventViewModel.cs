@@ -16,7 +16,7 @@ namespace NlogViewer
 
             ToolTip = logEventInfo.FormattedMessage;
             Level = logEventInfo.Level.ToString();
-            FormattedMessage = logEventInfo.FormattedMessage.Humanize();
+            FormattedMessage = logEventInfo.FormattedMessage;
             LoggerName = logEventInfo.LoggerName;
             Time = logEventInfo.TimeStamp.ToString(CultureInfo.InvariantCulture);
 

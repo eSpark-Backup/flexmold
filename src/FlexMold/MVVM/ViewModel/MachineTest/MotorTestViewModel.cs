@@ -5,6 +5,7 @@ using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
@@ -130,7 +131,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 _SelectedMotorTimeValue = value;
                 if (!justread)
                 {
-                    MyPLCMotor[SelectedMotorIndex].mTime = SelectedMotorTimeValue*1600;
+                    MyPLCMotor[SelectedMotorIndex].mTime = SelectedMotorTimeValue;
                     TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
                 }
                 else
@@ -151,7 +152,10 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 _SelectedMotorSpeedValue = value;
                 if (!justread)
                 {
-                    MyPLCMotor[SelectedMotorIndex].mSpeed = SelectedMotorSpeedValue/2;
+                    MyPLCMotor[SelectedMotorIndex].mSpeed = SelectedMotorSpeedValue*1600;
+                    TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
+                    Thread.Sleep(200);
+                    MyPLCMotor[SelectedMotorIndex].mSpeed = 0;
                     TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
                 }
                 else

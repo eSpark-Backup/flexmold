@@ -27,7 +27,7 @@
         <convertor:RadioBoolToIntConverter x:Key="radioBoolToIntConverter" />
     </UserControl.Resources>
     <UniformGrid Columns="2" Rows="8">
-        <Label Content="Selected Motor" />
+        <Label Content="Selected Motor : " />
         <ComboBox ItemsSource="{Binding DeviceIds}" SelectedItem="{Binding SelectedMotorIndex}" />
         <Label Content="Motor Direction : " />
         <Border

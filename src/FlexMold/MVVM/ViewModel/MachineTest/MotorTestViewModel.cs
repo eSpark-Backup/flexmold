@@ -1,4 +1,5 @@
-﻿using FlexMold.Core;
+﻿using EnvDTE80;
+using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.Utility;
 using NLog;
@@ -6,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
@@ -15,6 +17,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
     internal class MotorTestViewModel : ObservableObject
     {
         private Logger log;
+        public RelayCommand SendSpeedCommand { get; set; }
+        public RelayCommand SendTimeCommand { get; set; }
         public RelayCommand OnLoadedCommand { get; set; }
         public RelayCommand OnUnLoadedCommand { get; set; }
         public int structSize { get; set; }
@@ -129,15 +133,6 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             set
             {
                 _SelectedMotorTimeValue = value;
-                if (!justread)
-                {
-                    MyPLCMotor[SelectedMotorIndex].mTime = SelectedMotorTimeValue;
-                    TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
-                }
-                else
-                {
-                    justread = false;
-                }
                 OnPropertyChanged();
             }
         }
@@ -150,18 +145,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             set
             {
                 _SelectedMotorSpeedValue = value;
-                if (!justread)
-                {
-                    MyPLCMotor[SelectedMotorIndex].mSpeed = SelectedMotorSpeedValue*1600;
-                    TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
-                    Thread.Sleep(200);
-                    MyPLCMotor[SelectedMotorIndex].mSpeed = 0;
-                    TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
-                }
-                else
-                {
-                    justread = false;
-                }
+
                 OnPropertyChanged();
             }
         }
@@ -219,6 +203,33 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 log.Log(NLog.LogLevel.Error, ex.Message);
             }
         }
+        void WriteSpeedValue()
+        {
+            if (!justread)
+            {
+                MyPLCMotor[SelectedMotorIndex].mSpeed = SelectedMotorSpeedValue * 1600;
+                TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
+                Thread.Sleep(200);
+                MyPLCMotor[SelectedMotorIndex].mSpeed = 0;
+                TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
+            }
+            else
+            {
+                justread = false;
+            }
+        }
+        void WriteTimeValue()
+        {
+            if (!justread)
+            {
+                MyPLCMotor[SelectedMotorIndex].mTime = SelectedMotorTimeValue;
+                TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
+            }
+            else
+            {
+                justread = false;
+            }
+        }
 
         public MotorTestViewModel()
         {
@@ -227,7 +238,6 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 return;
             }
             log = LogManager.GetLogger("Motor Test");
-
             MyPLCMotor = new EthercatDevice[TwinCathelper.DeviceCount];
             PositionSymbol = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"{TCVarName.mPosition}").FirstOrDefault();
             SymbolEthercatDevice = TwinCathelper.MySymbols.Where(a => a.InstancePath == TCVarName.MainDevice).FirstOrDefault();
@@ -245,6 +255,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             justread = false;
             OnLoadedCommand = new RelayCommand(o => { OnLoaded(); });
             OnUnLoadedCommand = new RelayCommand(o => { OnUnLoaded(); });
+            SendSpeedCommand = new RelayCommand(o => { WriteSpeedValue(); });
+            SendTimeCommand = new RelayCommand(o => { WriteTimeValue(); });
         }
     }
 }

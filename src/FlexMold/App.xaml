@@ -70,7 +70,6 @@
             </Style>
             <Style BasedOn="{StaticResource MahApps.Styles.Button.Flat}" TargetType="{x:Type Button}">
                 <Setter Property="Margin" Value="2" />
-                <Setter Property="Height" Value="38" />
             </Style>
             <Style TargetType="{x:Type mah:MetroProgressBar}">
                 <Setter Property="Margin" Value="2" />

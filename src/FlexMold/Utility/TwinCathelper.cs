@@ -141,10 +141,17 @@ namespace FlexMold.Utility
 
         public static void WriteEthercatDeviceData(uint _motorNumber)
         {
-            var mtarray = new byte[structSize];
-            PLCMotors[_motorNumber].Pack().CopyTo(mtarray, 0);
-            TwinCathelper.Client.Write(SymbolEthercatDevice.IndexGroup,
-                SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
+            try
+            {
+               var mtarray = new byte[structSize];
+                PLCMotors[_motorNumber].Pack().CopyTo(mtarray, 0);
+                TwinCathelper.Client.Write(SymbolEthercatDevice.IndexGroup,
+                    SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
+            }
+            catch (Exception ex)
+            {
+                _log.Log(LogLevel.Error, ex.Message);
+            }
         }
 
         public static void StartpPLC()

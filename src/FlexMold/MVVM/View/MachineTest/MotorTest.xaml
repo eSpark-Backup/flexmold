@@ -54,7 +54,7 @@
             BorderThickness="1">
             <UniformGrid Columns="2">
                 <RadioButton
-                    Content="Speed"
+                    Content="Displacement"
                     GroupName="g1"
                     IsChecked="{Binding SelectedMotorModeValue, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=0}" />
                 <RadioButton
@@ -63,10 +63,22 @@
                     IsChecked="{Binding SelectedMotorModeValue, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=1}" />
             </UniformGrid>
         </Border>
-        <Label Content="Motor Speed : " />
-        <mah:NumericUpDown Value="{Binding SelectedMotorSpeedValue}" />
+        <Label Content="Motor Displacement(mm) : " />
+        <UniformGrid Columns="2">
+            <mah:NumericUpDown Value="{Binding SelectedMotorSpeedValue}" />
+            <Button
+                Margin="5"
+                Command="{Binding SendSpeedCommand}"
+                Content="Send" />
+        </UniformGrid>
         <Label Content="Motor Time : " />
-        <mah:NumericUpDown Value="{Binding SelectedMotorTimeValue}" />
+        <UniformGrid Columns="2">
+            <mah:NumericUpDown Value="{Binding SelectedMotorTimeValue}" />
+            <Button
+                Margin="5"
+                Command="{Binding SendTimeCommand}"
+                Content="Send" />
+        </UniformGrid>
         <Label Content="Motor Position : " />
         <Border
             Margin="5"

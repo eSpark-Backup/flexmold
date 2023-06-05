@@ -1,6 +1,8 @@
-﻿using FlexMold.Core;
+﻿using ControlzEx.Standard;
+using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.Utility;
+using Newtonsoft.Json;
 using NLog;
 using Sylvan.Data.Csv;
 using System;
@@ -8,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace FlexMold.MVVM.ViewModel.Project
 {
@@ -65,17 +68,22 @@ namespace FlexMold.MVVM.ViewModel.Project
                 if (TwinCathelper.PLCMotors.Length == data.Count)
                 {
                     for (int i = 0; i < data.Count; i++)
-                    {
-                        TwinCathelper.PLCMotors[i].mSpeed = (uint)data[i];
-                    }
+                        TwinCathelper.PLCMotors[i].mSpeed = (uint)data[i] * 1600;
                     TwinCathelper.WriteEthercatDeviceData();
-                    log.Log(LogLevel.Info, $"{data.Count} value/s has been written sucessfully");
+                    log.Log(LogLevel.Info, $"{data.Count} csv value/s has been written sucessfully");
+                    
+                    Thread.Sleep(200);
+                    
+                    for (int i = 0; i < data.Count; i++)
+                        TwinCathelper.PLCMotors[i].mSpeed = 0;
+                    TwinCathelper.WriteEthercatDeviceData();
+                    log.Log(LogLevel.Info, $"{data.Count} zero value/s has been written sucessfully");
                 }
                 else
                 {
                     log.Log(LogLevel.Error, $"Please select correct CSV");
                     log.Log(LogLevel.Error, $"Data and Box count are not equal");
-                      log.Log(LogLevel.Error, $"Data Count : {data.Count} | Device Count : {TwinCathelper.PLCMotors.Length}");
+                    log.Log(LogLevel.Error, $"Data Count : {data.Count} | Device Count : {TwinCathelper.PLCMotors.Length}");
                     _TstN.ShowError($"CSV Failed\nDevice:{TwinCathelper.PLCMotors.Length} != Data:{data.Count}");
                 }
             }
@@ -93,7 +101,8 @@ namespace FlexMold.MVVM.ViewModel.Project
             lVM = new LaserProjectorViewModel(this);
             SendCSVCommand = new RelayCommand(o => { WriteCSVData(readCsvFile(SelectedFile)); });
             BrowseProjectCommand = new RelayCommand(o => { BrowseProject(); });
-            StopMotorsCommand = new RelayCommand(o => {
+            StopMotorsCommand = new RelayCommand(o =>
+            {
                 log.Log(LogLevel.Warn, $"Stopping Motors");
                 WriteCSVData(StopCsv(TwinCathelper.DeviceCount));
             });
@@ -118,8 +127,6 @@ namespace FlexMold.MVVM.ViewModel.Project
                     log.Log(LogLevel.Info, $"Reading CSV File {filename.Name}");
                     try
                     {
-                        //var csv = @"C:\Users\123\Downloads\Sylvan-main\Sylvan-main\source\Sylvan.Data.Csv.Tests\Data\Quote.csv";
-                        //var csv = @"D:\smhraza\Projects\FLEXMOLD\flexmolddata\FlexMain\Projects\M&M\S3.2\S3.2.csv";
                         using (var reader = new StreamReader(SelectedFile.FullName))
                         {
                             var options = new CsvDataReaderOptions
@@ -133,7 +140,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                             {
                                 for (int i = 0; i < csvr.FieldCount; i++)
                                 {
-                                    data.Add(csvr.GetDouble(i) / 2);
+                                    data.Add(csvr.GetDouble(i));
                                 }
                             }
                         }
@@ -149,6 +156,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             }
             else
                 log.Log(LogLevel.Warn, $"Please Select File First");
+            log.Info($"CSV data : {JsonConvert.SerializeObject(data)}");
             return data;
         }
 

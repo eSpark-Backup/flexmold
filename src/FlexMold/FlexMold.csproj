@@ -82,6 +82,9 @@
 		</Reference>
 	</ItemGroup>
 	<ItemGroup>
+		<Compile Update="MVVM\View\Project\CSVDiaglog.xaml.cs">
+		  <SubType>Code</SubType>
+		</Compile>
 		<Compile Update="Properties\Settings.Designer.cs">
 			<DesignTimeSharedInput>True</DesignTimeSharedInput>
 			<AutoGen>True</AutoGen>

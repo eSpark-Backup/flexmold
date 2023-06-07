@@ -75,7 +75,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 {
                     for (int i = 0; i < data.Count; i++)
                     {
-                        TwinCathelper.PLCMotors[i].mSpeed = (uint)data[i] * 1600;
+                        TwinCathelper.PLCMotors[i].mDisplacement = (uint)data[i] * 1600;
                         TwinCathelper.PLCMotors[i].mDirection = SelectedMotorDirValue == 0 ? false : true;
                     }
                     TwinCathelper.WriteEthercatDeviceData();
@@ -84,7 +84,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     Thread.Sleep(200);
 
                     for (int i = 0; i < data.Count; i++)
-                        TwinCathelper.PLCMotors[i].mSpeed = 0;
+                        TwinCathelper.PLCMotors[i].mDisplacement = 0;
                     TwinCathelper.WriteEthercatDeviceData();
                     log.Log(LogLevel.Info, $"{data.Count} zero value/s has been written sucessfully");
                 }

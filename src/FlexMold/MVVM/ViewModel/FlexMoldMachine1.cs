@@ -377,7 +377,8 @@ namespace FlexMold.MVVM.ViewModel
             string declarationCode = @"TYPE EthercatDevice :
 STRUCT
     mDirection AT %Q*: BOOL;
-    mSpeed AT %Q*: DWORD;
+    mRPM AT %Q*: DWORD;
+    mDsiplacement AT %Q*: DWORD;
     mTime AT %Q*: DWORD;
     mMode AT %Q*: BOOL;
 END_STRUCT

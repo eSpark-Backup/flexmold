@@ -39,11 +39,11 @@
             <UniformGrid Columns="2">
                 <RadioButton
                     Content="Clockwise"
-                    GroupName="g1"
+                    GroupName="Group1"
                     IsChecked="{Binding SelectedMotorDirValue, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=0}" />
                 <RadioButton
                     Content="Anti-Clockwise"
-                    GroupName="g1"
+                    GroupName="Group1"
                     IsChecked="{Binding SelectedMotorDirValue, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=1}" />
             </UniformGrid>
         </Border>

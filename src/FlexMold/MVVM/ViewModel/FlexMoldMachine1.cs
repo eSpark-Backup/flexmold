@@ -548,7 +548,7 @@ END_TYPE";
 
                 "{attribute 'TcLinkTo' := '" + mPositionAtrib.Trim(';') +
                     "'}\n" +
-                    "mPosition AT %I* : ARRAY [1..deviceCount] OF DWORD ;\n" +
+                    "mPosition AT %I* : ARRAY [1..deviceCount] OF REAL ;\n" +
 
                 "{attribute 'TcLinkTo' := '" + mTemperatureAtrib.Trim(';') +
                     "'}\n" +

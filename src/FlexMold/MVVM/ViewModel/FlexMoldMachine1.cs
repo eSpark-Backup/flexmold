@@ -378,7 +378,7 @@ namespace FlexMold.MVVM.ViewModel
 STRUCT
     mDirection AT %Q*: BOOL;
     mRPM AT %Q*: DWORD;
-    mDsiplacement AT %Q*: DWORD;
+    mDisplacement AT %Q*: DWORD;
     mTime AT %Q*: DWORD;
     mMode AT %Q*: BOOL;
 END_STRUCT
@@ -482,7 +482,8 @@ END_TYPE";
                 var boxName = FCAModel.MyBoxes[i - 1].PathName;
                 deviceAtrib += $"" +
                     $"[{i}].mDirection :=  {boxName}^{outStr}^Direction;" +
-                    $"[{i}].mSpeed := {boxName}^{outStr}^Speed;" +
+                    $"[{i}].mDisplacement := {boxName}^{outStr}^Displacement;" +
+                    $"[{i}].mRPM := {boxName}^{outStr}^RPM;" +
                     $"[{i}].mTime := {boxName}^{outStr}^Time;" +
                     $"[{i}].mMode := {boxName}^{outStr}^Mode;";
                 mPositionAtrib += $"" +

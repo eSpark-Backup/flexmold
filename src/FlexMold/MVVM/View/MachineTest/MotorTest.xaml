@@ -30,6 +30,8 @@
     <UniformGrid Columns="2" Rows="8">
         <Label Content="Selected Motor : " />
         <ComboBox ItemsSource="{Binding DeviceIds}" SelectedItem="{Binding SelectedMotorIndex}" />
+        <Label Content="Motor Mode: " />
+        <ComboBox ItemsSource="{Binding EnumModes}" SelectedItem="{Binding SelectedMotorModeValue}" />
         <Label Content="Motor Direction : " />
         <Border
             Margin="5"
@@ -45,23 +47,6 @@
                     Content="Anti-Clockwise"
                     GroupName="Group1"
                     IsChecked="{Binding SelectedMotorDirValue, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=1}" />
-            </UniformGrid>
-        </Border>
-        <Label Content="Motor Mode : " />
-        <Border
-            Margin="5"
-            Padding="5,0,0,0"
-            BorderBrush="#FFCCCCCC"
-            BorderThickness="1">
-            <UniformGrid Columns="2">
-                <RadioButton
-                    Content="Displacement"
-                    GroupName="g1"
-                    IsChecked="{Binding SelectedMotorModeValue, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=0}" />
-                <RadioButton
-                    Content="Time"
-                    GroupName="g1"
-                    IsChecked="{Binding SelectedMotorModeValue, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=1}" />
             </UniformGrid>
         </Border>
         <Label Content="Motor RPM : " />

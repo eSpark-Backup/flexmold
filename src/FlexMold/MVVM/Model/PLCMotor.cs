@@ -25,9 +25,9 @@ namespace FlexMold.MVVM.Model
         [SkipPack]
         public uint DeviceID;
     }
-    enum EMode
+    public enum EMode
     {
-        Displacement=0,
+        Displacement = 0,
         Time,
         CalibrationRequest,
     }
@@ -57,6 +57,10 @@ namespace FlexMold.MVVM.Model
 
     public enum TCSymbols
     {
+        deviceCount,
+        device,
+        mPosition,
+        mTemperature,
         foe_dwPass,
         foe_nSlaveAddr,
         foe_eMode,

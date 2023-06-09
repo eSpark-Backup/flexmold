@@ -5,6 +5,7 @@ using FlexMold.MVVM.View.Project;
 using FlexMold.MVVM.View.Setting;
 using FlexMold.MVVM.ViewModel.Setting;
 using FlexMold.Utility;
+using MahApps.Metro.Controls;
 using MaterialDesignThemes.Wpf;
 using Newtonsoft.Json;
 using NLog;
@@ -16,6 +17,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using TwinCAT.Ads.TypeSystem;
+using TwinCAT.Ads;
 
 namespace FlexMold.MVVM.ViewModel.Project
 {
@@ -24,6 +27,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         private Logger log = LogManager.GetLogger("Project");
         public RelayCommand SendCSVCommand { get; set; }
         public RelayCommand BrowseProjectCommand { get; set; }
+        public RelayCommand CallibrationCommand { get; set; }
         public RelayCommand StopMotorsCommand { get; set; }
         public int SelectedMotorDirValue;
         private Model.Project _selectedMyDataModel;
@@ -203,6 +207,65 @@ namespace FlexMold.MVVM.ViewModel.Project
                 log.Log(LogLevel.Error, ex.Message);
             }
         }
+        private List<int> NotificatioHandles;
+        private void CallibrateMotors()
+        {
+            for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+            {
+                TwinCathelper.PLCMotors[i].mMode = (uint)EMode.CalibrationRequest;
+            }
+            TwinCathelper.WriteEthercatDeviceData();
+            log.Log(LogLevel.Warn, $"Callibration Request Sent. Please wait...");
+            NotificatioHandles = new List<int>
+            {
+                TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.mPosition}"),
+                TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.MotorDiagnostic}")
+            };
+            TwinCathelper.Client.AdsNotification += Client_AdsNotification;
+        }
+        private float[] _Position;
+
+        public float[] Position
+        {
+            get { return _Position; }
+            set
+            {
+                _Position = value;
+            }
+        }
+        private void Client_AdsNotification(object sender, AdsNotificationEventArgs e)
+        {
+            try
+            {
+                // Or here we know about UDINT type --> can be marshalled as UINT32
+                var _mysymbol = e.UserData as Symbol;
+                if (_mysymbol != null)
+                {
+                    TCSymbols aa;
+                    Enum.TryParse(_mysymbol.InstancePath.Replace("MAIN.", ""), out aa);
+                    switch (aa) 
+                    { 
+                        case TCSymbols.mPosition:
+                            Position = new float[TwinCathelper.DeviceCount];
+                            Buffer.BlockCopy(e.Data.ToArray(), 0, Position, 0, e.Data.Length);
+                            log.Log(LogLevel.Info, $"Positions Updated : {String.Join(",", Position)}");
+                            break;
+                        case TCSymbols.MotorDiagnostic:
+                            MDiag1 = new UInt32[TwinCathelper.DeviceCount];
+                            Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag1, 0, e.Data.Length);
+                            log.Log(LogLevel.Info, $"Diag0 Updated : {String.Join(",", MDiag1)}");
+                            Diag1Value = MDiag1;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Log(LogLevel.Error, ex.Message);
+            }
+        }
         public ProjectViewModel()
         {
             _TstN = new ToastNotificationUtil();
@@ -213,7 +276,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 var view = new CSVDiaglog() { DataContext = csvdlgvm };
                 var res = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
                 SelectedMotorDirValue = csvdlgvm.SelectedMotorDirPValue;
-                string dir =  SelectedMotorDirValue == 0 ? "Clockwise" : "Anti-Clockwise";
+                string dir = SelectedMotorDirValue == 0 ? "Clockwise" : "Anti-Clockwise";
                 log.Log(LogLevel.Info, $"Selected Direction : {dir}");
                 WriteCSVData(readCsvFile(SelectedFile));
             });
@@ -222,6 +285,10 @@ namespace FlexMold.MVVM.ViewModel.Project
             {
                 log.Log(LogLevel.Warn, $"Stopping Motors");
                 WriteCSVData(StopCsv(TwinCathelper.DeviceCount));
+            });
+            CallibrationCommand = new RelayCommand(o =>
+            {
+                CallibrateMotors();
             });
         }
     }

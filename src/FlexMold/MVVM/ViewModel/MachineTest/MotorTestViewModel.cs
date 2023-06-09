@@ -6,6 +6,7 @@ using NLog;
 using NLog.Fluent;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -80,12 +81,11 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 OnPropertyChanged();
             }
         }
-
         private void SetContols(uint value)
         {
             justread = true;
             SelectedMotorDirValue = MyPLCMotor[value].mDirection == false ? 0 : 1;
-            SelectedMotorModeValue = (int)MyPLCMotor[value].mMode;
+            SelectedMotorModeValue = (EMode)MyPLCMotor[value].mMode;
             SelectedMotorRPM = MyPLCMotor[value].mRPM;
             SelectedMotorDisplacementValue = MyPLCMotor[value].mDisplacement;
             SelectedMotorTimeValue = MyPLCMotor[value].mTime;
@@ -93,10 +93,10 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         }
 
         public Symbol PositionSymbol { get; set; }
+        public IEnumerable<EMode> EnumModes => Enum.GetValues(typeof(EMode)).Cast<EMode>();
 
-        private int _SelectedMotorModeValue;
-
-        public int SelectedMotorModeValue
+        private EMode _SelectedMotorModeValue;
+        public EMode SelectedMotorModeValue
         {
             get { return _SelectedMotorModeValue; }
             set
@@ -106,7 +106,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     MyPLCMotor[SelectedMotorIndex].mMode = (uint)value ;
                     TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
                 }
-                _SelectedMotorModeValue = (int)MyPLCMotor[SelectedMotorIndex].mMode;
+                _SelectedMotorModeValue =  (EMode)MyPLCMotor[SelectedMotorIndex].mMode;
                 OnPropertyChanged();
             }
         }

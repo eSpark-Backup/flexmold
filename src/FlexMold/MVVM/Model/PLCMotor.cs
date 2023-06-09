@@ -17,15 +17,30 @@ namespace FlexMold.MVVM.Model
         public UInt32 mRPM;
         public UInt32 mDisplacement;
         public UInt32 mTime;
-        public bool mMode;
-        public bool t4;
-        public bool t5;
-        public bool t6;
+        public UInt32 mMode;
+        //public bool t4;
+        //public bool t5;
+        //public bool t6;
 
         [SkipPack]
         public uint DeviceID;
     }
-
+    enum EMode
+    {
+        Displacement=0,
+        Time,
+        CalibrationRequest,
+    }
+    public enum EmDiag2 
+    {
+        None=0,
+        CalibrationSquence01Started,
+        CalibrationSquence01Failed,
+        CalibrationSquence01Success,
+        CalibrationSquence02Started,
+        CalibrationSquence02Failed,
+        CalibrationSquence02Success,
+    }
     public static class TCVarName
     {
         public const string DeviceCount = "MAIN.deviceCount";
@@ -70,8 +85,8 @@ namespace FlexMold.MVVM.Model
         ECAnSlaves,
         ECAbError,
         ECAnErrId,
-        mDiag1,
-        mDiag2,
+        MotorDiagnostic,
+        DeviceStatus,
         mDiag3,
     }
 

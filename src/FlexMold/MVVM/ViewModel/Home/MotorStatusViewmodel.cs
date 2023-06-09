@@ -32,7 +32,7 @@ namespace FlexMold.MVVM.ViewModel.Home
 
         private void GenerateD1Error()
         {
-            var SymbolDiag1Variable = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.mDiag1}").FirstOrDefault();
+            var SymbolDiag1Variable = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.MotorDiagnostic}").FirstOrDefault();
             var tt = new UInt32[TwinCathelper.DeviceCount];
             Random rnd = new Random();
             for (int i = 0; i < tt.Length; i++)
@@ -169,7 +169,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                         //    Buffer.BlockCopy(e.Data.ToArray(), 0, MTemperature, 0, e.Data.Length);
                         //    log.Log(LogLevel.Warn, $"Temperature Updated : {String.Join(",", MTemperature)}");
                         //    break;
-                        case TCSymbols.mDiag1:
+                        case TCSymbols.MotorDiagnostic:
                             MDiag1 = new UInt32[TwinCathelper.DeviceCount];
                             Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag1, 0, e.Data.Length);
                             log.Log(LogLevel.Info, $"Diag0 Updated : {String.Join(",", MDiag1)}");
@@ -226,7 +226,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             //_ = RegisterNotification(TwinCATVariableIfo.mPositionVariableName);
             //_ = RegisterNotification(TwinCATVariableIfo.mTemperatureVariableName);
             //_ = RegisterNotification(TwinCATVariableIfo.mDiag2VariableName);
-            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.mDiag1}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.MotorDiagnostic}"));
             //_ = RegisterNotification(TwinCATVariableIfo.mDiag3VariableName);
         }
     }

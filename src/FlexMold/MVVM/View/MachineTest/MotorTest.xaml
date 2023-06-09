@@ -94,7 +94,7 @@
             Padding="5,0,0,0"
             BorderBrush="#FFCCCCCC"
             BorderThickness="1">
-            <TextBlock Style="{StaticResource LabelTextBlock}" Text="{Binding Position}" />
+            <TextBlock Style="{StaticResource LabelTextBlock}" Text="{Binding Position, StringFormat={}{0:0.000}mm}" />
         </Border>
     </UniformGrid>
 </UserControl>

@@ -85,7 +85,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         {
             justread = true;
             SelectedMotorDirValue = MyPLCMotor[value].mDirection == false ? 0 : 1;
-            SelectedMotorModeValue = MyPLCMotor[value].mMode == false ? 0 : 1;
+            SelectedMotorModeValue = (int)MyPLCMotor[value].mMode;
             SelectedMotorRPM = MyPLCMotor[value].mRPM;
             SelectedMotorDisplacementValue = MyPLCMotor[value].mDisplacement;
             SelectedMotorTimeValue = MyPLCMotor[value].mTime;
@@ -103,10 +103,10 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             {
                 if (!justread)
                 {
-                    MyPLCMotor[SelectedMotorIndex].mMode = value == 0 ? false : true;
+                    MyPLCMotor[SelectedMotorIndex].mMode = (uint)value ;
                     TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
                 }
-                _SelectedMotorModeValue = MyPLCMotor[SelectedMotorIndex].mMode == false ? 0 : 1;
+                _SelectedMotorModeValue = (int)MyPLCMotor[SelectedMotorIndex].mMode;
                 OnPropertyChanged();
             }
         }
@@ -211,7 +211,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     switch (_mysymbol.InstancePath)
                     {
                         case TCVarName.mPosition:
-                            Position = BitConverter.ToSingle(e.Data.ToArray(), (int)SelectedMotorIndex * sizeof(UInt32)) / 1000;
+                            Position = BitConverter.ToSingle(e.Data.ToArray(), (int)SelectedMotorIndex * sizeof(UInt32));
                             break;
 
                         default:

@@ -380,7 +380,7 @@ STRUCT
     mRPM AT %Q*: DWORD;
     mDisplacement AT %Q*: DWORD;
     mTime AT %Q*: DWORD;
-    mMode AT %Q*: BOOL;
+    mMode AT %Q*: DWORD;
 END_STRUCT
 END_TYPE";
 
@@ -556,11 +556,11 @@ END_TYPE";
 
                 "{attribute 'TcLinkTo' := '" + Diag1Atrib.Trim(';') +
                     "'}\n" +
-                    "mDiag1 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
+                    "MotorDiagnostic AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
 
                 "{attribute 'TcLinkTo' := '" + Diag2Atrib.Trim(';') +
                     "'}\n" +
-                    "mDiag2 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
+                    "DeviceStatus AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
 
                 "{attribute 'TcLinkTo' := '" + Diag3Atrib.Trim(';') +
                     "'}\n" +

@@ -127,7 +127,6 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
                 }
                 _SelectedMotorDirValue = MyPLCMotor[SelectedMotorIndex].mDirection == false ? 0 : 1;
-                log.Log(LogLevel.Info, $"MyPLCMotor[{SelectedMotorIndex}].mDirection : {value}");
                 OnPropertyChanged();
             }
         }
@@ -212,7 +211,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     switch (_mysymbol.InstancePath)
                     {
                         case TCVarName.mPosition:
-                            Position = BitConverter.ToUInt32(e.Data.ToArray(), (int)SelectedMotorIndex * sizeof(UInt32)) / 1000;
+                            Position = BitConverter.ToSingle(e.Data.ToArray(), (int)SelectedMotorIndex * sizeof(UInt32)) / 1000;
                             break;
 
                         default:

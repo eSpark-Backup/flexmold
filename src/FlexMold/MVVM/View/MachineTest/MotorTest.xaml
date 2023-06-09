@@ -11,14 +11,15 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    GotFocus="ComboBox_Selected"
     mc:Ignorable="d">
     <b:Interaction.Triggers>
         <b:EventTrigger EventName="Loaded">
             <b:InvokeCommandAction Command="{Binding OnLoadedCommand}" />
         </b:EventTrigger>
-        <b:EventTrigger EventName="Unloaded">
+        <!--<b:EventTrigger EventName="Unloaded">
             <b:InvokeCommandAction Command="{Binding OnUnLoadedCommand}" />
-        </b:EventTrigger>
+        </b:EventTrigger>-->
     </b:Interaction.Triggers>
     <UserControl.DataContext>
         <machinetest:MotorTestViewModel />
@@ -38,11 +39,11 @@
             <UniformGrid Columns="2">
                 <RadioButton
                     Content="Clockwise"
-                    GroupName="g1"
+                    GroupName="Group1"
                     IsChecked="{Binding SelectedMotorDirValue, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=0}" />
                 <RadioButton
                     Content="Anti-Clockwise"
-                    GroupName="g1"
+                    GroupName="Group1"
                     IsChecked="{Binding SelectedMotorDirValue, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=1}" />
             </UniformGrid>
         </Border>
@@ -63,12 +64,20 @@
                     IsChecked="{Binding SelectedMotorModeValue, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=1}" />
             </UniformGrid>
         </Border>
-        <Label Content="Motor Displacement(mm) : " />
+        <Label Content="Motor RPM : " />
         <UniformGrid Columns="2">
-            <mah:NumericUpDown Value="{Binding SelectedMotorSpeedValue}" />
+            <mah:NumericUpDown Value="{Binding SelectedMotorRPM}" />
             <Button
                 Margin="5"
-                Command="{Binding SendSpeedCommand}"
+                Command="{Binding SendRPMCommand}"
+                Content="Send" />
+        </UniformGrid>
+        <Label Content="Motor Displacement(mm) : " />
+        <UniformGrid Columns="2">
+            <mah:NumericUpDown Value="{Binding SelectedMotorDisplacementValue}" />
+            <Button
+                Margin="5"
+                Command="{Binding SendDisplacementCommand}"
                 Content="Send" />
         </UniformGrid>
         <Label Content="Motor Time : " />

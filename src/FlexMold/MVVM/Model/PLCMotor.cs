@@ -14,7 +14,8 @@ namespace FlexMold.MVVM.Model
         public bool t1;
         public bool t2;
         public bool t3;
-        public UInt32 mSpeed;
+        public UInt32 mRPM;
+        public UInt32 mDisplacement;
         public UInt32 mTime;
         public bool mMode;
         public bool t4;

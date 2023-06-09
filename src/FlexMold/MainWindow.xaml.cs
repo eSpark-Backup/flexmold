@@ -182,11 +182,11 @@ namespace FlexMold
 
         private async void ConnectionLost(string _msg)
         {
-            var view = new ConnectionLostDialog()
-            {
-                DataContext = new ConnectionLostViewModel(_msg)
-            };
-            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
+            //var view = new ConnectionLostDialog()
+            //{
+            //    DataContext = new ConnectionLostViewModel(_msg)
+            //};
+            //var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
         }
 
         private void OnLogMessageItemAdded(object o, EventArgs Args)

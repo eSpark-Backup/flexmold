@@ -1,6 +1,7 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.Utility;
+using Newtonsoft.Json.Linq;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -11,15 +12,17 @@ using System.Windows;
 using System.Windows.Media;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
+using TwinCAT.TypeSystem;
 
 namespace FlexMold.MVVM.ViewModel.Home
 {
     internal class MotorStatusViewmodel : ObservableObject
     {
         private Logger log;
+        private ToastNotificationUtil _TstN;
         private readonly IMachineDetailViewModel _IMachineDetailViewModel;
         public ObservableCollection<MotorStatusControl> MyMotors { get; set; }
-        public RelayCommand GenerateErrorD1Command { get; set; }
+        public RelayCommand CalibrateCommand { get; set; }
         public RelayCommand DebugDetailClickCommand { get; set; }
         public RelayCommand OnLoadedCommand { get; set; }
         public RelayCommand OnUnLoadedCommand { get; set; }
@@ -30,43 +33,76 @@ namespace FlexMold.MVVM.ViewModel.Home
             Console.WriteLine();
         }
 
-        private void GenerateD1Error()
+        private void Calibrate()
         {
-            var SymbolDiag1Variable = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.MotorDiagnostic}").FirstOrDefault();
-            var tt = new UInt32[TwinCathelper.DeviceCount];
-            Random rnd = new Random();
-            for (int i = 0; i < tt.Length; i++)
+            for (int i = 0; i < TwinCathelper.DeviceCount; i++)
             {
-                tt[i] = (uint)rnd.Next(0, 3);
+                TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationRequest;
             }
-
-            SymbolDiag1Variable.WriteValue(tt);
+            TwinCathelper.WriteEthercatDeviceData();
         }
 
-        public UInt32[] OldValue { get; set; }
+        private float[] _mPosition;
 
-        private UInt32[] _Diag1Value;
-
-        public UInt32[] Diag1Value
+        public float[] mPosition
         {
-            get { return _Diag1Value; }
+            get { return _mPosition; }
+            set
+            {
+                SetMotorPos(value);
+                _mPosition = value;
+            }
+        }
+        private void SetMotorPos(float[] _value)
+        {
+            int[] v;
+            if (mPosition != null)
+            {
+                v = _value
+                    .Select((b, i) => b != -1 ? i : -1)
+                    .Where(i => i != -1)
+                    .ToArray();
+                for (int i = 0; i < v.Length; i++)
+                {
+                    if (mPosition[v[i]] != _value[v[i]])
+                    {
+                        MyMotors[v[i]].MotorPosition = _value[v[i]];
+                    }
+                }
+            }
+            else
+            {
+                v = Enumerable.Range(0, TwinCathelper.DeviceCount).ToArray();
+                for (int i = 0; i < v.Length; i++)
+                {
+                    MyMotors[v[i]].MotorPosition = _value[v[i]];
+                }
+            }
+        }
+        private UInt32[] _MotorDiagnisticx;
+        public UInt32[] MotorDiagnisticx
+        {
+            get { return _MotorDiagnisticx; }
             set
             {
                 SetMotorStatus(value);
-                _Diag1Value = value;
+                _MotorDiagnisticx = value;
             }
         }
-
         private void SetMotorStatus(UInt32[] _value)
         {
             int[] v;
-            if (Diag1Value != null)
+            if (MotorDiagnisticx != null)
             {
-                v = _value.Select((b, i) => b != 5 ? i : -1).Where(i => i != -1).ToArray();
+                v = _value
+                    .Select((b, i) => b != 5 ? i : -1)
+                    .Where(i => i != -1)
+                    .ToArray();
                 for (int i = 0; i < v.Length; i++)
                 {
-                    if (Diag1Value[v[i]] != _value[v[i]])
+                    if (MotorDiagnisticx[v[i]] != _value[v[i]])
                     {
+                        MyMotors[v[i]].MotorPosition = mPosition[v[i]];
                         var _tmgs = "";
                         switch (_value[v[i]])
                         {
@@ -97,7 +133,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                 v = Enumerable.Range(0, TwinCathelper.DeviceCount).ToArray();
                 for (int i = 0; i < v.Length; i++)
                 {
-
+                    MyMotors[v[i]].MotorPosition = mPosition[v[i]];
                     var _tmgs = "";
                     switch (_value[v[i]])
                     {
@@ -122,80 +158,19 @@ namespace FlexMold.MVVM.ViewModel.Home
                 }
             }
         }
-        private bool LinkStatus(int[] daigArray, int motorIndex)
+        private void Client_AdsNotificationPS(object sender, EventArgs e)
         {
-            if (_IMachineDetailViewModel != null)
-            {
-                if (_IMachineDetailViewModel.MySlaves[motorIndex].linkState == ElinkState.EC_LINK_STATE_OK)
-                {
-                    return true;
-                }
-                else
-                {
-                    MyMotors[daigArray[motorIndex]].FillColor = Brushes.Red;
-                    MyMotors[daigArray[motorIndex]].ErrorDeatil = _IMachineDetailViewModel.MySlaves[motorIndex].linkState.ToString();
-                    return false;
-                }
-            }
-            MyMotors[daigArray[motorIndex]].ErrorDeatil = "Box link Failed";
-            MyMotors[daigArray[motorIndex]].FillColor = Brushes.Red;
-            return false;
+            var array = new float[TwinCathelper.DeviceCount];
+            Array.Copy(TwinCathelper.PLCMotorsStates.mPostion, array, array.Length);
+            mPosition = array;
         }
-
-        public UInt32[] MPostion = new UInt32[TwinCathelper.DeviceCount];
-        public UInt32[] MTemperature = new UInt32[TwinCathelper.DeviceCount];
-        private UInt32[] MDiag1;
-        public UInt32[] MDiag2 = new UInt32[TwinCathelper.DeviceCount];
-        public UInt32[] MDiag3 = new UInt32[TwinCathelper.DeviceCount];
-        private List<int> NotificatioHandles;
-
-        private void Client_AdsNotificationMS(object sender, AdsNotificationEventArgs e)
+        private void Client_AdsNotificationMS(object sender, EventArgs e)
         {
-            try
-            {
-                // Or here we know about UDINT type --> can be marshalled as UINT32
-                var _mysymbol = e.UserData as Symbol;
-                if (_mysymbol != null)
-                {
-                    TCSymbols aa;
-                    Enum.TryParse(_mysymbol.InstancePath.Replace("MAIN.", ""), out aa);
-                    switch (aa)
-                    {
-                        //case TCVarName.mPosition:
-                        //    Buffer.BlockCopy(e.Data.ToArray(), 0, MPostion, 0, e.Data.Length);
-                        //    log.Log(LogLevel.Warn, $"Position Updated : {String.Join(",", MPostion)}");
-                        //    break;
-                        //case TCVarName.mTemperature:
-                        //    Buffer.BlockCopy(e.Data.ToArray(), 0, MTemperature, 0, e.Data.Length);
-                        //    log.Log(LogLevel.Warn, $"Temperature Updated : {String.Join(",", MTemperature)}");
-                        //    break;
-                        case TCSymbols.MotorDiagnostic:
-                            MDiag1 = new UInt32[TwinCathelper.DeviceCount];
-                            Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag1, 0, e.Data.Length);
-                            log.Log(LogLevel.Info, $"Diag0 Updated : {String.Join(",", MDiag1)}");
-                            Diag1Value = MDiag1;
-                            break;
-                            //case TCVarName.mDiag2:
-                            //    Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag2, 0, e.Data.Length);
-                            //    log.Log(LogLevel.Warn, $"Diag2 Updated : {String.Join(",", MDiag2)}");
-                            //    break;
-                            //case TCVarName.mDiag3:
-                            //    Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag3, 0, e.Data.Length);$"MAIN.{TCSymbols.ECAbError}"
-                            //    log.Log(LogLevel.Warn, $"Diag3 Updated : {String.Join(",", MDiag3)}");
-                            //    break;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                log.Log(LogLevel.Error, ex.Message);
-            }
+            var array = new uint[TwinCathelper.DeviceCount];
+            Array.Copy(TwinCathelper.PLCMotorsStates.MotorDiagnistic, array, array.Length);
+            MotorDiagnisticx = array;
         }
-
-        private ToastNotificationUtil _TstN;
-
         public MotorStatusViewmodel()
-
         {
             if (TwinCathelper.Client == null)
             {
@@ -204,30 +179,15 @@ namespace FlexMold.MVVM.ViewModel.Home
             log = LogManager.GetLogger("Motor Status");
             _TstN = new ToastNotificationUtil();
             MyMotors = new ObservableCollection<MotorStatusControl>() { };
-            int mcount = 0;
-            RegisterNotification();
             for (int j = 0; j < TwinCathelper.DeviceCount; j++)
             {
                 MyMotors.Add(new MotorStatusControl() { MotorID = j, FillColor = Brushes.Red, ErrorDeatil = "" });
-                mcount++;
             }
-            GenerateErrorD1Command = new RelayCommand(o => { GenerateD1Error(); });
-
+            TwinCathelper.TMotor_PositionChanged += Client_AdsNotificationPS;
+            //MotorDiagnisticx = new uint[TwinCathelper.DeviceCount];
+            TwinCathelper.TMotor_MotorDiagnosticChanged += Client_AdsNotificationMS;
+            CalibrateCommand = new RelayCommand(async => { Calibrate(); });
             DebugDetailClickCommand = new RelayCommand(o => { DisplayError(o as MotorStatusControl); });
-        }
-
-        private async void RegisterNotification()
-        {
-            log.Log(LogLevel.Info, $"Registring Device Status Notification...");
-            NotificatioHandles = new List<int>();
-
-            TwinCathelper.Client.AdsNotification += Client_AdsNotificationMS;
-
-            //_ = RegisterNotification(TwinCATVariableIfo.mPositionVariableName);
-            //_ = RegisterNotification(TwinCATVariableIfo.mTemperatureVariableName);
-            //_ = RegisterNotification(TwinCATVariableIfo.mDiag2VariableName);
-            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.MotorDiagnostic}"));
-            //_ = RegisterNotification(TwinCATVariableIfo.mDiag3VariableName);
         }
     }
 }

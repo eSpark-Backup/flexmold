@@ -467,8 +467,8 @@ END_TYPE";
             string foe_sAmsPort = $"foe_sAmsPort: ARRAY[1..deviceCount] OF UINT :=[";
             string mPositionAtrib = "";
             string mTemperatureAtrib = "";
-            string Diag1Atrib = "";
-            string Diag2Atrib = "";
+            string MotorDiagnosticAtrib = "";
+            string DeviceStatusAtrib = "";
             string Diag3Atrib = "";
             string outStr = "Outputs process data mapping";
             string inpStr = "Inputs process data mapping";
@@ -481,21 +481,21 @@ END_TYPE";
             {
                 var boxName = FCAModel.MyBoxes[i - 1].PathName;
                 deviceAtrib += $"" +
-                    $"[{i}].mDirection :=  {boxName}^{outStr}^Direction;" +
-                    $"[{i}].mDisplacement := {boxName}^{outStr}^Displacement;" +
-                    $"[{i}].mRPM := {boxName}^{outStr}^RPM;" +
-                    $"[{i}].mTime := {boxName}^{outStr}^Time;" +
-                    $"[{i}].mMode := {boxName}^{outStr}^Mode;";
+                    $"[{i}].mDirection :=  {boxName}^{outStr}^Direction; \n" +
+                    $"[{i}].mDisplacement := {boxName}^{outStr}^Displacement; \n" +
+                    $"[{i}].mRPM := {boxName}^{outStr}^RPM; \n" +
+                    $"[{i}].mTime := {boxName}^{outStr}^Time; \n" +
+                    $"[{i}].mMode := {boxName}^{outStr}^Mode; \n";
                 mPositionAtrib += $"" +
-                    $"[{i}]:= {boxName}^{inpStr}^Position;";
+                    $"[{i}]:= {boxName}^{inpStr}^Position; \n";
                 mTemperatureAtrib += $"" +
-                    $"[{i}]:= {boxName}^{inpStr}^Temperature;";
+                    $"[{i}]:= {boxName}^{inpStr}^Temperature; \n";
 
-                Diag1Atrib += $"" +
-                    $"[{i}]:=  {boxName}^{inpStr}^Diag1;";
+                MotorDiagnosticAtrib += $"" +
+                    $"[{i}]:=  {boxName}^{inpStr}^MotorDiagnostic; \n";
 
-                Diag2Atrib += $"" +
-                    $"[{i}]:=  {boxName}^{inpStr}^Diag2;";
+                DeviceStatusAtrib += $"" +
+                    $"[{i}]:=  {boxName}^{inpStr}^DeviceStatus; \n";
 
                 Diag3Atrib += $"" +
                     $"[{i}]:=  {boxName}^{inpStr}^Diag3;";
@@ -542,29 +542,24 @@ END_TYPE";
                 "END_VAR \n" +
                 "VAR \n" +
 
-                "{attribute 'TcLinkTo' := '" + deviceAtrib.Trim(';') +
-                    "'}\n" +
+                "{attribute 'TcLinkTo' := '" + deviceAtrib.Trim(';')+ "'}\n" +
                 "device : ARRAY [1..deviceCount] OF EthercatDevice ; \n" +
 
-                "{attribute 'TcLinkTo' := '" + mPositionAtrib.Trim(';') +
-                    "'}\n" +
+                "{attribute 'TcLinkTo' := '" + mPositionAtrib.Trim(';') + "'}\n" +
                     "mPosition AT %I* : ARRAY [1..deviceCount] OF REAL ;\n" +
 
-                "{attribute 'TcLinkTo' := '" + mTemperatureAtrib.Trim(';') +
-                    "'}\n" +
+                "{attribute 'TcLinkTo' := '" + mTemperatureAtrib.Trim(';') + "'}\n" +
                     "mTemperature AT %I* : ARRAY [1..deviceCount] OF DWORD ;\n" +
 
-                "{attribute 'TcLinkTo' := '" + Diag1Atrib.Trim(';') +
-                    "'}\n" +
+                "{attribute 'TcLinkTo' := '" + MotorDiagnosticAtrib.Trim(';') + "'}\n" +
                     "MotorDiagnostic AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
 
-                "{attribute 'TcLinkTo' := '" + Diag2Atrib.Trim(';') +
-                    "'}\n" +
+                "{attribute 'TcLinkTo' := '" + DeviceStatusAtrib.Trim(';') + "'}\n" +
                     "DeviceStatus AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
 
-                "{attribute 'TcLinkTo' := '" + Diag3Atrib.Trim(';') +
-                    "'}\n" +
+                "{attribute 'TcLinkTo' := '" + Diag3Atrib.Trim(';') +"'}\n" +
                     "mDiag3 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n"
+
                     + foe_sAmsNetId + "\n" + foe_sAmsPort.Trim(',') + "];\n" +
                 foe_Scrip + "\n" + exstate + "\n" + getstate + "\n" + fbGetSlaveState +
                     "\nEND_VAR";

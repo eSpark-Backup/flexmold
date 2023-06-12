@@ -1,8 +1,10 @@
 ﻿using FlexMold.MVVM.Model;
+using Newtonsoft.Json.Linq;
 using NLog;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
@@ -10,28 +12,8 @@ using TwinCAT.TypeSystem;
 
 namespace FlexMold.Utility
 {
-    internal static class TwinCathelper
+    internal static partial class TwinCathelper
     {
-        private static Logger _log = LogManager.GetLogger("TwinCat");
-        public static string SAmsNetId { get; private set; }
-        public static ushort[] SAmsPort { get; private set; }
-        private static int _port { get; set; }
-        public static AdsSession Session { get; private set; }
-        public static AdsSession SessionSystemService { get; set; }
-        public static AdsConnection Client { get; private set; }
-        public static AdsConnection ClientSystemService { get; set; }
-        public static ConnectionState MyConnectionStateOld { get; set; }
-        public static ConnectionState MyConnectionStateNew { get; set; }
-        public static ConnectionStateChangedReason MyConnectionStateChangedReason { get; set; }
-        public static AdsState MyAdsState { get; set; }
-        public static AmsRouterState MyAmsRouterState { get; set; }
-        private static IDataTypeCollection<IDataType> _dataTypes { get; set; }
-        public static ObservableCollection<Symbol> MySymbols { get; private set; }
-        public static Int16 DeviceCount { get; private set; }
-        public static EthercatDevice[] PLCMotors { get; private set; }
-        public static AdsState CurrentAdsState { get; set; }
-        public static ConnectionState CurrentConnectionState { get; set; }
-
         public static bool TwinCatConnect851()
         {
             _port = 851;
@@ -62,17 +44,168 @@ namespace FlexMold.Utility
             Client = null;
             Session = null;
         }
-        public static Symbol SymbolEthercatDevice { get; private set; }
-        public static int structSize { get; private set; }
-        public static byte[] buffer { get; private set; }
+        public static void InitializeNotifications()
+        {
+            Session.ConnectionStateChanged += Session_ConnectionStateChanged;
+            ClientSystemService.ConnectionStateChanged += Connection_ConnectionStatusChanged;
+            Client.RouterStateChanged += Connection_RouterStateChanged;
+            Client.RegisterAdsStateChangedAsync(Connection_AdsStateChanged, CancellationToken.None);
+
+            RegisterNotification($"MAIN.{TCSymbols.mPosition}");
+            RegisterNotification($"MAIN.{TCSymbols.MotorDiagnostic}");
+            Client.AdsNotification += Client_AdsNotification;
+        }
+        private static void Client_AdsNotification(object sender, AdsNotificationEventArgs e)
+        {
+            try
+            {
+                // Or here we know about UDINT type --> can be marshalled as UINT32
+                var _mysymbol = e.UserData as Symbol;
+                if (_mysymbol != null)
+                {
+                    TCSymbols aa;
+                    Enum.TryParse(_mysymbol.InstancePath.Replace("MAIN.", ""), out aa);
+                    switch (aa)
+                    {
+                        case TCSymbols.deviceCount:
+                            break;
+                        case TCSymbols.device:
+                            break;
+                        case TCSymbols.mPosition:
+                            for (int i = 0; i < PLCMotors.Length; i++)
+                                PLCMotorsStates.mPostion[i] = BitConverter.ToSingle(e.Data.ToArray(), i * sizeof(float));
+                            TMotor_PositionChanged?.Invoke(null, e);
+                            break;
+                        case TCSymbols.mTemperature:
+                            break;
+                        case TCSymbols.foe_dwPass:
+                            break;
+                        case TCSymbols.foe_nSlaveAddr:
+                            break;
+                        case TCSymbols.foe_eMode:
+                            break;
+                        case TCSymbols.foe_sPathName:
+                            break;
+                        case TCSymbols.foe_bLoad:
+                            break;
+                        case TCSymbols.foe_bBusy:
+                            break;
+                        case TCSymbols.foe_bError:
+                            break;
+                        case TCSymbols.foe_nErrID:
+                            break;
+                        case TCSymbols.foe_nBytesWritten:
+                            break;
+                        case TCSymbols.foe_nPercent:
+                            break;
+                        case TCSymbols.foe_sAmsNetId:
+                            break;
+                        case TCSymbols.foe_sAmsPort:
+                            break;
+                        case TCSymbols.ecs_bExecute:
+                            break;
+                        case TCSymbols.ecs_reqState:
+                            break;
+                        case TCSymbols.ecs_bBusy:
+                            break;
+                        case TCSymbols.ecs_bError:
+                            break;
+                        case TCSymbols.ecs_nErrId:
+                            break;
+                        case TCSymbols.ecs_currState:
+                            break;
+                        case TCSymbols.fbGetSlaveState:
+                            break;
+                        case TCSymbols.ecg_bExecute:
+                            break;
+                        case TCSymbols.state:
+                            break;
+                        case TCSymbols.ecg_bError:
+                            break;
+                        case TCSymbols.ecg_nErrId:
+                            break;
+                        case TCSymbols.ECAbExecute:
+                            break;
+                        case TCSymbols.ECAdevStates:
+                            break;
+                        case TCSymbols.ECAnSlaves:
+                            break;
+                        case TCSymbols.ECAbError:
+                            break;
+                        case TCSymbols.ECAnErrId:
+                            break;
+                        case TCSymbols.MotorDiagnostic:
+                            Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStates.MotorDiagnistic, 0, e.Data.Length);
+                            _log.Log(LogLevel.Info, $"MotorDiagnistic Updated : {String.Join(",", PLCMotorsStates.MotorDiagnistic)}");
+                            TMotor_MotorDiagnosticChanged?.Invoke(null, e);
+                            break;
+                        case TCSymbols.DeviceStatus:
+                            Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStates.DeviceStatus, 0, e.Data.Length);
+                            _log.Log(LogLevel.Info, $"DeviceStatus Updated : {String.Join(",", PLCMotorsStates.DeviceStatus)}");
+                            TMotor_DeviceStatusChanged?.Invoke(null, e);
+                            break;
+                        case TCSymbols.mDiag3:
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            catch (Exception ex)
+            {
+                _log.Log(LogLevel.Error, ex.Message);
+            }
+
+            TMotor_PositionChanged?.Invoke(null, e);
+        }
+
+        private static void Session_ConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
+        {
+            MyConnectionStateOld = e.OldState;
+            MyConnectionStateNew = e.NewState;
+            MyConnectionStateChangedReason = e.Reason;
+            _log.Log(LogLevel.Info, $"Session Connection Status : {MyConnectionStateNew}");
+            TSession_ConnectionStateChanged?.Invoke(null, e);
+        }
+        private static void Connection_ConnectionStatusChanged(object sender, ConnectionStateChangedEventArgs e)
+        {
+            MyConnectionStateOld = e.OldState;
+            MyConnectionStateNew = e.NewState;
+            MyConnectionStateChangedReason = e.Reason;
+            _log.Log(LogLevel.Info, $"Connection Status : {MyConnectionStateNew}");
+            TConnection_ConnectionStatusChanged?.Invoke(null, e);
+            TConnection_ConnectionStatusChanged?.Invoke(null, e);
+        }
+        private static void Connection_RouterStateChanged(object sender, AmsRouterNotificationEventArgs e)
+        {
+            MyAmsRouterState = e.State;
+            _log.Log(LogLevel.Info, $"Router State : {TwinCathelper.MyAmsRouterState}");
+            TConnection_RouterStateChanged?.Invoke(null, e);
+        }
+        private static void Connection_AdsStateChanged(object sender, AdsStateChangedEventArgs e)
+        {
+            MyAdsState = e.State.AdsState;
+            switch (e.State.AdsState)
+            {
+                case AdsState.Run:
+                    _log.Log(LogLevel.Info, $"AdsState : {MyAdsState}");
+                    break;
+                default:
+                    _log.Log(LogLevel.Error, $"AdsState : {MyAdsState}");
+                    break;
+            }
+            TConnection_AdsStateChanged?.Invoke(null, e);
+        }
 
         public static bool InitializeMotors()
         {
             try
             {
-                TwinCathelper.DeviceCount = (short)TwinCathelper.MySymbols.Where(a =>
-                           a.InstancePath == TCVarName.DeviceCount).FirstOrDefault().ReadAnyValue(typeof(short));
+                TwinCathelper.DeviceCount = (short)MySymbols.FirstOrDefault(a =>
+                           a.InstancePath == TCVarName.DeviceCount).ReadAnyValue(typeof(short));
                 PLCMotors = new EthercatDevice[DeviceCount];
+                PLCMotorsStates = new DeviceStatuses((uint)DeviceCount);
                 SymbolEthercatDevice = TwinCathelper.MySymbols.Where(a => a.InstancePath == TCVarName.MainDevice).FirstOrDefault();
                 structSize = (SymbolEthercatDevice.Size) / TwinCathelper.DeviceCount;
                 buffer = new byte[structSize * TwinCathelper.DeviceCount];
@@ -93,10 +226,10 @@ namespace FlexMold.Utility
 
         public static int RegisterNotification(string _deviceStatusVariableName)
         {
-            if (TwinCathelper.Client.State == ConnectionState.Connected)
+            if (Client.State == ConnectionState.Connected)
             {
-                var deviceStatusSymbol = TwinCathelper.MySymbols.Where(a => a.InstancePath == _deviceStatusVariableName).FirstOrDefault();
-                return (int)TwinCathelper.Client.AddDeviceNotification(deviceStatusSymbol.IndexGroup,
+                var deviceStatusSymbol = MySymbols.Where(a => a.InstancePath == _deviceStatusVariableName).FirstOrDefault();
+                return (int)Client.AddDeviceNotification(deviceStatusSymbol.IndexGroup,
                    deviceStatusSymbol.IndexOffset, (int)(deviceStatusSymbol.Size), NotificationSettings.Default, deviceStatusSymbol);
             }
             _log.Log(LogLevel.Error, $"TwinCAT Connection is {TwinCathelper.Client.State}");
@@ -143,7 +276,7 @@ namespace FlexMold.Utility
         {
             try
             {
-               var mtarray = new byte[structSize];
+                var mtarray = new byte[structSize];
                 PLCMotors[_motorNumber].Pack().CopyTo(mtarray, 0);
                 TwinCathelper.Client.Write(SymbolEthercatDevice.IndexGroup,
                     SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
@@ -153,7 +286,23 @@ namespace FlexMold.Utility
                 _log.Log(LogLevel.Error, ex.Message);
             }
         }
-
+        public static void WriteEthercatDeviceData(uint _motorNumber, DeviceSymbol deviceSymbol)
+        {
+            var aa = SymbolEthercatDevice
+                      .SubSymbols[(int)_motorNumber]
+                      .SubSymbols[(int)deviceSymbol].InstancePath;
+            try
+            {
+                var mtarray = new byte[sizeof(uint)];
+                Array.Copy(PLCMotors[_motorNumber].mTime.CastToArray(), mtarray, mtarray.Length);
+                var handle = Client.CreateVariableHandle(aa);
+                Client.Write(handle, mtarray.AsMemory());
+            }
+            catch (Exception ex)
+            {
+                _log.Log(LogLevel.Error, ex.Message);
+            }
+        }
         public static void StartpPLC()
         {
             _log.Log(LogLevel.Info, $"Resuming PLC ....");

@@ -28,19 +28,20 @@ namespace FlexMold
         public MainWindow(Machine SelectedMachine)
         {
             InitializeComponent();
-            Version v = Assembly.GetExecutingAssembly().GetName().Version;
+            Version v = GetRunningVersion();
             string About = string.Format(CultureInfo.InvariantCulture, @"YourApp Version {0}.{1}.{2} (r{3})", v.Major, v.Minor, v.Build, v.Revision);
-            this.Title = "FlexMold V:" + getRunningVersion().ToString();
+            this.Title = "FlexMold V:" + GetRunningVersion().ToString();
             //_vm = DataContext as MainViewModel;
             //_vm.OnRequestClose += (s, e) => this.Close();
             //Unloaded += OnUnload;
             switch (SelectedMachine.MachineType)
             {
                 case EMachineType.Motor:
-                    TwinCathelper.Session.ConnectionStateChanged += session_ConnectionStateChanged;
-                    TwinCathelper.ClientSystemService.ConnectionStateChanged += _connection_ConnectionStatusChanged;
-                    TwinCathelper.Client.RouterStateChanged += _connection_RouterStateChanged;
-                    TwinCathelper.Client.RegisterAdsStateChangedAsync(_connection_AdsStateChanged, CancellationToken.None);
+                    TwinCathelper.InitializeNotifications();
+                    TwinCathelper.TSession_ConnectionStateChanged += Session_ConnectionStateChanged;
+                    TwinCathelper.TConnection_ConnectionStatusChanged += Connection_ConnectionStatusChanged;
+                    TwinCathelper.TConnection_RouterStateChanged += Connection_RouterStateChanged;
+                    TwinCathelper.TConnection_AdsStateChanged += Connection_AdsStateChanged;
                     break;
 
                 case EMachineType.Projector:
@@ -59,7 +60,7 @@ namespace FlexMold
         //    _vm.OnUnloaded();
         //}
 
-        private Version getRunningVersion()
+        private static Version GetRunningVersion()
         {
             try
             {
@@ -71,48 +72,36 @@ namespace FlexMold
             }
         }
 
-        private void session_ConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
+        private void Session_ConnectionStateChanged(object sender, EventArgs e)
         {
             Dispatcher.Invoke(() =>
             {
                 TwinCATSystemUpdate();
-            });
-            TwinCathelper.MyConnectionStateOld = e.OldState;
-            TwinCathelper.MyConnectionStateNew = e.NewState;
-            TwinCathelper.MyConnectionStateChangedReason = e.Reason;
-            log.Log(LogLevel.Info, $"Session Connection Status : {TwinCathelper.MyConnectionStateNew}");
+            });           
         }
 
-        private void _connection_AdsStateChanged(object sender, AdsStateChangedEventArgs e)
+        private void Connection_AdsStateChanged(object sender, EventArgs e)
         {
             Dispatcher.Invoke(() =>
             {
                 TwinCATSystemUpdate();
             });
-            TwinCathelper.MyAdsState = e.State.AdsState;
-            log.Log(LogLevel.Info, $"AdsState : {TwinCathelper.MyAdsState}");
         }
 
-        private void _connection_RouterStateChanged(object sender, AmsRouterNotificationEventArgs e)
+        private void Connection_RouterStateChanged(object sender, EventArgs e)
         {
             Dispatcher.Invoke(() =>
             {
                 TwinCATSystemUpdate();
             });
-            TwinCathelper.MyAmsRouterState = e.State;
-            log.Log(LogLevel.Info, $"Router State : {TwinCathelper.MyAmsRouterState}");
         }
 
-        private void _connection_ConnectionStatusChanged(object sender, ConnectionStateChangedEventArgs e)
+        private void Connection_ConnectionStatusChanged(object sender, EventArgs e)
         {
             Dispatcher.Invoke(() =>
             {
                 TwinCATSystemUpdate();
-            });
-            TwinCathelper.MyConnectionStateOld = e.OldState;
-            TwinCathelper.MyConnectionStateNew = e.NewState;
-            TwinCathelper.MyConnectionStateChangedReason = e.Reason;
-            log.Log(LogLevel.Info, $"Connection Status : {TwinCathelper.MyConnectionStateNew}");
+            });            
         }
 
         private void TwinCATSystemUpdate()

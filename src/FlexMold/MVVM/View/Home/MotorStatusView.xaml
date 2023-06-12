@@ -14,15 +14,8 @@
     <UserControl.DataContext>
         <home:MotorStatusViewmodel />
     </UserControl.DataContext>
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition />
-        </Grid.RowDefinitions>
-        <ItemsControl
-            x:Name="MyItems"
-            Grid.Row="1"
-            ItemsSource="{Binding MyMotors}">
+    <UniformGrid Rows="2">
+        <ItemsControl x:Name="MyItems" ItemsSource="{Binding MyMotors}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <UniformGrid />
@@ -36,7 +29,7 @@
             </ItemsControl.ItemContainerStyle>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Grid>
+                    <UniformGrid Rows="2">
                         <Button
                             MaxWidth="40"
                             MaxHeight="40"
@@ -44,13 +37,21 @@
                             BorderBrush="{Binding FillColor}"
                             Command="{Binding ElementName=MyItems, Path=DataContext.DebugDetailClickCommand}"
                             CommandParameter="{Binding}"
-                            Content="{Binding MotorID}"
-                            Foreground="Black"
-                            Style="{StaticResource MahApps.Styles.Button.Circle}"
-                            ToolTip="{Binding ErrorDeatil}" />
-                    </Grid>
+                            Foreground="White"
+                            Style="{StaticResource MahApps.Styles.Button.Flat}"
+                            ToolTip="{Binding ErrorDeatil}">
+                            <Viewbox>
+                                <TextBlock Text="{Binding MotorPosition}" />
+                            </Viewbox>
+                        </Button>
+                    </UniformGrid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-    </Grid>
+        <Button
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            Command="{Binding CalibrateCommand}"
+            Content="Calibrate" />
+    </UniformGrid>
 </UserControl>

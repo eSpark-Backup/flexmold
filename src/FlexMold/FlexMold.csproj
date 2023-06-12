@@ -19,12 +19,6 @@
 		</Resource>
 	</ItemGroup>
 	<ItemGroup>
-		<None Update="External Libs\ToastNotifications.dll">
-			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
-		</None>
-		<None Update="External Libs\ToastNotifications.Messages.dll">
-			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
-		</None>
 		<None Update="Nlog.config">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
@@ -72,6 +66,8 @@
 		<PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.410601">
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
+		<PackageReference Include="ToastNotifications" Version="2.5.1" />
+		<PackageReference Include="ToastNotifications.Messages" Version="2.5.1" />
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="ToastNotifications">

@@ -218,13 +218,12 @@ namespace FlexMold.MVVM.ViewModel.Project
             log.Log(LogLevel.Warn, $"Callibration Request Sent. Please wait...");
             NotificatioHandles = new List<int>
             {
-                TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.mPosition}"),
-                TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.MotorDiagnostic}")
+                //TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.mPosition}"),
+                //TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.MotorDiagnostic}")
             };
             TwinCathelper.Client.AdsNotification += Client_AdsNotification;
         }
         private float[] _Position;
-
         public float[] Position
         {
             get { return _Position; }
@@ -251,10 +250,10 @@ namespace FlexMold.MVVM.ViewModel.Project
                             log.Log(LogLevel.Info, $"Positions Updated : {String.Join(",", Position)}");
                             break;
                         case TCSymbols.MotorDiagnostic:
-                            MDiag1 = new UInt32[TwinCathelper.DeviceCount];
-                            Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag1, 0, e.Data.Length);
-                            log.Log(LogLevel.Info, $"Diag0 Updated : {String.Join(",", MDiag1)}");
-                            Diag1Value = MDiag1;
+                            //MDiag1 = new UInt32[TwinCathelper.DeviceCount];
+                            //Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag1, 0, e.Data.Length);
+                            //log.Log(LogLevel.Info, $"Diag0 Updated : {String.Join(",", MDiag1)}");
+                            //Diag1Value = MDiag1;
                             break;
                         default:
                             break;

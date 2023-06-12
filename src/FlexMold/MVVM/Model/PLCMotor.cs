@@ -1,4 +1,5 @@
 ﻿using FlexMold.Core;
+using Microsoft.VisualStudio.Shell.Interop;
 using StructPacker;
 using System;
 using System.Runtime.InteropServices;
@@ -18,12 +19,25 @@ namespace FlexMold.MVVM.Model
         public UInt32 mDisplacement;
         public UInt32 mTime;
         public UInt32 mMode;
-        //public bool t4;
-        //public bool t5;
-        //public bool t6;
 
         [SkipPack]
         public uint DeviceID;
+    }
+    public class DeviceStatuses
+    {
+        public uint[] mTemperature { get; set; }
+        public uint[] MotorDiagnistic { get; set; }
+        public uint[] DeviceStatus { get; set; }
+        public uint[] mDiag3 { get; set; }
+        public float[] mPostion { get; set; }
+        public DeviceStatuses(uint deviceCount) 
+        {
+            mTemperature = new uint[deviceCount];
+            MotorDiagnistic = new uint[deviceCount];
+            DeviceStatus = new uint[deviceCount];
+            mDiag3 = new uint[deviceCount];
+            mPostion = new float[deviceCount];
+        }
     }
     public enum EMode
     {
@@ -31,9 +45,9 @@ namespace FlexMold.MVVM.Model
         Time,
         CalibrationRequest,
     }
-    public enum EmDiag2 
+    public enum EmDiag2
     {
-        None=0,
+        None = 0,
         CalibrationSquence01Started,
         CalibrationSquence01Failed,
         CalibrationSquence01Success,
@@ -287,10 +301,13 @@ namespace FlexMold.MVVM.Model
 
     public class MotorStatusControl : ObservableObject
     {
-        public int MotorID
-        { get => motorID; set { motorID = value; OnPropertyChanged(); } }
-
         private int motorID;
+        public int MotorID
+        { get => motorID; set { motorID = value; OnPropertyChanged(); } }      
+        public float MotorPosition
+        { get => motorPosition; set { motorPosition = value; OnPropertyChanged(); } }
+        private float motorPosition;
+
         private SolidColorBrush _FillColor;
 
         public SolidColorBrush FillColor

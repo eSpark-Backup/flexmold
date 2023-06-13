@@ -34,14 +34,15 @@
                             MaxWidth="40"
                             MaxHeight="40"
                             Background="{Binding FillColor}"
-                            BorderBrush="{Binding FillColor}"
+                            BorderBrush="{Binding StrokeColor}"
+                            BorderThickness="5"
                             Command="{Binding ElementName=MyItems, Path=DataContext.DebugDetailClickCommand}"
                             CommandParameter="{Binding}"
                             Foreground="White"
                             Style="{StaticResource MahApps.Styles.Button.Flat}"
-                            ToolTip="{Binding ErrorDeatil}">
+                            ToolTip="{Binding ToolTip}">
                             <Viewbox>
-                                <TextBlock Text="{Binding MotorPosition}" />
+                                <TextBlock Text="{Binding MotorPosition, StringFormat={}{0:0}}" />
                             </Viewbox>
                         </Button>
                     </UniformGrid>
@@ -52,6 +53,7 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Bottom"
             Command="{Binding CalibrateCommand}"
-            Content="Calibrate" />
+            Content="Calibrate"
+            IsEnabled="{Binding CalibrateButton}" />
     </UniformGrid>
 </UserControl>

@@ -485,17 +485,17 @@ END_TYPE";
                     $"[{i}].mDisplacement := {boxName}^{outStr}^Displacement; \n" +
                     $"[{i}].mRPM := {boxName}^{outStr}^RPM; \n" +
                     $"[{i}].mTime := {boxName}^{outStr}^Time; \n" +
-                    $"[{i}].mMode := {boxName}^{outStr}^Mode; \n";
+                    $"[{i}].mMode := {boxName}^{outStr}^Mode;";
                 mPositionAtrib += $"" +
-                    $"[{i}]:= {boxName}^{inpStr}^Position; \n";
+                    $"[{i}]:= {boxName}^{inpStr}^Position;";
                 mTemperatureAtrib += $"" +
-                    $"[{i}]:= {boxName}^{inpStr}^Temperature; \n";
+                    $"[{i}]:= {boxName}^{inpStr}^Temperature;";
 
                 MotorDiagnosticAtrib += $"" +
-                    $"[{i}]:=  {boxName}^{inpStr}^MotorDiagnostic; \n";
+                    $"[{i}]:=  {boxName}^{inpStr}^MotorDiagnostic;";
 
                 DeviceStatusAtrib += $"" +
-                    $"[{i}]:=  {boxName}^{inpStr}^DeviceStatus; \n";
+                    $"[{i}]:=  {boxName}^{inpStr}^DeviceStatus;";
 
                 Diag3Atrib += $"" +
                     $"[{i}]:=  {boxName}^{inpStr}^Diag3;";

@@ -30,7 +30,7 @@ namespace FlexMold.MVVM.Model
         public uint[] DeviceStatus { get; set; }
         public uint[] mDiag3 { get; set; }
         public float[] mPostion { get; set; }
-        public DeviceStatuses(uint deviceCount) 
+        public DeviceStatuses(uint deviceCount)
         {
             mTemperature = new uint[deviceCount];
             MotorDiagnistic = new uint[deviceCount];
@@ -45,7 +45,7 @@ namespace FlexMold.MVVM.Model
         Time,
         CalibrationRequest,
     }
-    public enum EmDiag2
+    public enum EDeviceStatus
     {
         None = 0,
         CalibrationSquence01Started,
@@ -298,18 +298,16 @@ namespace FlexMold.MVVM.Model
             return (Foe)this.MemberwiseClone();
         }
     }
-
     public class MotorStatusControl : ObservableObject
     {
         private int motorID;
         public int MotorID
-        { get => motorID; set { motorID = value; OnPropertyChanged(); } }      
+        { get => motorID; set { motorID = value; OnPropertyChanged(); } }
         public float MotorPosition
         { get => motorPosition; set { motorPosition = value; OnPropertyChanged(); } }
         private float motorPosition;
 
         private SolidColorBrush _FillColor;
-
         public SolidColorBrush FillColor
         {
             get { return _FillColor; }
@@ -319,15 +317,23 @@ namespace FlexMold.MVVM.Model
                 OnPropertyChanged();
             }
         }
-
-        private string _ErrorDeatil;
-
-        public string ErrorDeatil
+        private SolidColorBrush _StrokeColor;
+        public SolidColorBrush StrokeColor
         {
-            get { return _ErrorDeatil; }
+            get { return _StrokeColor; }
             set
             {
-                _ErrorDeatil = value;
+                _StrokeColor = value;
+                OnPropertyChanged();
+            }
+        }
+        private string _ToolTip;
+        public string ToolTip
+        {
+            get { return _ToolTip; }
+            set
+            {
+                _ToolTip = value;
                 OnPropertyChanged();
             }
         }

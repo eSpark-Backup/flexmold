@@ -27,7 +27,6 @@ namespace FlexMold.MVVM.ViewModel.Project
         private Logger log = LogManager.GetLogger("Project");
         public RelayCommand SendCSVCommand { get; set; }
         public RelayCommand BrowseProjectCommand { get; set; }
-        public RelayCommand CallibrationCommand { get; set; }
         public RelayCommand StopMotorsCommand { get; set; }
         public int SelectedMotorDirValue;
         private Model.Project _selectedMyDataModel;
@@ -81,6 +80,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     {
                         TwinCathelper.PLCMotors[i].mDisplacement = (uint)data[i] * 1600;
                         TwinCathelper.PLCMotors[i].mDirection = SelectedMotorDirValue == 0 ? false : true;
+                        TwinCathelper.PLCMotors[i].mMode = (int)EMode.Displacement;
                     }
                     TwinCathelper.WriteEthercatDeviceData();
                     log.Log(LogLevel.Info, $"{data.Count} csv value/s has been written sucessfully");
@@ -122,48 +122,6 @@ namespace FlexMold.MVVM.ViewModel.Project
             return data;
 
         }
-        private List<double> readCsvFile(FileInfo filename)
-        {
-            var data = new List<double>();
-            if (filename != null)
-            {
-                if (SelectedFile.FullName.EndsWith(".csv"))
-                {
-                    log.Log(LogLevel.Info, $"Reading CSV File {filename.Name}");
-                    try
-                    {
-                        using (var reader = new StreamReader(SelectedFile.FullName))
-                        {
-                            var options = new CsvDataReaderOptions
-                            {
-                                HasHeaders = false,
-                                BufferSize = 0x10000,
-                            };
-                            var csvr = CsvDataReader.Create(reader, options);
-
-                            while (csvr.Read())
-                            {
-                                for (int i = 0; i < csvr.FieldCount; i++)
-                                {
-                                    data.Add(csvr.GetDouble(i));
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        log.Log(LogLevel.Error, ex.Message);
-                        _TstN.ShowError(ex.Message);
-                    }
-                }
-                else
-                    log.Log(LogLevel.Warn, $"Selected File Not a .csv File {SelectedFile.Name}");
-            }
-            else
-                log.Log(LogLevel.Warn, $"Please Select File First");
-            log.Info($"CSV data : {JsonConvert.SerializeObject(data)}");
-            return data;
-        }
         private void BrowseProject()
         {
             Logger log = LogManager.GetLogger("Browse Project");
@@ -176,7 +134,6 @@ namespace FlexMold.MVVM.ViewModel.Project
                     if (result == System.Windows.Forms.DialogResult.OK)
                     {
                         myDataModels = new Porjects();
-                        //string selectedPath = @"D:\smhraza\Projects\FLEXMOLD\flexmolddata\FlexMain\Projects\";
                         string selectedPath = dialog.SelectedPath;
                         Regex reg = new Regex(@".las$|.csv$");
                         DirectoryInfo di = new DirectoryInfo(selectedPath);
@@ -207,22 +164,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 log.Log(LogLevel.Error, ex.Message);
             }
         }
-        private List<int> NotificatioHandles;
-        private void CallibrateMotors()
-        {
-            for (int i = 0; i < TwinCathelper.DeviceCount; i++)
-            {
-                TwinCathelper.PLCMotors[i].mMode = (uint)EMode.CalibrationRequest;
-            }
-            TwinCathelper.WriteEthercatDeviceData();
-            log.Log(LogLevel.Warn, $"Callibration Request Sent. Please wait...");
-            NotificatioHandles = new List<int>
-            {
-                //TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.mPosition}"),
-                //TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.MotorDiagnostic}")
-            };
-            TwinCathelper.Client.AdsNotification += Client_AdsNotification;
-        }
+       
         private float[] _Position;
         public float[] Position
         {
@@ -277,17 +219,13 @@ namespace FlexMold.MVVM.ViewModel.Project
                 SelectedMotorDirValue = csvdlgvm.SelectedMotorDirPValue;
                 string dir = SelectedMotorDirValue == 0 ? "Clockwise" : "Anti-Clockwise";
                 log.Log(LogLevel.Info, $"Selected Direction : {dir}");
-                WriteCSVData(readCsvFile(SelectedFile));
+                WriteCSVData(CSVHelper.ReadCSV_DoubleData(SelectedFile));
             });
             BrowseProjectCommand = new RelayCommand(o => { BrowseProject(); });
             StopMotorsCommand = new RelayCommand(o =>
             {
                 log.Log(LogLevel.Warn, $"Stopping Motors");
                 WriteCSVData(StopCsv(TwinCathelper.DeviceCount));
-            });
-            CallibrationCommand = new RelayCommand(o =>
-            {
-                CallibrateMotors();
             });
         }
     }

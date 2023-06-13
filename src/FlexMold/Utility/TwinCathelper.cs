@@ -4,6 +4,7 @@ using NLog;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Printing.IndexedProperties;
 using System.Threading;
 using TwinCAT;
 using TwinCAT.Ads;
@@ -53,6 +54,7 @@ namespace FlexMold.Utility
 
             RegisterNotification($"MAIN.{TCSymbols.mPosition}");
             RegisterNotification($"MAIN.{TCSymbols.MotorDiagnostic}");
+            RegisterNotification($"MAIN.{TCSymbols.DeviceStatus}");
             Client.AdsNotification += Client_AdsNotification;
         }
         private static void Client_AdsNotification(object sender, AdsNotificationEventArgs e)
@@ -286,23 +288,47 @@ namespace FlexMold.Utility
                 _log.Log(LogLevel.Error, ex.Message);
             }
         }
-        public static void WriteEthercatDeviceData(uint _motorNumber, DeviceSymbol deviceSymbol)
+        public static void WriteEthercatDeviceData(DeviceSymbol deviceSymbol)
+        {
+            switch (deviceSymbol)
+            {
+                case DeviceSymbol.mDirection:
+                    break;
+                case DeviceSymbol.mRPM:
+                    break;
+                case DeviceSymbol.mDisplacement:
+                    break;
+                case DeviceSymbol.mTime:
+                    break;
+                case DeviceSymbol.mMode:
+                    for (uint i = 0; i < DeviceCount; i++)
+                    {
+                        WriteEthercatDeviceData(i,deviceSymbol, PLCMotors[i].mMode.CastToArray());
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public static void WriteEthercatDeviceData(uint _motorNumber, DeviceSymbol deviceSymbol, byte[] data)
         {
             var aa = SymbolEthercatDevice
                       .SubSymbols[(int)_motorNumber]
                       .SubSymbols[(int)deviceSymbol].InstancePath;
             try
             {
-                var mtarray = new byte[sizeof(uint)];
-                Array.Copy(PLCMotors[_motorNumber].mTime.CastToArray(), mtarray, mtarray.Length);
+                var mtarray = new byte[data.Length];
+                Array.Copy(data, mtarray, mtarray.Length);
                 var handle = Client.CreateVariableHandle(aa);
                 Client.Write(handle, mtarray.AsMemory());
             }
             catch (Exception ex)
             {
-                _log.Log(LogLevel.Error, ex.Message);
+                _log.Log(LogLevel.Error, $"Motor[{_motorNumber}] Variable : {deviceSymbol} " + ex.Message);
             }
         }
+
         public static void StartpPLC()
         {
             _log.Log(LogLevel.Info, $"Resuming PLC ....");

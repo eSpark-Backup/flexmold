@@ -287,13 +287,6 @@ namespace FlexMold.MVVM.ViewModel.Home
                     }
                     TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
                     log.Log(LogLevel.Info, $"{data.Count} csv value/s has been written sucessfully");
-
-                    Thread.Sleep(200);
-
-                    for (int i = 0; i < data.Count; i++)
-                        TwinCathelper.PLCMotors[i].mDisplacement = 0;
-                    TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
-                    log.Log(LogLevel.Info, $"{data.Count} zero value/s has been written sucessfully");
                 }
                 else
                 {
@@ -336,6 +329,10 @@ namespace FlexMold.MVVM.ViewModel.Home
                 TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mMode);
                 log.Log(LogLevel.Warn, $"{EMode.CalibrationSeq02Request}. Please wait...");
                 _TstN.ShowSuccess("Calibration Seq02 Requested");
+                for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                    TwinCathelper.PLCMotors[i].mDisplacement = 0;
+                TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
+                log.Log(LogLevel.Info, $"{TwinCathelper.DeviceCount} zero value/s has been written sucessfully");
             }
             if (validSeq02Val.SequenceEqual(DeviceStatus))
             {

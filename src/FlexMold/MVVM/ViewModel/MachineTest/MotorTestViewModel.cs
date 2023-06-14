@@ -81,7 +81,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         {
             justread = true;
             SelectedMotorDirValue = MyPLCMotor[value].mDirection == false ? 0 : 1;
-            SelectedMotorModeValue = (EMode)MyPLCMotor[value].mMode;
+            SelectedMotorModeValue = (ETMode)MyPLCMotor[value].mMode;
             SelectedMotorRPM = MyPLCMotor[value].mRPM;
             SelectedMotorDisplacementValue = MyPLCMotor[value].mDisplacement;
             SelectedMotorTimeValue = MyPLCMotor[value].mTime;
@@ -90,10 +90,10 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         }
 
         public Symbol PositionSymbol { get; set; }
-        public IEnumerable<EMode> EnumModes => Enum.GetValues(typeof(EMode)).Cast<EMode>();
+        public IEnumerable<ETMode> EnumModes => Enum.GetValues(typeof(ETMode)).Cast<ETMode>();
 
-        private EMode _SelectedMotorModeValue;
-        public EMode SelectedMotorModeValue
+        private ETMode _SelectedMotorModeValue;
+        public ETMode SelectedMotorModeValue
         {
             get { return _SelectedMotorModeValue; }
             set
@@ -107,7 +107,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                   TwinCathelper.DeviceSymbol.mMode,
                   MyPLCMotor[SelectedMotorIndex].mMode.CastToArray());
                 }
-                _SelectedMotorModeValue = (EMode)MyPLCMotor[SelectedMotorIndex].mMode;
+                _SelectedMotorModeValue = (ETMode)MyPLCMotor[SelectedMotorIndex].mMode;
                 OnPropertyChanged();
             }
         }

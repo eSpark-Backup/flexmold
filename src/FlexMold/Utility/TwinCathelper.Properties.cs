@@ -34,6 +34,7 @@ namespace FlexMold.Utility
         public static Symbol SymbolEthercatDevice { get; private set; }
         public static int structSize { get; private set; }
         public static byte[] buffer { get; private set; }
+        public static AppSettings AppSettings { get; set; } = new();
 
         public static event EventHandler TSession_ConnectionStateChanged;
         public static event EventHandler TConnection_ConnectionStatusChanged;

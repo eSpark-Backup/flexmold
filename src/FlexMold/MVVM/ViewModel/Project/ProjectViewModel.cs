@@ -97,7 +97,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     log.Log(LogLevel.Error, $"Please select correct CSV");
                     log.Log(LogLevel.Error, $"Data and Box count are not equal");
                     log.Log(LogLevel.Error, $"Data Count : {data.Count} | Device Count : {TwinCathelper.PLCMotors.Length}");
-                    _TstN.ShowError($"CSV Failed\nDevice:{TwinCathelper.PLCMotors.Length} != Data:{data.Count}");
+                    _TstN.ShowError($"CSV Failed\nDevice Count :{TwinCathelper.PLCMotors.Length} != Data Count :{data.Count}");
                 }
             }
             else

@@ -3,9 +3,12 @@ using Newtonsoft.Json.Linq;
 using NLog;
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Printing.IndexedProperties;
 using System.Threading;
+using System.Windows;
+using System.Xml.Serialization;
 using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
@@ -297,6 +300,10 @@ namespace FlexMold.Utility
                 case DeviceSymbol.mRPM:
                     break;
                 case DeviceSymbol.mDisplacement:
+                    for (uint i = 0; i < DeviceCount; i++)
+                    {
+                        WriteEthercatDeviceData(i, deviceSymbol, PLCMotors[i].mDisplacement.CastToArray());
+                    }
                     break;
                 case DeviceSymbol.mTime:
                     break;
@@ -384,6 +391,71 @@ namespace FlexMold.Utility
             }
             _log.Log(LogLevel.Error, "No Symbol Found...");
             return false;
+        }
+        public static bool LoadSetting()
+        {
+            var log = LogManager.GetLogger("AppSettings");
+
+            // Create an XmlSerializer instance for the Person class
+            XmlSerializer serializer = new(typeof(AppSettings));
+            try
+            {
+                // Read the complete contents of the text file
+                string appSettings =
+                    File.ReadAllText(AppSettings.SettingRoot + "AppSettings.xml");
+
+                using StringReader reader = new(appSettings);
+                // Deserialize the XML back into a Person object
+                AppSettings = serializer.Deserialize(reader) as AppSettings;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (!File.Exists(AppSettings.SettingRoot + "AppSettings_Default.xml"))
+                {
+                    // Create a StringWriter to hold the XML
+                    StringWriter stringWriter = new();
+                    // Serialize the object to XML
+                    serializer.Serialize(stringWriter, new AppSettings());
+
+                    // Write the content to the text file
+                    if (!Directory.Exists(AppSettings.SettingRoot))
+                        Directory.CreateDirectory(AppSettings.SettingRoot);
+                    File.WriteAllText(AppSettings.SettingRoot + "AppSettings_Default.xml", stringWriter.ToString());
+                }
+                var tmsg = $"AppSettings.xml : {ex.Message}";
+                log.Log(LogLevel.Error, tmsg);
+                MessageBox.Show(tmsg);
+                return false;
+            }
+        }
+        public static bool WriteSetting()
+        {
+            var log = LogManager.GetLogger("AppSettings");
+
+            // Create an XmlSerializer instance for the Person class
+            XmlSerializer serializer = new(typeof(AppSettings));
+            try
+            {
+                // Create a StringWriter to hold the XML
+                StringWriter stringWriter = new();
+                // Serialize the object to XML
+                serializer.Serialize(stringWriter, AppSettings);
+
+                // Write the content to the text file
+                if (!Directory.Exists(AppSettings.SettingRoot))
+                    Directory.CreateDirectory(AppSettings.SettingRoot);
+                File.WriteAllText(AppSettings.SettingRoot + "AppSettings.xml", stringWriter.ToString());
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                var tmsg = $"AppSettings.xml : {ex.Message}";
+                log.Log(LogLevel.Error, tmsg);
+                MessageBox.Show(tmsg);
+                return false;
+            }
         }
     }
 }

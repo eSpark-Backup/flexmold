@@ -43,7 +43,13 @@ namespace FlexMold.MVVM.Model
     {
         Displacement = 0,
         Time,
-        CalibrationRequest,
+        CalibrationSeq01Request,
+        CalibrationSeq02Request
+    }
+    public enum ETMode
+    {
+        Displacement = 0,
+        Time
     }
     public enum EDeviceStatus
     {

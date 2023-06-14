@@ -7,8 +7,13 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Data.SqlTypes;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
+using System.Xml;
+using System.Xml.Serialization;
 using TwinCAT.Ads;
 
 namespace FlexMold.MVVM.ViewModel
@@ -89,8 +94,9 @@ namespace FlexMold.MVVM.ViewModel
         public event EventHandler OnRequestClose;
 
         public SplashScreenViewModel()
-
         {
+            if (!TwinCathelper.LoadSetting())
+                Environment.Exit(0);
             ICEnable = true;
             log.Log(LogLevel.Info, $"Flexmold application loading");
             RunButtonEnable = false;

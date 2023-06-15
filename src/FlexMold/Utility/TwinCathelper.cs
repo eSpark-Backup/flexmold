@@ -301,17 +301,13 @@ namespace FlexMold.Utility
                     break;
                 case DeviceSymbol.mDisplacement:
                     for (uint i = 0; i < DeviceCount; i++)
-                    {
                         WriteEthercatDeviceData(i, deviceSymbol, PLCMotors[i].mDisplacement.CastToArray());
-                    }
                     break;
                 case DeviceSymbol.mTime:
                     break;
                 case DeviceSymbol.mMode:
                     for (uint i = 0; i < DeviceCount; i++)
-                    {
-                        WriteEthercatDeviceData(i,deviceSymbol, PLCMotors[i].mMode.CastToArray());
-                    }
+                        WriteEthercatDeviceData(i, deviceSymbol, PLCMotors[i].mMode.CastToArray());
                     break;
                 default:
                     break;

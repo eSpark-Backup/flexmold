@@ -57,7 +57,24 @@ namespace FlexMold.MVVM.ViewModel.Home
             dispatcherTimer.Interval = new TimeSpan(0, 0, 3);
             dispatcherTimer.Start();
         }
+        void SetDefaultMode()
+        {
+            for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                TwinCathelper.PLCMotors[i].mMode = (int)EMode.Displacement;
 
+            TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mMode);
+            log.Log(LogLevel.Info, $"Device Mode Changed to : {EMode.Displacement}");
+            _TstN.ShowSuccess("Calibration Sucessful");
+        }
+        void SetAbortMode()
+        {
+            for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                TwinCathelper.PLCMotors[i].mMode = (int)EMode.Abort;
+
+            TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mMode);
+            log.Log(LogLevel.Info, $"Device Mode Changed to : {EMode.Abort}");
+            _TstN.ShowSuccess("Calibration Sucessful");
+        }
         private void Timer_Elapsed(object sender, EventArgs e)
         {
             GetSlaveMachineState();
@@ -71,6 +88,10 @@ namespace FlexMold.MVVM.ViewModel.Home
 
                 ECAbError = (bool)TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ECAbError}").FirstOrDefault().ReadAnyValue(typeof(bool));
 
+                // only odd indexes
+                ESlaveStateMachine[] enumArray = ECAdevStatesB
+                    .Where((value, index) => index % 2 != 0)
+                    .Select(b => (ESlaveStateMachine)Enum.ToObject(typeof(ESlaveStateMachine), b)).ToArray();
                 if (!ECAbError)
                 {
                     ushort index = 0;

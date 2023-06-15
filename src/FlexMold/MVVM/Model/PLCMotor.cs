@@ -44,7 +44,8 @@ namespace FlexMold.MVVM.Model
         Displacement = 0,
         Time,
         CalibrationSeq01Request,
-        CalibrationSeq02Request
+        CalibrationSeq02Request,
+        Abort
     }
     public enum ETMode
     {
@@ -54,12 +55,14 @@ namespace FlexMold.MVVM.Model
     public enum EDeviceStatus
     {
         None = 0,
-        CalibrationSquence01Started,
+        CalibrationSquence01Started=1,
         CalibrationSquence01Failed,
         CalibrationSquence01Success,
         CalibrationSquence02Started,
         CalibrationSquence02Failed,
         CalibrationSquence02Success,
+        ShapeFormingStarted,
+        ShapeFormingCompleted,
     }
     public static class TCVarName
     {

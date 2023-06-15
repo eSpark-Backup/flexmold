@@ -65,9 +65,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             if (CalibrationData.Count == 0)
                 return;
             for (int i = 0; i < TwinCathelper.DeviceCount; i++)
-            {
                 TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationSeq01Request;
-            }
             TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mMode);
             log.Log(LogLevel.Warn, $"Calibration Seq01 Request Sent. Please wait...");
             _TstN.ShowSuccess("Calibration Request Sent. Please wait...");

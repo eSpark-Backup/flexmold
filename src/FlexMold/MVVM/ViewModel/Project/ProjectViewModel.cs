@@ -53,7 +53,20 @@ namespace FlexMold.MVVM.ViewModel.Project
                 OnPropertyChanged();
             }
         }
+        private bool _CSVWriteButton;
 
+        public bool CSVWriteButton
+        {
+            get { return _CSVWriteButton; }
+            set { _CSVWriteButton = value; OnPropertyChanged(); }
+        }
+        private bool _LaserSendButton;
+
+        public bool LaserSendButton
+        {
+            get { return _LaserSendButton; }
+            set { _LaserSendButton = value; OnPropertyChanged(); }
+        }
         private FileInfo _selectedFile;
 
         public FileInfo SelectedFile
@@ -62,6 +75,23 @@ namespace FlexMold.MVVM.ViewModel.Project
             set
             {
                 _selectedFile = value;
+                CSVWriteButton = false;
+                LaserSendButton = false;
+                if (value != null)
+                {
+                    var se = value.Name.Substring(value.Name.Length - 4);
+                    switch (se)
+                    {
+                        case ".csv":
+                            CSVWriteButton = true;
+                            break;
+                        case ".las":
+                            LaserSendButton = true;
+                            break;
+                        default:
+                            break;
+                    }
+                }
                 OnPropertyChanged();
             }
         }
@@ -164,7 +194,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 log.Log(LogLevel.Error, ex.Message);
             }
         }
-       
+
         private float[] _Position;
         public float[] Position
         {
@@ -184,8 +214,8 @@ namespace FlexMold.MVVM.ViewModel.Project
                 {
                     TCSymbols aa;
                     Enum.TryParse(_mysymbol.InstancePath.Replace("MAIN.", ""), out aa);
-                    switch (aa) 
-                    { 
+                    switch (aa)
+                    {
                         case TCSymbols.mPosition:
                             Position = new float[TwinCathelper.DeviceCount];
                             Buffer.BlockCopy(e.Data.ToArray(), 0, Position, 0, e.Data.Length);

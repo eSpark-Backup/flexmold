@@ -24,8 +24,6 @@ namespace FlexMold.MVVM.ViewModel.Home
 
         private ST_EcSlaveState[] _MySlaves;
         private byte[] ECAdevStatesB;
-        private ToastNotificationUtil _TstN;
-
         public MachineDetailViewModel()
 
         {
@@ -34,7 +32,6 @@ namespace FlexMold.MVVM.ViewModel.Home
                 return;
             }
             log = LogManager.GetLogger("Machine Status");
-            _TstN = new ToastNotificationUtil();
             MySlaves = new ST_EcSlaveState[TwinCathelper.DeviceCount];
             for (int i = 0; i < TwinCathelper.DeviceCount; i++)
             {
@@ -63,8 +60,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                 TwinCathelper.PLCMotors[i].mMode = (int)EMode.Displacement;
 
             TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mMode);
-            log.Log(LogLevel.Info, $"Device Mode Changed to : {EMode.Displacement}");
-            _TstN.ShowSuccess("Calibration Sucessful");
+            log.Log(LogLevel.Info, $"Configured to Default Device Mode : {EMode.Displacement}");
+            TNF.ShowSuccess($"Default Device Mode : {EMode.Displacement}");
         }
         void SetAbortMode()
         {
@@ -73,7 +70,7 @@ namespace FlexMold.MVVM.ViewModel.Home
 
             TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mMode);
             log.Log(LogLevel.Info, $"Device Mode Changed to : {EMode.Abort}");
-            _TstN.ShowSuccess("Calibration Sucessful");
+            TNF.ShowError($"Device Mode: {EMode.Abort}");
         }
         private void Timer_Elapsed(object sender, EventArgs e)
         {
@@ -110,7 +107,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                                     MySlaves[index].FillColor = Brushes.Green;
                                     var _tmgs = $"{MySlaves[index].SlaveName} : Link State {MySlaves[index].linkState}";
                                     log.Log(LogLevel.Info, _tmgs);
-                                    _TstN.ShowSuccess(_tmgs);
+                                    TNF.ShowSuccess(_tmgs);
+                                    SetDefaultMode();
                                     break;
 
                                 case ElinkState.EC_LINK_STATE_NOT_PRESENT:
@@ -119,7 +117,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                                     MySlaves[index].FillColor = Brushes.Red;
                                     _tmgs = $"{MySlaves[index].SlaveName} : Link State {MySlaves[index].linkState}";
                                     log.Log(LogLevel.Error, _tmgs);
-                                    _TstN.ShowError(_tmgs);
+                                    TNF.ShowError(_tmgs);
+                                    SetAbortMode();
                                     break;
                                 default:
                                     break;
@@ -134,66 +133,39 @@ namespace FlexMold.MVVM.ViewModel.Home
                                 switch (MySlaves[index].deviceState)
                                 {
                                     case ESlaveStateMachine.EC_DEVICE_STATE_INIT:
-                                        MySlaves[index].FillColor = Brushes.White;
-                                        var _tmgs = $"{MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
-                                        log.Log(LogLevel.Warn, _tmgs);
-                                        _TstN.ShowWarning(_tmgs);
+                                        SetUI_DS(index, Brushes.White, true);
                                         break;
 
                                     case ESlaveStateMachine.EC_DEVICE_STATE_OP:
-                                        MySlaves[index].FillColor = Brushes.Green;
-                                        _tmgs = $"{MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
-                                        log.Log(LogLevel.Info, _tmgs);
-                                        _TstN.ShowSuccess(_tmgs);
+                                        SetUI_DS(index, Brushes.Green, false);
                                         break;
 
                                     case ESlaveStateMachine.EC_DEVICE_STATE_PREOP:
-                                        MySlaves[index].FillColor = Brushes.Yellow;
-                                        _tmgs = $"{MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
-                                        log.Log(LogLevel.Warn, _tmgs);
-                                        _TstN.ShowWarning(_tmgs);
+                                        SetUI_DS(index, Brushes.Yellow, true);
                                         break;
 
                                     case ESlaveStateMachine.EC_DEVICE_STATE_BOOTSTRAP:
-                                        MySlaves[index].FillColor = Brushes.Yellow;
-                                        _tmgs = $"{MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
-                                        log.Log(LogLevel.Warn, _tmgs);
-                                        _TstN.ShowWarning(_tmgs);
+                                        SetUI_DS(index, Brushes.Yellow, true);
                                         break;
 
                                     case ESlaveStateMachine.EC_DEVICE_STATE_SAFEOP:
-                                        MySlaves[index].FillColor = Brushes.Yellow;
-                                        _tmgs = $"{MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
-                                        log.Log(LogLevel.Warn, _tmgs);
-                                        _TstN.ShowWarning(_tmgs); break;
- 
+                                        SetUI_DS(index, Brushes.Yellow, true);
+                                        break;
 
                                     case ESlaveStateMachine.EC_DEVICE_STATE_ERROR:
-                                        MySlaves[index].FillColor = Brushes.Red;
-                                        _tmgs = $"{MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
-                                        log.Log(LogLevel.Error, _tmgs);
-                                        _TstN.ShowError(_tmgs);
+                                        SetUI_DS(index, Brushes.Red, true);
                                         break;
 
                                     case ESlaveStateMachine.EC_DEVICE_STATE_INVALID_VPRS:
-                                        MySlaves[index].FillColor = Brushes.Red;
-                                        _tmgs = $"{MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
-                                        log.Log(LogLevel.Error, _tmgs);
-                                        _TstN.ShowError(_tmgs);
+                                        SetUI_DS(index, Brushes.Red, true);
                                         break;
 
                                     case ESlaveStateMachine.EC_DEVICE_STATE_INITCMD_ERROR:
-                                        MySlaves[index].FillColor = Brushes.Red;
-                                        _tmgs = $"{MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
-                                        log.Log(LogLevel.Error, _tmgs);
-                                        _TstN.ShowError(_tmgs);
+                                        SetUI_DS(index, Brushes.Red, true);
                                         break;
 
                                     case ESlaveStateMachine.EC_DEVICE_STATE_DISABLED:
-                                        MySlaves[index].FillColor = Brushes.Red;
-                                        _tmgs = $"{MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
-                                        log.Log(LogLevel.Error, _tmgs);
-                                        _TstN.ShowError(_tmgs);
+                                        SetUI_DS(index, Brushes.Red, true);
                                         break;
 
                                     default:
@@ -216,6 +188,18 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 log.Log(LogLevel.Error, ex.Message);
             }
+        }
+
+        private void SetUI_DS(ushort index, SolidColorBrush color, bool abort)
+        {
+            string _tmgs;
+            MySlaves[index].FillColor = color;
+            _tmgs = $"{MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
+            log.Log(LogLevel.Error, _tmgs);
+            TNF.ShowError(_tmgs);
+            if (abort)
+                SetAbortMode();
+            SetDefaultMode();
         }
     }
 }

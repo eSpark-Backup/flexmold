@@ -37,29 +37,27 @@ namespace FlexMold.MVVM.ViewModel.Home
         {
             var log = LogManager.GetLogger("Calibration");
             CalibrateButton = false;
-            if (!File.Exists(TwinCathelper.AppSettings.CalibrationFileFullPath()))
-            {
-                try
-                {
-                    using System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
-                    openFileDialog.InitialDirectory = new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName;
-                    openFileDialog.Filter = "csv files (*.txt)|*.csv|All files (*.*)|*.*";
-                    openFileDialog.RestoreDirectory = true;
 
-                    if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                    {
-                        // Copy to File Appsetting's root
-                        File.Copy(openFileDialog.FileName, TwinCathelper.AppSettings.CalibrationFileFullPath(), true);
-                    }
-                    else
-                    {
-                        return;
-                    }
-                }
-                catch (Exception ex)
+            try
+            {
+                using System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
+                openFileDialog.InitialDirectory = new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName;
+                openFileDialog.Filter = "csv files (*.txt)|*.csv|All files (*.*)|*.*";
+                openFileDialog.RestoreDirectory = true;
+
+                if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    log.Error(ex.Message);
+                    // Copy to File Appsetting's root
+                    File.Copy(openFileDialog.FileName, TwinCathelper.AppSettings.CalibrationFileFullPath(), true);
                 }
+                else
+                {
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex.Message);
             }
             CalibrationData = CSVHelper.ReadCSV_DoubleData(new FileInfo(TwinCathelper.AppSettings.CalibrationFileFullPath()));
             if (CalibrationData.Count == 0)
@@ -317,7 +315,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             DeviceStatus = array;
             if (validSeq01Val.SequenceEqual(DeviceStatus))
             {
-                Thread.Sleep(5000);
+                Thread.Sleep((int)TwinCathelper.AppSettings.CalibrationSeq02Delay);
                 //Read the contents of the file into a stream
                 if (CalibrationData.Count == 0)
                     CalibrationData = CSVHelper.ReadCSV_DoubleData(new FileInfo(TwinCathelper.AppSettings.CalibrationFileFullPath()));

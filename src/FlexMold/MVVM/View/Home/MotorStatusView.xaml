@@ -29,7 +29,7 @@
             </ItemsControl.ItemContainerStyle>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <UniformGrid Rows="2">
+                    <Grid>
                         <Button
                             MaxWidth="40"
                             MaxHeight="40"
@@ -45,7 +45,7 @@
                                 <TextBlock Text="{Binding MotorPosition, StringFormat={}{0:0}}" />
                             </Viewbox>
                         </Button>
-                    </UniformGrid>
+                    </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

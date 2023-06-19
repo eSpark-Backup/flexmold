@@ -281,7 +281,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             {
                 log.Log(LogLevel.Info, $"Current port {SelectedSerialPort.PortName} Baud {SelectedSerialPort.BaudRate}");
                 log.Log(LogLevel.Info, $"Please Select Port params from available list ");
-                var main = App.Current.MainWindow as MainWindow;
+                var main = System.Windows.Application.Current.MainWindow as MainWindow;
                 var sv = new SerialPortConfigView(main, SelectedSerialPort);
                 sv.ShowDialog();
                 if (sv.SaveData)
@@ -308,7 +308,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             {
                 log.Log(LogLevel.Info, $"Current IP {MyPorjector.IpAddres} UserName {MyPorjector.UserName}");
                 log.Log(LogLevel.Info, $"Please Enter Samba params");
-                var main = App.Current.MainWindow as MainWindow;
+                var main = System.Windows.Application.Current.MainWindow as MainWindow;
                 var sv = new SambaConfigWindow(main, MyPorjector);
                 sv.ShowDialog();
                 if (sv.SaveData)

@@ -25,7 +25,7 @@ namespace ScriptingTestContainerBase
                 if (tp == null)
                     throw new ApplicationException("AppID '{0}' not found!");
 
-                dte = (DTE)System.Activator.CreateInstance(tp, true);
+                dte = (DTE)Activator.CreateInstance(tp, true);
             }
             else
             {
@@ -33,7 +33,7 @@ namespace ScriptingTestContainerBase
                 string executablePath = Path.Combine(installationPath, @"Common7\IDE\devenv.exe");
 
                 // Only for internal testing purposes
-                string tcHive = System.Environment.GetEnvironmentVariable("TcHive");
+                string tcHive = Environment.GetEnvironmentVariable("TcHive");
                 Process vsProcess;
                 if (tcHive != null)
                 {

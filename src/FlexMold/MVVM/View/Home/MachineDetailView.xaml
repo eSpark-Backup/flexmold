@@ -6,6 +6,7 @@
     xmlns:home="clr-namespace:FlexMold.MVVM.ViewModel.Home"
     xmlns:local="clr-namespace:FlexMold.MVVM.View.Home"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type=home:MachineDetailViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -38,12 +39,12 @@
                             MaxWidth="40"
                             MaxHeight="40"
                             Background="{Binding FillColor}"
-                            BorderBrush="{Binding FillColor}"
-                            Foreground="Black"
+                            BorderBrush="{Binding StrokeColor}"
+                            BorderThickness="5"
                             Content="{Binding SlaveID}"
+                            Foreground="Black"
                             Style="{StaticResource MahApps.Styles.Button.Circle}"
-                            ToolTip="{Binding ErrorDeatil}">
-                        </Button>
+                            ToolTip="{Binding ToolTip}" />
                     </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

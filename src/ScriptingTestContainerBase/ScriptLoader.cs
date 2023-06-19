@@ -40,7 +40,7 @@ namespace ScriptingTest
             //scripts.AddRange(assScripts);
 
             string location = assembly.Location;
-            DirectoryInfo dir = new DirectoryInfo(System.IO.Path.GetDirectoryName(location));
+            DirectoryInfo dir = new DirectoryInfo(Path.GetDirectoryName(location));
             FileInfo[] assemblies = dir.GetFiles("*.*"); // Getting all Dlls
 
             IEnumerable<FileInfo> a = assemblies.Where<FileInfo>(x =>
@@ -136,7 +136,7 @@ namespace ScriptingTest
                         if (use)
                         {
                             // Instantiate the Script type
-                            ConstructorInfo ctor = tp.GetConstructor(System.Type.EmptyTypes);
+                            ConstructorInfo ctor = tp.GetConstructor(Type.EmptyTypes);
 
                             if (ctor != null)
                             {

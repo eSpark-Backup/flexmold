@@ -1,4 +1,5 @@
 ﻿using FlexMold.MVVM.Model;
+using FlexMold.MVVM.ViewModel;
 using Newtonsoft.Json.Linq;
 using NLog;
 using System;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Printing.IndexedProperties;
 using System.Threading;
 using System.Windows;
+using System.Windows.Threading;
 using System.Xml.Serialization;
 using TwinCAT;
 using TwinCAT.Ads;
@@ -18,6 +20,106 @@ namespace FlexMold.Utility
 {
     internal static partial class TwinCathelper
     {
+        public static void SetMachineStatusTimer()
+        {
+            ValidStateMachines = new ESlaveStateMachine[DeviceCount];
+            ValidElinkStates = new ESlaveLink[DeviceCount];
+            defaultStateMachines = new ESlaveStateMachine[DeviceCount];
+            defaultElinkStates = new ESlaveLink[DeviceCount];
+
+            Array.Fill(ValidStateMachines, ESlaveStateMachine.EC_DEVICE_STATE_OP);
+            Array.Fill(defaultStateMachines, ESlaveStateMachine.UnAvailable);
+            Array.Fill(ValidElinkStates, ESlaveLink.EC_LINK_STATE_OK);
+            Array.Fill(defaultElinkStates, ESlaveLink.UnAvailable);
+
+            var dispatcherTimer = new DispatcherTimer();
+            dispatcherTimer.Tick += new EventHandler(Timer_Elapsed);
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 3);
+            dispatcherTimer.Start();
+        }
+        private static void Timer_Elapsed(object sender, EventArgs e)
+        {
+            GetSlaveMachineState();
+        }
+        private static void GetSlaveMachineState()
+        {
+            try
+            {
+                var pp = MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ECAbExecute}").FirstOrDefault().TryWriteValue(1, 200);
+
+                ECAbError = (bool)MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ECAbError}").FirstOrDefault().ReadAnyValue(typeof(bool));
+
+                if (!ECAbError)
+                {
+                    var deviceandlinkstatusbytes = (byte[])MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ECAdevStates}").FirstOrDefault().ReadValue();
+
+                    var oddIndexesValues = deviceandlinkstatusbytes.Where((value, index) => index % 2 != 0);
+                    Slave_Link_Status = oddIndexesValues.Select(b => (ESlaveLink)Enum.ToObject(typeof(ESlaveLink), b)).ToArray();
+                    var evenIndexesValues = deviceandlinkstatusbytes.Where((value, index) => index % 2 == 0);
+                    Slave_StateMachine_Status = evenIndexesValues.Select(b => (ESlaveStateMachine)Enum.ToObject(typeof(ESlaveStateMachine), b)).ToArray();
+                }
+                else
+                {
+                    Slave_Link_Status = defaultElinkStates;
+                    Slave_StateMachine_Status = defaultStateMachines;
+                }
+                MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ECAbExecute}").FirstOrDefault().WriteValue(0);
+            }
+            catch (Exception ex)
+            {
+                _log.Log(LogLevel.Error, ex.Message);
+            }
+        }
+        public static ESlaveLink[] Slave_Link_Status
+        {
+            get => _Slave_Link_Status;
+            set
+            {
+                _Slave_Link_Status = value;
+                TSlave_Link_Status_Changed.Invoke(null, null);
+            }
+        }
+        public static ESlaveStateMachine[] Slave_StateMachine_Status
+        {
+            get => _Slave_StateMachine_Status;
+            set
+            {
+                _Slave_StateMachine_Status = value;
+                TSlave_StateMachine_Status_Changed.Invoke(null, null);
+            }
+        }
+        public static void SetDefaultMode(Logger log)
+        {
+            if (Motor_Diagnostic_Abort == false &&
+                Slave_Link_Abort == false &&
+                Slave_StateMachine_Abort == false)
+            {
+                for (int i = 0; i < DeviceCount; i++)
+                    PLCMotors[i].mMode = (int)EMode.Displacement;
+                WriteEthercatDeviceData(DeviceSymbol.mMode);
+                log.Log(LogLevel.Info, $"Configured to Default Device Mode : {EMode.Displacement}");
+                TNF.ShowSuccess($"Default Device Mode : {EMode.Displacement}");
+            }
+        }
+        public static void SetAbortMode(Logger log)
+        {
+            if (Motor_Diagnostic_Abort == true ||
+                Slave_Link_Abort == true ||
+                Slave_StateMachine_Abort == true)
+            {
+                for (int i = 0; i < DeviceCount; i++)
+                    PLCMotors[i].mRPM = 0;
+                WriteEthercatDeviceData(DeviceSymbol.mRPM);
+
+                for (int i = 0; i < DeviceCount; i++)
+                    PLCMotors[i].mMode = (int)EMode.Abort;
+
+                WriteEthercatDeviceData(DeviceSymbol.mMode);
+                log.Log(LogLevel.Warn, $"Device Mode Changed to : {EMode.Abort}");
+                log.Log(LogLevel.Warn, $"RPM values Changed to : 0");
+                TNF.ShowError($"Device Mode: {EMode.Abort}");
+            }
+        }
         public static bool TwinCatConnect851()
         {
             _port = 851;
@@ -64,99 +166,33 @@ namespace FlexMold.Utility
         {
             try
             {
-                // Or here we know about UDINT type --> can be marshalled as UINT32
                 var _mysymbol = e.UserData as Symbol;
-                if (_mysymbol != null)
+                if (_mysymbol == null)
+                    return;
+
+                TCSymbols aa;
+                Enum.TryParse(_mysymbol.InstancePath.Replace("MAIN.", ""), out aa);
+                switch (aa)
                 {
-                    TCSymbols aa;
-                    Enum.TryParse(_mysymbol.InstancePath.Replace("MAIN.", ""), out aa);
-                    switch (aa)
-                    {
-                        case TCSymbols.deviceCount:
-                            break;
-                        case TCSymbols.device:
-                            break;
-                        case TCSymbols.mPosition:
-                            for (int i = 0; i < PLCMotors.Length; i++)
-                                PLCMotorsStates.mPostion[i] = BitConverter.ToSingle(e.Data.ToArray(), i * sizeof(float));
-                            TMotor_PositionChanged?.Invoke(null, e);
-                            break;
-                        case TCSymbols.mTemperature:
-                            break;
-                        case TCSymbols.foe_dwPass:
-                            break;
-                        case TCSymbols.foe_nSlaveAddr:
-                            break;
-                        case TCSymbols.foe_eMode:
-                            break;
-                        case TCSymbols.foe_sPathName:
-                            break;
-                        case TCSymbols.foe_bLoad:
-                            break;
-                        case TCSymbols.foe_bBusy:
-                            break;
-                        case TCSymbols.foe_bError:
-                            break;
-                        case TCSymbols.foe_nErrID:
-                            break;
-                        case TCSymbols.foe_nBytesWritten:
-                            break;
-                        case TCSymbols.foe_nPercent:
-                            break;
-                        case TCSymbols.foe_sAmsNetId:
-                            break;
-                        case TCSymbols.foe_sAmsPort:
-                            break;
-                        case TCSymbols.ecs_bExecute:
-                            break;
-                        case TCSymbols.ecs_reqState:
-                            break;
-                        case TCSymbols.ecs_bBusy:
-                            break;
-                        case TCSymbols.ecs_bError:
-                            break;
-                        case TCSymbols.ecs_nErrId:
-                            break;
-                        case TCSymbols.ecs_currState:
-                            break;
-                        case TCSymbols.fbGetSlaveState:
-                            break;
-                        case TCSymbols.ecg_bExecute:
-                            break;
-                        case TCSymbols.state:
-                            break;
-                        case TCSymbols.ecg_bError:
-                            break;
-                        case TCSymbols.ecg_nErrId:
-                            break;
-                        case TCSymbols.ECAbExecute:
-                            break;
-                        case TCSymbols.ECAdevStates:
-                            break;
-                        case TCSymbols.ECAnSlaves:
-                            break;
-                        case TCSymbols.ECAbError:
-                            break;
-                        case TCSymbols.ECAnErrId:
-                            break;
-                        case TCSymbols.MotorDiagnostic:
-                            Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStates.MotorDiagnistic, 0, e.Data.Length);
-                            _log.Log(LogLevel.Info, $"MotorDiagnistic Updated : {String.Join(",", PLCMotorsStates.MotorDiagnistic)}");
-                            TMotor_MotorDiagnosticChanged?.Invoke(null, e);
-                            break;
-                        case TCSymbols.DeviceStatus:
-                            Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStates.DeviceStatus, 0, e.Data.Length);
-                            _log.Log(LogLevel.Info, $"DeviceStatus Updated : {String.Join(",", PLCMotorsStates.DeviceStatus)}");
-                            TMotor_DeviceStatusChanged?.Invoke(null, e);
-                            break;
-                        case TCSymbols.mDiag3:
-                            break;
-                        default:
-                            break;
-                    }
+                    case TCSymbols.mPosition:
+                        for (int i = 0; i < PLCMotors.Length; i++)
+                            PLCMotorsStates.mPostion[i] = BitConverter.ToSingle(e.Data.ToArray(), i * sizeof(float));
+                        TMotor_PositionChanged?.Invoke(null, e);
+                        break;
+                    case TCSymbols.MotorDiagnostic:
+                        Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStates.MotorDiagnistic, 0, e.Data.Length);
+                        _log.Log(LogLevel.Info, $"MotorDiagnistic Updated : {String.Join(",", PLCMotorsStates.MotorDiagnistic)}");
+                        TMotor_MotorDiagnosticChanged?.Invoke(null, e);
+                        break;
+                    case TCSymbols.DeviceStatus:
+                        Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStates.DeviceStatus, 0, e.Data.Length);
+                        _log.Log(LogLevel.Info, $"DeviceStatus Updated : {String.Join(",", PLCMotorsStates.DeviceStatus)}");
+                        TMotor_DeviceStatusChanged?.Invoke(null, e);
+                        break;
+                    default:
+                        break;
                 }
             }
-
             catch (Exception ex)
             {
                 _log.Log(LogLevel.Error, ex.Message);
@@ -185,7 +221,7 @@ namespace FlexMold.Utility
         private static void Connection_RouterStateChanged(object sender, AmsRouterNotificationEventArgs e)
         {
             MyAmsRouterState = e.State;
-            _log.Log(LogLevel.Info, $"Router State : {TwinCathelper.MyAmsRouterState}");
+            _log.Log(LogLevel.Info, $"Router State : {MyAmsRouterState}");
             TConnection_RouterStateChanged?.Invoke(null, e);
         }
         private static void Connection_AdsStateChanged(object sender, AdsStateChangedEventArgs e)
@@ -207,18 +243,18 @@ namespace FlexMold.Utility
         {
             try
             {
-                TwinCathelper.DeviceCount = (short)MySymbols.FirstOrDefault(a =>
+                DeviceCount = (short)MySymbols.FirstOrDefault(a =>
                            a.InstancePath == TCVarName.DeviceCount).ReadAnyValue(typeof(short));
                 PLCMotors = new EthercatDevice[DeviceCount];
                 PLCMotorsStates = new DeviceStatuses((uint)DeviceCount);
-                SymbolEthercatDevice = TwinCathelper.MySymbols.Where(a => a.InstancePath == TCVarName.MainDevice).FirstOrDefault();
-                structSize = (SymbolEthercatDevice.Size) / TwinCathelper.DeviceCount;
-                buffer = new byte[structSize * TwinCathelper.DeviceCount];
+                SymbolEthercatDevice = MySymbols.Where(a => a.InstancePath == TCVarName.MainDevice).FirstOrDefault();
+                structSize = (SymbolEthercatDevice.Size) / DeviceCount;
+                buffer = new byte[structSize * DeviceCount];
                 ReadAllEthercatDeviceData();
                 if (SessionSystemService == null)
                 {
                     SessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
-                    ClientSystemService = (AdsConnection)TwinCathelper.SessionSystemService.Connect();
+                    ClientSystemService = (AdsConnection)SessionSystemService.Connect();
                 }
                 return true;
             }
@@ -237,7 +273,7 @@ namespace FlexMold.Utility
                 return (int)Client.AddDeviceNotification(deviceStatusSymbol.IndexGroup,
                    deviceStatusSymbol.IndexOffset, (int)(deviceStatusSymbol.Size), NotificationSettings.Default, deviceStatusSymbol);
             }
-            _log.Log(LogLevel.Error, $"TwinCAT Connection is {TwinCathelper.Client.State}");
+            _log.Log(LogLevel.Error, $"TwinCAT Connection is {Client.State}");
             return -1;
         }
 
@@ -255,16 +291,55 @@ namespace FlexMold.Utility
 
         private static void InitializeVarables()
         {
-            SAmsNetId = (string)TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sAmsNetId}").FirstOrDefault().ReadAnyValue(typeof(string));
-            SAmsPort = (UInt16[])TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sAmsPort}").FirstOrDefault().ReadAnyValue(typeof(UInt16[]));
+            SAmsNetId = (string)MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sAmsNetId}").FirstOrDefault().ReadAnyValue(typeof(string));
+            SAmsPort = (UInt16[])MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sAmsPort}").FirstOrDefault().ReadAnyValue(typeof(UInt16[]));
         }
 
         public static void ReadEthercatDeviceData(uint _motorNumber)
         {
             var mtarray = new byte[structSize];
-            TwinCathelper.Client.Read(SymbolEthercatDevice.IndexGroup,
+            Client.Read(SymbolEthercatDevice.IndexGroup,
                 SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
             PLCMotors[_motorNumber].Unpack(mtarray);
+        }
+        public static byte[]? ReadEthercatDeviceData(DeviceSymbol deviceSymbol)
+        {
+            byte[] data = null;
+            switch (deviceSymbol)
+            {
+                case DeviceSymbol.mDirection:
+                    break;
+                case DeviceSymbol.mRPM:
+                    break;
+                case DeviceSymbol.mDisplacement:
+                    for (uint i = 0; i < DeviceCount; i++)
+                        data = ReadEthercatDeviceData(i, deviceSymbol, sizeof(UInt32));
+                    break;
+                case DeviceSymbol.mTime:
+                    break;
+                case DeviceSymbol.mMode:
+                    break;
+                default:
+                    break;
+            }
+            return data;
+        }
+        public static byte[] ReadEthercatDeviceData(uint _motorNumber, DeviceSymbol deviceSymbol, int dataLength)
+        {
+            var aa = SymbolEthercatDevice
+                      .SubSymbols[(int)_motorNumber]
+                      .SubSymbols[(int)deviceSymbol].InstancePath;
+            var mtarray = new byte[dataLength];
+            try
+            {
+                var handle = Client.CreateVariableHandle(aa);
+                Client.Read(handle, mtarray.AsMemory());
+            }
+            catch (Exception ex)
+            {
+                _log.Log(LogLevel.Error, $"Motor[{_motorNumber}] Variable : {deviceSymbol} " + ex.Message);
+            }
+            return mtarray;
         }
 
         public static void WriteEthercatDeviceData()
@@ -273,7 +348,7 @@ namespace FlexMold.Utility
             {
                 PLCMotors[i].Pack().CopyTo(buffer, structSize * i);
             }
-            TwinCathelper.Client.Write(SymbolEthercatDevice.IndexGroup,
+            Client.Write(SymbolEthercatDevice.IndexGroup,
                 SymbolEthercatDevice.IndexOffset, buffer.AsMemory());
         }
 
@@ -283,7 +358,7 @@ namespace FlexMold.Utility
             {
                 var mtarray = new byte[structSize];
                 PLCMotors[_motorNumber].Pack().CopyTo(mtarray, 0);
-                TwinCathelper.Client.Write(SymbolEthercatDevice.IndexGroup,
+                Client.Write(SymbolEthercatDevice.IndexGroup,
                     SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
             }
             catch (Exception ex)
@@ -358,7 +433,7 @@ namespace FlexMold.Utility
             StateInfo info = new StateInfo();
             if (Client.IsConnected)
             {
-                AdsErrorCode errorCode = TwinCathelper.Client.TryReadState(out info);
+                AdsErrorCode errorCode = Client.TryReadState(out info);
             }
             return info;
         }

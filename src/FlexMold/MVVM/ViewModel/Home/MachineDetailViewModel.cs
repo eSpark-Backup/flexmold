@@ -1,37 +1,215 @@
-﻿using FlexMold.Core;
+﻿using ControlzEx.Standard;
+using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.Utility;
-using Humanizer;
 using NLog;
 using System;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Timers;
 using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace FlexMold.MVVM.ViewModel.Home
 {
-    internal class MachineDetailViewModel : ObservableObject, IMachineDetailViewModel
+    internal class MachineDetailViewModel : StatusBaseViewModel, IMachineDetailViewModel
     {
-        private Logger log;
-        public UInt16 ECAnSlaves { get; set; }
-        public bool ECAbError { get; set; }
-        public UInt32 ECAnErrId { get; set; }
-
         public ST_EcSlaveState[] MySlaves
         { get => _MySlaves; set { _MySlaves = value; OnPropertyChanged(); } }
 
         private ST_EcSlaveState[] _MySlaves;
-        private byte[] ECAdevStatesB;
-        public MachineDetailViewModel()
+        private ESlaveLink[] _Slave_Link_Status;
+        public ESlaveLink[] Slave_Link_Status
+        {
+            get => _Slave_Link_Status;
+            set
+            {
+                SetLinkStatus(value);
+                _Slave_Link_Status = value;
+            }
+        }
+        private void SetLinkStatus(ESlaveLink[] _value)
+        {
+            var log = LogManager.GetLogger("Machine Link Status");
+            var v = GetMismatchedIndexes(Slave_Link_Status, _value);
+            if (Slave_Link_Status != null)
+            {
+                for (int i = 0; i < v.Length; i++)
+                {
+                    if (Slave_Link_Status[i] != _value[i])
+                    {
+                        DispLinkStatus(_value, i, log);
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < v.Length; i++)
+                {
+                    DispLinkStatus(_value, i, log);
+                }
+            }
+            if (v.Length != 0)
+                SetDeviceMode(_value, log);
+        }
 
+        void DispLinkStatus(ESlaveLink[] _value, int index, Logger log)
+        {
+            MySlaves[index].Slave_Link_State = _value[index];
+            switch (MySlaves[index].Slave_Link_State)
+            {
+                case ESlaveLink.EC_LINK_STATE_OK:
+                    var _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Green);
+                    log.Log(LogLevel.Warn, _tmg);
+                    TNF.ShowSuccess(_tmg); 
+                    break;
+                case ESlaveLink.EC_LINK_STATE_Other_Fail:
+                case ESlaveLink.EC_LINK_STATE_ADDITIONAL_LINK:
+                case ESlaveLink.EC_LINK_STATE_NOT_PRESENT:
+                case ESlaveLink.EC_LINK_STATE_LINK_WITHOUT_COMM:
+                case ESlaveLink.EC_LINK_STATE_MISSING_LINK:
+                    _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Red);
+                    log.Log(LogLevel.Warn, _tmg);
+                    TNF.ShowWarning(_tmg);
+                    break;
+                case ESlaveLink.UnAvailable:
+                    _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.White);
+                    //log.Log(LogLevel.Warn, _tmg);
+                    //TNF.ShowWarning(_tmg);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private string SetUI(int i, ESlaveLink sw, SolidColorBrush br)
+        {
+            var ds = Slave_StateMachine_Status == null ? "" : $"{Slave_StateMachine_Status[i]}";
+            MySlaves[i].ToolTip =
+                $"Box_{i} \n" +
+                $" Link State : {sw}\n" +
+                $" State Machine : {ds}\n";
+            MySlaves[i].StrokeColor = br;
+            var _tmg = $"{MySlaves[i].SlaveName} --> Link State {MySlaves[i].Slave_Link_State}";
+            return _tmg;
+        }
+        private string SetUI(int i, ESlaveStateMachine sw, SolidColorBrush br)
+        {
+            var ds = Slave_Link_Status == null ? "" : $"{Slave_Link_Status[i]}";
+            MySlaves[i].ToolTip =
+                $"Box_{i} \n" +
+                $" Link State : {ds}\n" +
+                $" State Machine : {sw}\n";
+            MySlaves[i].FillColor = br;
+            var _tmg = $"{MySlaves[i].SlaveName} --> State Machine {MySlaves[i].Slave_State_Machine}";
+            return _tmg;
+        }
+
+        private ESlaveStateMachine[] _Slave_StateMachine_Status;
+
+        public ESlaveStateMachine[] Slave_StateMachine_Status
+        {
+            get => _Slave_StateMachine_Status;
+            set
+            {
+                SetStateMachine(value);
+                _Slave_StateMachine_Status = value;
+            }
+        }
+        private void SetStateMachine(ESlaveStateMachine[] _value)
+        {
+            var log = LogManager.GetLogger("State Machine Status");
+            var v = GetMismatchedIndexes(Slave_StateMachine_Status, _value);
+            if (Slave_StateMachine_Status != null)
+            {
+                for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                {
+                    if (Slave_StateMachine_Status[i] != _value[i])
+                    {
+                        DispStateMachine(_value, i, log);
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < v.Length; i++)
+                {
+                    DispStateMachine(_value, i, log);
+                }
+            }
+            if (v.Length != 0)
+                SetDeviceMode(_value, log);
+        }
+
+        private void SetDeviceMode(ESlaveStateMachine[] _value, Logger log)
+        {
+            if (_value.SequenceEqual(TwinCathelper.ValidStateMachines))
+            {
+                TwinCathelper.Slave_StateMachine_Abort = false;
+                TwinCathelper.SetDefaultMode(log);
+            }
+            else
+            {
+                TwinCathelper.Slave_StateMachine_Abort = true;
+                TwinCathelper.SetAbortMode(log);
+            }
+        }
+        private void SetDeviceMode(ESlaveLink[] _value, Logger log)
+        {
+            if (_value.SequenceEqual(TwinCathelper.ValidElinkStates))
+            {
+                TwinCathelper.Slave_Link_Abort = false;
+                TwinCathelper.SetDefaultMode(log);
+            }
+            else
+            {
+                TwinCathelper.Slave_Link_Abort = true;
+                TwinCathelper.SetAbortMode(log);
+            }
+        }
+        void DispStateMachine(ESlaveStateMachine[] _value, int index, Logger log)
+        {
+            MySlaves[index].Slave_State_Machine = _value[index];
+            {
+                switch (MySlaves[index].Slave_State_Machine)
+                {
+                    case ESlaveStateMachine.EC_DEVICE_STATE_OP:
+                        var _tmg = SetUI(index, MySlaves[index].Slave_State_Machine, Brushes.Green);
+                        TNF.ShowSuccess(_tmg);
+                        log.Log(LogLevel.Info, _tmg);
+                        break;
+
+                    case ESlaveStateMachine.EC_DEVICE_STATE_INIT:
+                    case ESlaveStateMachine.EC_DEVICE_STATE_PREOP:
+                    case ESlaveStateMachine.EC_DEVICE_STATE_BOOTSTRAP:
+                    case ESlaveStateMachine.EC_DEVICE_STATE_SAFEOP:
+                    case ESlaveStateMachine.EC_DEVICE_STATE_ERROR:
+                    case ESlaveStateMachine.EC_DEVICE_STATE_INVALID_VPRS:
+                    case ESlaveStateMachine.EC_DEVICE_STATE_INITCMD_ERROR:
+                    case ESlaveStateMachine.EC_DEVICE_STATE_DISABLED:
+                        _tmg = SetUI(index, MySlaves[index].Slave_State_Machine, Brushes.Red);
+                        TNF.ShowError(_tmg);
+                        log.Log(LogLevel.Error, _tmg);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        private void Slave_Link_Status_Changed(object? sender, EventArgs e)
+        {
+            Slave_Link_Status = TwinCathelper.Slave_Link_Status;
+        }
+
+        private void Slave_StateMachine_Status_Changed(object? sender, EventArgs e)
+        {
+            Slave_StateMachine_Status = TwinCathelper.Slave_StateMachine_Status;
+        }
+        public MachineDetailViewModel()
         {
             if (TwinCathelper.Client == null)
             {
                 return;
             }
-            log = LogManager.GetLogger("Machine Status");
             MySlaves = new ST_EcSlaveState[TwinCathelper.DeviceCount];
             for (int i = 0; i < TwinCathelper.DeviceCount; i++)
             {
@@ -39,167 +217,19 @@ namespace FlexMold.MVVM.ViewModel.Home
                 {
                     SlaveID = i,
                     SlaveName = $"Box_{i}",
-                    deviceState = ESlaveStateMachine.EC_DEVICE_STATE_OP,
-                    linkState = ElinkState.EC_LINK_STATE_OK,
-                    FillColor = Brushes.Transparent,
-                    ErrorDeatil =
+                    Slave_State_Machine = ESlaveStateMachine.UnAvailable,
+                    Slave_Link_State = ESlaveLink.UnAvailable,
+                    FillColor = Brushes.White,
+                    StrokeColor = Brushes.White,
+                    ToolTip =
                     $"Box_{i} \n" +
-                    $" Link State : {ElinkState.EC_LINK_STATE_OK.Humanize()}\n" +
-                    $" Machine State : {ESlaveStateMachine.EC_DEVICE_STATE_OP.Humanize()}\n"
+                    $" Link State : {ESlaveLink.UnAvailable}\n" +
+                    $" State Machine : {ESlaveStateMachine.UnAvailable}\n"
                 };
             }
-            ECAdevStatesB = new byte[TwinCathelper.DeviceCount * sizeof(ElinkState) * 2];
-            var dispatcherTimer = new DispatcherTimer();
-            dispatcherTimer.Tick += new EventHandler(Timer_Elapsed);
-            dispatcherTimer.Interval = new TimeSpan(0, 0, 3);
-            dispatcherTimer.Start();
-        }
-        void SetDefaultMode()
-        {
-            for (int i = 0; i < TwinCathelper.DeviceCount; i++)
-                TwinCathelper.PLCMotors[i].mMode = (int)EMode.Displacement;
-
-            TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mMode);
-            log.Log(LogLevel.Info, $"Configured to Default Device Mode : {EMode.Displacement}");
-            TNF.ShowSuccess($"Default Device Mode : {EMode.Displacement}");
-        }
-        void SetAbortMode()
-        {
-            for (int i = 0; i < TwinCathelper.DeviceCount; i++)
-                TwinCathelper.PLCMotors[i].mMode = (int)EMode.Abort;
-
-            TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mMode);
-            log.Log(LogLevel.Info, $"Device Mode Changed to : {EMode.Abort}");
-            TNF.ShowError($"Device Mode: {EMode.Abort}");
-        }
-        private void Timer_Elapsed(object sender, EventArgs e)
-        {
-            GetSlaveMachineState();
-        }
-
-        private void GetSlaveMachineState()
-        {
-            try
-            {
-                var pp = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ECAbExecute}").FirstOrDefault().TryWriteValue(1, 200);
-
-                ECAbError = (bool)TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ECAbError}").FirstOrDefault().ReadAnyValue(typeof(bool));
-
-                // only odd indexes
-                ESlaveStateMachine[] enumArray = ECAdevStatesB
-                    .Where((value, index) => index % 2 != 0)
-                    .Select(b => (ESlaveStateMachine)Enum.ToObject(typeof(ESlaveStateMachine), b)).ToArray();
-                if (!ECAbError)
-                {
-                    ushort index = 0;
-
-                    ECAdevStatesB = (byte[])TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ECAdevStates}").FirstOrDefault().ReadValue();
-
-                    for (int i = 0; i < ECAdevStatesB.Length;)
-                    {
-                        if (MySlaves[index].linkState != (ElinkState)ECAdevStatesB[i])
-                        {
-                            MySlaves[index].linkState = (ElinkState)ECAdevStatesB[i];
-                            switch (MySlaves[index].linkState)
-                            {
-                                case ElinkState.EC_LINK_STATE_OK:
-                                case ElinkState.EC_LINK_STATE_ADDITIONAL_LINK:
-                                    MySlaves[index].FillColor = Brushes.Green;
-                                    var _tmgs = $"{MySlaves[index].SlaveName} : Link State {MySlaves[index].linkState}";
-                                    log.Log(LogLevel.Info, _tmgs);
-                                    TNF.ShowSuccess(_tmgs);
-                                    SetDefaultMode();
-                                    break;
-
-                                case ElinkState.EC_LINK_STATE_NOT_PRESENT:
-                                case ElinkState.EC_LINK_STATE_LINK_WITHOUT_COMM:
-                                case ElinkState.EC_LINK_STATE_MISSING_LINK:
-                                    MySlaves[index].FillColor = Brushes.Red;
-                                    _tmgs = $"{MySlaves[index].SlaveName} : Link State {MySlaves[index].linkState}";
-                                    log.Log(LogLevel.Error, _tmgs);
-                                    TNF.ShowError(_tmgs);
-                                    SetAbortMode();
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        if (MySlaves[index].linkState == ElinkState.EC_LINK_STATE_OK ||
-                            MySlaves[index].linkState == ElinkState.EC_LINK_STATE_ADDITIONAL_LINK)
-                        {
-                            if (MySlaves[index].deviceState != (ESlaveStateMachine)ECAdevStatesB[i])
-                            {
-                                MySlaves[index].deviceState = (ESlaveStateMachine)ECAdevStatesB[i];
-                                switch (MySlaves[index].deviceState)
-                                {
-                                    case ESlaveStateMachine.EC_DEVICE_STATE_INIT:
-                                        SetUI_DS(index, Brushes.White, true);
-                                        break;
-
-                                    case ESlaveStateMachine.EC_DEVICE_STATE_OP:
-                                        SetUI_DS(index, Brushes.Green, false);
-                                        break;
-
-                                    case ESlaveStateMachine.EC_DEVICE_STATE_PREOP:
-                                        SetUI_DS(index, Brushes.Yellow, true);
-                                        break;
-
-                                    case ESlaveStateMachine.EC_DEVICE_STATE_BOOTSTRAP:
-                                        SetUI_DS(index, Brushes.Yellow, true);
-                                        break;
-
-                                    case ESlaveStateMachine.EC_DEVICE_STATE_SAFEOP:
-                                        SetUI_DS(index, Brushes.Yellow, true);
-                                        break;
-
-                                    case ESlaveStateMachine.EC_DEVICE_STATE_ERROR:
-                                        SetUI_DS(index, Brushes.Red, true);
-                                        break;
-
-                                    case ESlaveStateMachine.EC_DEVICE_STATE_INVALID_VPRS:
-                                        SetUI_DS(index, Brushes.Red, true);
-                                        break;
-
-                                    case ESlaveStateMachine.EC_DEVICE_STATE_INITCMD_ERROR:
-                                        SetUI_DS(index, Brushes.Red, true);
-                                        break;
-
-                                    case ESlaveStateMachine.EC_DEVICE_STATE_DISABLED:
-                                        SetUI_DS(index, Brushes.Red, true);
-                                        break;
-
-                                    default:
-                                        break;
-                                }
-                            }
-                        }
-                        MySlaves[index].ErrorDeatil =
-                            $"{MySlaves[index].SlaveName} \n" +
-                             $" Link State : {MySlaves[index].linkState}\n" +
-                            $" Machine State : {MySlaves[index].deviceState}\n";
-                        i = i + 2;
-                        index++;
-                    }
-                }
-
-                TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ECAbExecute}").FirstOrDefault().WriteValue(0);
-            }
-            catch (Exception ex)
-            {
-                log.Log(LogLevel.Error, ex.Message);
-            }
-        }
-
-        private void SetUI_DS(ushort index, SolidColorBrush color, bool abort)
-        {
-            string _tmgs;
-            MySlaves[index].FillColor = color;
-            _tmgs = $"{MySlaves[index].SlaveName} : State {MySlaves[index].deviceState}";
-            log.Log(LogLevel.Error, _tmgs);
-            TNF.ShowError(_tmgs);
-            if (abort)
-                SetAbortMode();
-            SetDefaultMode();
+            TwinCathelper.TSlave_Link_Status_Changed += Slave_Link_Status_Changed;
+            TwinCathelper.TSlave_StateMachine_Status_Changed += Slave_StateMachine_Status_Changed;
+            TwinCathelper.SetMachineStatusTimer();
         }
     }
 }

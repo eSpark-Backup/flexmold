@@ -1,17 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ToastNotifications.Core;
-using ToastNotifications.Lifetime.Clear;
-using ToastNotifications;
-using ToastNotifications.Position;
 using System.Windows;
+using System.Windows.Threading;
+using ToastNotifications;
+using ToastNotifications.Core;
 using ToastNotifications.Lifetime;
 using ToastNotifications.Messages;
-using Humanizer;
+using ToastNotifications.Position;
 
 namespace FlexMold.MVVM.ViewModel
 {
@@ -26,7 +20,7 @@ namespace FlexMold.MVVM.ViewModel
             {
                 cfg.PositionProvider = new WindowPositionProvider(
                     parentWindow: Application.Current.MainWindow,
-                    corner: Corner.BottomLeft,
+                    corner: Corner.TopRight,
                     offsetX: 0,
                     offsetY: 0);
 
@@ -34,7 +28,7 @@ namespace FlexMold.MVVM.ViewModel
                     notificationLifetime: TimeSpan.FromSeconds(6),
                     maximumNotificationCount: MaximumNotificationCount.FromCount(_messageCounter));
 
-                cfg.Dispatcher = Application.Current.Dispatcher;
+                cfg.Dispatcher = Dispatcher.CurrentDispatcher;
 
                 cfg.DisplayOptions.TopMost = false;
                 cfg.DisplayOptions.Width = 200;
@@ -48,42 +42,42 @@ namespace FlexMold.MVVM.ViewModel
         {
             if (_messageCounter % 3 == 0)
             {
-                _lastMessage = message.Humanize();
+                _lastMessage = message;
             }
         }
 
         public static void ShowInformation(string message)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Dispatcher.CurrentDispatcher.BeginInvoke(() =>
             {
-                _Notifier.ShowInformation(message.Humanize(), CreateOptions());
+                _Notifier.ShowInformation(message, CreateOptions());
                 RememberMessage(message);
             });
         }
 
         public static void ShowError(string message)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Dispatcher.CurrentDispatcher.BeginInvoke(() =>
             {
-                _Notifier.ShowError(message.Humanize(), CreateOptions());
+                _Notifier.ShowError(message, CreateOptions());
                 RememberMessage(message);
             });
         }
 
         public static void ShowSuccess(string message)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Dispatcher.CurrentDispatcher.BeginInvoke(() =>
             {
-                _Notifier.ShowSuccess(message.Humanize(), CreateOptions());
+                _Notifier.ShowSuccess(message, CreateOptions());
                 RememberMessage(message);
             });
         }
 
         public static void ShowWarning(string message)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Dispatcher.CurrentDispatcher.BeginInvoke(() =>
             {
-                _Notifier.ShowWarning(message.Humanize(), CreateOptions());
+                _Notifier.ShowWarning(message, CreateOptions());
                 RememberMessage(message);
             });
         }

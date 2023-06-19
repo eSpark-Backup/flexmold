@@ -35,10 +35,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 for (int i = 0; i < v.Length; i++)
                 {
-                    if (Slave_Link_Status[i] != _value[i])
-                    {
-                        DispLinkStatus(_value, i, log);
-                    }
+                    DispLinkStatus(_value, i, log);
                 }
             }
             else
@@ -60,7 +57,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                 case ESlaveLink.EC_LINK_STATE_OK:
                     var _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Green);
                     log.Log(LogLevel.Warn, _tmg);
-                    TNF.ShowSuccess(_tmg); 
+                    TNF.ShowSuccess(_tmg);
                     break;
                 case ESlaveLink.EC_LINK_STATE_Other_Fail:
                 case ESlaveLink.EC_LINK_STATE_ADDITIONAL_LINK:
@@ -121,12 +118,9 @@ namespace FlexMold.MVVM.ViewModel.Home
             var v = GetMismatchedIndexes(Slave_StateMachine_Status, _value);
             if (Slave_StateMachine_Status != null)
             {
-                for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                for (int i = 0; i < v.Length; i++)
                 {
-                    if (Slave_StateMachine_Status[i] != _value[i])
-                    {
-                        DispStateMachine(_value, i, log);
-                    }
+                    DispStateMachine(_value, i, log);
                 }
             }
             else

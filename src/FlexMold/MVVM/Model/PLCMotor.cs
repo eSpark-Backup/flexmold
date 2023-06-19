@@ -72,10 +72,11 @@ namespace FlexMold.MVVM.Model
         public const string mTemperature = "MAIN.mTemperature";
     }
 
-    public enum EmDiag1
+    public enum EmotorDiagnostic
     {
         Healthy,
         Stepper_Driver_Failed,
+        Stall
     }
 
     public enum TCSymbols

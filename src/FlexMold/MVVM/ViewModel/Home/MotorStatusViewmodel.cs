@@ -1,4 +1,5 @@
-﻿using FlexMold.Core;
+﻿using ControlzEx.Standard;
+using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.Utility;
 using NLog;
@@ -137,32 +138,32 @@ namespace FlexMold.MVVM.ViewModel.Home
                     break;
             }
         }
-        private string SetUI(int i, EmDiag1 sw, SolidColorBrush br)
+        private string SetUI(int i, EmotorDiagnostic sw, SolidColorBrush br)
         {
-            var ds = DeviceStatus == null ? "" : $"\n\t Motor DeviceStatus : {(EDeviceStatus)DeviceStatus[i]}";
+            var ds = DeviceStatus == null ? "" : $"\n\t DeviceStatus : {(EDeviceStatus)DeviceStatus[i]}";
             string _tmgs = $"Motor[{i}]" +
                 $"\n\t Motor Diagnostic : {sw}" +
                 $"\n\t Motor Position : {MyMotors[i].MotorPosition:0.000}mm" + ds;
             MyMotors[i].FillColor = br;
             MyMotors[i].ToolTip = _tmgs;
-            return _tmgs;
+            return $"Motor{i} --> Diagnostic : {sw}";
         }
         private string SetUI(int i, EDeviceStatus aa, SolidColorBrush br)
         {
-            var md = MotorDiagnistics == null ? "" : $"\n\t Motor Diagnostic : {(EmDiag1)MotorDiagnistics[i]}";
+            var md = MotorDiagnistics == null ? "" : $"\n\t Diagnostic : {(EmotorDiagnostic)MotorDiagnistics[i]}";
             var _tmgs = $"Motor[{i}]" + md +
-                $"\n\t Motor Position : {MyMotors[i].MotorPosition:0.000}mm" +
-                $"\n\t Motor DeviceStatus : {aa}";
+                $"\n\t Position : {MyMotors[i].MotorPosition:0.000}mm" +
+                $"\n\t DeviceStatus : {aa}";
             MyMotors[i].StrokeColor = br;
             MyMotors[i].ToolTip = _tmgs;
-            return _tmgs;
+            return $"Motor{i} --> DeviceStatus : {aa}";
         }
         private void Position_SetUI(int i)
         {
-            var ds = DeviceStatus == null ? "" : $"\n\t Motor DeviceStatus : {(EDeviceStatus)DeviceStatus[i]}";
-            var md = MotorDiagnistics == null ? "" : $"\n\t Motor Diagnostic : {(EmDiag1)MotorDiagnistics[i]}";
+            var ds = DeviceStatus == null ? "" : $"\n\t DeviceStatus : {(EDeviceStatus)DeviceStatus[i]}";
+            var md = MotorDiagnistics == null ? "" : $"\n\t Diagnostic : {(EmotorDiagnostic)MotorDiagnistics[i]}";
             var _tmgs = $"Motor[{i}]" + md +
-                $"\n\t Motor Position : {MyMotors[i].MotorPosition:0.000}mm" + ds;
+                $"\n\t Position : {MyMotors[i].MotorPosition:0.000}mm" + ds;
             MyMotors[i].ToolTip = _tmgs;
         }
         private void SetDeviceStatus(uint[] _value)
@@ -172,15 +173,12 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 for (int i = 0; i < v.Length; i++)
                 {
-                    if (DeviceStatus[v[i]] != _value[v[i]])
-                    {
-                        DispDeviceStatus(_value, v[i]);
-                    }
+                    DispDeviceStatus(_value, v[i]);
                 }
             }
             else
             {
-                for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                for (int i = 0; i < v.Length; i++)
                 {
                     DispDeviceStatus(_value, v[i]);
                 }
@@ -188,21 +186,18 @@ namespace FlexMold.MVVM.ViewModel.Home
         }
         private void SetMotorPos(float[] _value)
         {
+            var v = GetMismatchedIndexes(mPosition, _value);
             if (mPosition != null)
             {
-                var v = GetMismatchedIndexes(mPosition, _value);
                 for (int i = 0; i < v.Length; i++)
                 {
-                    if (mPosition[v[i]] != _value[v[i]])
-                    {
-                        MyMotors[v[i]].MotorPosition = _value[v[i]];
-                        Position_SetUI(v[i]);
-                    }
+                    MyMotors[v[i]].MotorPosition = _value[v[i]];
+                    Position_SetUI(v[i]);
                 }
             }
             else
             {
-                for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                for (int i = 0; i < v.Length; i++)
                 {
                     MyMotors[i].MotorPosition = _value[i];
                     Position_SetUI(i);
@@ -222,18 +217,23 @@ namespace FlexMold.MVVM.ViewModel.Home
         void DisplayMotorDiagStatus(uint[] _value, int i, Logger log)
         {
             MyMotors[i].MotorPosition = mPosition[i];
-            var sw = (EmDiag1)Enum.ToObject(typeof(EmDiag1), _value[i]);
+            var sw = (EmotorDiagnostic)Enum.ToObject(typeof(EmotorDiagnostic), _value[i]);
             switch (sw)
             {
-                case EmDiag1.Healthy:
+                case EmotorDiagnostic.Healthy:
                     var _tmgs = SetUI(i, sw, Brushes.Green);
                     TNF.ShowSuccess(_tmgs);
                     log.Log(LogLevel.Info, _tmgs);
                     break;
-                case EmDiag1.Stepper_Driver_Failed:
+                case EmotorDiagnostic.Stepper_Driver_Failed:
                     _tmgs = SetUI(i, sw, Brushes.Red);
                     TNF.ShowError(_tmgs);
                     log.Log(LogLevel.Error, _tmgs);
+                    break;
+                case EmotorDiagnostic.Stall:
+                    _tmgs = SetUI(i, sw, Brushes.Orange);
+                    TNF.ShowWarning(_tmgs);
+                    log.Log(LogLevel.Warn, _tmgs);
                     break;
                 default:
                     break;
@@ -248,10 +248,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 for (int i = 0; i < v.Length; i++)
                 {
-                    if (MotorDiagnistics[i] != _value[v[i]])
-                    {
-                        DisplayMotorDiagStatus(_value, v[i], log);
-                    }
+                    DisplayMotorDiagStatus(_value, v[i], log);
                 }
                 SetDeviceMode(_value, log);
             }
@@ -390,7 +387,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             DebugDetailClickCommand = new RelayCommand(o => { DisplayError(o as MotorStatusControl); });
             Array.Fill<uint>(validSeq01Val, (int)EDeviceStatus.CalibrationSquence01Success);
             Array.Fill<uint>(validSeq02Val, (int)EDeviceStatus.CalibrationSquence02Success);
-            Array.Fill<uint>(healthyMotorDiag, (int)EmDiag1.Healthy);
+            Array.Fill<uint>(healthyMotorDiag, (int)EmotorDiagnostic.Healthy);
         }
     }
 }

@@ -25,12 +25,11 @@ namespace FlexMold.MVVM.ViewModel
                     offsetY: 0);
 
                 cfg.LifetimeSupervisor = new TimeAndCountBasedLifetimeSupervisor(
-                    notificationLifetime: TimeSpan.FromSeconds(6),
+                    notificationLifetime: TimeSpan.FromSeconds(4),
                     maximumNotificationCount: MaximumNotificationCount.FromCount(_messageCounter));
 
-                cfg.Dispatcher = Dispatcher.CurrentDispatcher;
-
-                cfg.DisplayOptions.TopMost = false;
+                cfg.Dispatcher = Application.Current.Dispatcher;
+                cfg.DisplayOptions.TopMost = true;
                 cfg.DisplayOptions.Width = 200;
             });
         }
@@ -48,7 +47,7 @@ namespace FlexMold.MVVM.ViewModel
 
         public static void ShowInformation(string message)
         {
-            Dispatcher.CurrentDispatcher.BeginInvoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 _Notifier.ShowInformation(message, CreateOptions());
                 RememberMessage(message);
@@ -57,7 +56,7 @@ namespace FlexMold.MVVM.ViewModel
 
         public static void ShowError(string message)
         {
-            Dispatcher.CurrentDispatcher.BeginInvoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 _Notifier.ShowError(message, CreateOptions());
                 RememberMessage(message);
@@ -66,7 +65,7 @@ namespace FlexMold.MVVM.ViewModel
 
         public static void ShowSuccess(string message)
         {
-            Dispatcher.CurrentDispatcher.BeginInvoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 _Notifier.ShowSuccess(message, CreateOptions());
                 RememberMessage(message);
@@ -75,7 +74,7 @@ namespace FlexMold.MVVM.ViewModel
 
         public static void ShowWarning(string message)
         {
-            Dispatcher.CurrentDispatcher.BeginInvoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 _Notifier.ShowWarning(message, CreateOptions());
                 RememberMessage(message);

@@ -38,10 +38,7 @@ namespace FlexMold.MVVM.ViewModel.Home
 
             try
             {
-<<<<<<< HEAD
-=======
                 log.Info("Please Select valid Calibration File ....");
->>>>>>> feature/30-error-detection-and-handling-sequence
                 using System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
                 openFileDialog.InitialDirectory = new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName;
                 openFileDialog.Filter = "csv files (*.txt)|*.csv|All files (*.*)|*.*";
@@ -49,33 +46,21 @@ namespace FlexMold.MVVM.ViewModel.Home
 
                 if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-<<<<<<< HEAD
-                    // Copy to File Appsetting's root
-                    File.Copy(openFileDialog.FileName, TwinCathelper.AppSettings.CalibrationFileFullPath(), true);
-                }
-                else
-                {
-=======
                     if (openFileDialog.FileName != TwinCathelper.AppSettings.CalibrationFileFullPath())
                         File.Copy(openFileDialog.FileName, TwinCathelper.AppSettings.CalibrationFileFullPath(), true);
                 }
                 else
                 {
                     CalibrateButton = true;
->>>>>>> feature/30-error-detection-and-handling-sequence
                     return;
                 }
             }
             catch (Exception ex)
             {
-<<<<<<< HEAD
-                log.Error(ex.Message);
-=======
                 CalibrateButton = true;
                 log.Error(ex.Message);
                 TNF.ShowError(ex.Message);
                 return;
->>>>>>> feature/30-error-detection-and-handling-sequence
             }
             CalibrationData = CSVHelper.ReadCSV_DoubleData(new FileInfo(TwinCathelper.AppSettings.CalibrationFileFullPath()));
             if (CalibrationData.Count == 0)

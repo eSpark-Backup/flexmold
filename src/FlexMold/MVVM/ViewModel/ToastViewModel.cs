@@ -29,7 +29,7 @@ namespace FlexMold.MVVM.ViewModel
                     maximumNotificationCount: MaximumNotificationCount.FromCount(_messageCounter));
 
                 cfg.Dispatcher = Application.Current.Dispatcher;
-                cfg.DisplayOptions.TopMost = true;
+                cfg.DisplayOptions.TopMost = false;
                 cfg.DisplayOptions.Width = 200;
             });
         }

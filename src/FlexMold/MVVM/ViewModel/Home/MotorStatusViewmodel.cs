@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media;
@@ -63,7 +64,11 @@ namespace FlexMold.MVVM.ViewModel.Home
             }
             CalibrationData = CSVHelper.ReadCSV_DoubleData(new FileInfo(TwinCathelper.AppSettings.CalibrationFileFullPath()));
             if (CalibrationData.Count == 0)
+            {
+                log.Log(LogLevel.Error, $"No data found in Calibration.csv");
+                TNF.ShowError("Calibration.csv");
                 return;
+            }
             for (int i = 0; i < TwinCathelper.DeviceCount; i++)
                 TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationSeq01Request;
             TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mMode);
@@ -285,7 +290,7 @@ namespace FlexMold.MVVM.ViewModel.Home
 
         public IList<double> CalibrationData { get; set; }
 
-        private void WriteCSVData(IList<double> data)
+        private void WriteDistpacementCSVData(IList<double> data)
         {
             var log = LogManager.GetLogger("Calibration");
             if (data.Count != 0)
@@ -298,6 +303,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     }
                     TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
                     log.Log(LogLevel.Info, $"{data.Count} csv value/s has been written sucessfully");
+                    log.Log(LogLevel.Info, $"{JsonSerializer.Serialize(data)}");
                 }
                 else
                 {
@@ -330,7 +336,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 Thread.Sleep((int)TwinCathelper.AppSettings.CalibrationSeq02Delay);
                 //Read the contents of the file into a stream
-                WriteCSVData(CalibrationData);
+                WriteDistpacementCSVData(CalibrationData);
                 for (int i = 0; i < TwinCathelper.DeviceCount; i++)
                 {
                     TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationSeq02Request;
@@ -338,6 +344,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                 TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mMode);
                 log.Log(LogLevel.Warn, $"{EMode.CalibrationSeq02Request}. Please wait...");
                 TNF.ShowSuccess("Calibration Seq02 Requested");
+                Thread.Sleep(200);
                 for (int i = 0; i < TwinCathelper.DeviceCount; i++)
                     TwinCathelper.PLCMotors[i].mDisplacement = 0;
                 TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
@@ -377,6 +384,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             }
             CalibrateButton = true;
             CalibrationData = new List<double>();
+            CalibrationData = CSVHelper.ReadCSV_DoubleData(new FileInfo(TwinCathelper.AppSettings.CalibrationFileFullPath()));
             MyMotors = new ObservableCollection<MotorStatusControl>() { };
             for (int j = 0; j < TwinCathelper.DeviceCount; j++)
             {

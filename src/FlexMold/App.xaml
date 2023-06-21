@@ -2,10 +2,7 @@
     x:Class="FlexMold.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="clr-namespace:FlexMold"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-    xmlns:view="clr-namespace:FlexMold.MVVM.View"
-    xmlns:viewModelx="clr-namespace:FlexMold.MVVM.ViewModel"
     StartupUri="SplashMachineSlection.xaml">
     <Application.Resources>
         <ResourceDictionary>
@@ -56,6 +53,9 @@
             </Style>
             <Style x:Key="LabelTextBlock" TargetType="{x:Type TextBlock}">
                 <Setter Property="FontSize" Value="20" />
+                <Setter Property="FontFamily" Value="Trebuchet MS" />
+                <Setter Property="Foreground" Value="Aqua" />
+                <Setter Property="VerticalAlignment" Value="Center" />
                 <Setter Property="Margin" Value="5" />
                 <Setter Property="HorizontalAlignment" Value="Left" />
             </Style>
@@ -70,7 +70,6 @@
             </Style>
             <Style BasedOn="{StaticResource MahApps.Styles.Button.Flat}" TargetType="{x:Type Button}">
                 <Setter Property="Margin" Value="2" />
-                <Setter Property="Height" Value="40" />
             </Style>
             <Style TargetType="{x:Type mah:MetroProgressBar}">
                 <Setter Property="Margin" Value="2" />
@@ -79,7 +78,6 @@
             <Style BasedOn="{StaticResource MahApps.Styles.RadioButton.Win10}" TargetType="{x:Type RadioButton}">
                 <Setter Property="MinWidth" Value="60" />
                 <Setter Property="Margin" Value="5" />
-
             </Style>
             <Style BasedOn="{StaticResource MahApps.Styles.CheckBox.Win10}" TargetType="{x:Type CheckBox}" />
             <!--  quick change of the collapse storyboard duration  -->
@@ -97,7 +95,6 @@
             <Style BasedOn="{StaticResource MahApps.Styles.Expander}" TargetType="{x:Type Expander}">
                 <Setter Property="mah:ExpanderHelper.CollapseStoryboard" Value="{StaticResource MahApps.Storyboard.Expander.Collapse.Fast}" />
             </Style>
-
         </ResourceDictionary>
     </Application.Resources>
 </Application>

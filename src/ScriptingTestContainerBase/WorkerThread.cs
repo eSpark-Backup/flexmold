@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.ComponentModel;
-using System.Threading;
 using System.Diagnostics;
+using System.Threading;
 
 namespace ScriptingTest
 {
@@ -22,6 +20,7 @@ namespace ScriptingTest
         /// </summary>
         /// <value>The DTE.</value>
         dynamic DTE { get; }
+
         /// <summary>
         /// Gets the solution object
         /// </summary>
@@ -33,6 +32,7 @@ namespace ScriptingTest
         /// </summary>
         /// <value>The worker.</value>
         IWorker Worker { get; }
+
         /// <summary>
         /// Gets the Configuration Factory
         /// </summary>
@@ -49,7 +49,7 @@ namespace ScriptingTest
         /// Gets the solution template.
         /// </summary>
         /// <value>The solution template.</value>
-        string ProjectTemplate { get;  }
+        string ProjectTemplate { get; }
     }
 
     //TODO:
@@ -59,9 +59,9 @@ namespace ScriptingTest
     internal interface IContextProvider : IContext
     {
         void SetDTE(dynamic dte, dynamic solution);
+
         void SetWorker(IWorker worker);
     }
-
 
     /// <summary>
     /// Script context class
@@ -104,12 +104,12 @@ namespace ScriptingTest
             _solution = factory.Solution;
 
             //_worker = worker;
-             this.parameters = new Dictionary<string,dynamic>();
+            this.parameters = new Dictionary<string, dynamic>();
         }
 
         #region IContext Members
 
-        IWorker _worker;
+        private IWorker _worker;
 
         /// <summary>
         /// Gets the Script Worker.
@@ -120,7 +120,8 @@ namespace ScriptingTest
             get { return _worker; }
         }
 
-        IConfigurationFactory _factory;
+        private IConfigurationFactory _factory;
+
         /// <summary>
         /// Gets the Configuration Factory
         /// </summary>
@@ -130,7 +131,8 @@ namespace ScriptingTest
             get { return _factory; }
         }
 
-        dynamic _dte;
+        private dynamic _dte;
+
         /// <summary>
         /// Gets the DTE.
         /// </summary>
@@ -140,7 +142,8 @@ namespace ScriptingTest
             get { return _dte; }
         }
 
-        dynamic _solution;
+        private dynamic _solution;
+
         /// <summary>
         /// Gets the solution.
         /// </summary>
@@ -154,7 +157,7 @@ namespace ScriptingTest
         /// Parameters dictionary
         /// </summary>
         protected IDictionary<string, dynamic> parameters;
-        
+
         /// <summary>
         /// Gets the Named parameters (Dictionary Name --&gt; ParameterValue)
         /// </summary>
@@ -163,7 +166,6 @@ namespace ScriptingTest
         {
             get { return parameters; }
         }
-
 
         /// <summary>
         /// Project template
@@ -179,7 +181,7 @@ namespace ScriptingTest
             get { return projectTemplate; }
         }
 
-        #endregion
+        #endregion IContext Members
 
         #region IContextProvider Members
 
@@ -203,7 +205,7 @@ namespace ScriptingTest
             this._worker = worker;
         }
 
-        #endregion
+        #endregion IContextProvider Members
     }
 
     /// <summary>
@@ -267,25 +269,24 @@ namespace ScriptingTest
             //this.WorkerSupportsCancellation = true;
         }
 
-
         /// <summary>
         /// Configuration factory
         /// </summary>
-        IConfigurationFactory _factory = null;
+        private IConfigurationFactory _factory = null;
 
         /// <summary>
         /// Executed Script
         /// </summary>
-        Script _script = null;
+        private Script _script = null;
 
         ///// <summary>
         ///// The Script Invoke parameters
         ///// </summary>
         //IDictionary<string, dynamic> _parameters = null;
 
-        IContext _scriptContext;
+        private IContext _scriptContext;
 
-        bool _executing = false;
+        private bool _executing = false;
 
         private void OnDoWork()
         {
@@ -305,7 +306,7 @@ namespace ScriptingTest
                 _factory.ExecuteScript(_script /*,_parameters,this*/);   // Execution of Script
                 this.ProgressStatus = "Closing configuration ...";
                 _factory.Cleanup();  // Closing of configuration
-              
+
                 this.Progress = 99;
                 this.ProgressStatus = "Finishing";
             }
@@ -346,7 +347,6 @@ namespace ScriptingTest
             {
                 if (this._executing) throw new ApplicationException("Script Already executing!");
 
-
                 DoWorkEventArgs args = new DoWorkEventArgs(null);
 
                 ThreadStart threadStart = new ThreadStart(OnDoWork);
@@ -361,7 +361,7 @@ namespace ScriptingTest
         /// <summary>
         /// Current status of the script execution
         /// </summary>
-        string progressStatus = string.Empty;
+        private string progressStatus = string.Empty;
 
         /// <summary>
         /// Gets or sets the status string.
@@ -390,10 +390,19 @@ namespace ScriptingTest
         /// </summary>
         public event EventHandler<ProgressStatusChangedArgs> ProgressStatusChanged;
 
+        private bool _isBuildSucceeded;
+
+        public bool IsBuildSucceeded
+        {
+            get { return _isBuildSucceeded; }
+            set { _isBuildSucceeded = value; }
+        }
+
+
         /// <summary>
         /// Current Progress
         /// </summary>
-        int _progress = 0;
+        private int _progress = 0;
 
         /// <summary>
         /// Sets the progress value (0-100%)
@@ -427,7 +436,8 @@ namespace ScriptingTest
         /// </summary>
         public event ProgressChangedEventHandler ProgressChanged;
 
-        bool cancelationPending = false;
+        private bool cancelationPending = false;
+
         /// <summary>
         /// Gets a value indicating whether a cancellation is pending.
         /// </summary>
@@ -504,5 +514,4 @@ namespace ScriptingTest
         /// </summary>
         public event EventHandler ConfigurationInitialized;
     }
-
 }

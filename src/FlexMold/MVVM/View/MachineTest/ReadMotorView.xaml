@@ -24,25 +24,21 @@
         <Label
             Grid.Row="0"
             Grid.Column="0"
-            Content="Motor No From :"
-            />
+            Content="Motor No From :" />
         <Label
             Grid.Row="1"
             Grid.Column="0"
-            Content="Motor No To :"
-           />
+            Content="Motor No To :" />
         <mah:NumericUpDown
             Grid.Row="0"
             Grid.Column="1"
             Maximum="65535"
-            Minimum="0"
-            />
+            Minimum="0" />
         <mah:NumericUpDown
             Grid.Row="1"
             Grid.Column="1"
             Maximum="65535"
-            Minimum="0"
-            />
+            Minimum="0" />
         <Button
             Grid.Row="2"
             Grid.ColumnSpan="2"
@@ -55,6 +51,5 @@
             Grid.Row="4"
             Grid.ColumnSpan="2"
             Text=" Motors Not Responding" />
-
     </Grid>
 </UserControl>

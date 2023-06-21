@@ -27,7 +27,6 @@
                 <Setter Property="TextOptions.TextRenderingMode" Value="ClearType" />
                 <Setter Property="TitleFontSize" Value="14" />
                 <Setter Property="Width" Value="300" />
-
             </Style>
             <Style x:Key="SmallTileStyle" TargetType="mah:Tile">
                 <Setter Property="Height" Value="125" />

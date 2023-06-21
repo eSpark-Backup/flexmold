@@ -1,19 +1,15 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.View.Setting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FlexMold.MVVM.ViewModel
 {
-    class SettingViewModel : ObservableObject
+    internal class SettingViewModel : ObservableObject
     {
         /// <summary>
         /// Relay Commands
         /// </summary>
         public RelayCommand MachineTestCommand { get; set; }
+
         public RelayCommand PowerSettingCommand { get; set; }
         public RelayCommand MotorSettingCommand { get; set; }
         public RelayCommand VacuumSettingCommand { get; set; }
@@ -36,6 +32,7 @@ namespace FlexMold.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+
         public SettingViewModel()
         {
             MachineTestVM = new MachineTestView();
@@ -51,8 +48,6 @@ namespace FlexMold.MVVM.ViewModel
             MotorSettingCommand = new RelayCommand(o => { CurrentView = MotorSettingVM; });
             VacuumSettingCommand = new RelayCommand(o => { CurrentView = VacuumSettingMV; });
             LaserSettingCommand = new RelayCommand(o => { CurrentView = LaserSettingMV; });
-
         }
-
     }
 }

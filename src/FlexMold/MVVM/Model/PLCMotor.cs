@@ -1,4 +1,5 @@
 ﻿using FlexMold.Core;
+using Microsoft.VisualStudio.Shell.Interop;
 using StructPacker;
 using System;
 using System.Runtime.InteropServices;
@@ -14,14 +15,54 @@ namespace FlexMold.MVVM.Model
         public bool t1;
         public bool t2;
         public bool t3;
-        public UInt32 mSpeed;
+        public UInt32 mRPM;
+        public UInt32 mDisplacement;
         public UInt32 mTime;
-        public bool mMode;
-        public bool t4;
-        public bool t5;
-        public bool t6;
+        public UInt32 mMode;
+
         [SkipPack]
         public uint DeviceID;
+    }
+    public class DeviceStatuses
+    {
+        public uint[] mTemperature { get; set; }
+        public uint[] MotorDiagnistic { get; set; }
+        public uint[] DeviceStatus { get; set; }
+        public uint[] mDiag3 { get; set; }
+        public float[] mPostion { get; set; }
+        public DeviceStatuses(uint deviceCount)
+        {
+            mTemperature = new uint[deviceCount];
+            MotorDiagnistic = new uint[deviceCount];
+            DeviceStatus = new uint[deviceCount];
+            mDiag3 = new uint[deviceCount];
+            mPostion = new float[deviceCount];
+        }
+    }
+    public enum EMode
+    {
+        Displacement = 0,
+        Time,
+        CalibrationSeq01Request,
+        CalibrationSeq02Request,
+        Abort
+    }
+    public enum ETMode
+    {
+        Displacement = 0,
+        Time
+    }
+    public enum EDeviceStatus
+    {
+        None = 0,
+        CalibrationSquence01Started = 1,
+        CalibrationSquence01Failed,
+        CalibrationSquence01Success,
+        CalibrationSquence02Started,
+        CalibrationSquence02Failed,
+        CalibrationSquence02Success,
+        ShapeFormingStarted,
+        ShapeFormingCompleted,
     }
     public static class TCVarName
     {
@@ -30,14 +71,20 @@ namespace FlexMold.MVVM.Model
         public const string mPosition = "MAIN.mPosition";
         public const string mTemperature = "MAIN.mTemperature";
     }
-    public enum EmDiag1
+
+    public enum EmotorDiagnostic
     {
         Healthy,
         Stepper_Driver_Failed,
+        Stall
     }
 
     public enum TCSymbols
     {
+        deviceCount,
+        device,
+        mPosition,
+        mTemperature,
         foe_dwPass,
         foe_nSlaveAddr,
         foe_eMode,
@@ -66,10 +113,11 @@ namespace FlexMold.MVVM.Model
         ECAnSlaves,
         ECAbError,
         ECAnErrId,
-        mDiag1,
-        mDiag2,
+        MotorDiagnostic,
+        DeviceStatus,
         mDiag3,
     }
+
     public enum ESlaveStateMachine
     {
         EC_DEVICE_STATE_INIT = 0x01,
@@ -80,9 +128,11 @@ namespace FlexMold.MVVM.Model
         EC_DEVICE_STATE_ERROR = 0x10,
         EC_DEVICE_STATE_INVALID_VPRS = 0x20,
         EC_DEVICE_STATE_INITCMD_ERROR = 0x40,
-        EC_DEVICE_STATE_DISABLED = 0x80
+        EC_DEVICE_STATE_DISABLED = 0x80,
+        UnAvailable = 0x99
     }
-    public enum ElinkState
+
+    public enum ESlaveLink
     {
         EC_LINK_STATE_OK = 0x00,
         EC_LINK_STATE_NOT_PRESENT = 0x01,
@@ -92,9 +142,12 @@ namespace FlexMold.MVVM.Model
         EC_LINK_STATE_PORT_A = 0x10,
         EC_LINK_STATE_PORT_B = 0x20,
         EC_LINK_STATE_PORT_C = 0x40,
-        EC_LINK_STATE_PORT_D = 0x80
+        EC_LINK_STATE_PORT_D = 0x80,
+        EC_LINK_STATE_Other_Fail = 0x24,
+        UnAvailable = 0x99
     }
-    class ST_EcSlaveState : ObservableObject
+
+    internal class ST_EcSlaveState : ObservableObject
     {
         private int slaveID;
 
@@ -105,35 +158,51 @@ namespace FlexMold.MVVM.Model
         }
 
         private string slaveName;
-        private ESlaveStateMachine deviceState1;
-        private ElinkState linkState1;
-        public string SlaveName { get => slaveName; set { slaveName = value; OnPropertyChanged(); } }
-        public ESlaveStateMachine deviceState
+        private ESlaveStateMachine _Slave_State_Machine;
+        private ESlaveLink _Slave_Link_State;
+
+        public string SlaveName
+        { get => slaveName; set { slaveName = value; OnPropertyChanged(); } }
+
+        public ESlaveStateMachine Slave_State_Machine
         {
-            get => deviceState1;
+            get => _Slave_State_Machine;
             set
             {
-                deviceState1 = value;
+                _Slave_State_Machine = value;
                 OnPropertyChanged();
             }
         }
-        public ElinkState linkState
+
+        public ESlaveLink Slave_Link_State
         {
-            get => linkState1;
+            get => _Slave_Link_State;
 
             set
             {
-                linkState1 = value;
+                _Slave_Link_State = value;
                 OnPropertyChanged();
             }
         }
-        private string _ErrorDeatil;
-        public string ErrorDeatil
+
+        private string _ToolTip;
+
+        public string ToolTip
         {
-            get { return _ErrorDeatil; }
+            get { return _ToolTip; }
             set
             {
-                _ErrorDeatil = value;
+                _ToolTip = value;
+                OnPropertyChanged();
+            }
+        }
+        private SolidColorBrush _StrokeColor;
+        public SolidColorBrush StrokeColor
+        {
+            get { return _StrokeColor; }
+            set
+            {
+                _StrokeColor = value;
                 OnPropertyChanged();
             }
         }
@@ -150,13 +219,21 @@ namespace FlexMold.MVVM.Model
             }
         }
     }
+
     public class Foe : ObservableObject
     {
         private SolidColorBrush _ErrorForeground;
-        public SolidColorBrush ErrorForeground { get => _ErrorForeground; set { _ErrorForeground = value; OnPropertyChanged(); } }
+
+        public SolidColorBrush ErrorForeground
+        { get => _ErrorForeground; set { _ErrorForeground = value; OnPropertyChanged(); } }
+
         private SolidColorBrush _BusyForeground;
-        public SolidColorBrush BusyForeground { get => _BusyForeground; set { _BusyForeground = value; OnPropertyChanged(); } }
+
+        public SolidColorBrush BusyForeground
+        { get => _BusyForeground; set { _BusyForeground = value; OnPropertyChanged(); } }
+
         private uint _Foe_dwPass;
+
         public UInt32 Foe_dwPass
         {
             get => _Foe_dwPass;
@@ -166,20 +243,26 @@ namespace FlexMold.MVVM.Model
                 OnPropertyChanged();
             }
         }
+
         public bool Init_Status { get; set; }
         public bool Foe_Status { get; set; }
         public bool Op_Status { get; set; }
         public UInt16 Foe_nSlaveAddr { get; set; }
         private string _Foe_sPathName;
+
         public string Foe_sPathName
         {
             get => _Foe_sPathName; set { _Foe_sPathName = value; OnPropertyChanged(); }
         }
+
         public string Foe_sNetId { get; set; }
         private bool _Foe_bLoad;
-        public bool Foe_bLoad { get => _Foe_bLoad; set { _Foe_bLoad = value; OnPropertyChanged(); } }
+
+        public bool Foe_bLoad
+        { get => _Foe_bLoad; set { _Foe_bLoad = value; OnPropertyChanged(); } }
 
         private bool _Foe_bBusy;
+
         public bool Foe_bBusy
         {
             get => _Foe_bBusy; set
@@ -195,11 +278,13 @@ namespace FlexMold.MVVM.Model
                 }
             }
         }
+
         public bool Status { get; set; }
         public bool Ecs_bBusy { get; set; }
         public bool Ecs_bError { get; set; }
         public UInt32 Ecs_nErrId { get; set; }
         private bool _Foe_bError;
+
         public bool Foe_bError
         {
             get => _Foe_bError; set
@@ -217,13 +302,20 @@ namespace FlexMold.MVVM.Model
         }
 
         private UInt32 _Foe_nErrID;
-        public UInt32 Foe_nErrID { get => _Foe_nErrID; set { _Foe_nErrID = value; OnPropertyChanged(); } }
+
+        public UInt32 Foe_nErrID
+        { get => _Foe_nErrID; set { _Foe_nErrID = value; OnPropertyChanged(); } }
 
         private UInt32 _Foe_nBytesWritten;
-        public UInt32 Foe_nBytesWritten { get => _Foe_nBytesWritten; set { _Foe_nBytesWritten = value; OnPropertyChanged(); } }
+
+        public UInt32 Foe_nBytesWritten
+        { get => _Foe_nBytesWritten; set { _Foe_nBytesWritten = value; OnPropertyChanged(); } }
 
         private UInt32 _Foe_nPercent;
-        public UInt32 Foe_nPercent { get => _Foe_nPercent; set { _Foe_nPercent = value; OnPropertyChanged(); } }
+
+        public UInt32 Foe_nPercent
+        { get => _Foe_nPercent; set { _Foe_nPercent = value; OnPropertyChanged(); } }
+
         public Foe ShallowCopy()
         {
             return (Foe)this.MemberwiseClone();
@@ -231,11 +323,14 @@ namespace FlexMold.MVVM.Model
     }
     public class MotorStatusControl : ObservableObject
     {
-        public int MotorID { get => motorID; set { motorID = value; OnPropertyChanged(); } }
-
         private int motorID;
-        private SolidColorBrush _FillColor;
+        public int MotorID
+        { get => motorID; set { motorID = value; OnPropertyChanged(); } }
+        public float MotorPosition
+        { get => motorPosition; set { motorPosition = value; OnPropertyChanged(); } }
+        private float motorPosition;
 
+        private SolidColorBrush _FillColor;
         public SolidColorBrush FillColor
         {
             get { return _FillColor; }
@@ -245,17 +340,25 @@ namespace FlexMold.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private string _ErrorDeatil;
-
-        public string ErrorDeatil
+        private SolidColorBrush _StrokeColor;
+        public SolidColorBrush StrokeColor
         {
-            get { return _ErrorDeatil; }
+            get { return _StrokeColor; }
             set
             {
-                _ErrorDeatil = value;
+                _StrokeColor = value;
                 OnPropertyChanged();
             }
         }
-
+        private string _ToolTip;
+        public string ToolTip
+        {
+            get { return _ToolTip; }
+            set
+            {
+                _ToolTip = value;
+                OnPropertyChanged();
+            }
+        }
     }
 }

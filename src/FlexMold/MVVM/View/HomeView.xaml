@@ -67,7 +67,5 @@
                 Margin="10"
                 Content="{Binding CurrentView}" />
         </Grid>
-
     </Border>
-
 </UserControl>

@@ -1,9 +1,7 @@
 ﻿using FlexMold.Core;
-using FlexMold.MVVM.Model;
 using FlexMold.Utility;
 using NLog;
 using System;
-using System.ServiceModel.Channels;
 using System.Threading;
 using System.Windows;
 using TwinCAT.Ads;
@@ -13,7 +11,7 @@ namespace FlexMold.MVVM.ViewModel
 {
     internal class ConnectionLostViewModel : ObservableObject
     {
-        static private Logger log = LogManager.GetLogger("TwinCat Connection");
+        private static Logger log = LogManager.GetLogger("TwinCat Connection");
         private string _EventMessage;
 
         public string EventMessage
@@ -21,6 +19,7 @@ namespace FlexMold.MVVM.ViewModel
             get { return _EventMessage; }
             set { _EventMessage = value; OnPropertyChanged(); }
         }
+
         private bool _Restore;
 
         public ConnectionLostViewModel(string _msg)
@@ -37,13 +36,15 @@ namespace FlexMold.MVVM.ViewModel
                 switch (EventMessage)
                 {
                     case "Connection State Lost":
-                        TwinCathelper.TwinCatConnect851();
-
+                        Thread.Sleep(500);
+                        TwinCathelper.Client.Close();
                         break;
+
                     case "Ads State Lost":
                         retry = 0;
                         setState();
                         break;
+
                     default:
                         break;
                 }
@@ -53,8 +54,10 @@ namespace FlexMold.MVVM.ViewModel
                 MessageBox.Show(ex.Message);
             }
         }
-        int retry;
-        bool setState()
+
+        private int retry;
+
+        private bool setState()
         {
             log.Log(LogLevel.Info, $"{retry} Attempting to Start PLC ....");
             TwinCathelper.StartpPLC();

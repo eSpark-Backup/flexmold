@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FlexMold.Core
 {
-    class PropertyValidation : IDataErrorInfo
+    internal class PropertyValidation : IDataErrorInfo
     {
-        // check for general model error    
-        public string Error { get { return null; } }
+        // check for general model error
+        public string Error
+        { get { return null; } }
 
-        // check for property errors    
+        // check for property errors
         public string this[string columnName]
         {
             get

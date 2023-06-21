@@ -1,13 +1,11 @@
-﻿using System;
+﻿using EnvDTE80;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
-using System.Text;
-using EnvDTE;
-using EnvDTE80;
 
 namespace ScriptingTest
 {
@@ -18,6 +16,7 @@ namespace ScriptingTest
     {
         [DllImport("ole32.dll")]
         private static extern int GetRunningObjectTable(int reserved, out IRunningObjectTable rot);
+
         [DllImport("ole32.dll")]
         private static extern int CreateBindCtx(int reserved, out IBindCtx bindContext);
 
@@ -60,7 +59,6 @@ namespace ScriptingTest
             return result;
         }
 
-
         /// <summary>
         /// Get a table of the currently running instances of the Visual Studio .NET IDE.
         /// </summary>
@@ -94,7 +92,7 @@ namespace ScriptingTest
 
         public static void CloseRunningDTETable(string ScriptSolutionName)
         {
-            var myDtelist =new List<DTE2>();
+            var myDtelist = new List<DTE2>();
             Dictionary<string, DTE2> runningIDEInstances = new Dictionary<string, DTE2>();
             Dictionary<string, List<object>> runningObjects = GetRunningObjectTable();
 
@@ -110,7 +108,7 @@ namespace ScriptingTest
                         Console.WriteLine($"Closing : {dte.Solution.FullName}  ....");
                         dte.Solution.Close();
                         dte.Quit();
-                    }   
+                    }
                 }
             }
         }
@@ -136,6 +134,7 @@ namespace ScriptingTest
         /// The version of the DTE
         /// </summary>
         public readonly Version Version;
+
         /// <summary>
         /// The process identifier of the devenv process
         /// </summary>

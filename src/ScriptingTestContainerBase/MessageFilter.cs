@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace ScriptingTest
 {
@@ -24,10 +21,10 @@ namespace ScriptingTest
         {
             get { return _isRegistered; }
         }
-        
+
         // Class containing the IOleMessageFilter
         // thread error-handling functions.
-        // 
+        //
 
         /// <summary>
         /// Start the filter
@@ -86,7 +83,7 @@ namespace ScriptingTest
             if (dwRejectType == 2)
             // flag = SERVERCALL_RETRYLATER.
             {
-                // Retry the thread call immediately if return >=0 & 
+                // Retry the thread call immediately if return >=0 &
                 // <100.
                 return 99;
             }
@@ -95,13 +92,13 @@ namespace ScriptingTest
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="hTaskCallee">The h task callee.</param>
         /// <param name="dwTickCount">The dw tick count.</param>
         /// <param name="dwPendingType">Type of the dw pending.</param>
         /// <returns></returns>
-        int IOleMessageFilter.MessagePending(System.IntPtr hTaskCallee,int dwTickCount, int dwPendingType)
+        int IOleMessageFilter.MessagePending(System.IntPtr hTaskCallee, int dwTickCount, int dwPendingType)
         {
             //Return the flag PENDINGMSG_WAITDEFPROCESS.
             return 2;
@@ -117,7 +114,7 @@ namespace ScriptingTest
     /// </summary>
     [ComImport(), Guid("00000016-0000-0000-C000-000000000046"),
     InterfaceTypeAttribute(ComInterfaceType.InterfaceIsIUnknown)]
-    interface IOleMessageFilter
+    internal interface IOleMessageFilter
     {
         /// <summary>
         /// Handles the in coming call.

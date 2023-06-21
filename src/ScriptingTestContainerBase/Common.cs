@@ -1,15 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using EnvDTE80;
-using EnvDTE100;
-using System.Reflection;
-using System.IO;
 using System.ComponentModel;
-using System.Threading;
-using System.Diagnostics;
-using System.Globalization;
 
 namespace ScriptingTest
 {
@@ -18,11 +8,13 @@ namespace ScriptingTest
     /// </summary>
     public interface IProgressProvider
     {
+        bool IsBuildSucceeded { get; set; }
         /// <summary>
         /// Sets the progress.
         /// </summary>
         /// <value>The progress.</value>
         int Progress { set; }
+
         /// <summary>
         /// Gets or sets the status string.
         /// </summary>
@@ -65,7 +57,7 @@ namespace ScriptingTest
 namespace TwinCAT
 {
     /// <summary>
-    /// Default MacIds 
+    /// Default MacIds
     /// </summary>
     public class DefaultMacIds
     {
@@ -73,22 +65,27 @@ namespace TwinCAT
         /// Broadcast Address
         /// </summary>
         public static byte[] Broadcast = new byte[] { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+
         /// <summary>
         /// First Multicast Address
         /// </summary>
         public static byte[] FirstMulticast = new byte[] { 0x01, 0xff, 0x5e, 0xff, 0xff, 0xff };
+
         /// <summary>
         /// Empty Address
         /// </summary>
         public static byte[] Empty = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
         /// <summary>
         /// EtherCAT Multicast Address
         /// </summary>
         public static byte[] EcatMulticast = new byte[] { 0x01, 0x01, 0x05, 0x01, 0x00, 0x00 };
+
         /// <summary>
         /// Network variables Multicast Address
         /// </summary>
         public static byte[] NvMulticast = new byte[] { 0x01, 0x01, 0x05, 0x04, 0x00, 0x00 };
+
         /// <summary>
         /// Profinet DCP Multicast Address
         /// </summary>
@@ -100,7 +97,7 @@ namespace TwinCAT
     /// </summary>
     public class AmsNetId
     {
-        byte[] netId = new byte[6];
+        private byte[] netId = new byte[6];
 
         /// <summary>
         /// Constructor
@@ -148,7 +145,6 @@ namespace TwinCAT
             get { return new AmsNetId(new byte[] { 127, 0, 0, 1, 1, 1 }); }
         }
 
-        
         /// <summary>
         /// Converts the string representation of the address to <see cref="AmsNetId"/>.
         /// </summary>

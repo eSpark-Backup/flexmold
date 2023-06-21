@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace ScriptingTest
+﻿namespace ScriptingTest
 {
     public interface IConfigurationFactory
     {
@@ -44,6 +39,7 @@ namespace ScriptingTest
         /// 	<c>true</c> if this instance is configuration open; otherwise, <c>false</c>.
         /// </value>
         bool IsConfigurationOpen { get; }
+
         /// <summary>
         /// Gets a value indicating whether this instance is generating.
         /// </summary>

@@ -1,21 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using EnvDTE;
-using EnvDTE80;
-using EnvDTE90;
-using EnvDTE90a;
-using EnvDTE100;
-using System.Runtime.InteropServices;
-using System.IO;
-using TCatSysManagerLib;
-using System.Xml;
-using System.Diagnostics;
-using System.Reflection;
-
-namespace ScriptingTest
+﻿namespace ScriptingTest
 {
     /// <summary>
     /// Configuration Factory for Early Binding

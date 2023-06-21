@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using ToastNotifications;
@@ -11,33 +7,33 @@ using ToastNotifications.Lifetime;
 using ToastNotifications.Messages;
 using ToastNotifications.Position;
 
-namespace FlexMold.Utility
+namespace FlexMold.MVVM.ViewModel
 {
-
-    public static class ToastNotificationUtil
+    public static class TNF
     {
-        static readonly Notifier _notifier;
-        static ToastNotificationUtil()
+        private static readonly Notifier _Notifier;
+
+        static TNF()
         {
             _messageCounter = 5;
-            _notifier = new Notifier(cfg =>
+            _Notifier = new Notifier(cfg =>
             {
                 cfg.PositionProvider = new WindowPositionProvider(
                     parentWindow: Application.Current.MainWindow,
-                    corner: Corner.BottomLeft,
+                    corner: Corner.TopRight,
                     offsetX: 0,
                     offsetY: 0);
 
                 cfg.LifetimeSupervisor = new TimeAndCountBasedLifetimeSupervisor(
-                    notificationLifetime: TimeSpan.FromSeconds(6),
+                    notificationLifetime: TimeSpan.FromSeconds(4),
                     maximumNotificationCount: MaximumNotificationCount.FromCount(_messageCounter));
 
                 cfg.Dispatcher = Application.Current.Dispatcher;
-
                 cfg.DisplayOptions.TopMost = false;
                 cfg.DisplayOptions.Width = 200;
             });
         }
+
         private static string _lastMessage = "";
         private static int _messageCounter;
 
@@ -48,38 +44,43 @@ namespace FlexMold.Utility
                 _lastMessage = message;
             }
         }
+
         public static void ShowInformation(string message)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(() =>
             {
-                _notifier.ShowInformation(message, CreateOptions());
+                _Notifier.ShowInformation(message, CreateOptions());
                 RememberMessage(message);
             });
         }
+
         public static void ShowError(string message)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(() =>
             {
-                _notifier.ShowError(message, CreateOptions());
+                _Notifier.ShowError(message, CreateOptions());
                 RememberMessage(message);
             });
         }
+
         public static void ShowSuccess(string message)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(() =>
             {
-                _notifier.ShowSuccess(message, CreateOptions());
+                _Notifier.ShowSuccess(message, CreateOptions());
                 RememberMessage(message);
             });
         }
+
         public static void ShowWarning(string message)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(() =>
             {
-                _notifier.ShowWarning(message, CreateOptions());
+                _Notifier.ShowWarning(message, CreateOptions());
                 RememberMessage(message);
             });
         }
+
         private static MessageOptions CreateOptions()
         {
             return new MessageOptions
@@ -89,6 +90,7 @@ namespace FlexMold.Utility
                 Tag = ++_messageCounter % 2
             };
         }
+
         public static bool? FreezeOnMouseEnter { get; set; } = false;
         public static bool? ShowCloseButton { get; set; } = true;
     }

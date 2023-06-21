@@ -1,25 +1,27 @@
-﻿using FlexMold.Core;
+﻿using EnvDTE80;
+using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.Utility;
-using MahApps.Metro.Controls;
 using NLog;
+using NLog.Fluent;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
-using TwinCAT.TypeSystem;
-using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
-using LogLevel = NLog.LogLevel;
 
 namespace FlexMold.MVVM.ViewModel.MachineTest
 {
     internal class MotorTestViewModel : ObservableObject
     {
-        Logger log;
+        private Logger log;
+        public RelayCommand SendRPMCommand { get; set; }
+        public RelayCommand SendDisplacementCommand { get; set; }
+        public RelayCommand SendTimeCommand { get; set; }
         public RelayCommand OnLoadedCommand { get; set; }
         public RelayCommand OnUnLoadedCommand { get; set; }
         public int structSize { get; set; }
@@ -27,6 +29,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         public uint DeviceVariableHandle { get; set; }
         public Symbol SymbolEthercatDevice { get; private set; }
         private EthercatDevice[] _MyPLCMotor;
+
         public EthercatDevice[] MyPLCMotor
         {
             get { return _MyPLCMotor; }
@@ -36,7 +39,9 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 OnPropertyChanged();
             }
         }
+
         private uint[] _DeviceIds;
+
         public uint[] DeviceIds
         {
             get { return _DeviceIds; }
@@ -46,184 +51,236 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 OnPropertyChanged();
             }
         }
-        private float _Position;
-        public float Position
+
+        private double _Position;
+
+        public double Position
         {
             get { return _Position; }
-            set { _Position = value; OnPropertyChanged(); }
+            set
+            {
+                _Position = value;
+                OnPropertyChanged();
+            }
         }
+
         private uint _SelectedMotorIndex;
+
         public uint SelectedMotorIndex
         {
             get { return _SelectedMotorIndex; }
             set
             {
                 _SelectedMotorIndex = value;
-                justread = true;
                 TwinCathelper.ReadEthercatDeviceData(value);
-                SelectedMotorSpeedValue = MyPLCMotor[value].mSpeed;
-                SelectedMotorTimeValue = MyPLCMotor[value].mTime;
-                SelectedMotorDirValue = MyPLCMotor[value].mDirection;
-                SelectedMotorModeValue = MyPLCMotor[value].mMode;
-                var mtarray = new byte[sizeof(UInt32)];
-                TwinCathelper.Client.Read(PositionSymbol.IndexGroup,
-                   PositionSymbol.IndexOffset + (uint)SelectedMotorIndex * sizeof(UInt32), mtarray.AsMemory());
-                Position = BitConverter.ToUInt32(mtarray) / 1000;
+                SetContols(value);
                 OnPropertyChanged();
             }
         }
-        public Symbol PositionSymbol { get; set; }
+        private void SetContols(uint value)
+        {
+            justread = true;
+            SelectedMotorDirValue = MyPLCMotor[value].mDirection == false ? 0 : 1;
+            SelectedMotorModeValue = (ETMode)MyPLCMotor[value].mMode;
+            SelectedMotorRPM = MyPLCMotor[value].mRPM;
+            SelectedMotorDisplacementValue = MyPLCMotor[value].mDisplacement;
+            SelectedMotorTimeValue = MyPLCMotor[value].mTime;
+            Position = TwinCathelper.PLCMotorsStates.mPostion[SelectedMotorIndex];
+            justread = false;
+        }
 
-        private bool _SelectedMotorModeValue;
-        public bool SelectedMotorModeValue
+        public Symbol PositionSymbol { get; set; }
+        public IEnumerable<ETMode> EnumModes => Enum.GetValues(typeof(ETMode)).Cast<ETMode>();
+
+        private ETMode _SelectedMotorModeValue;
+        public ETMode SelectedMotorModeValue
         {
             get { return _SelectedMotorModeValue; }
             set
             {
                 if (!justread)
                 {
-                    _SelectedMotorModeValue = value;
-                    MyPLCMotor[SelectedMotorIndex].mMode = SelectedMotorModeValue;
-                    TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
+                    MyPLCMotor[SelectedMotorIndex].mMode = (uint)value;
+                    TwinCathelper
+                  .WriteEthercatDeviceData(
+                  SelectedMotorIndex,
+                  TwinCathelper.DeviceSymbol.mMode,
+                  MyPLCMotor[SelectedMotorIndex].mMode.CastToArray());
                 }
-                else
-                {
-                    _SelectedMotorModeValue = value;
-                    justread = false;
-                }
+                _SelectedMotorModeValue = (ETMode)MyPLCMotor[SelectedMotorIndex].mMode;
                 OnPropertyChanged();
             }
         }
-        private bool _SelectedMotorDirValue;
-        public bool SelectedMotorDirValue
+
+        private int _SelectedMotorDirValue;
+
+        public int SelectedMotorDirValue
         {
-            get { return _SelectedMotorDirValue; }
+            get
+            {
+                return _SelectedMotorDirValue;
+            }
             set
             {
                 if (!justread)
                 {
-                    _SelectedMotorDirValue = value;
-                    MyPLCMotor[SelectedMotorIndex].mDirection = SelectedMotorDirValue;
-                    TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
+                    MyPLCMotor[SelectedMotorIndex].mDirection = value == 0 ? false : true;
+                    TwinCathelper
+                   .WriteEthercatDeviceData(
+                   SelectedMotorIndex,
+                   TwinCathelper.DeviceSymbol.mDirection,
+                   new byte[] { MyPLCMotor[SelectedMotorIndex].mDirection.CastToArray().FirstOrDefault() }
+                   );
                 }
-                else
-                {
-                    _SelectedMotorDirValue = value;
-                    justread = false;
-                }
+                _SelectedMotorDirValue = MyPLCMotor[SelectedMotorIndex].mDirection == false ? 0 : 1;
                 OnPropertyChanged();
             }
         }
+
         private UInt32 _SelectedMotorTimeValue;
+
         public UInt32 SelectedMotorTimeValue
         {
             get { return _SelectedMotorTimeValue; }
             set
             {
-                if (!justread)
-                {
-                    _SelectedMotorTimeValue = value;
-                    MyPLCMotor[SelectedMotorIndex].mTime = SelectedMotorTimeValue;
-                    TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
-                }
-                else
-                {
-                    _SelectedMotorSpeedValue = value;
-                    justread = false;
-                }
+                _SelectedMotorTimeValue = value;
                 OnPropertyChanged();
             }
         }
-        private UInt32 _SelectedMotorSpeedValue;
-        public UInt32 SelectedMotorSpeedValue
+
+        private UInt32 _SelectedMotorRPM;
+        public UInt32 SelectedMotorRPM
         {
-            get { return _SelectedMotorSpeedValue; }
+            get { return _SelectedMotorRPM; }
             set
             {
-                if (!justread)
-                {
-                    _SelectedMotorSpeedValue = value;
-                    MyPLCMotor[SelectedMotorIndex].mSpeed = SelectedMotorSpeedValue;
-                    TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex);
-                }
-                else
-                {
-                    _SelectedMotorSpeedValue = value;
-                    justread = false;
-                }
+                _SelectedMotorRPM = value;
+
                 OnPropertyChanged();
             }
         }
+        private UInt32 _SelectedMotorDisplacementValue;
+
+        public UInt32 SelectedMotorDisplacementValue
+        {
+            get { return _SelectedMotorDisplacementValue; }
+            set
+            {
+                _SelectedMotorDisplacementValue = value;
+
+                OnPropertyChanged();
+            }
+        }
+
         public byte[] buffer { get; set; }
-        
-        List<int> NotificatioHandles;
+
+        bool positionNofication = false;
         public void OnLoaded()
         {
-            NotificatioHandles = new List<int>
+            if (!positionNofication)
             {
-                TwinCathelper.RegisterNotification(TCVarName.mPosition)
-            };
-            TwinCathelper.Client.AdsNotification += Client_AdsNotificationMT;
-            SelectedMotorIndex = 0;
+
+                TwinCathelper.TMotor_PositionChanged += Client_AdsNotificationMT;
+                SelectedMotorIndex = 0;
+                positionNofication = true;
+            }
         }
-        void OnUnLoaded()
+
+        private void OnUnLoaded()
         {
-            if (TwinCathelper.Client.State == ConnectionState.Connected)
-            {
-                foreach (var item in NotificatioHandles)
-                {
-                    if (item != -1)
-                    {
-                        TwinCathelper.Client.DeleteDeviceNotification((uint)item);
-                    }
-                }
-                TwinCathelper.Client.AdsNotification -= Client_AdsNotificationMT;
-            }
+            //if (TwinCathelper.Client.State == ConnectionState.Connected)
+            //{
+            //    foreach (var item in NotificatioHandles)
+            //    {
+            //        if (item != -1)
+            //        {
+            //            TwinCathelper.Client.DeleteDeviceNotification((uint)item);
+            //        }
+            //    }
+            //    TwinCathelper.Client.AdsNotification -= Client_AdsNotificationMT;
+            //}
         }
-        private void Client_AdsNotificationMT(object sender, AdsNotificationEventArgs e)
+        private void Client_AdsNotificationMT(object sender, EventArgs e)
         {
-            try
+            Position = TwinCathelper.PLCMotorsStates.mPostion[SelectedMotorIndex];
+        }
+        void WriteRPMValue()
+        {
+            if (!justread)
             {
-                // Or here we know about UDINT type --> can be marshalled as UINT32
-                var _mysymbol = e.UserData as Symbol;
-                if (_mysymbol != null)
-                {
-                    switch (_mysymbol.InstancePath)
-                    {
-                        case TCVarName.mPosition:
-                            Position = BitConverter.ToUInt32(e.Data.ToArray(), (int)SelectedMotorIndex * sizeof(UInt32)) / 1000;
-                            break;
-                        default:
-                            break;
-                    }
-                }
+                MyPLCMotor[SelectedMotorIndex].mRPM = SelectedMotorRPM;
+                TwinCathelper
+                   .WriteEthercatDeviceData(
+                   SelectedMotorIndex,
+                   TwinCathelper.DeviceSymbol.mRPM,
+                   MyPLCMotor[SelectedMotorIndex].mRPM.CastToArray());
             }
-            catch (Exception ex)
+            else
             {
-                log.Log(NLog.LogLevel.Error, ex.Message);
+                justread = false;
             }
         }
+        void WriteSpeedValue()
+        {
+            if (!justread)
+            {
+                MyPLCMotor[SelectedMotorIndex].mDisplacement = SelectedMotorDisplacementValue * 1600;
+                TwinCathelper
+                    .WriteEthercatDeviceData(
+                    SelectedMotorIndex,
+                    TwinCathelper.DeviceSymbol.mDisplacement,
+                    MyPLCMotor[SelectedMotorIndex].mDisplacement.CastToArray());
+                Thread.Sleep(200);
+                MyPLCMotor[SelectedMotorIndex].mDisplacement = 0;
+                TwinCathelper
+                   .WriteEthercatDeviceData(
+                   SelectedMotorIndex,
+                   TwinCathelper.DeviceSymbol.mDisplacement,
+                   MyPLCMotor[SelectedMotorIndex].mDisplacement.CastToArray());
+            }
+            else
+            {
+                justread = false;
+            }
+        }
+        void WriteTimeValue()
+        {
+            if (!justread)
+            {
+                MyPLCMotor[SelectedMotorIndex].mTime = SelectedMotorTimeValue;
+                TwinCathelper
+                    .WriteEthercatDeviceData(
+                    SelectedMotorIndex,
+                    TwinCathelper.DeviceSymbol.mTime,
+                    MyPLCMotor[SelectedMotorIndex].mTime.CastToArray());
+            }
+            else
+            {
+                justread = false;
+            }
+        }
+
         public MotorTestViewModel()
         {
+            if (TwinCathelper.Client == null)
+            {
+                return;
+            }
             log = LogManager.GetLogger("Motor Test");
-   
             MyPLCMotor = new EthercatDevice[TwinCathelper.DeviceCount];
-            PositionSymbol = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"{TCVarName.mPosition}").FirstOrDefault();
-            SymbolEthercatDevice = TwinCathelper.MySymbols.Where(a => a.InstancePath == TCVarName.MainDevice).FirstOrDefault();
-            structSize = (SymbolEthercatDevice.Size) / TwinCathelper.DeviceCount;
-            buffer = new byte[structSize * TwinCathelper.DeviceCount];
             DeviceIds = new uint[TwinCathelper.DeviceCount];
             for (uint i = 0; i < TwinCathelper.DeviceCount; i++)
             {
                 DeviceIds[i] = i;
             }
             MyPLCMotor = TwinCathelper.PLCMotors;
-            justread = true;
-            SelectedMotorSpeedValue = MyPLCMotor[SelectedMotorIndex].mSpeed;
-            SelectedMotorDirValue = Convert.ToBoolean(MyPLCMotor[SelectedMotorIndex].mDirection);
-            justread = false;
-            OnLoadedCommand = new RelayCommand(o => { OnLoaded(); });
+            SetContols(SelectedMotorIndex);
+            OnLoadedCommand = new RelayCommand(o => OnLoaded());
             OnUnLoadedCommand = new RelayCommand(o => { OnUnLoaded(); });
+            SendRPMCommand = new RelayCommand(o => { WriteRPMValue(); });
+            SendDisplacementCommand = new RelayCommand(o => { WriteSpeedValue(); });
+            SendTimeCommand = new RelayCommand(o => { WriteTimeValue(); });
         }
     }
 }

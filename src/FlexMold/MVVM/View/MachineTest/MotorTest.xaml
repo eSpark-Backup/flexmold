@@ -11,38 +11,75 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    GotFocus="ComboBox_Selected"
     mc:Ignorable="d">
     <b:Interaction.Triggers>
         <b:EventTrigger EventName="Loaded">
             <b:InvokeCommandAction Command="{Binding OnLoadedCommand}" />
         </b:EventTrigger>
-        <b:EventTrigger EventName="Unloaded">
+        <!--<b:EventTrigger EventName="Unloaded">
             <b:InvokeCommandAction Command="{Binding OnUnLoadedCommand}" />
-        </b:EventTrigger>
+        </b:EventTrigger>-->
     </b:Interaction.Triggers>
     <UserControl.DataContext>
         <machinetest:MotorTestViewModel />
     </UserControl.DataContext>
-    <UserControl.Resources />
+    <UserControl.Resources>
+        <convertor:RadioBoolToIntConverter x:Key="radioBoolToIntConverter" />
+    </UserControl.Resources>
     <UniformGrid Columns="2" Rows="8">
-        <Label Content="Selected Motor" />
+        <Label Content="Selected Motor : " />
         <ComboBox ItemsSource="{Binding DeviceIds}" SelectedItem="{Binding SelectedMotorIndex}" />
+        <Label Content="Motor Mode: " />
+        <ComboBox ItemsSource="{Binding EnumModes}" SelectedItem="{Binding SelectedMotorModeValue}" />
         <Label Content="Motor Direction : " />
-        <mah:ToggleSwitch
-            IsOn="{Binding SelectedMotorDirValue}"
-            OffContent="Reverese"
-            OnContent="Forward" />
-        <Label Content="Motor Mode : " />
-        <mah:ToggleSwitch
-            IsOn="{Binding SelectedMotorModeValue}"
-            OffContent="Time"
-            OnContent="Direction" />
-        <Label Content="Motor Speed : " />
-        <mah:NumericUpDown Value="{Binding SelectedMotorSpeedValue}" />
+        <Border
+            Margin="5"
+            Padding="5,0,0,0"
+            BorderBrush="#FFCCCCCC"
+            BorderThickness="1">
+            <UniformGrid Columns="2">
+                <RadioButton
+                    Content="Clockwise"
+                    GroupName="Group1"
+                    IsChecked="{Binding SelectedMotorDirValue, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=0}" />
+                <RadioButton
+                    Content="Anti-Clockwise"
+                    GroupName="Group1"
+                    IsChecked="{Binding SelectedMotorDirValue, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=1}" />
+            </UniformGrid>
+        </Border>
+        <Label Content="Motor RPM : " />
+        <UniformGrid Columns="2">
+            <mah:NumericUpDown Value="{Binding SelectedMotorRPM}" />
+            <Button
+                Margin="5"
+                Command="{Binding SendRPMCommand}"
+                Content="Send" />
+        </UniformGrid>
+        <Label Content="Motor Displacement(mm) : " />
+        <UniformGrid Columns="2">
+            <mah:NumericUpDown Value="{Binding SelectedMotorDisplacementValue}" />
+            <Button
+                Margin="5"
+                Command="{Binding SendDisplacementCommand}"
+                Content="Send" />
+        </UniformGrid>
         <Label Content="Motor Time : " />
-        <mah:NumericUpDown Value="{Binding SelectedMotorTimeValue}" />
+        <UniformGrid Columns="2">
+            <mah:NumericUpDown Value="{Binding SelectedMotorTimeValue}" />
+            <Button
+                Margin="5"
+                Command="{Binding SendTimeCommand}"
+                Content="Send" />
+        </UniformGrid>
         <Label Content="Motor Position : " />
-        <TextBlock Style="{StaticResource LabelTextBlock}" Text="{Binding Position}" />
-
+        <Border
+            Margin="5"
+            Padding="5,0,0,0"
+            BorderBrush="#FFCCCCCC"
+            BorderThickness="1">
+            <TextBlock Style="{StaticResource LabelTextBlock}" Text="{Binding Position, StringFormat={}{0:0.000}mm}" />
+        </Border>
     </UniformGrid>
 </UserControl>

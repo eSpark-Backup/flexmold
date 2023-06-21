@@ -76,7 +76,7 @@
         </ResourceDictionary>
     </Window.Resources>
     <!--<mah:MetroWindow.DataContext>
-        <viewmodel:MainViewModel/>
+        <viewmodel:MainViewModel />
     </mah:MetroWindow.DataContext>-->
 
     <mah:MetroWindow.LeftWindowCommands>
@@ -149,10 +149,9 @@
             <nlogviewer:NlogViewer
                 x:Name="logCtrl"
                 Grid.Row="2"
-                ExceptionWidth="600"
-                LevelWidth="auto"
-                LoggerNameWidth="auto"
-                MessageWidth="auto"
+                LevelWidth="Auto"
+                LoggerNameWidth="Auto"
+                MessageWidth="480"
                 TimeWidth="AUTO" />
         </Grid>
     </materialDesignMahApps:DialogHost>

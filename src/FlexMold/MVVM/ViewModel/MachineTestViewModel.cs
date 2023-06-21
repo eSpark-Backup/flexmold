@@ -3,12 +3,13 @@ using FlexMold.MVVM.View.MachineTest;
 
 namespace FlexMold.MVVM.ViewModel
 {
-    class MachineTestViewModel : ObservableObject
+    internal class MachineTestViewModel : ObservableObject
     {
         /// <summary>
         /// Relay Commands
         /// </summary>
         public RelayCommand MotorTestCommand { get; set; }
+
         public RelayCommand ReadMotorCommand { get; set; }
         public RelayCommand PowerOnOffCommand { get; set; }
         public RelayCommand RenumberingCommand { get; set; }
@@ -33,6 +34,7 @@ namespace FlexMold.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+
         public MachineTestViewModel()
         {
             MotorTestVM = new MotorTest();
@@ -50,8 +52,6 @@ namespace FlexMold.MVVM.ViewModel
             RenumberingCommand = new RelayCommand(o => { CurrentView = RenumberingVM; });
             PositionCommand = new RelayCommand(o => { CurrentView = PositionVM; });
             ResetCommand = new RelayCommand(o => { CurrentView = ResetVM; });
-
         }
-
     }
 }

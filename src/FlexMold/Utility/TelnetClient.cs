@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -45,8 +44,8 @@ namespace FlexMold.Utility
         }
 
         /// <summary>
-        /// Connect and wait for incoming messages. 
-        /// When this task completes you are connected. 
+        /// Connect and wait for incoming messages.
+        /// When this task completes you are connected.
         /// You cannot call this method twice; if you need to reconnect, dispose of this instance and create a new one.
         /// </summary>
         /// <returns></returns>
@@ -69,7 +68,7 @@ namespace FlexMold.Utility
 
         /// <summary>
         /// Connect via SOCKS4 proxy. See http://en.wikipedia.org/wiki/SOCKS#SOCKS4.
-        /// When this task completes you are connected. 
+        /// When this task completes you are connected.
         /// You cannot call this method twice; if you need to reconnect, dispose of this instance and create a new one.
         /// </summary>
         /// <param name="socks4ProxyHost"></param>
@@ -300,7 +299,6 @@ namespace FlexMold.Utility
         }
 
         private bool _disposed = false;
-
 
         public void Dispose()
         {

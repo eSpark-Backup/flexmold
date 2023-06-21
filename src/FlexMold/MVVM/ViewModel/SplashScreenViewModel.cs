@@ -7,15 +7,18 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Data.SqlTypes;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
-using System.Windows.Controls;
+using System.Xml;
+using System.Xml.Serialization;
 using TwinCAT.Ads;
 
 namespace FlexMold.MVVM.ViewModel
 {
-
-    class SplashScreenViewModel : ObservableObject
+    internal class SplashScreenViewModel : ObservableObject
     {
         public VSInfo SelectedVS { get; set; }
         private bool _RunButtonEnable;
@@ -28,6 +31,7 @@ namespace FlexMold.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+
         private bool _CloseButtonEnable;
         public bool CloseButtonEnable
         {
@@ -38,8 +42,9 @@ namespace FlexMold.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        Logger log = LogManager.GetLogger("Machine Selection");
-        Logger logtb = LogManager.GetLogger("TwiCAT Builder");
+
+        private Logger log = LogManager.GetLogger("Machine Selection");
+        private Logger logtb = LogManager.GetLogger("TwiCAT Builder");
         public Script SelectedScript { get; set; }
 
         private int _ProgressPercentage;
@@ -66,12 +71,15 @@ namespace FlexMold.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+
         private bool _ICEnable;
+
         public bool ICEnable
         {
             get { return _ICEnable; }
             set { _ICEnable = value; OnPropertyChanged(); }
         }
+
         public bool ComRegistration { get; set; }
         public IWorker _worker { get; set; }
         public ConfigurationFactory _factory { get; set; }
@@ -82,9 +90,13 @@ namespace FlexMold.MVVM.ViewModel
         public RelayCommand RunButtonCommand { get; set; }
         public ObservableCollection<Machine> MyMachines { get; set; }
         public List<VSInfo> AvailableVS { get; private set; }
+
         public event EventHandler OnRequestClose;
+
         public SplashScreenViewModel()
         {
+            if (!TwinCathelper.LoadSetting())
+                Environment.Exit(0);
             ICEnable = true;
             log.Log(LogLevel.Info, $"Flexmold application loading");
             RunButtonEnable = false;
@@ -100,25 +112,34 @@ namespace FlexMold.MVVM.ViewModel
                 { ID = 3, Location = "R2", MachineType = EMachineType.Projector, Name = "P1" },
             };
             log.Log(LogLevel.Info, $"{MyMachines.Count} Machines Found");
+
             MachineClickCommand = new RelayCommand(o => MachineSelectMethod(o as Machine));
-            RunButtonCommand = new RelayCommand(o => RunMainWindow());
+
+            RunButtonCommand = new RelayCommand(o =>
+            {
+                if (Validataion())
+                    RunMainWindow();
+            });
             CloseButtonCommand = new RelayCommand(o =>
             {
-                OnRequestClose(this, new EventArgs());
                 log.Log(LogLevel.Info, $"Closing ....");
+
+                OnRequestClose(this, new EventArgs());
             }
             );
         }
 
-        void MachineSelectMethod(Machine _a)
+        private void MachineSelectMethod(Machine _a)
         {
             SelectedMachine = _a;
             switch (SelectedMachine.MachineType)
             {
                 case EMachineType.Motor:
-                    if (MessageBox.Show("Do You Want to build TwinCAT Solution?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                    if (MessageBox.Show("Do You Want to build TwinCAT Solution?", "Question",
+                        MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
                     {
-                        RunMainWindow();
+                        if (Validataion())
+                            RunMainWindow();
                     }
                     else
                     {
@@ -129,7 +150,9 @@ namespace FlexMold.MVVM.ViewModel
 
                         string TCVS = "TcXaeShell 15.0";
                         log.Log(LogLevel.Info, $"TwinCAT IDE : {TCVS}");
+
                         SelectedVS = AvailableVS.Where(a => a.Name == TCVS).FirstOrDefault();
+
                         if (SelectedVS != null)
                         {
                             RunScript();
@@ -144,15 +167,20 @@ namespace FlexMold.MVVM.ViewModel
                     }
 
                     break;
+
                 case EMachineType.Projector:
+                    RunMainWindow();
                     break;
+
                 default:
                     break;
             }
         }
+
         public void updateVSInstallations()
         {
             VSInfo[] vsInstallations = null;
+
             if (ComRegistration)
             {
                 int currentIndex;
@@ -165,9 +193,9 @@ namespace FlexMold.MVVM.ViewModel
             }
             UpdateVSInfos(vsInstallations);
         }
+
         private void UpdateVSInfos(VSInfo[] progIdDict2)
         {
-
             int CompareTo(VSInfo info1, VSInfo info2)
             {
                 return info1.Version.CompareTo(info2.Version);
@@ -185,17 +213,16 @@ namespace FlexMold.MVVM.ViewModel
                 AvailableVS.Add(vsInfo);
             }
         }
-        void RunMainWindow()
+
+        private void RunMainWindow()
         {
-            if (Validataion())
-            {
-                MainWindow mw = new MainWindow(SelectedMachine);
-                OnRequestClose(this, new EventArgs());
-                mw.Show();
-                Application.Current.MainWindow = mw;
-            }
+            MainWindow mw = new MainWindow(SelectedMachine);
+            OnRequestClose(this, new EventArgs());
+            mw.Show();
+            Application.Current.MainWindow = mw;
         }
-        bool Validataion()
+
+        private bool Validataion()
         {
             try
             {
@@ -212,10 +239,11 @@ namespace FlexMold.MVVM.ViewModel
                 }
                 else
                 {
-                   ProgressStatuses = $"{AdsErrorCode.DeviceSymbolNotFound.ToString()}\n" +
-               $"TwinCAT Script not running or TwinCAT is Config mode \n" +
-               $"Please Start/Restart TwinCAT serivce or Build TwinCAT Solution from FCA \n";
+                    ProgressStatuses = $"{AdsErrorCode.DeviceSymbolNotFound.ToString()}\n" +
+                $"TwinCAT Script is not running or TwinCAT is in Config mode \n" +
+                $"Please Start/Restart TwinCAT serivce or Build TwinCAT Solution from FCA \n";
                 }
+                TwinCathelper.TwinCatDiconnectConnect851();
             }
             catch (Exception ex)
             {
@@ -224,25 +252,26 @@ namespace FlexMold.MVVM.ViewModel
             return false;
         }
 
-        void _worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void _worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             ProgressPercentage = e.ProgressPercentage;
-            if (ProgressPercentage == 100)
+            if (ProgressPercentage == 100 && _worker.IsBuildSucceeded)
             {
                 if (_worker != null)
                     _worker.CancelAndWait(TimeSpan.FromSeconds(1.0));
                 RunButtonEnable = true;
-
             }
             else if (ProgressPercentage == 0)
             {
                 ICEnable = true;
             }
         }
-        void _worker_ProgressStatusChanged(object sender, ProgressStatusChangedArgs e)
+
+        private void _worker_ProgressStatusChanged(object sender, ProgressStatusChangedArgs e)
         {
             ProgressStatuses = e.Status;
         }
+
         public void RunScript()
         {
             ICEnable = false;
@@ -272,7 +301,9 @@ namespace FlexMold.MVVM.ViewModel
                 ROTAccess.CloseRunningDTETable(_runningScript.ScriptRootFolder + @"\" + _runningScript.ScriptName + ".sln");
 
                 _worker.ProgressChanged += new ProgressChangedEventHandler(_worker_ProgressChanged);
+
                 _worker.ProgressStatusChanged += new EventHandler<ProgressStatusChangedArgs>(_worker_ProgressStatusChanged);
+
 #if OLD
                 _factory.AppID = this.DTEInfo.ProgId;
 #else

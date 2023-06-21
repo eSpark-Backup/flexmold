@@ -1,205 +1,403 @@
-﻿using FlexMold.Core;
+﻿using ControlzEx.Standard;
+using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.Utility;
 using NLog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text.Json;
+using System.Threading;
 using System.Windows;
 using System.Windows.Media;
-using TwinCAT.Ads;
-using TwinCAT.Ads.TypeSystem;
 
 namespace FlexMold.MVVM.ViewModel.Home
 {
-    class MotorStatusViewmodel : ObservableObject
+    internal class MotorStatusViewmodel : StatusBaseViewModel
     {
-        Logger log;
+        private readonly IMachineDetailViewModel _IMachineDetailViewModel;
         public ObservableCollection<MotorStatusControl> MyMotors { get; set; }
-        public RelayCommand GenerateErrorD1Command { get; set; }
+        public RelayCommand CalibrateCommand { get; set; }
         public RelayCommand DebugDetailClickCommand { get; set; }
         public RelayCommand OnLoadedCommand { get; set; }
         public RelayCommand OnUnLoadedCommand { get; set; }
 
-        void DisplayError(MotorStatusControl o)
+        private void DisplayError(MotorStatusControl o)
         {
-            MessageBox.Show(o.ErrorDeatil);
+            MessageBox.Show(o.ToolTip);
             Console.WriteLine();
         }
-        void GenerateD1Error()
-        {
-            var SymbolDiag1Variable = TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.mDiag1}").FirstOrDefault();
-            var tt = new UInt32[TwinCathelper.DeviceCount];
-            Random rnd = new Random();
-            for (int i = 0; i < tt.Length; i++)
-            {
-                tt[i] = (uint)rnd.Next(0, 3);
-            }
-            SymbolDiag1Variable.WriteValue(tt);
-        }
 
-        public UInt32[] OldValue { get; set; }
+        private void Calibrate()
+        {
+            var log = LogManager.GetLogger("Calibration");
+            CalibrateButton = false;
 
-        private UInt32[] _Diag1Value;
-        public UInt32[] Diag1Value
-        {
-            get { return _Diag1Value; }
-            set
-            {
-                SetMotorStatus(value);
-                _Diag1Value = value;
-            }
-        }
-        void SetMotorStatus(UInt32[] _value)
-        {
-            int[] v;
-            if (Diag1Value != null)
-            {
-                v = _value.Select((b, i) => b != 5 ? i : -1).Where(i => i != -1).ToArray();
-                for (int i = 0; i < v.Length; i++)
-                {
-                    if (Diag1Value[v[i]] != _value[v[i]])
-                    {
-                        var _tmgs = "";
-                        switch (_value[v[i]])
-                        {
-                            case (int)EmDiag1.Healthy:
-                                _tmgs = $"[Info{_value[v[i]]}] Motor #{v[i]} {EmDiag1.Healthy}";
-                                MyMotors[v[i]].FillColor = Brushes.Green;
-                                MyMotors[v[i]].ErrorDeatil = _tmgs;
-                                log.Log(LogLevel.Info, _tmgs);
-                                ToastNotificationUtil.ShowSuccess(_tmgs);
-                                break;
-                            //case (int)EmDiag1.Recovered:
-                            //    _tmgs = $"[Info{_value[v[i]]}] Motor #{v[i]} {EmDiag1.Recovered}";
-                            //    MyMotors[v[i]].FillColor = Brushes.Gray;
-                            //    MyMotors[v[i]].ErrorDeatil = _tmgs;
-                            //    log.Log(LogLevel.Info, _tmgs);
-                            //    ToastNotificationUtil.ShowInformation(_tmgs);
-                            //    break;
-                            case (int)EmDiag1.Stepper_Driver_Failed:
-                                _tmgs = $"[Err{_value[v[i]]}] Motor #{v[i]} {EmDiag1.Stepper_Driver_Failed.ToString().Replace("_", " ")}";
-                                MyMotors[v[i]].FillColor = Brushes.Red;
-                                MyMotors[v[i]].ErrorDeatil = _tmgs;
-                                log.Log(LogLevel.Error, _tmgs);
-                                ToastNotificationUtil.ShowError(_tmgs);
-                                break;
-                            default:
-                                break;
-
-                        }
-                    }
-                }
-            }
-            else
-            {
-                v = Enumerable.Range(0, TwinCathelper.DeviceCount).ToArray();
-                for (int i = 0; i < v.Length; i++)
-                {
-                    var _tmgs = "";
-                    switch (_value[v[i]])
-                    {
-                        case (int)EmDiag1.Healthy:
-                            _tmgs = $"[Info{_value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Healthy}";
-                            MyMotors[v[i]].FillColor = Brushes.Green;
-                            MyMotors[v[i]].ErrorDeatil = _tmgs;
-                            log.Log(LogLevel.Info, _tmgs);
-                            ToastNotificationUtil.ShowSuccess(_tmgs);
-                            break;
-                        //case (int)EmDiag1.Recovered:
-                        //    _tmgs = $"[Info{_value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Recovered}";
-                        //    MyMotors[v[i]].FillColor = Brushes.Gray;
-                        //    MyMotors[v[i]].ErrorDeatil = _tmgs;
-                        //    log.Log(LogLevel.Info, _tmgs);
-                        //    ToastNotificationUtil.ShowInformation(_tmgs);
-                        //    break;
-                        case (int)EmDiag1.Stepper_Driver_Failed:
-                            _tmgs = $"[Err{_value[v[i]]}] Motor #{v[i]} \n{EmDiag1.Stepper_Driver_Failed.ToString().Replace("_", " ")}";
-                            MyMotors[v[i]].FillColor = Brushes.Red;
-                            MyMotors[v[i]].ErrorDeatil = _tmgs;
-                            log.Log(LogLevel.Error, _tmgs);
-                            ToastNotificationUtil.ShowError(_tmgs);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-        }
-        public UInt32[] MPostion = new UInt32[TwinCathelper.DeviceCount];
-        public UInt32[] MTemperature = new UInt32[TwinCathelper.DeviceCount];
-        UInt32[] MDiag1;
-        public UInt32[] MDiag2 = new UInt32[TwinCathelper.DeviceCount];
-        public UInt32[] MDiag3 = new UInt32[TwinCathelper.DeviceCount];
-        List<int> NotificatioHandles;
-        private void Client_AdsNotificationMS(object sender, AdsNotificationEventArgs e)
-        {
             try
             {
-                // Or here we know about UDINT type --> can be marshalled as UINT32
-                var _mysymbol = e.UserData as Symbol;
-                if (_mysymbol != null)
+                log.Info("Please Select valid Calibration File ....");
+                using System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
+                openFileDialog.InitialDirectory = new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName;
+                openFileDialog.Filter = "csv files (*.txt)|*.csv|All files (*.*)|*.*";
+                openFileDialog.RestoreDirectory = true;
+
+                if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    TCSymbols aa;
-                    Enum.TryParse(_mysymbol.InstancePath.Replace("MAIN.", ""), out aa);
-                    switch (aa)
-                    {
-                        //case TCVarName.mPosition:
-                        //    Buffer.BlockCopy(e.Data.ToArray(), 0, MPostion, 0, e.Data.Length);
-                        //    log.Log(LogLevel.Warn, $"Position Updated : {String.Join(",", MPostion)}");
-                        //    break;
-                        //case TCVarName.mTemperature:
-                        //    Buffer.BlockCopy(e.Data.ToArray(), 0, MTemperature, 0, e.Data.Length);
-                        //    log.Log(LogLevel.Warn, $"Temperature Updated : {String.Join(",", MTemperature)}");
-                        //    break;
-                        case TCSymbols.mDiag1:
-                            MDiag1 = new UInt32[TwinCathelper.DeviceCount];
-                            Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag1, 0, e.Data.Length);
-                            log.Log(LogLevel.Warn, $"Diag1 Updated : {String.Join(",", MDiag1)}");
-                            Diag1Value = MDiag1;
-                            break;
-                            //case TCVarName.mDiag2:
-                            //    Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag2, 0, e.Data.Length);
-                            //    log.Log(LogLevel.Warn, $"Diag2 Updated : {String.Join(",", MDiag2)}");
-                            //    break;
-                            //case TCVarName.mDiag3:
-                            //    Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag3, 0, e.Data.Length);$"MAIN.{TCSymbols.ECAbError}"
-                            //    log.Log(LogLevel.Warn, $"Diag3 Updated : {String.Join(",", MDiag3)}");
-                            //    break;
-                    }
+                    if (openFileDialog.FileName != TwinCathelper.AppSettings.CalibrationFileFullPath())
+                        File.Copy(openFileDialog.FileName, TwinCathelper.AppSettings.CalibrationFileFullPath(), true);
+                }
+                else
+                {
+                    CalibrateButton = true;
+                    return;
                 }
             }
             catch (Exception ex)
             {
-                log.Log(LogLevel.Error, ex.Message);
+                CalibrateButton = true;
+                log.Error(ex.Message);
+                TNF.ShowError(ex.Message);
+                return;
+            }
+            CalibrationData = CSVHelper.ReadCSV_DoubleData(new FileInfo(TwinCathelper.AppSettings.CalibrationFileFullPath()));
+            if (CalibrationData.Count == 0)
+            {
+                log.Log(LogLevel.Error, $"No data found in Calibration.csv");
+                TNF.ShowError("Calibration.csv");
+                return;
+            }
+            for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationSeq01Request;
+            TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mMode);
+            log.Log(LogLevel.Warn, $"Calibration Seq01 Request Sent. Please wait...");
+            TNF.ShowSuccess("Calibration Request Sent. Please wait...");
+        }
+        private float[] _mPosition;
+        public float[] mPosition
+        {
+            get { return _mPosition; }
+            set
+            {
+                SetMotorPos(value);
+                _mPosition = value;
             }
         }
+        private uint[] _DeviceStatus;
+        public uint[] DeviceStatus
+        {
+            get { return _DeviceStatus; }
+            set
+            {
+                SetDeviceStatus(value);
+                _DeviceStatus = value;
+            }
+        }
+        void DispDeviceStatus(uint[] _value, int i)
+        {
+            var swe = (EDeviceStatus)Enum.ToObject(typeof(EDeviceStatus), _value[i]);
+            var log = LogManager.GetLogger("Calibration");
+            switch (_value[i])
+            {
+                case (int)EDeviceStatus.None:
+                    var _tmgs = SetUI(i, swe, Brushes.Transparent);
+                    TNF.ShowInformation(_tmgs);
+                    log.Log(LogLevel.Info, _tmgs);
+                    CalibrateButton = true;
+                    break;
+                case (int)EDeviceStatus.CalibrationSquence01Started:
+                    _tmgs = SetUI(i, swe, Brushes.Yellow);
+                    TNF.ShowInformation(_tmgs);
+                    log.Log(LogLevel.Info, _tmgs);
+                    CalibrateButton = false;
+                    break;
+                case (int)EDeviceStatus.CalibrationSquence01Failed:
+                    _tmgs = SetUI(i, swe, Brushes.Red);
+                    TNF.ShowError(_tmgs);
+                    log.Log(LogLevel.Error, _tmgs);
+                    CalibrateButton = true;
+                    break;
+                case (int)EDeviceStatus.CalibrationSquence01Success:
+                    _tmgs = SetUI(i, swe, Brushes.LightBlue);
+                    TNF.ShowSuccess(_tmgs);
+                    log.Log(LogLevel.Info, _tmgs);
+                    CalibrateButton = false;
+                    break;
+                case (int)EDeviceStatus.CalibrationSquence02Started:
+                    _tmgs = SetUI(i, swe, Brushes.Yellow);
+                    TNF.ShowInformation(_tmgs);
+                    log.Log(LogLevel.Info, _tmgs);
+                    CalibrateButton = false;
+                    break;
+                case (int)EDeviceStatus.CalibrationSquence02Failed:
+                    _tmgs = SetUI(i, swe, Brushes.Red);
+                    TNF.ShowError(_tmgs);
+                    log.Log(LogLevel.Error, _tmgs);
+                    CalibrateButton = false;
+                    break;
+                case (int)EDeviceStatus.CalibrationSquence02Success:
+                    _tmgs = SetUI(i, swe, Brushes.Blue);
+                    TNF.ShowSuccess(_tmgs);
+                    log.Log(LogLevel.Info, _tmgs);
+                    CalibrateButton = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+        private string SetUI(int i, EmotorDiagnostic sw, SolidColorBrush br)
+        {
+            var ds = DeviceStatus == null ? "" : $"\n\t DeviceStatus : {(EDeviceStatus)DeviceStatus[i]}";
+            string _tmgs = $"Motor[{i}]" +
+                $"\n\t Motor Diagnostic : {sw}" +
+                $"\n\t Motor Position : {MyMotors[i].MotorPosition:0.000}mm" + ds;
+            MyMotors[i].FillColor = br;
+            MyMotors[i].ToolTip = _tmgs;
+            return $"Motor{i} --> Diagnostic : {sw}";
+        }
+        private string SetUI(int i, EDeviceStatus aa, SolidColorBrush br)
+        {
+            var md = MotorDiagnistics == null ? "" : $"\n\t Diagnostic : {(EmotorDiagnostic)MotorDiagnistics[i]}";
+            var _tmgs = $"Motor[{i}]" + md +
+                $"\n\t Position : {MyMotors[i].MotorPosition:0.000}mm" +
+                $"\n\t DeviceStatus : {aa}";
+            MyMotors[i].StrokeColor = br;
+            MyMotors[i].ToolTip = _tmgs;
+            return $"Motor{i} --> DeviceStatus : {aa}";
+        }
+        private void Position_SetUI(int i)
+        {
+            var ds = DeviceStatus == null ? "" : $"\n\t DeviceStatus : {(EDeviceStatus)DeviceStatus[i]}";
+            var md = MotorDiagnistics == null ? "" : $"\n\t Diagnostic : {(EmotorDiagnostic)MotorDiagnistics[i]}";
+            var _tmgs = $"Motor[{i}]" + md +
+                $"\n\t Position : {MyMotors[i].MotorPosition:0.000}mm" + ds;
+            MyMotors[i].ToolTip = _tmgs;
+        }
+        private void SetDeviceStatus(uint[] _value)
+        {
+            var v = GetMismatchedIndexes(DeviceStatus, _value);
+            if (DeviceStatus != null)
+            {
+                for (int i = 0; i < v.Length; i++)
+                {
+                    DispDeviceStatus(_value, v[i]);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < v.Length; i++)
+                {
+                    DispDeviceStatus(_value, v[i]);
+                }
+            }
+        }
+        private void SetMotorPos(float[] _value)
+        {
+            var v = GetMismatchedIndexes(mPosition, _value);
+            if (mPosition != null)
+            {
+                for (int i = 0; i < v.Length; i++)
+                {
+                    MyMotors[v[i]].MotorPosition = _value[v[i]];
+                    Position_SetUI(v[i]);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < v.Length; i++)
+                {
+                    MyMotors[i].MotorPosition = _value[i];
+                    Position_SetUI(i);
+                }
+            }
+        }
+        private uint[] _MotorDiagnistics;
+        public UInt32[] MotorDiagnistics
+        {
+            get { return _MotorDiagnistics; }
+            set
+            {
+                SetMotorDiagnisticStatus(value);
+                _MotorDiagnistics = value;
+            }
+        }
+        void DisplayMotorDiagStatus(uint[] _value, int i, Logger log)
+        {
+            MyMotors[i].MotorPosition = mPosition[i];
+            var sw = (EmotorDiagnostic)Enum.ToObject(typeof(EmotorDiagnostic), _value[i]);
+            switch (sw)
+            {
+                case EmotorDiagnostic.Healthy:
+                    var _tmgs = SetUI(i, sw, Brushes.Green);
+                    TNF.ShowSuccess(_tmgs);
+                    log.Log(LogLevel.Info, _tmgs);
+                    break;
+                case EmotorDiagnostic.Stepper_Driver_Failed:
+                    _tmgs = SetUI(i, sw, Brushes.Red);
+                    TNF.ShowError(_tmgs);
+                    log.Log(LogLevel.Error, _tmgs);
+                    break;
+                case EmotorDiagnostic.Stall:
+                    _tmgs = SetUI(i, sw, Brushes.Orange);
+                    TNF.ShowWarning(_tmgs);
+                    log.Log(LogLevel.Warn, _tmgs);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void SetMotorDiagnisticStatus(uint[] _value)
+        {
+            var log = LogManager.GetLogger("Motor Diagnistic Status");
+            var v = GetMismatchedIndexes(MotorDiagnistics, _value);
+            if (MotorDiagnistics != null)
+            {
+                for (int i = 0; i < v.Length; i++)
+                {
+                    DisplayMotorDiagStatus(_value, v[i], log);
+                }
+                SetDeviceMode(_value, log);
+            }
+            else
+            {
+                for (int i = 0; i < v.Length; i++)
+                {
+                    DisplayMotorDiagStatus(_value, i, log);
+                }
+            }
+            if (v.Length != 0)
+                SetDeviceMode(_value, log);
+        }
+        private void SetDeviceMode(uint[] _value, Logger log)
+        {
+            if (_value.SequenceEqual(healthyMotorDiag))
+            {
+                TwinCathelper.Motor_Diagnostic_Abort = false;
+                TwinCathelper.SetDefaultMode(log);
+            }
+            else
+            {
+                TwinCathelper.Motor_Diagnostic_Abort = true;
+                TwinCathelper.SetAbortMode(log);
+            }
+        }
+        uint[] validSeq01Val = new uint[TwinCathelper.DeviceCount];
+        uint[] validSeq02Val = new uint[TwinCathelper.DeviceCount];
+        uint[] healthyMotorDiag = new uint[TwinCathelper.DeviceCount];
+
+        public IList<double> CalibrationData { get; set; }
+
+        private void WriteDistpacementCSVData(IList<double> data)
+        {
+            var log = LogManager.GetLogger("Calibration");
+            if (data.Count != 0)
+            {
+                if (TwinCathelper.PLCMotors.Length == data.Count)
+                {
+                    for (int i = 0; i < data.Count; i++)
+                    {
+                        TwinCathelper.PLCMotors[i].mDisplacement = (uint)data[i] * 1600;
+                    }
+                    TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
+                    log.Log(LogLevel.Info, $"{data.Count} csv value/s has been written sucessfully");
+                    log.Log(LogLevel.Info, $"{JsonSerializer.Serialize(data)}");
+                }
+                else
+                {
+                    log.Log(LogLevel.Error, $"Please select correct CSV");
+                    log.Log(LogLevel.Error, $"Data and Box count are not equal");
+                    log.Log(LogLevel.Error, $"Data Count : {data.Count} | Device Count : {TwinCathelper.PLCMotors.Length}");
+                    TNF.ShowError($"CSV Failed\nDevice Count :{TwinCathelper.PLCMotors.Length} != Data Count :{data.Count}");
+                }
+            }
+            else
+            {
+                log.Log(LogLevel.Error, $"Please select correct CSV\n" +
+                    $" File doesn't conatain desired data");
+                TNF.ShowError($"CSV Failed");
+            }
+        }
+        private void Motor_PositionChanged(object sender, EventArgs e)
+        {
+            var array = new float[TwinCathelper.DeviceCount];
+            Array.Copy(TwinCathelper.PLCMotorsStates.mPostion, array, array.Length);
+            mPosition = array;
+        }
+        private void Motor_DeviceStatusChanged(object sender, EventArgs e)
+        {
+            var log = LogManager.GetLogger("Device Status");
+            var array = new uint[TwinCathelper.DeviceCount];
+            Array.Copy(TwinCathelper.PLCMotorsStates.DeviceStatus, array, array.Length);
+            DeviceStatus = array;
+            if (DeviceStatus.SequenceEqual(validSeq01Val))
+            {
+                Thread.Sleep((int)TwinCathelper.AppSettings.CalibrationSeq02Delay);
+                //Read the contents of the file into a stream
+                WriteDistpacementCSVData(CalibrationData);
+                for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                {
+                    TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationSeq02Request;
+                }
+                TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mMode);
+                log.Log(LogLevel.Warn, $"{EMode.CalibrationSeq02Request}. Please wait...");
+                TNF.ShowSuccess("Calibration Seq02 Requested");
+                Thread.Sleep(200);
+                for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                    TwinCathelper.PLCMotors[i].mDisplacement = 0;
+                TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
+                log.Log(LogLevel.Info, $"{TwinCathelper.DeviceCount} zero value/s has been written sucessfully");
+            }
+            if (DeviceStatus.SequenceEqual(validSeq02Val))
+            {
+                log.Log(LogLevel.Info, $"Calibration Sucessful");
+                for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                {
+                    TwinCathelper.PLCMotors[i].mMode = (int)EMode.Displacement;
+                }
+                TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mMode);
+                log.Log(LogLevel.Info, $"Device Mode Changed to : {EMode.Displacement}");
+                TNF.ShowSuccess("Calibration Sucessful");
+            }
+        }
+        private void Motor_MotorDiagnosticChanged(object sender, EventArgs e)
+        {
+            var array = new uint[TwinCathelper.DeviceCount];
+            Array.Copy(TwinCathelper.PLCMotorsStates.MotorDiagnistic, array, array.Length);
+            MotorDiagnistics = array;
+        }
+        private bool _CalibrateButton;
+
+        public bool CalibrateButton
+        {
+            get { return _CalibrateButton; }
+            set { _CalibrateButton = value; OnPropertyChanged(); }
+        }
+
         public MotorStatusViewmodel()
         {
-            log = LogManager.GetLogger("Motor Status");
+            if (TwinCathelper.Client == null)
+            {
+                return;
+            }
+            CalibrateButton = true;
+            CalibrationData = new List<double>();
+            CalibrationData = CSVHelper.ReadCSV_DoubleData(new FileInfo(TwinCathelper.AppSettings.CalibrationFileFullPath()));
             MyMotors = new ObservableCollection<MotorStatusControl>() { };
-            int mcount = 0;
-            RegisterNotification();
             for (int j = 0; j < TwinCathelper.DeviceCount; j++)
             {
-                MyMotors.Add(new MotorStatusControl() { MotorID = j+1, FillColor = Brushes.Transparent, ErrorDeatil = $"Motor #{mcount} \n No anomaly found" });
-                mcount++;
+                MyMotors.Add(new MotorStatusControl() { MotorID = j, FillColor = Brushes.Red, ToolTip = "", StrokeColor = Brushes.White });
             }
-            GenerateErrorD1Command = new RelayCommand(o => { GenerateD1Error(); });
+            TwinCathelper.TMotor_MotorDiagnosticChanged += Motor_MotorDiagnosticChanged;
+            TwinCathelper.TMotor_DeviceStatusChanged += Motor_DeviceStatusChanged;
+            TwinCathelper.TMotor_PositionChanged += Motor_PositionChanged;
+            CalibrateCommand = new RelayCommand(async => { Calibrate(); });
             DebugDetailClickCommand = new RelayCommand(o => { DisplayError(o as MotorStatusControl); });
-        }
-        void RegisterNotification()
-        {
-            log.Log(LogLevel.Info, $"Registring Device Status Notification...");
-            NotificatioHandles = new List<int>();
-            TwinCathelper.Client.AdsNotification += Client_AdsNotificationMS;
-            //_ = RegisterNotification(TwinCATVariableIfo.mPositionVariableName);
-            //_ = RegisterNotification(TwinCATVariableIfo.mTemperatureVariableName);
-            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.mDiag1}"));
-            //_ = RegisterNotification(TwinCATVariableIfo.mDiag2VariableName);
-            //_ = RegisterNotification(TwinCATVariableIfo.mDiag3VariableName);
+            Array.Fill<uint>(validSeq01Val, (int)EDeviceStatus.CalibrationSquence01Success);
+            Array.Fill<uint>(validSeq02Val, (int)EDeviceStatus.CalibrationSquence02Success);
+            Array.Fill<uint>(healthyMotorDiag, (int)EmotorDiagnostic.Healthy);
         }
     }
-
 }

@@ -1,15 +1,13 @@
 ﻿using FlexMold.Core;
+using FlexMold.MVVM.ViewModel;
 using NLog;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace FlexMold.Utility
 {
-    class TelnetHelper : ObservableObject
+    internal class TelnetHelper : ObservableObject
     {
         public string ReceivedMessage
         {
@@ -20,9 +18,11 @@ namespace FlexMold.Utility
                 OnPropertyChanged();
             }
         }
+
         private string _ReceivedMessage;
 
         private string _SendMessage;
+
         public string SendMessage
         {
             get { return _SendMessage; }
@@ -32,14 +32,16 @@ namespace FlexMold.Utility
                 OnPropertyChanged();
             }
         }
-        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+        private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         public TelnetClient MyTelnetClient { get; set; }
 
-        Logger log;
+        private Logger log;
+
         public TelnetHelper()
         {
             log = LogManager.GetLogger("Laser Projector");
-            SendMessage = "echo";
+            //SendMessage = "echo";
         }
 
         public void DisconnectTelnet()
@@ -54,9 +56,9 @@ namespace FlexMold.Utility
                 log.Log(LogLevel.Info, $"No Active Connection Found");
             }
         }
+
         public async Task<bool> ConnectTelnet(string IpAddres, int TelnetPort)
         {
-            log.Log(LogLevel.Info, $"Testing TelNet Connection....");
             ReceivedMessage = "";
             // CancellationTokenSource provides the token and have authority to cancel the token
             try
@@ -64,17 +66,18 @@ namespace FlexMold.Utility
                 MyTelnetClient = new TelnetClient(IpAddres, TelnetPort, TimeSpan.FromSeconds(3), cancellationTokenSource.Token);
                 MyTelnetClient.ConnectionClosed += HandleConnectionClosed;
                 MyTelnetClient.MessageReceived += HandleMessageReceived;
-                log.Log(LogLevel.Info, $"Connecting....");
+                log.Log(LogLevel.Info, $"Connecting to {IpAddres}:{TelnetPort}...");
                 await MyTelnetClient.Connect();
                 return true;
             }
             catch (Exception err)
             {
-                ToastNotificationUtil.ShowError(err.Message);
+                TNF.ShowError(err.Message);
                 log.Log(LogLevel.Error, err.Message);
                 return false;
             }
         }
+
         public async Task SendTelnetMessgae()
         {
             if (MyTelnetClient != null)
@@ -90,6 +93,7 @@ namespace FlexMold.Utility
                 log.Log(LogLevel.Error, $"Connect First");
             }
         }
+
         private void HandleConnectionClosed(object sender, EventArgs e)
         {
             log.Log(LogLevel.Info, $"Connection Closed");

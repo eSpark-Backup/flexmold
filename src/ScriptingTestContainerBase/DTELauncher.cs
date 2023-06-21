@@ -1,14 +1,12 @@
-﻿using System;
+﻿using EnvDTE;
+using Microsoft.VisualStudio.Setup.Configuration;
+using ScriptingTest;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.Setup.Configuration;
-using EnvDTE;
-using ScriptingTest;
 using Process = System.Diagnostics.Process;
 using Thread = System.Threading.Thread;
 
@@ -25,9 +23,9 @@ namespace ScriptingTestContainerBase
             {
                 Type tp = Type.GetTypeFromProgID(vs.ProgId);
                 if (tp == null)
-                     throw new ApplicationException("AppID '{0}' not found!");
+                    throw new ApplicationException("AppID '{0}' not found!");
 
-                dte = (DTE)System.Activator.CreateInstance(tp, true);
+                dte = (DTE)Activator.CreateInstance(tp, true);
             }
             else
             {
@@ -35,11 +33,11 @@ namespace ScriptingTestContainerBase
                 string executablePath = Path.Combine(installationPath, @"Common7\IDE\devenv.exe");
 
                 // Only for internal testing purposes
-                string tcHive = System.Environment.GetEnvironmentVariable("TcHive");
+                string tcHive = Environment.GetEnvironmentVariable("TcHive");
                 Process vsProcess;
                 if (tcHive != null)
                 {
-                    vsProcess = Process.Start(executablePath,$"/rootSuffix {tcHive} /NoSplash");
+                    vsProcess = Process.Start(executablePath, $"/rootSuffix {tcHive} /NoSplash");
                 }
                 else
                 {
@@ -49,7 +47,7 @@ namespace ScriptingTestContainerBase
                 //string runningObjectDisplayName = $"VisualStudio.DTE.16.0:{vsProcess.Id}";
                 string runningObjectDisplayName = $"{vs.ProgId}:{vsProcess.Id}";
 
-                string[] searchStrings = new string[] {"!VisualStudio.DTE.", "!TcXaeShell.DTE."};
+                string[] searchStrings = new string[] { "!VisualStudio.DTE.", "!TcXaeShell.DTE." };
                 dte = WaitForVS(runningObjectDisplayName);
             }
             return dte;
@@ -72,7 +70,7 @@ namespace ScriptingTestContainerBase
 
                 if (runningObject != null)
                 {
-                    return (EnvDTE.DTE) runningObject;
+                    return (EnvDTE.DTE)runningObject;
                 }
 
                 Thread.Sleep(millisecondsTimeout: 1000);
@@ -80,7 +78,6 @@ namespace ScriptingTestContainerBase
 
             throw new TimeoutException($"Failed to retrieve DTE object. Current running objects: {string.Join(";", runningObjectDisplayNames)}");
         }
-
 
         //internal static EnvDTE.DTE LaunchVsDte(bool isPreRelease)
         //{
@@ -164,7 +161,7 @@ namespace ScriptingTestContainerBase
 
         private static bool IsPreRelease(ISetupInstance setupInstance)
         {
-            ISetupInstanceCatalog setupInstanceCatalog = (ISetupInstanceCatalog) setupInstance;
+            ISetupInstanceCatalog setupInstanceCatalog = (ISetupInstanceCatalog)setupInstance;
             return setupInstanceCatalog.IsPrerelease();
         }
 

@@ -1,33 +1,35 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <OutputType>Library</OutputType>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <UseWPF>true</UseWPF>
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-  </PropertyGroup>
-  <ItemGroup>
-    <None Update="NlogViewer.nuspec">
-      <SubType>Designer</SubType>
-    </None>
-    <AppDesigner Include="Properties\" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="NLog" Version="5.1.0" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-    <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.355802">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="7.0.0" />
-  </ItemGroup>
-  <PropertyGroup>
-    <PostBuildEvent>if "$(ConfigurationName)" == "Release" (
+	<PropertyGroup>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<OutputType>Library</OutputType>
+		<SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+		<RestorePackages>true</RestorePackages>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<UseWPF>true</UseWPF>
+		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Update="NlogViewer.nuspec">
+			<SubType>Designer</SubType>
+		</None>
+		<AppDesigner Include="Properties\" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Humanizer.Core" Version="2.14.1" />
+		<PackageReference Include="NLog" Version="5.1.0" />
+		<PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.355802">
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Windows.Compatibility" Version="7.0.0" />
+	</ItemGroup>
+	<PropertyGroup>
+		<PostBuildEvent>
+			if "$(ConfigurationName)" == "Release" (
 
-NuGet.exe pack "$(ProjectDir)NlogViewer.csproj" -Prop Configuration=Release
+			NuGet.exe pack "$(ProjectDir)NlogViewer.csproj" -Prop Configuration=Release
 
-)</PostBuildEvent>
-  </PropertyGroup>
+			)
+		</PostBuildEvent>
+	</PropertyGroup>
 </Project>

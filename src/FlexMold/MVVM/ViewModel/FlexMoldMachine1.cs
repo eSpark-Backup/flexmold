@@ -2,8 +2,6 @@
 using EnvDTE80;
 using FlexMold.MVVM.Model;
 using FlexMold.Utility;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.Shell.Interop;
 using ScriptingTest;
 using System;
 using System.Collections.Generic;
@@ -12,21 +10,20 @@ using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
 using TCatSysManagerLib;
-using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.SystemManager;
 
 namespace FlexMold.MVVM.ViewModel
 {
     /// <summary>
-    /// Demonstrates the generation + compilation of PLC projects. 
+    /// Demonstrates the generation + compilation of PLC projects.
     /// The method Execute() will be called by ScriptingContainer and will execute the actual script code.
     /// </summary>
     public class FlexMoldMachine1
         : ScriptEarlyBound
     {
-        ITcSysManager4 systemManager = null;
-        EnvDTE.Project project = null;
+        private ITcSysManager4 systemManager = null;
+        private EnvDTE.Project project = null;
 
         /// <summary>
         /// Handler function Initializing the Script (Configuration preparations)
@@ -57,7 +54,6 @@ namespace FlexMold.MVVM.ViewModel
             base.OnCleanUp(worker);
         }
 
-
         /// <summary>
         /// Insertion Mode for creating PLC projects.
         /// </summary>
@@ -67,10 +63,12 @@ namespace FlexMold.MVVM.ViewModel
             /// Copies a PLC Project
             /// </summary>
             Copy = 0,
+
             /// <summary>
             /// Moves a PLC Project
             /// </summary>
             Move = 1,
+
             /// <summary>
             /// References a PLC Project
             /// </summary>
@@ -94,6 +92,7 @@ namespace FlexMold.MVVM.ViewModel
                 browse(child, worker);
             }
         }
+
         private void AddLibrary(string _LibraryName, ITcSmTreeItem plcProject, IWorker worker)
         {
             worker.ProgressStatus = string.Format("Adding Library '{0}' ...", _LibraryName);
@@ -102,18 +101,18 @@ namespace FlexMold.MVVM.ViewModel
             ITcPlcLibraryManager libraryManager = (ITcPlcLibraryManager)referencesItem;
             libraryManager.AddLibrary(_LibraryName);
         }
+
         /// <summary>
         /// Handler function Executing the Script code.
         /// </summary>
         /// <param name="worker">The worker.</param>
         protected override void OnExecute(IWorker worker)
         {
-
             if (worker.CancellationPending)
                 throw new Exception("Cancelled");
             worker.ProgressStatus = $"Connecting to TwinCAT Via ADS On Port {(int)AmsPort.SystemService}";
-            TwinCathelper._sessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
-            TwinCathelper.ClientSystemService = (AdsConnection)TwinCathelper._sessionSystemService.Connect();
+            TwinCathelper.SessionSystemService = new AdsSession(AmsNetId.Local, (int)AmsPort.SystemService);
+            TwinCathelper.ClientSystemService = (AdsConnection)TwinCathelper.SessionSystemService.Connect();
             worker.Progress = 8;
 
             worker.ProgressStatus = $"Configuring TwinCAT System into ConfigMode ....";
@@ -126,7 +125,6 @@ namespace FlexMold.MVVM.ViewModel
              * ================================================================================================= */
             ITcSmTreeItem plcConfig = systemManager.LookupTreeItem("TIPC"); // Getting PLC Configuration item
             ITcSmTreeItem devices = systemManager.LookupTreeItem("TIID"); // Getting IO-Configuration item
-
 
             /* =================================================================================================
              * Scans the Fieldbus interfaces and adds an EtherCAT Device.
@@ -206,9 +204,8 @@ namespace FlexMold.MVVM.ViewModel
                 worker.Progress = 55;
                 iecProjectRoot.BootProjectAutostart = true;
 
-
                 /* =================================================================================================
-                 * Compiling project using Visual Studio DTE methods 
+                 * Compiling project using Visual Studio DTE methods
                  * ================================================================================================= */
                 errors = null;
                 worker.ProgressStatus = "Compiling project (3) ...";
@@ -223,7 +220,6 @@ namespace FlexMold.MVVM.ViewModel
                     worker.ProgressStatus = "Generating boot project ...";
                     iecProjectRoot.GenerateBootProject(true);
                     worker.Progress = 65;
-
 
                     /* =================================================================================================
                      * Prepare XML for PLC Login
@@ -331,19 +327,23 @@ namespace FlexMold.MVVM.ViewModel
                     System.Threading.Thread.Sleep(5000);
                     plcProjectItem.ConsumeXml(xmlLogout);
                     worker.Progress = 95;
+                    worker.IsBuildSucceeded = true;
                 }
                 else
                 {
                     worker.ProgressStatus = "TwinCAT Project build Failed";
                     worker.Progress = 0;
-                } 
+                    worker.IsBuildSucceeded = false;
+                }
             }
             else
             {
-                worker.ProgressStatus = "No Divice & Box Found";
+                worker.ProgressStatus = "No Device or Box Found";
+                worker.IsBuildSucceeded = false;
                 worker.Progress = 0;
             }
         }
+
         private bool WaitForState(AdsState state, int timeOutInMilliSeconds)
         {
             var stopwatch = new Stopwatch();
@@ -371,17 +371,18 @@ namespace FlexMold.MVVM.ViewModel
             stopwatch.Stop();
             return false;
         }
+
         private ITcSmTreeItem CreateDut(ITcSmTreeItem parent, TreeItemType treeItemType, string typeName, string baseType, IWorker worker)
         {
-            string declarationCode = @"TYPE EthercatDevice : 
+            string declarationCode = @"TYPE EthercatDevice :
 STRUCT
     mDirection AT %Q*: BOOL;
-    mSpeed AT %Q*: DWORD;
+    mRPM AT %Q*: DWORD;
+    mDisplacement AT %Q*: DWORD;
     mTime AT %Q*: DWORD;
-    mMode AT %Q*: BOOL;
+    mMode AT %Q*: DWORD;
 END_STRUCT
 END_TYPE";
-
 
             /* =================================================================================================
              * Creating the DUT using CreateChild()
@@ -439,10 +440,10 @@ END_TYPE";
                     messages++;
                     worker.ProgressStatus = "Compiler message: " + item.Description;
                 }
-
             }
             return buildSucceeded;
         }
+
         private void CreatePOUsST(ITcSmTreeItem parent, IWorker worker)
         {
             /* =================================================================================================
@@ -453,7 +454,8 @@ END_TYPE";
             ITcSmTreeItem program = AddPOUProgram("Main", parent, language, worker);
         }
 
-        string deviceName = "LAN9255_EtherCAT_Slave";
+        private string deviceName = "LAN9255_EtherCAT_Slave";
+
         private ITcSmTreeItem AddPOUProgram(string pouName, ITcSmTreeItem parent, IECLanguageType language, IWorker worker)
         {
             ITcSmTreeItem programPou = parent.LookupChild("Main");
@@ -465,8 +467,8 @@ END_TYPE";
             string foe_sAmsPort = $"foe_sAmsPort: ARRAY[1..deviceCount] OF UINT :=[";
             string mPositionAtrib = "";
             string mTemperatureAtrib = "";
-            string Diag1Atrib = "";
-            string Diag2Atrib = "";
+            string MotorDiagnosticAtrib = "";
+            string DeviceStatusAtrib = "";
             string Diag3Atrib = "";
             string outStr = "Outputs process data mapping";
             string inpStr = "Inputs process data mapping";
@@ -475,31 +477,30 @@ END_TYPE";
             {
                 foe_sAmsPort += $"{item.EtherCAT.AmsAddress.AmsPort},";
             }
-            for (int j = 1; j <= AvaiableDevicesCount; j++)
+            for (int i = 1; i <= FCAModel.MyBoxes.Count; i++)
             {
-                for (int i = 1; i <= FCAModel.MyBoxes.Count; i++)
-                {
-                    var boxName = FCAModel.MyBoxes[i - 1].PathName;
-                    deviceAtrib += $"" +
-                        $"[{i}].mDirection :=  {boxName}^{outStr}^Direction;" +
-                        $"[{i}].mSpeed := {boxName}^{outStr}^Speed;" +
-                        $"[{i}].mTime := {boxName}^{outStr}^Time;" +
-                        $"[{i}].mMode := {boxName}^{outStr}^Mode;";
-                    mPositionAtrib += $"" +
-                        $"[{i}]:= {boxName}^{inpStr}^Position;";
-                    mTemperatureAtrib += $"" +
-                        $"[{i}]:= {boxName}^{inpStr}^Temperature;";
+                var boxName = FCAModel.MyBoxes[i - 1].PathName;
+                deviceAtrib += $"" +
+                    $"[{i}].mDirection :=  {boxName}^{outStr}^Direction; \n" +
+                    $"[{i}].mDisplacement := {boxName}^{outStr}^Displacement; \n" +
+                    $"[{i}].mRPM := {boxName}^{outStr}^RPM; \n" +
+                    $"[{i}].mTime := {boxName}^{outStr}^Time; \n" +
+                    $"[{i}].mMode := {boxName}^{outStr}^Mode;";
+                mPositionAtrib += $"" +
+                    $"[{i}]:= {boxName}^{inpStr}^Position;";
+                mTemperatureAtrib += $"" +
+                    $"[{i}]:= {boxName}^{inpStr}^Temperature;";
 
-                    Diag1Atrib += $"" +
-                        $"[{i}]:=  {boxName}^{inpStr}^Diag1;";
+                MotorDiagnosticAtrib += $"" +
+                    $"[{i}]:=  {boxName}^{inpStr}^MotorDiagnostic;";
 
-                    Diag2Atrib += $"" +
-                        $"[{i}]:=  {boxName}^{inpStr}^Diag2;";
+                DeviceStatusAtrib += $"" +
+                    $"[{i}]:=  {boxName}^{inpStr}^DeviceStatus;";
 
-                    Diag3Atrib += $"" +
-                        $"[{i}]:=  {boxName}^{inpStr}^Diag3;";
-                }
+                Diag3Atrib += $"" +
+                    $"[{i}]:=  {boxName}^{inpStr}^Diag3;";
             }
+
             string foe_Scrip =
                     "fbDownload : FB_EcFoeLoad ;\n" +
                     "foe_dwPass     : DWORD := 0; // 287454020\n" +
@@ -541,29 +542,24 @@ END_TYPE";
                 "END_VAR \n" +
                 "VAR \n" +
 
-                "{attribute 'TcLinkTo' := '" + deviceAtrib.Trim(';') +
-                    "'}\n" +
+                "{attribute 'TcLinkTo' := '" + deviceAtrib.Trim(';')+ "'}\n" +
                 "device : ARRAY [1..deviceCount] OF EthercatDevice ; \n" +
 
-                "{attribute 'TcLinkTo' := '" + mPositionAtrib.Trim(';') +
-                    "'}\n" +
-                    "mPosition AT %I* : ARRAY [1..deviceCount] OF DWORD ;\n" +
+                "{attribute 'TcLinkTo' := '" + mPositionAtrib.Trim(';') + "'}\n" +
+                    "mPosition AT %I* : ARRAY [1..deviceCount] OF REAL ;\n" +
 
-                "{attribute 'TcLinkTo' := '" + mTemperatureAtrib.Trim(';') +
-                    "'}\n" +
+                "{attribute 'TcLinkTo' := '" + mTemperatureAtrib.Trim(';') + "'}\n" +
                     "mTemperature AT %I* : ARRAY [1..deviceCount] OF DWORD ;\n" +
 
-                "{attribute 'TcLinkTo' := '" + Diag1Atrib.Trim(';') +
-                    "'}\n" +
-                    "mDiag1 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
+                "{attribute 'TcLinkTo' := '" + MotorDiagnosticAtrib.Trim(';') + "'}\n" +
+                    "MotorDiagnostic AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
 
-                "{attribute 'TcLinkTo' := '" + Diag2Atrib.Trim(';') +
-                    "'}\n" +
-                    "mDiag2 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
+                "{attribute 'TcLinkTo' := '" + DeviceStatusAtrib.Trim(';') + "'}\n" +
+                    "DeviceStatus AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n" +
 
-                "{attribute 'TcLinkTo' := '" + Diag3Atrib.Trim(';') +
-                    "'}\n" +
+                "{attribute 'TcLinkTo' := '" + Diag3Atrib.Trim(';') +"'}\n" +
                     "mDiag3 AT %I*: ARRAY [1..deviceCount] OF DWORD ;\n"
+
                     + foe_sAmsNetId + "\n" + foe_sAmsPort.Trim(',') + "];\n" +
                 foe_Scrip + "\n" + exstate + "\n" + getstate + "\n" + fbGetSlaveState +
                     "\nEND_VAR";
@@ -576,6 +572,7 @@ END_TYPE";
 
             return programPou;
         }
+
         public override string Description
         {
             get { return "Demonstrates the creation of PLC projects, POUs etc., Setting of Solution Configurations."; }
@@ -623,9 +620,11 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
                 return "PLC";
             }
         }
+
         public int AvaiableBoxesCount { get; set; }
         public int AvaiableDevicesCount { get; set; }
         public List<ITcSmTreeItem> AvailableBoxes { get; set; }
+
         public void ScanDevicesAndBoxes(IWorker worker)
         {
             FCAModel.MyBoxes = new List<TreeItem>();

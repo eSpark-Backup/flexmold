@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Diagnostics;
+﻿using EnvDTE80;
 using Microsoft.Win32;
-using System.Text.RegularExpressions;
+
 //using Microsoft.VisualStudio.Utilities;
 using ScriptingTestContainerBase;
-using EnvDTE80;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace ScriptingTest
 {
-
-
     /// <summary>
     /// Visual Studio Info object
     /// </summary>
@@ -22,12 +20,11 @@ namespace ScriptingTest
         public readonly string Name;
         public readonly string DisplayName;
         public readonly string InstallationPath;
-        public readonly string  InstanceId;
+        public readonly string InstanceId;
         public readonly Version Version;
         public readonly string ProgId;
 
-
-        public VSInfo(string name,string progId, string displayName, string installationPath, string instanceId, Version version)
+        public VSInfo(string name, string progId, string displayName, string installationPath, string instanceId, Version version)
         {
             //this.Name = $"{name}.{version}";
             this.Name = displayName;
@@ -62,10 +59,12 @@ namespace ScriptingTest
         /// DTE Name
         /// </summary>
         public readonly string DisplayName;
+
         /// <summary>
         /// DTE Prog ID
         /// </summary>
         public readonly string ProgId;
+
         /// <summary>
         /// DTE Guid
         /// </summary>
@@ -129,7 +128,7 @@ namespace ScriptingTest
             }
         }
 
-        public const string progIdRegEx = @"^(?<Name>VisualStudio|TcXaeShell)\.DTE\.(?<Version>\d*\.\d*)$"; 
+        public const string progIdRegEx = @"^(?<Name>VisualStudio|TcXaeShell)\.DTE\.(?<Version>\d*\.\d*)$";
         public static readonly Regex regex = new Regex(progIdRegEx, RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
     }
 
@@ -147,6 +146,7 @@ namespace ScriptingTest
         /// <param name="userControl">if set to <c>true</c> Visual Studio will be started with user control.</param>
         /// <returns></returns>
         dynamic CreateDTE(VSInfo vsInfo, bool launchByProgId, bool ideVisible, bool suppressUI, bool userControl);
+
         /// <summary>
         /// Creates a new Visual Studio project.
         /// </summary>
@@ -164,21 +164,21 @@ namespace ScriptingTest
     public class VsFactory : IVsFactory
     {
         #region IVsFactory Members
-
         /// <summary>
         /// Creates the DTE.
         /// </summary>
-        /// <param name="appId">Application ID to use.</param>
-        /// <param name="ideVisible">if set to <c>true</c> the ide will be visible.</param>
-        /// <param name="suppressUI">if set to <c>true</c> UI will be suppressed.</param>
-        /// <param name="userControl">if set to <c>true</c> Visual Studio will be started with user control.</param>
+        /// <param name="vsInfo"></param>
+        /// <param name="launchByProgId"></param>
+        /// <param name="ideVisible"></param>
+        /// <param name="suppressUI"></param>
+        /// <param name="userControl"></param>
         /// <returns></returns>
         public dynamic CreateDTE(VSInfo vsInfo, bool launchByProgId, bool ideVisible, bool suppressUI, bool userControl)
         {
             dynamic dte;
-            dte = DTELauncher.LaunchVsDte(vsInfo,launchByProgId);
+            dte = DTELauncher.LaunchVsDte(vsInfo, launchByProgId);
 
-            // Register the IOleMessageFilter to handle any threading 
+            // Register the IOleMessageFilter to handle any threading
             // errors.
 
             if (!MessageFilter.IsRegistered)
@@ -206,7 +206,7 @@ namespace ScriptingTest
             return project;
         }
 
-        #endregion
+        #endregion IVsFactory Members
     }
 
     /// <summary>
@@ -223,9 +223,9 @@ namespace ScriptingTest
             this._useComRegistration = useComRegistration;
         }
 
-        IContextProvider _scriptContext = null;
-        IVsFactory _vsFactory = null;
-        bool _useComRegistration = false;
+        private IContextProvider _scriptContext = null;
+        private IVsFactory _vsFactory = null;
+        private bool _useComRegistration = false;
 
         /// <summary>
         /// Gets the currently used application path.
@@ -236,7 +236,7 @@ namespace ScriptingTest
             get
             {
                 //return Path.GetDirectoryName(Application.ExecutablePath);
-                
+
                 //Doesn't work with unit tests
                 //string path = System.Reflection.Assembly.GetEntryAssembly().Location;
 
@@ -374,7 +374,7 @@ namespace ScriptingTest
 
                 //string progId = $"VisualStudio.DTE.{version.Major}.{version.Minor}";
                 string progId = $"VisualStudio.DTE.{version.Major}.0";
-                ret.Add(new VSInfo(displayName, progId, displayName,installationPath,instanceId,new Version(installationVersion)));
+                ret.Add(new VSInfo(displayName, progId, displayName, installationPath, instanceId, new Version(installationVersion)));
             }
 
             return ret.ToArray();
@@ -387,7 +387,6 @@ namespace ScriptingTest
         /// <returns></returns>
         public static VSInfo[] GetVSInstallationsByRegistry(out int currentIdx)
         {
-
             List<VSInfo> ret = new List<VSInfo>();
 
             currentIdx = -1;
@@ -410,7 +409,6 @@ namespace ScriptingTest
                     bool isXaeShell = progIdSubKey.StartsWith("TcXaeShell");
                     using (RegistryKey dte = root.OpenSubKey(progIdSubKey))
                     {
-
                         if (dte != null)
                         {
                             using (RegistryKey curVer = dte.OpenSubKey("CurVer"))
@@ -456,24 +454,31 @@ namespace ScriptingTest
                                 case 9:
                                     vsName = "Visual Studio 2008";
                                     break;
+
                                 case 10:
                                     vsName = "Visual Studio 2010";
                                     break;
+
                                 case 11:
                                     vsName = "Visual Studio 2012";
                                     break;
+
                                 case 12:
                                     vsName = "Visual Studio 2013";
                                     break;
+
                                 case 14:
                                     vsName = "Visual Studio 2015";
                                     break;
+
                                 case 15:
                                     vsName = "Visual Studio 2017";
                                     break;
+
                                 case 16:
                                     vsName = "Visual Studio 2019";
                                     break;
+
                                 case 17:
                                     vsName = "Visual Studio 2022";
                                     break;
@@ -484,7 +489,6 @@ namespace ScriptingTest
                                     break;
                             }
                         }
-
 
                         if (version >= new Version(10, 0)) // Only Version > 10.0 are allowed
                         {
@@ -504,8 +508,6 @@ namespace ScriptingTest
                             }
                         }
                     }
-
-
                 }
             }
             return ret.ToArray();
@@ -628,7 +630,7 @@ namespace ScriptingTest
         /// </summary>
         /// <value><c>true</c> if [show application]; otherwise, <c>false</c>.</value>
         public bool IsIdeVisible { get; set; }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether this instance is IDE user control.
         /// </summary>
@@ -643,8 +645,7 @@ namespace ScriptingTest
         /// <value><c>true</c> if UI is suppressed; otherwise, <c>false</c>.</value>
         public bool SuppressUI { get; set; }
 
-#region IConfigurationFactory Members
-
+        #region IConfigurationFactory Members
 
         /// <summary>
         /// Gets the Visual Studio Factory
@@ -657,10 +658,9 @@ namespace ScriptingTest
             get { return _vsFactory; }
         }
 
-#endregion
+        #endregion IConfigurationFactory Members
 
-#region IConfigurationFactory Members
-
+        #region IConfigurationFactory Members
 
         /// <summary>
         /// Gets the Visual Studio Process ID.
@@ -691,6 +691,6 @@ namespace ScriptingTest
             }
         }
 
-#endregion
+        #endregion IConfigurationFactory Members
     }
 }

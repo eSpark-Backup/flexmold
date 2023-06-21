@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FlexMold.Utility
 {
-    static class MixUtil
+    internal static class MixUtil
     {
         public static async Task<string> ReadTextFromFileAsync(string filePath)
         {
@@ -29,6 +29,7 @@ namespace FlexMold.Utility
 
             return sb.ToString();
         }
+
         public static T CastToStruct<T>(this byte[] data) where T : struct
         {
             var pData = GCHandle.Alloc(data, GCHandleType.Pinned);
@@ -36,10 +37,12 @@ namespace FlexMold.Utility
             pData.Free();
             return result;
         }
+
         public static int[] FindAllIndexof<T>(this IEnumerable<T> values, T val)
         {
-            return values.Select((b, i) => object.Equals(b, val) ? i : -1).Where(i => i != -1).ToArray();
+            return values.Select((b, i) => Equals(b, val) ? i : -1).Where(i => i != -1).ToArray();
         }
+
         public static byte[] CastToArray<T>(this T data) where T : struct
         {
             var result = new byte[Marshal.SizeOf(typeof(T))];

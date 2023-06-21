@@ -36,6 +36,5 @@
             Grid.Column="1"
             Maximum="65535"
             Minimum="0" />
-
     </Grid>
 </UserControl>

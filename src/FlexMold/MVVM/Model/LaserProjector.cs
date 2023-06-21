@@ -1,6 +1,4 @@
-﻿using System.IO.Ports;
-
-namespace FlexMold.MVVM.Model
+﻿namespace FlexMold.MVVM.Model
 {
     public class LaserProjector
     {
@@ -19,6 +17,7 @@ namespace FlexMold.MVVM.Model
             PlotFolderName = "Plot";
         }
     }
+
     public enum EProjectorComMode
     {
         Serial,

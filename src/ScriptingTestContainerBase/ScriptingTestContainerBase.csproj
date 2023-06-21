@@ -1,36 +1,37 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <BaseOutputPath>bin\Release\</BaseOutputPath>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Company>Beckhoff Automation GmbH &amp; Co KG</Company>
-    <Copyright>Beckhoff Automation GmbH &amp; Co KG 2022</Copyright>
-    <Description>For TwinCAT XAE Base TypeLibrary Version 3.1</Description>
-    <AssemblyVersion>3.1.0.0</AssemblyVersion>
-    <FileVersion>3.1.0.0</FileVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <Optimize>False</Optimize>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <Optimize>True</Optimize>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="envdte" Version="17.4.33103.184" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.4.2244" />
-    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-    <COMReference Include="TCatSysManagerLib">
-      <Guid>{3C49D6C3-93DC-11D0-B162-00A0248C244B}</Guid>
-      <VersionMajor>3</VersionMajor>
-      <VersionMinor>1</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>primary</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </COMReference>
-    <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.355802">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
+	<PropertyGroup>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<BaseOutputPath>bin\Release\</BaseOutputPath>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<Company>Beckhoff Automation GmbH &amp; Co KG</Company>
+		<Copyright>Beckhoff Automation GmbH &amp; Co KG 2022</Copyright>
+		<Description>For TwinCAT XAE Base TypeLibrary Version 3.1</Description>
+		<AssemblyVersion>3.1.0.0</AssemblyVersion>
+		<FileVersion>3.1.0.0</FileVersion>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<Optimize>False</Optimize>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<Optimize>True</Optimize>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="envdte" Version="17.5.33428.366" />
+		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+		<PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.5.2145" />
+		<PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+		<COMReference Include="TCatSysManagerLib">
+			<Guid>{3C49D6C3-93DC-11D0-B162-00A0248C244B}</Guid>
+			<VersionMajor>3</VersionMajor>
+			<VersionMinor>1</VersionMinor>
+			<Lcid>0</Lcid>
+			<WrapperTool>primary</WrapperTool>
+			<Isolated>False</Isolated>
+			<EmbedInteropTypes>False</EmbedInteropTypes>
+		</COMReference>
+		<PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.410601">
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+	</ItemGroup>
 </Project>

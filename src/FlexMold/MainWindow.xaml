@@ -151,7 +151,7 @@
                 Grid.Row="2"
                 LevelWidth="Auto"
                 LoggerNameWidth="Auto"
-                MessageWidth="500"
+                MessageWidth="480"
                 TimeWidth="AUTO" />
         </Grid>
     </materialDesignMahApps:DialogHost>

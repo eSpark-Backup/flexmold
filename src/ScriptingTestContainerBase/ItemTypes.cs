@@ -2657,37 +2657,37 @@ namespace TwinCAT.SystemManager
         /// <summary>
         ///
         /// </summary>
-        None = TCatSysManagerLib.IECLANGUAGETYPES.IECLANGUAGE_NONE,
+        None = IECLANGUAGETYPES.IECLANGUAGE_NONE,
 
         /// <summary>
         ///
         /// </summary>
-        ST = TCatSysManagerLib.IECLANGUAGETYPES.IECLANGUAGE_ST,
+        ST = IECLANGUAGETYPES.IECLANGUAGE_ST,
 
         /// <summary>
         ///
         /// </summary>
-        IL = TCatSysManagerLib.IECLANGUAGETYPES.IECLANGUAGE_IL,
+        IL = IECLANGUAGETYPES.IECLANGUAGE_IL,
 
         /// <summary>
         ///
         /// </summary>
-        SFC = TCatSysManagerLib.IECLANGUAGETYPES.IECLANGUAGE_SFC,
+        SFC = IECLANGUAGETYPES.IECLANGUAGE_SFC,
 
         /// <summary>
         ///
         /// </summary>
-        FBD = TCatSysManagerLib.IECLANGUAGETYPES.IECLANGUAGE_FBD,
+        FBD = IECLANGUAGETYPES.IECLANGUAGE_FBD,
 
         /// <summary>
         ///
         /// </summary>
-        CFC = TCatSysManagerLib.IECLANGUAGETYPES.IECLANGUAGE_CFC,
+        CFC = IECLANGUAGETYPES.IECLANGUAGE_CFC,
 
         /// <summary>
         ///
         /// </summary>
-        LD = TCatSysManagerLib.IECLANGUAGETYPES.IECLANGUAGE_LD
+        LD = IECLANGUAGETYPES.IECLANGUAGE_LD
     }
 
     /// <summary>

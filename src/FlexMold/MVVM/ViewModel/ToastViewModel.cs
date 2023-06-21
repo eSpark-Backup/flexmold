@@ -1,88 +1,87 @@
-﻿using Humanizer;
-using System;
+﻿using System;
 using System.Windows;
+using System.Windows.Threading;
 using ToastNotifications;
 using ToastNotifications.Core;
 using ToastNotifications.Lifetime;
 using ToastNotifications.Messages;
 using ToastNotifications.Position;
 
-namespace FlexMold.Utility
+namespace FlexMold.MVVM.ViewModel
 {
-    public class ToastNotificationUtil
+    public static class TNF
     {
-        public Notifier Notifier { get; private set; }
+        private static readonly Notifier _Notifier;
 
-        public ToastNotificationUtil()
+        static TNF()
         {
             _messageCounter = 5;
-            Notifier = new Notifier(cfg =>
+            _Notifier = new Notifier(cfg =>
             {
                 cfg.PositionProvider = new WindowPositionProvider(
                     parentWindow: Application.Current.MainWindow,
-                    corner: Corner.BottomLeft,
+                    corner: Corner.TopRight,
                     offsetX: 0,
                     offsetY: 0);
 
                 cfg.LifetimeSupervisor = new TimeAndCountBasedLifetimeSupervisor(
-                    notificationLifetime: TimeSpan.FromSeconds(6),
+                    notificationLifetime: TimeSpan.FromSeconds(4),
                     maximumNotificationCount: MaximumNotificationCount.FromCount(_messageCounter));
 
                 cfg.Dispatcher = Application.Current.Dispatcher;
-
                 cfg.DisplayOptions.TopMost = false;
                 cfg.DisplayOptions.Width = 200;
             });
         }
 
-        private string _lastMessage = "";
-        private int _messageCounter;
+        private static string _lastMessage = "";
+        private static int _messageCounter;
 
-        private void RememberMessage(string message)
+        private static void RememberMessage(string message)
         {
             if (_messageCounter % 3 == 0)
             {
-                _lastMessage = message.Humanize();
+                _lastMessage = message;
             }
         }
 
-        public void ShowInformation(string message)
+        public static void ShowInformation(string message)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(() =>
             {
-                Notifier.ShowInformation(message.Humanize(), CreateOptions());
+                _Notifier.ShowInformation(message, CreateOptions());
                 RememberMessage(message);
             });
         }
 
-        public void ShowError(string message)
+        public static void ShowError(string message)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(() =>
             {
-                Notifier.ShowError(message.Humanize(), CreateOptions());
+                _Notifier.ShowError(message, CreateOptions());
                 RememberMessage(message);
             });
         }
 
-        public void ShowSuccess(string message)
+        public static void ShowSuccess(string message)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(() =>
             {
-                Notifier.ShowSuccess(message.Humanize(), CreateOptions());
+                _Notifier.ShowSuccess(message, CreateOptions());
                 RememberMessage(message);
             });
         }
 
-        public void ShowWarning(string message)
+        public static void ShowWarning(string message)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(() =>
             {
-                Notifier.ShowWarning(message.Humanize(), CreateOptions());
+                _Notifier.ShowWarning(message, CreateOptions());
                 RememberMessage(message);
             });
         }
 
-        private MessageOptions CreateOptions()
+        private static MessageOptions CreateOptions()
         {
             return new MessageOptions
             {
@@ -92,7 +91,7 @@ namespace FlexMold.Utility
             };
         }
 
-        public bool? FreezeOnMouseEnter { get; set; } = false;
-        public bool? ShowCloseButton { get; set; } = true;
+        public static bool? FreezeOnMouseEnter { get; set; } = false;
+        public static bool? ShowCloseButton { get; set; } = true;
     }
 }

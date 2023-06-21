@@ -35,6 +35,16 @@ namespace FlexMold.Utility
         public static int structSize { get; private set; }
         public static byte[] buffer { get; private set; }
         public static AppSettings AppSettings { get; set; } = new();
+        private static ESlaveLink[] _Slave_Link_Status;
+        private static ESlaveStateMachine[] _Slave_StateMachine_Status;
+        public static bool ECAbError { get; set; }
+        private static ESlaveLink[] defaultElinkStates;
+        private static ESlaveStateMachine[] defaultStateMachines;
+        public static ESlaveLink[] ValidElinkStates { get; set; }
+        public static ESlaveStateMachine[] ValidStateMachines { get; set; }
+        public static bool Slave_StateMachine_Abort { get; set; }
+        public static bool Slave_Link_Abort { get; set; }
+        public static bool Motor_Diagnostic_Abort { get; set; }
 
         public static event EventHandler TSession_ConnectionStateChanged;
         public static event EventHandler TConnection_ConnectionStatusChanged;
@@ -45,13 +55,16 @@ namespace FlexMold.Utility
         public static event EventHandler TMotor_MotorDiagnosticChanged;
         public static event EventHandler TMotor_TemperatureChanged;
         public static event EventHandler TMotor_DeviceStatusChanged;
+        public static event EventHandler TSlave_Link_Status_Changed;
+        public static event EventHandler TSlave_StateMachine_Status_Changed;
         public enum DeviceSymbol
         {
-            mDirection=0,
+            mDirection = 0,
             mRPM,
             mDisplacement,
             mTime,
             mMode,
         }
+
     }
 }

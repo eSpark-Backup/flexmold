@@ -111,7 +111,7 @@ namespace FlexMold.MVVM.ViewModel
             if (worker.CancellationPending)
                 throw new Exception("Cancelled");
             worker.ProgressStatus = $"Connecting to TwinCAT Via ADS On Port {(int)AmsPort.SystemService}";
-            TwinCathelper.SessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
+            TwinCathelper.SessionSystemService = new AdsSession(AmsNetId.Local, (int)AmsPort.SystemService);
             TwinCathelper.ClientSystemService = (AdsConnection)TwinCathelper.SessionSystemService.Connect();
             worker.Progress = 8;
 

@@ -20,7 +20,7 @@ namespace FlexMold
 
         public string CalibrationFileFullPath()
         {
-            return SettingRoot + CalibrationFile;
+            return new FileInfo(Environment.CurrentDirectory+SettingRoot.Trim('.') + CalibrationFile).FullName;
         }
     }
 }

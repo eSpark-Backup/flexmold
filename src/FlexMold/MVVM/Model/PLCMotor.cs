@@ -44,7 +44,8 @@ namespace FlexMold.MVVM.Model
         Displacement = 0,
         Time,
         CalibrationSeq01Request,
-        CalibrationSeq02Request
+        CalibrationSeq02Request,
+        Abort
     }
     public enum ETMode
     {
@@ -54,12 +55,14 @@ namespace FlexMold.MVVM.Model
     public enum EDeviceStatus
     {
         None = 0,
-        CalibrationSquence01Started,
+        CalibrationSquence01Started = 1,
         CalibrationSquence01Failed,
         CalibrationSquence01Success,
         CalibrationSquence02Started,
         CalibrationSquence02Failed,
         CalibrationSquence02Success,
+        ShapeFormingStarted,
+        ShapeFormingCompleted,
     }
     public static class TCVarName
     {
@@ -69,10 +72,11 @@ namespace FlexMold.MVVM.Model
         public const string mTemperature = "MAIN.mTemperature";
     }
 
-    public enum EmDiag1
+    public enum EmotorDiagnostic
     {
         Healthy,
         Stepper_Driver_Failed,
+        Stall
     }
 
     public enum TCSymbols
@@ -124,10 +128,11 @@ namespace FlexMold.MVVM.Model
         EC_DEVICE_STATE_ERROR = 0x10,
         EC_DEVICE_STATE_INVALID_VPRS = 0x20,
         EC_DEVICE_STATE_INITCMD_ERROR = 0x40,
-        EC_DEVICE_STATE_DISABLED = 0x80
+        EC_DEVICE_STATE_DISABLED = 0x80,
+        UnAvailable = 0x99
     }
 
-    public enum ElinkState
+    public enum ESlaveLink
     {
         EC_LINK_STATE_OK = 0x00,
         EC_LINK_STATE_NOT_PRESENT = 0x01,
@@ -137,7 +142,9 @@ namespace FlexMold.MVVM.Model
         EC_LINK_STATE_PORT_A = 0x10,
         EC_LINK_STATE_PORT_B = 0x20,
         EC_LINK_STATE_PORT_C = 0x40,
-        EC_LINK_STATE_PORT_D = 0x80
+        EC_LINK_STATE_PORT_D = 0x80,
+        EC_LINK_STATE_Other_Fail = 0x24,
+        UnAvailable = 0x99
     }
 
     internal class ST_EcSlaveState : ObservableObject
@@ -151,41 +158,51 @@ namespace FlexMold.MVVM.Model
         }
 
         private string slaveName;
-        private ESlaveStateMachine deviceState1;
-        private ElinkState linkState1;
+        private ESlaveStateMachine _Slave_State_Machine;
+        private ESlaveLink _Slave_Link_State;
 
         public string SlaveName
         { get => slaveName; set { slaveName = value; OnPropertyChanged(); } }
 
-        public ESlaveStateMachine deviceState
+        public ESlaveStateMachine Slave_State_Machine
         {
-            get => deviceState1;
+            get => _Slave_State_Machine;
             set
             {
-                deviceState1 = value;
+                _Slave_State_Machine = value;
                 OnPropertyChanged();
             }
         }
 
-        public ElinkState linkState
+        public ESlaveLink Slave_Link_State
         {
-            get => linkState1;
+            get => _Slave_Link_State;
 
             set
             {
-                linkState1 = value;
+                _Slave_Link_State = value;
                 OnPropertyChanged();
             }
         }
 
-        private string _ErrorDeatil;
+        private string _ToolTip;
 
-        public string ErrorDeatil
+        public string ToolTip
         {
-            get { return _ErrorDeatil; }
+            get { return _ToolTip; }
             set
             {
-                _ErrorDeatil = value;
+                _ToolTip = value;
+                OnPropertyChanged();
+            }
+        }
+        private SolidColorBrush _StrokeColor;
+        public SolidColorBrush StrokeColor
+        {
+            get { return _StrokeColor; }
+            set
+            {
+                _StrokeColor = value;
                 OnPropertyChanged();
             }
         }

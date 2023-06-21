@@ -64,16 +64,7 @@
 		<PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.421302">
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-		<PackageReference Include="ToastNotifications" Version="2.5.1" />
 		<PackageReference Include="ToastNotifications.Messages" Version="2.5.1" />
-	</ItemGroup>
-	<ItemGroup>
-		<Reference Include="ToastNotifications">
-			<HintPath>External Libs\ToastNotifications.dll</HintPath>
-		</Reference>
-		<Reference Include="ToastNotifications.Messages">
-			<HintPath>External Libs\ToastNotifications.Messages.dll</HintPath>
-		</Reference>
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Update="MVVM\View\Project\CSVDiaglog.xaml.cs">

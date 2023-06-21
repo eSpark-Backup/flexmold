@@ -40,7 +40,7 @@ namespace FlexMold.Utility
 
         public static int[] FindAllIndexof<T>(this IEnumerable<T> values, T val)
         {
-            return values.Select((b, i) => object.Equals(b, val) ? i : -1).Where(i => i != -1).ToArray();
+            return values.Select((b, i) => Equals(b, val) ? i : -1).Where(i => i != -1).ToArray();
         }
 
         public static byte[] CastToArray<T>(this T data) where T : struct

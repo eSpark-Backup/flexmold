@@ -53,7 +53,20 @@ namespace FlexMold.MVVM.ViewModel.Project
                 OnPropertyChanged();
             }
         }
+        private bool _CSVWriteButton;
 
+        public bool CSVWriteButton
+        {
+            get { return _CSVWriteButton; }
+            set { _CSVWriteButton = value; OnPropertyChanged(); }
+        }
+        private bool _LaserSendButton;
+
+        public bool LaserSendButton
+        {
+            get { return _LaserSendButton; }
+            set { _LaserSendButton = value; OnPropertyChanged(); }
+        }
         private FileInfo _selectedFile;
 
         public FileInfo SelectedFile
@@ -62,11 +75,26 @@ namespace FlexMold.MVVM.ViewModel.Project
             set
             {
                 _selectedFile = value;
+                CSVWriteButton = false;
+                LaserSendButton = false;
+                if (value != null)
+                {
+                    var se = value.Name.Substring(value.Name.Length - 4);
+                    switch (se)
+                    {
+                        case ".csv":
+                            CSVWriteButton = true;
+                            break;
+                        case ".las":
+                            LaserSendButton = true;
+                            break;
+                        default:
+                            break;
+                    }
+                }
                 OnPropertyChanged();
             }
         }
-
-        private ToastNotificationUtil _TstN;
 
         public LaserProjectorViewModel lVM { get; set; }
 
@@ -97,14 +125,14 @@ namespace FlexMold.MVVM.ViewModel.Project
                     log.Log(LogLevel.Error, $"Please select correct CSV");
                     log.Log(LogLevel.Error, $"Data and Box count are not equal");
                     log.Log(LogLevel.Error, $"Data Count : {data.Count} | Device Count : {TwinCathelper.PLCMotors.Length}");
-                    _TstN.ShowError($"CSV Failed\nDevice Count :{TwinCathelper.PLCMotors.Length} != Data Count :{data.Count}");
+                    TNF.ShowError($"CSV Failed\nDevice Count :{TwinCathelper.PLCMotors.Length} != Data Count :{data.Count}");
                 }
             }
             else
             {
                 log.Log(LogLevel.Error, $"Please select correct CSV\n" +
                     $" File doesn't conatain desired data");
-                _TstN.ShowError($"CSV Failed");
+                TNF.ShowError($"CSV Failed");
             }
         }
         private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
@@ -164,7 +192,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 log.Log(LogLevel.Error, ex.Message);
             }
         }
-       
+
         private float[] _Position;
         public float[] Position
         {
@@ -184,8 +212,8 @@ namespace FlexMold.MVVM.ViewModel.Project
                 {
                     TCSymbols aa;
                     Enum.TryParse(_mysymbol.InstancePath.Replace("MAIN.", ""), out aa);
-                    switch (aa) 
-                    { 
+                    switch (aa)
+                    {
                         case TCSymbols.mPosition:
                             Position = new float[TwinCathelper.DeviceCount];
                             Buffer.BlockCopy(e.Data.ToArray(), 0, Position, 0, e.Data.Length);
@@ -209,7 +237,6 @@ namespace FlexMold.MVVM.ViewModel.Project
         }
         public ProjectViewModel()
         {
-            _TstN = new ToastNotificationUtil();
             lVM = new LaserProjectorViewModel(this);
             SendCSVCommand = new RelayCommand(async o =>
             {

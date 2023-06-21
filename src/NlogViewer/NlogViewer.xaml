@@ -25,7 +25,10 @@
     </UserControl.Resources>
     <Grid>
         <Expander Name="MyExpander" MaxHeight="200">
-            <ListView Name="logView" ItemsSource="{Binding LogEntries}" SelectionChanged="logView_SelectionChanged">
+            <ListView
+                Name="logView"
+                ItemsSource="{Binding LogEntries}"
+                SelectionChanged="logView_SelectionChanged">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="{x:Type ListViewItem}">
                         <Setter Property="ToolTip" Value="{Binding ToolTip}" />
@@ -66,7 +69,7 @@
                                 DisplayMemberBinding="{Binding Level}"
                                 Header="Level" />
                             <GridViewColumn
-                                Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type nlogViewer:NlogViewer}}, Path=LevelWidth}"
+                                Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type nlogViewer:NlogViewer}}, Path=MessageWidth}"
                                 DisplayMemberBinding="{Binding FormattedMessage}"
                                 Header="Message" />
                         </GridView.Columns>

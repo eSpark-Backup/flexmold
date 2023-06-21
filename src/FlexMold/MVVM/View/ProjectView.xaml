@@ -11,7 +11,8 @@
     xmlns:projectvm="clr-namespace:FlexMold.MVVM.ViewModel.Project"
     Name="parent"
     Dialog:DialogParticipation.Register="{Binding}"
-    d:DataContext=""
+    d:DataContext="{d:DesignInstance Type=projectvm:ProjectViewModel,
+                                     IsDesignTimeCreatable=False}"
     d:DesignHeight="600"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -109,7 +110,7 @@
                     Margin="0,0,8,0"
                     Header="Motor Controls">
                     <UniformGrid Columns="2">
-                        <Button Command="{Binding SendCSVCommand}">
+                        <Button Command="{Binding SendCSVCommand}" IsEnabled="{Binding CSVWriteButton}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconMaterial Margin="6" Kind="Send" />
                                 <TextBlock

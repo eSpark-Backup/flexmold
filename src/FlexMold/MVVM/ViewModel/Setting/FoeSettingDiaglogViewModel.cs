@@ -240,7 +240,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
                     if (ChengeBoxState(ESlaveStateMachine.EC_DEVICE_STATE_OP))
                     {
                         log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyFoe.Foe_nSlaveAddr}" +
-                            $" Configuraing Device State To {ESlaveStateMachine.EC_DEVICE_STATE_OP}");
+                            $" Configuring Device State To {ESlaveStateMachine.EC_DEVICE_STATE_OP}");
                         return true;
                     }
                     else

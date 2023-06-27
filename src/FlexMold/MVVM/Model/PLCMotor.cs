@@ -15,9 +15,10 @@ namespace FlexMold.MVVM.Model
         public bool t1;
         public bool t2;
         public bool t3;
-        public UInt32 mRPM;
-        public UInt32 mDisplacement;
-        public UInt32 mTime;
+        public float mRPM;
+        public float mDisplacement;
+        public float mTime;
+        public float mRampDelay;
         public UInt32 mMode;
 
         [SkipPack]
@@ -25,14 +26,14 @@ namespace FlexMold.MVVM.Model
     }
     public class DeviceStatuses
     {
-        public uint[] mTemperature { get; set; }
+        public float[] mTemperature { get; set; }
         public uint[] MotorDiagnistic { get; set; }
         public uint[] DeviceStatus { get; set; }
         public uint[] mDiag3 { get; set; }
         public float[] mPostion { get; set; }
         public DeviceStatuses(uint deviceCount)
         {
-            mTemperature = new uint[deviceCount];
+            mTemperature = new float[deviceCount];
             MotorDiagnistic = new uint[deviceCount];
             DeviceStatus = new uint[deviceCount];
             mDiag3 = new uint[deviceCount];
@@ -45,7 +46,8 @@ namespace FlexMold.MVVM.Model
         Time,
         CalibrationSeq01Request,
         CalibrationSeq02Request,
-        Abort
+        Abort, 
+        Project
     }
     public enum ETMode
     {
@@ -85,6 +87,7 @@ namespace FlexMold.MVVM.Model
         device,
         mPosition,
         mTemperature,
+        mRampDelay,
         foe_dwPass,
         foe_nSlaveAddr,
         foe_eMode,

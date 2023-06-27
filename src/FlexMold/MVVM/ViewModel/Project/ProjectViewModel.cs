@@ -19,6 +19,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TwinCAT.Ads.TypeSystem;
 using TwinCAT.Ads;
+using System.Runtime.Intrinsics.Arm;
 
 namespace FlexMold.MVVM.ViewModel.Project
 {
@@ -28,7 +29,9 @@ namespace FlexMold.MVVM.ViewModel.Project
         public RelayCommand SendCSVCommand { get; set; }
         public RelayCommand BrowseProjectCommand { get; set; }
         public RelayCommand StopMotorsCommand { get; set; }
-        public int SelectedMotorDirValue;
+        public int MotorDirValue;
+        public float MotorRampDelayValue;
+        public float MotorTime;
         private Model.Project _selectedMyDataModel;
 
         public Model.Project selectedMyDataModel
@@ -100,55 +103,26 @@ namespace FlexMold.MVVM.ViewModel.Project
 
         private void WriteCSVData(IList<double> data)
         {
-            if (data.Count != 0)
+            for (int i = 0; i < data.Count; i++)
             {
-                if (TwinCathelper.PLCMotors.Length == data.Count)
-                {
-                    for (int i = 0; i < data.Count; i++)
-                    {
-                        TwinCathelper.PLCMotors[i].mDisplacement = (uint)data[i] * 1600;
-                        TwinCathelper.PLCMotors[i].mDirection = SelectedMotorDirValue == 0 ? false : true;
-                        TwinCathelper.PLCMotors[i].mMode = (int)EMode.Displacement;
-                    }
-                    TwinCathelper.WriteEthercatDeviceData();
-                    log.Log(LogLevel.Info, $"{data.Count} csv value/s has been written sucessfully");
-
-                    Thread.Sleep(200);
-
-                    for (int i = 0; i < data.Count; i++)
-                        TwinCathelper.PLCMotors[i].mDisplacement = 0;
-                    TwinCathelper.WriteEthercatDeviceData();
-                    log.Log(LogLevel.Info, $"{data.Count} zero value/s has been written sucessfully");
-                }
-                else
-                {
-                    log.Log(LogLevel.Error, $"Please select correct CSV");
-                    log.Log(LogLevel.Error, $"Data and Box count are not equal");
-                    log.Log(LogLevel.Error, $"Data Count : {data.Count} | Device Count : {TwinCathelper.PLCMotors.Length}");
-                    TNF.ShowError($"CSV Failed\nDevice Count :{TwinCathelper.PLCMotors.Length} != Data Count :{data.Count}");
-                }
+                TwinCathelper.PLCMotors[i].mDisplacement = (uint)data[i];
+                TwinCathelper.PLCMotors[i].mDirection = MotorDirValue == 0 ? false : true;
+                TwinCathelper.PLCMotors[i].mRampDelay = MotorRampDelayValue;
+                TwinCathelper.PLCMotors[i].mTime = MotorTime;
+                TwinCathelper.PLCMotors[i].mMode = (int)EMode.Project;
             }
-            else
-            {
-                log.Log(LogLevel.Error, $"Please select correct CSV\n" +
-                    $" File doesn't conatain desired data");
-                TNF.ShowError($"CSV Failed");
-            }
+            TwinCathelper.WriteEthercatDeviceData();
+            log.Log(LogLevel.Info, $"{data.Count} csv value/s has been written sucessfully");
+
+            Thread.Sleep(200);
+            uint zero = 0;
+            for (uint i = 0; i < data.Count; i++)
+                TwinCathelper.WriteEthercatDeviceData(i, TwinCathelper.DeviceSymbol.mDisplacement, zero.CastToArray());
+            log.Log(LogLevel.Info, $"{data.Count} zero value/s has been written sucessfully");
         }
         private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
         {
             Console.WriteLine();
-        }
-
-        private List<double> StopCsv(int dataLength)
-        {
-            var data = new List<double>();
-            for (int i = 0; i < dataLength; i++)
-            {
-                data.Add(0);
-            }
-            return data;
-
         }
         private void BrowseProject()
         {
@@ -235,24 +209,98 @@ namespace FlexMold.MVVM.ViewModel.Project
                 log.Log(LogLevel.Error, ex.Message);
             }
         }
+        private PanelData[] CalcSoftStarter(IList<double> _csvdata)
+        {
+            // Inputs
+            double rampDelay = 5;
+            double missionTime = 1000;
+
+            // Fixed Params
+            double displacementFactor = 2;
+            double maxRPM = 200;
+            double minRPM = 1;
+            uint rampSteps = 10;
+            var pd = new PanelData[_csvdata.Count];
+
+            // Calculations
+            for (int i = 0; i < _csvdata.Count; i++)
+            {
+                double requiredRotations = _csvdata[i] / displacementFactor;
+                double requiredRPM = (requiredRotations / missionTime) * 60;
+                double rampRPM = requiredRPM / rampSteps;
+                double timePerStep = rampDelay / rampSteps;
+                pd[i].RampRpmTime = timePerStep;
+                double displacementPerStep = timePerStep * (rampRPM / 60) * displacementFactor;
+                double totalDisplacementPerRamp = 0;
+                pd[i].RampRpm = new double[rampSteps];
+                for (int j = 1; j <= rampSteps; j++)
+                {
+                    totalDisplacementPerRamp += displacementPerStep * j;
+                    pd[i].RampRpm[j - 1] = rampRPM * j;
+                }
+                pd[i].RampDisplacement = totalDisplacementPerRamp;
+                double requiredDisplacementWithoutRamps = _csvdata[i] - totalDisplacementPerRamp * 2;
+                pd[i].Displacement = requiredDisplacementWithoutRamps;
+                double timeWithoutRamps = missionTime - (rampDelay * 2);
+                pd[i].Time = timeWithoutRamps;
+                double requiredRotationsWithoutRamps = requiredDisplacementWithoutRamps / displacementFactor;
+                double requiredRPMAfterWithoutRamps = (requiredRotationsWithoutRamps / timeWithoutRamps) * 60;
+                pd[i].RPM = requiredRPMAfterWithoutRamps;
+            }
+            return pd;
+        }
+        struct PanelData
+        {
+            public double[] RampRpm;
+            public double RampRpmTime;
+            public double RampDisplacement;
+            public double Displacement;
+            public double Time;
+            public double RPM;
+        }
+        private async Task CSVSend()
+        {
+            var csvdlgvm = new CSVDiaglogViewModel();
+            var view = new CSVDiaglog() { DataContext = csvdlgvm };
+            _ = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
+            MotorDirValue = csvdlgvm.MotorDirPValue;
+            MotorRampDelayValue = csvdlgvm.MotorRampDelayValue;
+            MotorTime = csvdlgvm.MotorTime;
+            string dir = MotorDirValue == 0 ? "Clockwise" : "Anti-Clockwise";
+            log.Log(LogLevel.Info, $"Selected Direction : {dir}");
+            var csvdata = CSVHelper.ReadCSV_DoubleData(SelectedFile);
+            if (csvdata.Count == 0)
+            {
+                log.Log(LogLevel.Error, $"Please select correct CSV\n" +
+                $" File doesn't conatain desired data");
+                TNF.ShowError($"CSV Failed");
+                return;
+            }
+            if (TwinCathelper.PLCMotors.Length != csvdata.Count)
+            {
+                log.Log(LogLevel.Error, $"Please select correct CSV");
+                log.Log(LogLevel.Error, $"Data and Box counts are not equal");
+                log.Log(LogLevel.Error, $"Data Count : {csvdata.Count} | Device Count : {TwinCathelper.PLCMotors.Length}");
+                TNF.ShowError($"CSV Failed\nDevice Count :{TwinCathelper.PLCMotors.Length} != Data Count :{csvdata.Count}");
+                return;
+            }
+            WriteCSVData(csvdata);
+        }
+
         public ProjectViewModel()
         {
             lVM = new LaserProjectorViewModel(this);
             SendCSVCommand = new RelayCommand(async o =>
             {
-                var csvdlgvm = new CSVDiaglogViewModel();
-                var view = new CSVDiaglog() { DataContext = csvdlgvm };
-                var res = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
-                SelectedMotorDirValue = csvdlgvm.SelectedMotorDirPValue;
-                string dir = SelectedMotorDirValue == 0 ? "Clockwise" : "Anti-Clockwise";
-                log.Log(LogLevel.Info, $"Selected Direction : {dir}");
-                WriteCSVData(CSVHelper.ReadCSV_DoubleData(SelectedFile));
+                await CSVSend();
             });
             BrowseProjectCommand = new RelayCommand(o => { BrowseProject(); });
             StopMotorsCommand = new RelayCommand(o =>
             {
                 log.Log(LogLevel.Warn, $"Stopping Motors");
-                WriteCSVData(StopCsv(TwinCathelper.DeviceCount));
+                UInt32 data = 0;
+                for (uint i = 0; i < TwinCathelper.DeviceCount; i++)
+                    TwinCathelper.WriteEthercatDeviceData(i, TwinCathelper.DeviceSymbol.mDisplacement, data.CastToArray());
             });
         }
     }

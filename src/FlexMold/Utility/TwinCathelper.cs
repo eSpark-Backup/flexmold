@@ -313,7 +313,7 @@ namespace FlexMold.Utility
                     break;
                 case DeviceSymbol.mDisplacement:
                     for (uint i = 0; i < DeviceCount; i++)
-                        data = ReadEthercatDeviceData(i, deviceSymbol, sizeof(UInt32));
+                        data = ReadEthercatDeviceData(i, deviceSymbol, sizeof(float));
                     break;
                 case DeviceSymbol.mTime:
                     break;

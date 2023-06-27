@@ -21,7 +21,9 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         private Logger log;
         public RelayCommand SendRPMCommand { get; set; }
         public RelayCommand SendDisplacementCommand { get; set; }
+        public RelayCommand SendTestCommand { get; set; }
         public RelayCommand SendTimeCommand { get; set; }
+        public RelayCommand SendRampCommand { get; set; }
         public RelayCommand OnLoadedCommand { get; set; }
         public RelayCommand OnUnLoadedCommand { get; set; }
         public int structSize { get; set; }
@@ -85,6 +87,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             SelectedMotorRPM = MyPLCMotor[value].mRPM;
             SelectedMotorDisplacementValue = MyPLCMotor[value].mDisplacement;
             SelectedMotorTimeValue = MyPLCMotor[value].mTime;
+            SelectedMotorRampDelayValue = MyPLCMotor[value].mRampDelay;
             Position = TwinCathelper.PLCMotorsStates.mPostion[SelectedMotorIndex];
             justread = false;
         }
@@ -137,37 +140,47 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             }
         }
 
-        private UInt32 _SelectedMotorTimeValue;
+        private float _SelectedMotorTimeValue;
 
-        public UInt32 SelectedMotorTimeValue
+        public float SelectedMotorTimeValue
         {
             get { return _SelectedMotorTimeValue; }
             set
             {
-                _SelectedMotorTimeValue = value;
+                _SelectedMotorTimeValue = (float)Math.Round((decimal)value, 2); 
+                OnPropertyChanged();
+            }
+        }
+        private float _SelectedMotorRampDelayValue;
+
+        public float SelectedMotorRampDelayValue
+        {
+            get { return _SelectedMotorRampDelayValue; }
+            set
+            {
+                _SelectedMotorRampDelayValue = (float)Math.Round((decimal)value, 2);
                 OnPropertyChanged();
             }
         }
 
-        private UInt32 _SelectedMotorRPM;
-        public UInt32 SelectedMotorRPM
+        private float _SelectedMotorRPM;
+        public float SelectedMotorRPM
         {
             get { return _SelectedMotorRPM; }
             set
             {
-                _SelectedMotorRPM = value;
-
+                _SelectedMotorRPM = (float)Math.Round((decimal)value, 2); 
                 OnPropertyChanged();
             }
         }
-        private UInt32 _SelectedMotorDisplacementValue;
+        private float _SelectedMotorDisplacementValue;
 
-        public UInt32 SelectedMotorDisplacementValue
+        public float SelectedMotorDisplacementValue
         {
             get { return _SelectedMotorDisplacementValue; }
             set
             {
-                _SelectedMotorDisplacementValue = value;
+                _SelectedMotorDisplacementValue = (float)Math.Round((decimal)value, 2);
 
                 OnPropertyChanged();
             }
@@ -260,6 +273,39 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 justread = false;
             }
         }
+        private void WriteRampValue()
+        {
+            if (!justread)
+            {
+                MyPLCMotor[SelectedMotorIndex].mRampDelay = SelectedMotorRampDelayValue;
+                TwinCathelper
+                    .WriteEthercatDeviceData(
+                    SelectedMotorIndex,
+                    TwinCathelper.DeviceSymbol.mRampDelay,
+                    MyPLCMotor[SelectedMotorIndex].mRampDelay.CastToArray());
+            }
+            else
+            {
+                justread = false;
+            }
+        }
+        void WriteTestValue()
+        {
+            uint zero = 0;
+            MyPLCMotor[SelectedMotorIndex].mTime = SelectedMotorTimeValue;
+            TwinCathelper
+                .WriteEthercatDeviceData(
+                SelectedMotorIndex,
+                TwinCathelper.DeviceSymbol.mTime,
+                MyPLCMotor[SelectedMotorIndex].mTime.CastToArray());
+            Thread.Sleep(200);
+            TwinCathelper
+               .WriteEthercatDeviceData(
+               SelectedMotorIndex,
+               TwinCathelper.DeviceSymbol.mTime,
+                zero.CastToArray());
+        }
+      
 
         public MotorTestViewModel()
         {
@@ -281,6 +327,10 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             SendRPMCommand = new RelayCommand(o => { WriteRPMValue(); });
             SendDisplacementCommand = new RelayCommand(o => { WriteSpeedValue(); });
             SendTimeCommand = new RelayCommand(o => { WriteTimeValue(); });
+            SendTestCommand = new RelayCommand(o => { WriteTestValue(); });
+            SendRampCommand = new RelayCommand(o => { WriteRampValue(); });
         }
+
+      
     }
 }

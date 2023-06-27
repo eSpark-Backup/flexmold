@@ -377,9 +377,10 @@ namespace FlexMold.MVVM.ViewModel
             string declarationCode = @"TYPE EthercatDevice :
 STRUCT
     mDirection AT %Q*: BOOL;
-    mRPM AT %Q*: DWORD;
-    mDisplacement AT %Q*: DWORD;
-    mTime AT %Q*: DWORD;
+    mRPM AT %Q*: REAL;
+    mDisplacement AT %Q*: REAL;
+    mTime AT %Q*: REAL;
+    mRampDelay AT %Q*: REAL;
     mMode AT %Q*: DWORD;
 END_STRUCT
 END_TYPE";
@@ -485,6 +486,7 @@ END_TYPE";
                     $"[{i}].mDisplacement := {boxName}^{outStr}^Displacement; \n" +
                     $"[{i}].mRPM := {boxName}^{outStr}^RPM; \n" +
                     $"[{i}].mTime := {boxName}^{outStr}^Time; \n" +
+                    $"[{i}].mRampDelay := {boxName}^{outStr}^RampDelay; \n" +
                     $"[{i}].mMode := {boxName}^{outStr}^Mode;";
                 mPositionAtrib += $"" +
                     $"[{i}]:= {boxName}^{inpStr}^Position;";

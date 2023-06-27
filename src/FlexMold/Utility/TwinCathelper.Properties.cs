@@ -63,6 +63,7 @@ namespace FlexMold.Utility
             mRPM,
             mDisplacement,
             mTime,
+            mRampDelay,
             mMode,
         }
 

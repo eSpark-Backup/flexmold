@@ -73,6 +73,14 @@
                 Command="{Binding SendTimeCommand}"
                 Content="Send" />
         </UniformGrid>
+        <Label Content="Motor Ramp Delay : " />
+        <UniformGrid Columns="2">
+            <mah:NumericUpDown Value="{Binding SelectedMotorRampDelayValue}" />
+            <Button
+                Margin="5"
+                Command="{Binding SendRampCommand}"
+                Content="Send" />
+        </UniformGrid>
         <Label Content="Motor Position : " />
         <Border
             Margin="5"
@@ -81,5 +89,7 @@
             BorderThickness="1">
             <TextBlock Style="{StaticResource LabelTextBlock}" Text="{Binding Position, StringFormat={}{0:0.000}mm}" />
         </Border>
+        <!--<Label Content="latency Test : " />-->
+        <!--<Button Command="{Binding SendTestCommand}" Content="Send" />-->
     </UniformGrid>
 </UserControl>

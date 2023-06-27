@@ -27,13 +27,40 @@
     <UserControl.Resources>
         <convertor:RadioBoolToIntConverter x:Key="radioBoolToIntConverter" />
     </UserControl.Resources>
-    <UniformGrid Columns="2" Rows="8">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
         <Label Content="Selected Motor : " />
-        <ComboBox ItemsSource="{Binding DeviceIds}" SelectedItem="{Binding SelectedMotorIndex}" />
-        <Label Content="Motor Mode: " />
-        <ComboBox ItemsSource="{Binding EnumModes}" SelectedItem="{Binding SelectedMotorModeValue}" />
-        <Label Content="Motor Direction : " />
+        <ComboBox
+            Grid.Column="1"
+            Grid.ColumnSpan="2"
+            ItemsSource="{Binding DeviceIds}"
+            SelectedItem="{Binding SelectedMotorIndex}" />
+        <Label Grid.Row="1" Content="Motor Mode: " />
+        <ComboBox
+            Grid.Row="1"
+            Grid.Column="1"
+            Grid.ColumnSpan="2"
+            ItemsSource="{Binding EnumModes}"
+            SelectedItem="{Binding SelectedMotorModeValue}" />
+        <Label Grid.Row="2" Content="Motor Direction : " />
         <Border
+            Grid.Row="2"
+            Grid.Column="1"
+            Grid.ColumnSpan="2"
             Margin="5"
             Padding="5,0,0,0"
             BorderBrush="#FFCCCCCC"
@@ -49,40 +76,79 @@
                     IsChecked="{Binding SelectedMotorDirValue, Converter={StaticResource radioBoolToIntConverter}, ConverterParameter=1}" />
             </UniformGrid>
         </Border>
-        <Label Content="Motor RPM : " />
-        <UniformGrid Columns="2">
-            <mah:NumericUpDown Value="{Binding SelectedMotorRPM}" />
+        <Label Grid.Row="3" Content="Motor RPM : " />
+        <Grid
+            Grid.Row="3"
+            Grid.Column="1"
+            Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <mah:NumericUpDown Grid.ColumnSpan="2" Value="{Binding SelectedMotorRPM}" />
             <Button
+                Grid.Column="2"
                 Margin="5"
-                Command="{Binding SendRPMCommand}"
+                Command="{Binding SendRPMCommand, StringFormat=N2}"
                 Content="Send" />
-        </UniformGrid>
-        <Label Content="Motor Displacement(mm) : " />
-        <UniformGrid Columns="2">
-            <mah:NumericUpDown Value="{Binding SelectedMotorDisplacementValue}" />
+        </Grid>
+        <Label Grid.Row="4" Content="Motor Displacement(mm) : " />
+        <Grid
+            Grid.Row="4"
+            Grid.Column="1"
+            Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <mah:NumericUpDown Grid.ColumnSpan="2" Value="{Binding SelectedMotorDisplacementValue, StringFormat=N2}" />
             <Button
+                Grid.Column="2"
                 Margin="5"
                 Command="{Binding SendDisplacementCommand}"
                 Content="Send" />
-        </UniformGrid>
-        <Label Content="Motor Time : " />
-        <UniformGrid Columns="2">
-            <mah:NumericUpDown Value="{Binding SelectedMotorTimeValue}" />
+        </Grid>
+        <Label Grid.Row="5" Content="Motor Time : " />
+        <Grid
+            Grid.Row="5"
+            Grid.Column="1"
+            Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <mah:NumericUpDown Grid.ColumnSpan="2" Value="{Binding SelectedMotorTimeValue, StringFormat=N2}" />
             <Button
+                Grid.Column="2"
                 Margin="5"
                 Command="{Binding SendTimeCommand}"
                 Content="Send" />
-        </UniformGrid>
-        <Label Content="Motor Ramp Delay : " />
-        <UniformGrid Columns="2">
-            <mah:NumericUpDown Value="{Binding SelectedMotorRampDelayValue}" />
+        </Grid>
+        <Label Grid.Row="6" Content="Motor Ramp Delay : " />
+        <Grid
+            Grid.Row="6"
+            Grid.Column="1"
+            Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <mah:NumericUpDown Grid.ColumnSpan="2" Value="{Binding SelectedMotorRampDelayValue, StringFormat=N2}" />
             <Button
+                Grid.Column="2"
                 Margin="5"
                 Command="{Binding SendRampCommand}"
                 Content="Send" />
-        </UniformGrid>
-        <Label Content="Motor Position : " />
+        </Grid>
+        <Label Grid.Row="7" Content="Motor Position : " />
         <Border
+            Grid.Row="7"
+            Grid.Column="1"
+            Grid.ColumnSpan="2"
             Margin="5"
             Padding="5,0,0,0"
             BorderBrush="#FFCCCCCC"
@@ -91,5 +157,5 @@
         </Border>
         <!--<Label Content="latency Test : " />-->
         <!--<Button Command="{Binding SendTestCommand}" Content="Send" />-->
-    </UniformGrid>
+    </Grid>
 </UserControl>

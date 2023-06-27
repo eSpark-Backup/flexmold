@@ -298,9 +298,10 @@ namespace FlexMold.MVVM.ViewModel.Project
             StopMotorsCommand = new RelayCommand(o =>
             {
                 log.Log(LogLevel.Warn, $"Stopping Motors");
-                UInt32 data = 0;
+                var data = (int)EMode.Abort;
                 for (uint i = 0; i < TwinCathelper.DeviceCount; i++)
-                    TwinCathelper.WriteEthercatDeviceData(i, TwinCathelper.DeviceSymbol.mDisplacement, data.CastToArray());
+                    TwinCathelper.WriteEthercatDeviceData(i, TwinCathelper.DeviceSymbol.mMode, data.CastToArray());
+                log.Log(LogLevel.Warn, $"{EMode.Abort}");
             });
         }
     }

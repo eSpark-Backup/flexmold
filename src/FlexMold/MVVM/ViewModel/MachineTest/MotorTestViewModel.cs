@@ -19,6 +19,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
     internal class MotorTestViewModel : ObservableObject
     {
         private Logger log;
+        public RelayCommand SendAllCommand { get; set; }
         public RelayCommand SendRPMCommand { get; set; }
         public RelayCommand SendDisplacementCommand { get; set; }
         public RelayCommand SendTestCommand { get; set; }
@@ -305,8 +306,33 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                TwinCathelper.DeviceSymbol.mTime,
                 zero.CastToArray());
         }
-      
 
+        private void WriteAllValue()
+        {
+            if (!justread)
+            {
+                for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                {
+                    MyPLCMotor[i].mDisplacement = (float)SelectedMotorDisplacementValue * 1600;
+                    MyPLCMotor[i].mRPM = (float)SelectedMotorRPM;
+                }
+                TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
+                log.Log(LogLevel.Info, "All Motors Displacement Value Has Been Written * 1600");
+                TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mRPM);
+                log.Log(LogLevel.Info, "All Motors RPM Value Has Been Written");
+                Thread.Sleep(200);
+                for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                {
+                    MyPLCMotor[i].mDisplacement = 0;
+                }
+                TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
+                log.Log(LogLevel.Info,"All Motors Displacement Value Has Been Written : 0");
+            }
+            else
+            {
+                justread = false;
+            }
+        }
         public MotorTestViewModel()
         {
             if (TwinCathelper.Client == null)
@@ -329,6 +355,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             SendTimeCommand = new RelayCommand(o => { WriteTimeValue(); });
             SendTestCommand = new RelayCommand(o => { WriteTestValue(); });
             SendRampCommand = new RelayCommand(o => { WriteRampValue(); });
+            SendAllCommand = new RelayCommand(o => { WriteAllValue(); });
         }
 
       

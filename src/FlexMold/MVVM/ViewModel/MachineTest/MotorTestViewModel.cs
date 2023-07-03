@@ -140,47 +140,47 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             }
         }
 
-        private float _SelectedMotorTimeValue;
+        private double _SelectedMotorTimeValue;
 
-        public float SelectedMotorTimeValue
+        public double SelectedMotorTimeValue
         {
             get { return _SelectedMotorTimeValue; }
             set
             {
-                _SelectedMotorTimeValue = (float)Math.Round((decimal)value, 2); 
+                _SelectedMotorTimeValue = Math.Round(value, 2); 
                 OnPropertyChanged();
             }
         }
-        private float _SelectedMotorRampDelayValue;
+        private double _SelectedMotorRampDelayValue;
 
-        public float SelectedMotorRampDelayValue
+        public double SelectedMotorRampDelayValue
         {
             get { return _SelectedMotorRampDelayValue; }
             set
             {
-                _SelectedMotorRampDelayValue = (float)Math.Round((decimal)value, 2);
+                _SelectedMotorRampDelayValue = Math.Round(value, 2);
                 OnPropertyChanged();
             }
         }
 
-        private float _SelectedMotorRPM;
-        public float SelectedMotorRPM
+        private double _SelectedMotorRPM;
+        public double SelectedMotorRPM
         {
             get { return _SelectedMotorRPM; }
             set
             {
-                _SelectedMotorRPM = (float)Math.Round((decimal)value, 2); 
+                _SelectedMotorRPM = Math.Round(value, 2); 
                 OnPropertyChanged();
             }
         }
-        private float _SelectedMotorDisplacementValue;
+        private double _SelectedMotorDisplacementValue;
 
-        public float SelectedMotorDisplacementValue
+        public double SelectedMotorDisplacementValue
         {
             get { return _SelectedMotorDisplacementValue; }
             set
             {
-                _SelectedMotorDisplacementValue = (float)Math.Round((decimal)value, 2);
+                _SelectedMotorDisplacementValue = Math.Round(value, 2);
 
                 OnPropertyChanged();
             }
@@ -222,7 +222,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         {
             if (!justread)
             {
-                MyPLCMotor[SelectedMotorIndex].mRPM = SelectedMotorRPM;
+                MyPLCMotor[SelectedMotorIndex].mRPM = (float)SelectedMotorRPM;
                 TwinCathelper
                    .WriteEthercatDeviceData(
                    SelectedMotorIndex,
@@ -238,7 +238,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         {
             if (!justread)
             {
-                MyPLCMotor[SelectedMotorIndex].mDisplacement = SelectedMotorDisplacementValue * 1600;
+                MyPLCMotor[SelectedMotorIndex].mDisplacement = (float)SelectedMotorDisplacementValue * 1600;
                 TwinCathelper
                     .WriteEthercatDeviceData(
                     SelectedMotorIndex,
@@ -261,7 +261,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         {
             if (!justread)
             {
-                MyPLCMotor[SelectedMotorIndex].mTime = SelectedMotorTimeValue;
+                MyPLCMotor[SelectedMotorIndex].mTime = (float)SelectedMotorTimeValue;
                 TwinCathelper
                     .WriteEthercatDeviceData(
                     SelectedMotorIndex,
@@ -277,7 +277,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         {
             if (!justread)
             {
-                MyPLCMotor[SelectedMotorIndex].mRampDelay = SelectedMotorRampDelayValue;
+                MyPLCMotor[SelectedMotorIndex].mRampDelay = (float)SelectedMotorRampDelayValue;
                 TwinCathelper
                     .WriteEthercatDeviceData(
                     SelectedMotorIndex,
@@ -292,7 +292,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         void WriteTestValue()
         {
             uint zero = 0;
-            MyPLCMotor[SelectedMotorIndex].mTime = SelectedMotorTimeValue;
+            MyPLCMotor[SelectedMotorIndex].mTime = (float)SelectedMotorTimeValue;
             TwinCathelper
                 .WriteEthercatDeviceData(
                 SelectedMotorIndex,

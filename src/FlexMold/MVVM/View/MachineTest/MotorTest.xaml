@@ -86,7 +86,11 @@
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <mah:NumericUpDown Grid.ColumnSpan="2" Value="{Binding SelectedMotorRPM}" />
+            <mah:NumericUpDown
+                Grid.ColumnSpan="2"
+                Maximum="300000"
+                Minimum="0"
+                Value="{Binding SelectedMotorRPM}" />
             <Button
                 Grid.Column="2"
                 Margin="5"
@@ -103,7 +107,11 @@
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <mah:NumericUpDown Grid.ColumnSpan="2" Value="{Binding SelectedMotorDisplacementValue, StringFormat=N2}" />
+            <mah:NumericUpDown
+                Grid.ColumnSpan="2"
+                Maximum="300000"
+                Minimum="0"
+                Value="{Binding SelectedMotorDisplacementValue, StringFormat=N2}" />
             <Button
                 Grid.Column="2"
                 Margin="5"
@@ -120,7 +128,11 @@
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <mah:NumericUpDown Grid.ColumnSpan="2" Value="{Binding SelectedMotorTimeValue, StringFormat=N2}" />
+            <mah:NumericUpDown
+                Grid.ColumnSpan="2"
+                Maximum="300000"
+                Minimum="0"
+                Value="{Binding SelectedMotorTimeValue, StringFormat=N2}" />
             <Button
                 Grid.Column="2"
                 Margin="5"
@@ -137,7 +149,11 @@
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <mah:NumericUpDown Grid.ColumnSpan="2" Value="{Binding SelectedMotorRampDelayValue, StringFormat=N2}" />
+            <mah:NumericUpDown
+                Grid.ColumnSpan="2"
+                Maximum="300000"
+                Minimum="0"
+                Value="{Binding SelectedMotorRampDelayValue, StringFormat=N2}" />
             <Button
                 Grid.Column="2"
                 Margin="5"

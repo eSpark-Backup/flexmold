@@ -373,6 +373,8 @@ namespace FlexMold.Utility
                 case DeviceSymbol.mDirection:
                     break;
                 case DeviceSymbol.mRPM:
+                    for (uint i = 0; i < DeviceCount; i++)
+                        WriteEthercatDeviceData(i, deviceSymbol, PLCMotors[i].mRPM.CastToArray());
                     break;
                 case DeviceSymbol.mDisplacement:
                     for (uint i = 0; i < DeviceCount; i++)

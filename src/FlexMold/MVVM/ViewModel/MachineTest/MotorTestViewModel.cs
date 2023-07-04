@@ -19,9 +19,9 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
     internal class MotorTestViewModel : ObservableObject
     {
         private Logger log;
+        public RelayCommand SendAllCommand { get; set; }
         public RelayCommand SendRPMCommand { get; set; }
         public RelayCommand SendDisplacementCommand { get; set; }
-        public RelayCommand SendTestCommand { get; set; }
         public RelayCommand SendTimeCommand { get; set; }
         public RelayCommand SendRampCommand { get; set; }
         public RelayCommand OnLoadedCommand { get; set; }
@@ -228,6 +228,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                    SelectedMotorIndex,
                    TwinCathelper.DeviceSymbol.mRPM,
                    MyPLCMotor[SelectedMotorIndex].mRPM.CastToArray());
+                log.Log(LogLevel.Info, "Motor RPM Value Has Been Written");
+
             }
             else
             {
@@ -244,6 +246,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     SelectedMotorIndex,
                     TwinCathelper.DeviceSymbol.mDisplacement,
                     MyPLCMotor[SelectedMotorIndex].mDisplacement.CastToArray());
+                log.Log(LogLevel.Info, "Motor Displacement Value Has Been Written with * 1600");
+
                 Thread.Sleep(200);
                 MyPLCMotor[SelectedMotorIndex].mDisplacement = 0;
                 TwinCathelper
@@ -251,6 +255,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                    SelectedMotorIndex,
                    TwinCathelper.DeviceSymbol.mDisplacement,
                    MyPLCMotor[SelectedMotorIndex].mDisplacement.CastToArray());
+                log.Log(LogLevel.Info, "Motor Displacement Value Has Been Written 0");
+
             }
             else
             {
@@ -267,6 +273,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     SelectedMotorIndex,
                     TwinCathelper.DeviceSymbol.mTime,
                     MyPLCMotor[SelectedMotorIndex].mTime.CastToArray());
+                log.Log(LogLevel.Info, "Motor Time Value Has Been Written");
+
             }
             else
             {
@@ -283,30 +291,40 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     SelectedMotorIndex,
                     TwinCathelper.DeviceSymbol.mRampDelay,
                     MyPLCMotor[SelectedMotorIndex].mRampDelay.CastToArray());
+                log.Log(LogLevel.Info, "Motor Ramp Delay Value Has Been Written");
             }
             else
             {
                 justread = false;
             }
         }
-        void WriteTestValue()
-        {
-            uint zero = 0;
-            MyPLCMotor[SelectedMotorIndex].mTime = (float)SelectedMotorTimeValue;
-            TwinCathelper
-                .WriteEthercatDeviceData(
-                SelectedMotorIndex,
-                TwinCathelper.DeviceSymbol.mTime,
-                MyPLCMotor[SelectedMotorIndex].mTime.CastToArray());
-            Thread.Sleep(200);
-            TwinCathelper
-               .WriteEthercatDeviceData(
-               SelectedMotorIndex,
-               TwinCathelper.DeviceSymbol.mTime,
-                zero.CastToArray());
-        }
-      
 
+        private void WriteAllValue()
+        {
+            if (!justread)
+            {
+                for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                {
+                    MyPLCMotor[i].mDisplacement = (float)SelectedMotorDisplacementValue * 1600;
+                    MyPLCMotor[i].mRPM = (float)SelectedMotorRPM;
+                }
+                TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
+                log.Log(LogLevel.Info, "All Motors Displacement Value Has Been Written * 1600");
+                TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mRPM);
+                log.Log(LogLevel.Info, "All Motors RPM Value Has Been Written");
+                Thread.Sleep(200);
+                for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                {
+                    MyPLCMotor[i].mDisplacement = 0;
+                }
+                TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
+                log.Log(LogLevel.Info,"All Motors Displacement Value Has Been Written : 0");
+            }
+            else
+            {
+                justread = false;
+            }
+        }
         public MotorTestViewModel()
         {
             if (TwinCathelper.Client == null)
@@ -327,8 +345,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             SendRPMCommand = new RelayCommand(o => { WriteRPMValue(); });
             SendDisplacementCommand = new RelayCommand(o => { WriteSpeedValue(); });
             SendTimeCommand = new RelayCommand(o => { WriteTimeValue(); });
-            SendTestCommand = new RelayCommand(o => { WriteTestValue(); });
             SendRampCommand = new RelayCommand(o => { WriteRampValue(); });
+            SendAllCommand = new RelayCommand(o => { WriteAllValue(); });
         }
 
       

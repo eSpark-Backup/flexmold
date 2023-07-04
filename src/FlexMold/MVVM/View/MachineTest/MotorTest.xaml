@@ -154,6 +154,7 @@
                 Maximum="300000"
                 Minimum="0"
                 Value="{Binding SelectedMotorRampDelayValue, StringFormat=N2}" />
+
             <Button
                 Grid.Column="2"
                 Margin="5"
@@ -161,17 +162,28 @@
                 Content="Send" />
         </Grid>
         <Label Grid.Row="7" Content="Motor Position : " />
-        <Border
+        <Grid
             Grid.Row="7"
             Grid.Column="1"
-            Grid.ColumnSpan="2"
-            Margin="5"
-            Padding="5,0,0,0"
-            BorderBrush="#FFCCCCCC"
-            BorderThickness="1">
-            <TextBlock Style="{StaticResource LabelTextBlock}" Text="{Binding Position, StringFormat={}{0:0.000}mm}" />
-        </Border>
-        <!--<Label Content="latency Test : " />-->
-        <!--<Button Command="{Binding SendTestCommand}" Content="Send" />-->
+            Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Border
+                Grid.ColumnSpan="2"
+                Margin="5"
+                Padding="5,0,0,0"
+                BorderBrush="#FFCCCCCC"
+                BorderThickness="1">
+                <TextBlock Style="{StaticResource LabelTextBlock}" Text="{Binding Position, StringFormat={}{0:0.000}mm}" />
+            </Border>
+            <Button
+                Grid.Column="2"
+                Margin="5"
+                Command="{Binding SendAllCommand}"
+                Content="Send All" />
+        </Grid>
     </Grid>
 </UserControl>

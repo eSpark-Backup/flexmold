@@ -20,7 +20,9 @@ namespace FlexMold.MVVM.Model
                     case EMachineType.Motor:
                         IconT = new PackIconMaterial() { Height = 80, Width = 80, Kind = PackIconMaterialKind.Draw };
                         break;
-
+                    case EMachineType.ScanDevices:
+                        IconT = new PackIconMaterial() { Height = 80, Width = 80, Kind = PackIconMaterialKind.SettingsHelper };
+                        break;
                     case EMachineType.Projector:
                         IconT = new PackIconMaterial() { Height = 80, Width = 80, Kind = PackIconMaterialKind.Projector };
                         break;
@@ -35,6 +37,7 @@ namespace FlexMold.MVVM.Model
     public enum EMachineType
     {
         Motor = 0,
-        Projector
+        Projector, 
+        ScanDevices
     }
 }

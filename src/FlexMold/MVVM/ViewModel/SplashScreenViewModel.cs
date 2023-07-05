@@ -1,6 +1,10 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
+using FlexMold.MVVM.View.Setting;
+using FlexMold.MVVM.ViewModel.Setting;
+using FlexMold.MVVM.ViewModel.SplashScreen;
 using FlexMold.Utility;
+using MaterialDesignThemes.Wpf;
 using NLog;
 using ScriptingTest;
 using System;
@@ -110,11 +114,12 @@ namespace FlexMold.MVVM.ViewModel
                 { ID = 2, Location = "R1", MachineType = EMachineType.Motor, Name = "M2" },
                 new Machine()
                 { ID = 3, Location = "R2", MachineType = EMachineType.Projector, Name = "P1" },
+                new Machine()
+                { ID = 3, Location = "Device Scan", MachineType = EMachineType.ScanDevices, Name = "TwinCat Config" },
             };
             log.Log(LogLevel.Info, $"{MyMachines.Count} Machines Found");
 
             MachineClickCommand = new RelayCommand(o => MachineSelectMethod(o as Machine));
-
             RunButtonCommand = new RelayCommand(o =>
             {
                 if (Validataion())
@@ -128,13 +133,48 @@ namespace FlexMold.MVVM.ViewModel
             }
             );
         }
-
+        private async void TwinCatManager()
+        {
+            var view = new DeviceScanDialog()
+            {
+                DataContext = new DeviceScanDialogViewModel()
+            };
+            _ = await DialogHost.Show(view, "SplashDialog", ClosingEventHandler);
+        }
+        private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
+        {
+            Console.WriteLine();
+        }
         private void MachineSelectMethod(Machine _a)
         {
             SelectedMachine = _a;
             switch (SelectedMachine.MachineType)
             {
+                case EMachineType.ScanDevices:
+                    log.Log(LogLevel.Info, $"Building Scanning Script");
+                    SelectedScript = new TcDeviceScanning();
+                    ComRegistration = true;
+                    updateVSInstallations();
+
+                    string TCVS = "TcXaeShell 15.0";
+                    log.Log(LogLevel.Info, $"TwinCAT IDE : {TCVS}");
+
+                    SelectedVS = AvailableVS.Where(a => a.Name == TCVS).FirstOrDefault();
+
+                    if (SelectedVS != null)
+                    {
+                        RunScript();
+                    }
+                    else
+                    {
+                        string msg = $"IDE Not Found Please Install {TCVS}";
+                        log.Log(LogLevel.Error, $"{msg}");
+                        MessageBox.Show($"{msg}");
+                        OnRequestClose(this, new EventArgs());
+                    }
+                    break;
                 case EMachineType.Motor:
+                    log.Log(LogLevel.Info, $"Building Machine Script");
                     if (MessageBox.Show("Do You Want to build TwinCAT Solution?", "Question",
                         MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
                     {
@@ -148,7 +188,7 @@ namespace FlexMold.MVVM.ViewModel
                         ComRegistration = true;
                         updateVSInstallations();
 
-                        string TCVS = "TcXaeShell 15.0";
+                        TCVS = "TcXaeShell 15.0";
                         log.Log(LogLevel.Info, $"TwinCAT IDE : {TCVS}");
 
                         SelectedVS = AvailableVS.Where(a => a.Name == TCVS).FirstOrDefault();
@@ -255,16 +295,34 @@ namespace FlexMold.MVVM.ViewModel
         private void _worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             ProgressPercentage = e.ProgressPercentage;
-            if (ProgressPercentage == 100 && _worker.IsBuildSucceeded)
+            switch (SelectedMachine.MachineType)
             {
-                if (_worker != null)
-                    _worker.CancelAndWait(TimeSpan.FromSeconds(1.0));
-                RunButtonEnable = true;
+                case EMachineType.Motor:
+                    if (ProgressPercentage == 100 && _worker.IsBuildSucceeded)
+                    {
+                        if (_worker != null)
+                            _worker.CancelAndWait(TimeSpan.FromSeconds(1.0));
+                        RunButtonEnable = true;
+                    }
+                    else if (ProgressPercentage == 0)
+                    {
+                        ICEnable = true;
+                    }
+                    break;
+                case EMachineType.Projector:
+                    break;
+                case EMachineType.ScanDevices:
+                    if (ProgressPercentage == 100 && _worker.IsBuildSucceeded)
+                    {
+                        if (_worker != null)
+                            _worker.CancelAndWait(TimeSpan.FromSeconds(1.0));
+                        TwinCatManager();
+                    }
+                    break;
+                default:
+                    break;
             }
-            else if (ProgressPercentage == 0)
-            {
-                ICEnable = true;
-            }
+
         }
 
         private void _worker_ProgressStatusChanged(object sender, ProgressStatusChangedArgs e)

@@ -9,9 +9,11 @@
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:projectview="clr-namespace:FlexMold.MVVM.View.Setting.Motor"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
     xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
-    Width="400"
+    Width="800"
+    Height="490"
     mc:Ignorable="d">
     <Border Style="{StaticResource panelMenuBorder}">
         <Grid>
@@ -21,25 +23,34 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Label
                 Grid.Row="0"
                 Grid.Column="0"
-                Content="File Path" />
+                Margin="0,5,0,0"
+                Content="File Path"
+                FontSize="15" />
             <Label
-                Grid.Row="1"
-                Grid.Column="0"
-                Content="Password" />
+                Grid.Row="0"
+                Grid.Column="3"
+                Margin="0,5,0,0"
+                Content="Password"
+                FontSize="15" />
             <TextBox
                 Grid.Row="0"
                 Grid.Column="1"
-                Margin="4"
+                Height="20"
+                Margin="2"
                 MaxLength="12">
                 <TextBox.Text>
                     <Binding Path="MyFoe.Foe_sPathName">
@@ -53,14 +64,16 @@
                 Grid.Row="0"
                 Grid.Column="2"
                 Width="25"
+                Height="25"
                 HorizontalAlignment="Right"
                 Command="{Binding BrowseFirmwareCommand}"
                 Content=".." />
             <TextBox
                 Name="pbox_pwd"
-                Grid.Row="1"
-                Grid.Column="1"
+                Grid.Row="0"
+                Grid.Column="4"
                 Grid.ColumnSpan="2"
+                Height="20"
                 mah:TextBoxHelper.ClearTextButton="True">
                 <TextBox.Text>
                     <Binding Path="MyFoe.Foe_dwPass">
@@ -71,25 +84,38 @@
                 </TextBox.Text>
             </TextBox>
             <UniformGrid
-                Grid.Row="2"
-                Grid.ColumnSpan="3"
+                Grid.Row="0"
+                Grid.Column="6"
                 Rows="1">
                 <Button
+                    Width="125"
+                    Height="35"
+                    Margin="0,2,3,0"
                     Command="{Binding UpdateFirmwareCommand}"
+                    Foreground="Black"
                     IsDefault="True"
-                    IsEnabled="{Binding BT_FirmwareEnable}">
+                    IsEnabled="{Binding BT_FirmwareEnable}"
+                    Style="{StaticResource RoundButton}">
                     <Button.CommandParameter>
                         <system:Boolean>True</system:Boolean>
                     </Button.CommandParameter>
                     <StackPanel Orientation="Horizontal">
                         <iconPacks:PackIconMaterial Margin="6" Kind="ContentSave" />
-                        <TextBlock VerticalAlignment="Center" Text="Update Firmware" />
+                        <TextBlock
+                            Margin="0,0,3,0"
+                            VerticalAlignment="Center"
+                            Text="Update Firmware" />
                     </StackPanel>
                 </Button>
                 <Button
+                    Width="125"
+                    Height="35"
+                    Margin="0,2,3,0"
                     Command="{x:Static wpf:DialogHost.CloseDialogCommand}"
+                    Foreground="Black"
                     IsCancel="True"
-                    IsEnabled="{Binding BT_FirmwareEnable}">
+                    IsEnabled="{Binding BT_FirmwareEnable}"
+                    Style="{StaticResource RoundButton}">
                     <Button.CommandParameter>
                         <system:Boolean>False</system:Boolean>
                     </Button.CommandParameter>
@@ -99,16 +125,11 @@
                     </StackPanel>
                 </Button>
             </UniformGrid>
-            <Grid Grid.Row="3" Grid.ColumnSpan="3">
-                <mah:MetroProgressBar Value="{Binding MyFoe.Foe_nPercent}" />
-                <TextBlock
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    FontSize="16"
-                    Text="{Binding DeviceStatusIndex}"
-                    TextAlignment="Center" />
+            <Grid Grid.Row="3" Grid.ColumnSpan="7">
+                <mah:MetroProgressBar Height="10" Value="{Binding MyFoe.Foe_nPercent}" />
             </Grid>
-            <StackPanel
+            <projectview:MotorGridView Grid.Row="4" Grid.ColumnSpan="7" />
+            <!--<StackPanel
                 Grid.Row="4"
                 Grid.ColumnSpan="3"
                 HorizontalAlignment="Center"
@@ -133,7 +154,7 @@
                         ToolTip="Error Indicator" />
                     <Label Content="FOE Error" FontSize="8" />
                 </StackPanel>
-            </StackPanel>
+            </StackPanel>-->
         </Grid>
     </Border>
 </UserControl>

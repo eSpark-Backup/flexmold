@@ -4,6 +4,7 @@ using FlexMold.Utility;
 using NLog;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -19,7 +20,41 @@ namespace FlexMold.MVVM.ViewModel.Setting
     internal class FoeSettingDiaglogViewModel : ObservableObject
     {
         private Logger log;
-        public Foe MyFoe { get; set; }
+        //public Foe MyFoe { get; set; }
+
+        private List<Foe> _fOE2;
+
+        public List<Foe> FOE2
+        {
+            get 
+            { 
+                return FOE2; 
+            }
+            set 
+            {
+                FOE2 = value; 
+                OnPropertyChanged();
+            }
+        }
+
+
+
+        private Foe myFoe;
+
+        public Foe MyFoe
+        {
+            get 
+            {
+                return myFoe; 
+            }
+            set 
+            {
+                myFoe = value;
+                OnPropertyChanged();
+            }
+        }
+
+
         public RelayCommand UpdateFirmwareCommand { get; set; }
         public RelayCommand BrowseFirmwareCommand { get; set; }
         private bool _BT_FirmwareEnable;
@@ -116,7 +151,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
         {
             try
             {
-                FCAModel.FoeStatuses = new List<Foe>();
+                FCAModel.FoeStatuses = new ObservableCollection<Foe>();
                 RegisterNotification();
                 TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_dwPass}").FirstOrDefault().WriteValue(MyFoe.Foe_dwPass);
                 TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sPathName}").FirstOrDefault().WriteValue(MyFoe.Foe_sPathName);

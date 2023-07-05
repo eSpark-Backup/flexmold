@@ -11,5 +11,6 @@ namespace FlexMold.MVVM.View.Setting
         {
             InitializeComponent();
         }
+
     }
 }

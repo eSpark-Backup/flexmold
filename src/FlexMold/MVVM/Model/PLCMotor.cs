@@ -235,11 +235,15 @@ namespace FlexMold.MVVM.Model
         public SolidColorBrush BusyForeground
         { get => _BusyForeground; set { _BusyForeground = value; OnPropertyChanged(); } }
 
+
+       
+
+
         private bool _Checked;
 
         public bool Checked
         {
-            get { return _Checked; }
+            get  => _Checked; 
             set
             {
                 _Checked = value;

@@ -24,6 +24,22 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         private bool Foe_Status = false;
         private bool Op_Status = false;
         private object foe_dwPass;
+
+        private string _foe_Remarks;
+
+        public string Foe_Remarks
+        {
+            get
+            {
+                return _foe_Remarks;
+            }
+            set
+            {
+                _foe_Remarks = value;
+                OnPropertyChanged();
+            }
+        }
+
         public DevicesAndBoxes MyDevicesAndBoxes
         {
             get { return _MyDevicesAndBoxes; }
@@ -171,6 +187,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             catch (Exception ex)
             {
                 DeviceStatusIndex = ex.Message;
+                Foe_Remarks = ex.Message;
                 log.Log(LogLevel.Error, $"{ex.Message}");
             }
             finally

@@ -123,6 +123,11 @@
                     IsReadOnly="True" />
                 <DataGridTextColumn
                     dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
+                    Binding="{Binding SlaveState}"
+                    Header="SlaveState"
+                    IsReadOnly="True" />
+                <DataGridTextColumn
+                    dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
                     Binding="{Binding Foe_nErrID}"
                     Header="Foe Error Id"
                     IsReadOnly="True" />
@@ -133,9 +138,10 @@
                     IsReadOnly="True" />
                 <DataGridTextColumn
                     dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
-                    Binding="{Binding SlaveState}"
-                    Header="SlaveState"
+                    Binding="{Binding Foe_Remarks}"
+                    Header="Foe Remarks"
                     IsReadOnly="True" />
+
             </DataGrid.Columns>
             <DataGrid.RowStyle>
                 <Style BasedOn="{StaticResource MahApps.Styles.DataGridRow}" TargetType="{x:Type DataGridRow}">

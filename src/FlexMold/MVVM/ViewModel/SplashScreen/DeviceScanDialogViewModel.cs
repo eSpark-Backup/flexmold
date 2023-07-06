@@ -1,16 +1,29 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
+using FlexMold.Utility;
+using NLog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
+using System.Windows.Forms;
+using System.Windows.Media;
+using TwinCAT;
+using TwinCAT.Ads;
+using TwinCAT.Ads.TypeSystem;
 
 namespace FlexMold.MVVM.ViewModel.SplashScreen
 {
     internal class DeviceScanDialogViewModel : ObservableObject
     {
         private DevicesAndBoxes _MyDevicesAndBoxes;
+        private int retry = 0;
+        private string foe_sPathName;
+        private bool Init_Status = false;
+        private bool Foe_Status = false;
+        private bool Op_Status = false;
+        private object foe_dwPass;
         public DevicesAndBoxes MyDevicesAndBoxes
         {
             get { return _MyDevicesAndBoxes; }
@@ -37,6 +50,368 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             get { return _OverAllProgress; }
             set { _OverAllProgress = value; }
         }
+        int runningIndex = 0;
+        private Logger log;
+        public RelayCommand UpdateFirmwareCommand { get; set; }
+        public RelayCommand BrowseFirmwareCommand { get; set; }
+        private bool _BT_FirmwareEnable;
 
+        public bool BT_FirmwareEnable
+        {
+            get { return _BT_FirmwareEnable; }
+            set { _BT_FirmwareEnable = value; OnPropertyChanged(); }
+        }
+        private void BrowseFirmwareFile()
+        {
+            using (var dialog = new OpenFileDialog())
+            {
+                log.Log(LogLevel.Info, $"Select Project Folder");
+                DialogResult result = dialog.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    Foe_sPathName = new FileInfo(dialog.FileName).FullName;
+                }
+            }
+        }
+        private string _DeviceStatusIndex;
+        public string DeviceStatusIndex
+        {
+            get { return _DeviceStatusIndex; }
+            set { _DeviceStatusIndex = value; OnPropertyChanged(); }
+        }
+
+        public string Foe_sPathName { get => foe_sPathName; set { foe_sPathName = value; OnPropertyChanged(); } }
+
+        public object Foe_dwPass { get => foe_dwPass; set { foe_dwPass = value; OnPropertyChanged(); } }
+
+        public string Foe_sNetId { get; private set; }
+
+        private List<int> NotificatioHandles;
+        private void RegisterNotification()
+        {
+            NotificatioHandles = new List<int>();
+            TwinCathelper.Client.AdsNotification += Client_AdsNotificationFoe;
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.foe_nErrID}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.foe_bBusy}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.foe_bError}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.foe_nPercent}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.foe_nBytesWritten}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.ecs_bBusy}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.ecs_bError}"));
+            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.ecs_nErrId}"));
+        }
+        private void UpdateFirmwareMeth()
+        {
+            try
+            {
+                var checkedSlaves  = MyDevicesAndBoxes.Where(a=>a.Checked==true).ToList();
+                RegisterNotification();
+                TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_dwPass}").FirstOrDefault().WriteValue(Foe_dwPass);
+                TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sPathName}").FirstOrDefault().WriteValue(Foe_sPathName);
+                Foe_sNetId = TwinCathelper.SAmsNetId;
+                for (UInt16 i = 0; i < checkedSlaves.Count; i++)
+                {
+                    runningIndex = MyDevicesAndBoxes.IndexOf(MyDevicesAndBoxes.Where(a=>a.Foe_nSlaveAddr== checkedSlaves[i].Foe_nSlaveAddr).FirstOrDefault());
+                    ResetSetContols();
+                    DeviceStatusIndex = $"Updating {i + 1}/{checkedSlaves.Count}";
+                    TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(0);
+                    TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nSlaveAddr}").FirstOrDefault().WriteValue(MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr);
+                    TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bBusy}").FirstOrDefault().WriteValue(0);
+                    TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bError}").FirstOrDefault().WriteValue(0);
+                    TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nErrID}").FirstOrDefault().WriteValue(0);
+                    TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nBytesWritten}").FirstOrDefault().WriteValue(0);
+                    TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nPercent}").FirstOrDefault().WriteValue(0);
+                    Thread.Sleep(1000);
+                    DeviceStatusIndex = $"Initializing {i + 1}/{checkedSlaves.Count}";
+                    if (ChengeBoxState(ESlaveStateMachine.EC_DEVICE_STATE_INIT))
+                    {
+                        Init_Status = true;
+                        TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_bExecute}").FirstOrDefault().WriteValue(0);
+                        DeviceStatusIndex = $"Setted into : {ESlaveStateMachine.EC_DEVICE_STATE_INIT} {i + 1}/{checkedSlaves.Count}";
+                        log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} State Updated");
+                        TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(1);
+                        DeviceStatusIndex = $"Downloading {i + 1}/{checkedSlaves.Count}";
+                        if (FoeWait())
+                        {
+                            Op_Status = true;
+                            log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} Update Completed");
+                        }
+                        else
+                        {
+                            Op_Status = false;
+                            log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} Update Failed");
+                        }
+                    }
+                    else
+                    {
+                        Init_Status = false;
+                        log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} Deveice State not set");
+                    }
+                    MyDevicesAndBoxes[runningIndex].Init_Status = Init_Status;
+                    MyDevicesAndBoxes[runningIndex].Foe_Status = Foe_Status;
+                    MyDevicesAndBoxes[runningIndex].Op_Status = Op_Status;
+                }
+                var updatedDeviceCount = MyDevicesAndBoxes.Where(a => (a.Init_Status == true) & (a.Foe_Status == true) & (a.Op_Status == true)).Count();
+
+                foreach (var item in MyDevicesAndBoxes)
+                {
+                    log.Log(LogLevel.Info, $"\tSlave Addr : {item.Foe_nSlaveAddr} : \n" +
+                        $" \t Init Status = {item.Init_Status}\n" +
+                        $" \t Foe Status = {item.Foe_Status}\n" +
+                        $" \t OP Status = {item.Init_Status}\n" +
+                        $" \t Foe_nErrID = {(AdsErrorCode)item.Foe_nErrID}"
+                        );
+                }
+                log.Log(LogLevel.Info, $"FOE Update Summary \n " +
+                   $"Total Devices : {checkedSlaves.Count} ." +
+                   $"\n Sucessful Update Operations : {updatedDeviceCount} out of {checkedSlaves.Count}");
+
+                DeviceStatusIndex = $"{updatedDeviceCount}/{checkedSlaves.Count} Updated";
+            }
+            catch (Exception ex)
+            {
+                DeviceStatusIndex = ex.Message;
+                log.Log(LogLevel.Error, $"{ex.Message}");
+            }
+            finally
+            {
+                BT_FirmwareEnable = true;
+                DeleteNotifications();
+            }
+        }
+        private void ResetSetContols()
+        {
+            MyDevicesAndBoxes[runningIndex].Foe_nPercent = 0;
+            MyDevicesAndBoxes[runningIndex].Foe_bError = false;
+            MyDevicesAndBoxes[runningIndex].Foe_bBusy = false;
+            MyDevicesAndBoxes[runningIndex].Foe_nErrID = 0;
+            MyDevicesAndBoxes[runningIndex].Ecs_bError = false;
+            MyDevicesAndBoxes[runningIndex].Ecs_bBusy = false;
+            MyDevicesAndBoxes[runningIndex].Ecs_nErrId = 0;
+        }
+        private void DeleteNotifications()
+        {
+            if (TwinCathelper.Client.State == ConnectionState.Connected)
+            {
+                foreach (var item in NotificatioHandles)
+                {
+                    if (item != -1)
+                    {
+                        TwinCathelper.Client.DeleteDeviceNotification((uint)item);
+                    }
+                }
+                TwinCathelper.Client.AdsNotification -= Client_AdsNotificationFoe;
+            }
+        }
+
+
+
+        private bool GetSlaveState(ESlaveStateMachine _EreqState)
+        {
+            log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} Requesting Slave Box State....");
+            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecg_bExecute}").FirstOrDefault().WriteValue(0);
+            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecg_bExecute}").FirstOrDefault().WriteValue(1);
+            Thread.Sleep(500);
+            var state = BitConverter.GetBytes((UInt16)TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.state}").FirstOrDefault().ReadAnyValue(typeof(UInt16)));
+            MyDevicesAndBoxes[runningIndex].SlaveState = ((ESlaveStateMachine)state[0]).ToString();
+            log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} State {state}");
+            if (retry < 5)
+            {
+                log.Log(LogLevel.Warn, $"{(retry != 0 ? ("Retrying : " + retry) : "")} Requesting Slave State Please Wait ....");
+                retry++;
+                if ((ESlaveStateMachine)state[0] != _EreqState)
+                {
+                    Thread.Sleep(2000);
+                    return GetSlaveState(_EreqState);
+                }
+                else
+                {
+                    TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecg_bExecute}").FirstOrDefault().WriteValue(0);
+                    return true;
+                }
+            }
+            else
+            {
+                if (_EreqState == ESlaveStateMachine.EC_DEVICE_STATE_OP)
+                {
+                    if (ChengeBoxState(ESlaveStateMachine.EC_DEVICE_STATE_OP))
+                    {
+                        log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr}" +
+                            $" Configuring Device State To {ESlaveStateMachine.EC_DEVICE_STATE_OP}");
+                        return true;
+                    }
+                    else
+                    {
+                        Op_Status = false;
+                        return false;
+                    }
+                }
+                return false;
+            }
+        }
+
+        private bool ChengeBoxState(ESlaveStateMachine _EreqState)
+        {
+            log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} Changing Box State : {_EreqState}");
+            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_bExecute}").FirstOrDefault().WriteValue(0);
+            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_reqState}").FirstOrDefault().WriteValue((int)_EreqState);
+            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_bExecute}").FirstOrDefault().WriteValue(1);
+            return EcsWait(_EreqState);
+        }
+
+        private bool FoeWait()
+        {
+            Thread.Sleep(5000);
+            if (!MyDevicesAndBoxes[runningIndex].Foe_bError)
+            {
+                if (MyDevicesAndBoxes[runningIndex].Foe_bBusy | MyDevicesAndBoxes[runningIndex].Foe_nPercent != 100)
+                {
+                    log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} FOE System is busy please wait.");
+                    return FoeWait();
+                }
+                else
+                {
+                    Foe_Status = true;
+                    retry = 0;
+                    return GetSlaveState(ESlaveStateMachine.EC_DEVICE_STATE_OP);
+                }
+            }
+            else
+            {
+                Foe_Status = false;
+                return false;
+            }
+        }
+
+        private bool EcsWait(ESlaveStateMachine _EreqState)
+        {
+            Thread.Sleep(2000);
+            if (!MyDevicesAndBoxes[runningIndex].Ecs_bError)
+            {
+                if (MyDevicesAndBoxes[runningIndex].Ecs_bBusy)
+                {
+                    log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr}  Ecs System is busy please wait.");
+                    Thread.Sleep(1000);
+                    return EcsWait(_EreqState);
+                }
+                retry = 0;
+                return GetSlaveState(_EreqState);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private void Client_AdsNotificationFoe(object sender, AdsNotificationEventArgs e)
+        {
+            var pdd = (UInt16)(TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nSlaveAddr}").FirstOrDefault().ReadAnyValue(typeof(UInt16)));
+
+            if (pdd != 0)
+            {
+                var _mysymbol = e.UserData as Symbol;
+                TCSymbols aa;
+                Enum.TryParse(_mysymbol.InstancePath.Replace("MAIN.", ""), out aa);
+                switch (aa)
+                {
+                    case TCSymbols.foe_dwPass:
+                        break;
+
+                    case TCSymbols.foe_nSlaveAddr:
+                        break;
+
+                    case TCSymbols.foe_eMode:
+                        break;
+
+                    case TCSymbols.foe_sPathName:
+                        break;
+
+                    case TCSymbols.foe_bLoad:
+                        MyDevicesAndBoxes[runningIndex].Foe_bLoad = BitConverter.ToBoolean(e.Data.ToArray());
+                        log.Log(LogLevel.Info, $"{TCSymbols.foe_bLoad} : {MyDevicesAndBoxes[runningIndex].Foe_bLoad}");
+                        break;
+
+                    case TCSymbols.foe_bBusy:
+                        MyDevicesAndBoxes[runningIndex].Foe_bBusy = BitConverter.ToBoolean(e.Data.ToArray());
+                        log.Log(MyDevicesAndBoxes[runningIndex].Foe_bBusy == false ? LogLevel.Info : LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} ==> {TCSymbols.foe_bBusy} : {MyDevicesAndBoxes[runningIndex].Foe_bBusy}");
+                        break;
+
+                    case TCSymbols.foe_bError:
+                        MyDevicesAndBoxes[runningIndex].Foe_bError = BitConverter.ToBoolean(e.Data.ToArray());
+                        log.Log(MyDevicesAndBoxes[runningIndex].Foe_bError == false ? LogLevel.Info : LogLevel.Error, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} ==> {TCSymbols.foe_bError} : {MyDevicesAndBoxes[runningIndex].Foe_bError}");
+                        break;
+
+                    case TCSymbols.foe_nErrID:
+                        MyDevicesAndBoxes[runningIndex].Foe_nErrID = BitConverter.ToUInt32(e.Data.ToArray());
+                        DeviceStatusIndex = ((AdsErrorCode)MyDevicesAndBoxes[runningIndex].Foe_nErrID).ToString();
+                        log.Log(MyDevicesAndBoxes[runningIndex].Foe_nErrID == 0 ? LogLevel.Info : LogLevel.Error, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} ==> {TCSymbols.foe_nErrID} : {(AdsErrorCode)MyDevicesAndBoxes[runningIndex].Foe_nErrID}");
+                        break;
+
+                    case TCSymbols.foe_nBytesWritten:
+                        MyDevicesAndBoxes[runningIndex].Foe_nBytesWritten = BitConverter.ToUInt32(e.Data.ToArray());
+                        log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} ==> {TCSymbols.foe_nBytesWritten} : {MyDevicesAndBoxes[runningIndex].Foe_nBytesWritten}");
+                        break;
+
+                    case TCSymbols.foe_nPercent:
+                        MyDevicesAndBoxes[runningIndex].Foe_nPercent = BitConverter.ToUInt32(e.Data.ToArray());
+                        log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} ==> {TCSymbols.foe_nPercent} : {MyDevicesAndBoxes[runningIndex].Foe_nPercent}");
+                        break;
+
+                    case TCSymbols.ecs_bExecute:
+                        break;
+
+                    case TCSymbols.ecs_reqState:
+                        break;
+
+                    case TCSymbols.ecs_bBusy:
+                        MyDevicesAndBoxes[runningIndex].Ecs_bBusy = BitConverter.ToBoolean(e.Data.ToArray());
+                        log.Log(MyDevicesAndBoxes[runningIndex].Ecs_bBusy == false ? LogLevel.Info : LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} ==> {TCSymbols.ecs_bBusy} : {MyDevicesAndBoxes[runningIndex].Ecs_bBusy}");
+                        break;
+
+                    case TCSymbols.ecs_bError:
+                        MyDevicesAndBoxes[runningIndex].Ecs_bError = BitConverter.ToBoolean(e.Data.ToArray());
+                        log.Log(MyDevicesAndBoxes[runningIndex].Ecs_bError == false ? LogLevel.Info : LogLevel.Error, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} ==> {TCSymbols.ecs_bError} : {MyDevicesAndBoxes[runningIndex].Ecs_bError}");
+                        break;
+
+                    case TCSymbols.ecs_nErrId:
+                        MyDevicesAndBoxes[runningIndex].Ecs_nErrId = BitConverter.ToUInt32(e.Data.ToArray());
+                        DeviceStatusIndex = ((AdsErrorCode)MyDevicesAndBoxes[runningIndex].Ecs_nErrId).ToString();
+                        log.Log(MyDevicesAndBoxes[runningIndex].Ecs_nErrId == 0 ? LogLevel.Info : LogLevel.Error, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} ==> {TCSymbols.ecs_nErrId} : {(AdsErrorCode)MyDevicesAndBoxes[runningIndex].Ecs_nErrId}");
+                        break;
+
+                    case TCSymbols.ecs_currState:
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        }
+        public DeviceScanDialogViewModel()
+        {
+            MyDevicesAndBoxes = new DevicesAndBoxes();
+            for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                MyDevicesAndBoxes.Add(new Foe() { Foe_nSlaveAddr = TwinCathelper.SAmsPort[i], BusyForeground = Brushes.White, ErrorForeground = Brushes.White });
+
+            BT_FirmwareEnable = true;
+            Foe_dwPass = 287454020;
+            log = LogManager.GetLogger("Motor Firmaware Update");
+            UpdateFirmwareCommand = new RelayCommand(o =>
+            {
+                BT_FirmwareEnable = false;
+                var FoeWroker = new Thread(UpdateFirmwareMeth) { IsBackground = true };
+                FoeWroker.Start();
+            });
+            BrowseFirmwareCommand = new RelayCommand(o => { BrowseFirmwareFile(); });
+
+            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(0);
+            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bBusy}").FirstOrDefault().WriteValue(0);
+            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bError}").FirstOrDefault().WriteValue(0);
+            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nErrID}").FirstOrDefault().WriteValue(0);
+            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(0);
+            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nBytesWritten}").FirstOrDefault().WriteValue(0);
+            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nPercent}").FirstOrDefault().WriteValue(0);
+            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nSlaveAddr}").FirstOrDefault().WriteValue(0);
+        }
     }
 }

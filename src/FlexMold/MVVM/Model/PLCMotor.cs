@@ -235,29 +235,30 @@ namespace FlexMold.MVVM.Model
         public SolidColorBrush BusyForeground
         { get => _BusyForeground; set { _BusyForeground = value; OnPropertyChanged(); } }
 
-        private uint _Foe_dwPass;
+        private bool _Checked;
 
-        public UInt32 Foe_dwPass
+        public bool Checked
         {
-            get => _Foe_dwPass;
+            get { return _Checked; }
             set
             {
-                _Foe_dwPass = value;
+                _Checked = value;
                 OnPropertyChanged();
             }
         }
+        private string _SlaveState;
+
+        public string SlaveState
+        {
+            get { return _SlaveState; }
+            set { _SlaveState = value; OnPropertyChanged(); }
+        }
+
 
         public bool Init_Status { get; set; }
         public bool Foe_Status { get; set; }
         public bool Op_Status { get; set; }
-        public UInt16 Foe_nSlaveAddr { get; set; }
-        private string _Foe_sPathName;
-
-        public string Foe_sPathName
-        {
-            get => _Foe_sPathName; set { _Foe_sPathName = value; OnPropertyChanged(); }
-        }
-
+        public UInt16 Foe_nSlaveAddr { get => foe_nSlaveAddr; set { foe_nSlaveAddr = value; OnPropertyChanged(); } }
         public string Foe_sNetId { get => foe_sNetId; set { foe_sNetId = value; OnPropertyChanged(); } }
         private bool _Foe_bLoad;
 
@@ -316,6 +317,7 @@ namespace FlexMold.MVVM.Model
 
         private UInt32 _Foe_nPercent;
         private string foe_sNetId;
+        private ushort foe_nSlaveAddr;
 
         public UInt32 Foe_nPercent
         { get => _Foe_nPercent; set { _Foe_nPercent = value; OnPropertyChanged(); } }

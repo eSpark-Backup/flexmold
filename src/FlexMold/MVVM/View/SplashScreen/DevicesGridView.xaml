@@ -36,10 +36,9 @@
             dgx:DataGridFilter.IsAutoFilterEnabled="True"
             AutoGenerateColumns="False"
             CanUserAddRows="False"
-            IsReadOnly="True"
             ItemsSource="{Binding Source={StaticResource devices}}"
             RowHeaderWidth="20"
-            ScrollViewer.HorizontalScrollBarVisibility="Auto"
+            ScrollViewer.HorizontalScrollBarVisibility="Visible"
             ScrollViewer.VerticalScrollBarVisibility="Auto"
             SelectedItem="{Binding Path=SelectedDeviceAndBox}"
             SelectionMode="Single"
@@ -103,14 +102,40 @@
                 </Style>
             </DataGrid.ColumnHeaderStyle>
             <DataGrid.Columns>
+                <DataGridCheckBoxColumn
+                    dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
+                    Binding="{Binding Checked}"
+                    Header="-" />
                 <DataGridTextColumn
                     dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
-                    Binding="{Binding Foe_sNetId}"
-                    Header="Foe_sNetId" />
+                    Binding="{Binding Foe_nSlaveAddr}"
+                    Header="Slave#"
+                    IsReadOnly="True" />
                 <DataGridTextColumn
                     dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
                     Binding="{Binding Foe_nPercent}"
-                    Header="Foe_nPercent" />
+                    Header="Foe%"
+                    IsReadOnly="True" />
+                <DataGridTextColumn
+                    dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
+                    Binding="{Binding Foe_nBytesWritten}"
+                    Header="Foe Bytes"
+                    IsReadOnly="True" />
+                <DataGridTextColumn
+                    dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
+                    Binding="{Binding Foe_nErrID}"
+                    Header="Foe Error Id"
+                    IsReadOnly="True" />
+                <DataGridTextColumn
+                    dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
+                    Binding="{Binding Foe_bError}"
+                    Header="Foe Error"
+                    IsReadOnly="True" />
+                <DataGridTextColumn
+                    dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
+                    Binding="{Binding SlaveState}"
+                    Header="SlaveState"
+                    IsReadOnly="True" />
             </DataGrid.Columns>
             <DataGrid.RowStyle>
                 <Style BasedOn="{StaticResource MahApps.Styles.DataGridRow}" TargetType="{x:Type DataGridRow}">

@@ -40,7 +40,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
             }
             BT_FirmwareEnable = true;
             MyFoe = new Foe() { BusyForeground = Brushes.White, ErrorForeground = Brushes.White };
-            MyFoe.Foe_dwPass = 287454020;
+            //MyFoe.Foe_dwPass = 287454020;
             log = LogManager.GetLogger("Motor Firmaware Update");
             UpdateFirmwareCommand = new RelayCommand(o =>
             {
@@ -76,7 +76,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
                 DialogResult result = dialog.ShowDialog();
                 if (result == DialogResult.OK)
                 {
-                    MyFoe.Foe_sPathName = new FileInfo(dialog.FileName).FullName;
+                    //MyFoe.Foe_sPathName = new FileInfo(dialog.FileName).FullName;
                 }
             }
         }
@@ -118,8 +118,8 @@ namespace FlexMold.MVVM.ViewModel.Setting
             {
                 FCAModel.FoeStatuses = new List<Foe>();
                 RegisterNotification();
-                TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_dwPass}").FirstOrDefault().WriteValue(MyFoe.Foe_dwPass);
-                TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sPathName}").FirstOrDefault().WriteValue(MyFoe.Foe_sPathName);
+                //TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_dwPass}").FirstOrDefault().WriteValue(MyFoe.Foe_dwPass);
+                //TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sPathName}").FirstOrDefault().WriteValue(MyFoe.Foe_sPathName);
                 MyFoe.Foe_sNetId = TwinCathelper.SAmsNetId;
                 for (UInt16 i = 0; i < TwinCathelper.SAmsPort.Length; i++)
                 {

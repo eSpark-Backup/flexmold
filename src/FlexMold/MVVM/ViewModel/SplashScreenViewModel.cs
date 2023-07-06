@@ -130,6 +130,17 @@ namespace FlexMold.MVVM.ViewModel
             });
             CloseButtonCommand = new RelayCommand(o =>
             {
+                SelectedMachine.MachineType = EMachineType.ScanDevices;
+                TwincatConfig();
+                //log.Log(LogLevel.Info, $"Closing ....");
+
+                //OnRequestClose(this, new EventArgs());
+            });
+        }
+        private void TwincatConfig()
+        {
+            if (Validataion())
+            {
                 Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
                 {
                     var view = new DeviceScanDialog()
@@ -138,11 +149,7 @@ namespace FlexMold.MVVM.ViewModel
                     };
                     await DialogHost.Show(view, "SplashDialog", ClosingEventHandler);
                 }));
-                //log.Log(LogLevel.Info, $"Closing ....");
-
-                //OnRequestClose(this, new EventArgs());
             }
-            );
         }
 
         private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
@@ -272,18 +279,18 @@ namespace FlexMold.MVVM.ViewModel
             {
                 if (TwinCathelper.TwinCatConnect851())
                 {
-                    if (TwinCathelper.InitializeMotors())
+                    if (TwinCathelper.InitializeSlaves(SelectedMachine.MachineType))
                     {
                         return true;
                     }
                     else
                     {
-                        ProgressStatuses = "Motor initalization failed see logs";
+                        ProgressStatuses = "Slaves initalization failed see logs";
                     }
                 }
                 else
                 {
-                    ProgressStatuses = $"{AdsErrorCode.DeviceSymbolNotFound.ToString()}\n" +
+                    ProgressStatuses = $"{AdsErrorCode.DeviceSymbolNotFound}\n" +
                 $"TwinCAT Script is not running or TwinCAT is in Config mode \n" +
                 $"Please Start/Restart TwinCAT serivce or Build TwinCAT Solution from FCA \n";
                 }
@@ -320,14 +327,7 @@ namespace FlexMold.MVVM.ViewModel
                     {
                         if (_worker != null)
                             _worker.CancelAndWait(TimeSpan.FromSeconds(1.0));
-                        Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
-                        {
-                            var view = new DeviceScanDialog()
-                            {
-                                DataContext = new DeviceScanDialogViewModel()
-                            };
-                            await DialogHost.Show(view, "SplashDialog", ClosingEventHandler);
-                        }));
+                        TwincatConfig();
                     }
                     break;
                 default:

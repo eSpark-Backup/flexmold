@@ -68,7 +68,7 @@
                     <DataGrid
                         Height="320"
                         Margin="5"
-                        AutoGenerateColumns="False"
+                        AutoGenerateColumns="True"
                         CanUserAddRows="False"
                         IsReadOnly="True"
                         ItemsSource="{Binding selectedMyDataModel.LaserFile}"
@@ -77,11 +77,11 @@
                         ScrollViewer.VerticalScrollBarVisibility="Auto"
                         SelectedItem="{Binding Path=SelectedFile}"
                         SelectionMode="Single">
-                        <DataGrid.Columns>
+                        <!--<DataGrid.Columns>
                             <DataGridTextColumn Binding="{Binding Name}" Header="File" />
                             <DataGridTextColumn Binding="{Binding Length}" Header="Size(b)" />
                             <DataGridTextColumn Binding="{Binding LastWriteTime}" Header="Last Modified" />
-                        </DataGrid.Columns>
+                        </DataGrid.Columns>-->
                     </DataGrid>
                 </GroupBox>
                 <GroupBox

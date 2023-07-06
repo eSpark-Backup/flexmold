@@ -46,7 +46,7 @@ namespace FlexMold.MVVM.Model
         Time,
         CalibrationSeq01Request,
         CalibrationSeq02Request,
-        Abort, 
+        Abort,
         Project
     }
     public enum ETMode
@@ -258,7 +258,7 @@ namespace FlexMold.MVVM.Model
             get => _Foe_sPathName; set { _Foe_sPathName = value; OnPropertyChanged(); }
         }
 
-        public string Foe_sNetId { get; set; }
+        public string Foe_sNetId { get => foe_sNetId; set { foe_sNetId = value; OnPropertyChanged(); } }
         private bool _Foe_bLoad;
 
         public bool Foe_bLoad
@@ -315,6 +315,7 @@ namespace FlexMold.MVVM.Model
         { get => _Foe_nBytesWritten; set { _Foe_nBytesWritten = value; OnPropertyChanged(); } }
 
         private UInt32 _Foe_nPercent;
+        private string foe_sNetId;
 
         public UInt32 Foe_nPercent
         { get => _Foe_nPercent; set { _Foe_nPercent = value; OnPropertyChanged(); } }

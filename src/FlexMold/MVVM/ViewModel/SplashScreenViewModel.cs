@@ -15,7 +15,10 @@ using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Windows;
+using System.Windows.Media;
+using System.Windows.Threading;
 using System.Xml;
 using System.Xml.Serialization;
 using TwinCAT.Ads;
@@ -127,20 +130,21 @@ namespace FlexMold.MVVM.ViewModel
             });
             CloseButtonCommand = new RelayCommand(o =>
             {
-                log.Log(LogLevel.Info, $"Closing ....");
+                Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
+                {
+                    var view = new DeviceScanDialog()
+                    {
+                        DataContext = new DeviceScanDialogViewModel()
+                    };
+                    await DialogHost.Show(view, "SplashDialog", ClosingEventHandler);
+                }));
+                //log.Log(LogLevel.Info, $"Closing ....");
 
-                OnRequestClose(this, new EventArgs());
+                //OnRequestClose(this, new EventArgs());
             }
             );
         }
-        private async void TwinCatManager()
-        {
-            var view = new DeviceScanDialog()
-            {
-                DataContext = new DeviceScanDialogViewModel()
-            };
-            _ = await DialogHost.Show(view, "SplashDialog", ClosingEventHandler);
-        }
+
         private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
         {
             Console.WriteLine();
@@ -292,7 +296,7 @@ namespace FlexMold.MVVM.ViewModel
             return false;
         }
 
-        private void _worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             ProgressPercentage = e.ProgressPercentage;
             switch (SelectedMachine.MachineType)
@@ -301,7 +305,7 @@ namespace FlexMold.MVVM.ViewModel
                     if (ProgressPercentage == 100 && _worker.IsBuildSucceeded)
                     {
                         if (_worker != null)
-                            _worker.CancelAndWait(TimeSpan.FromSeconds(1.0));
+                            _ = _worker.CancelAndWait(TimeSpan.FromSeconds(1.0));
                         RunButtonEnable = true;
                     }
                     else if (ProgressPercentage == 0)
@@ -316,7 +320,14 @@ namespace FlexMold.MVVM.ViewModel
                     {
                         if (_worker != null)
                             _worker.CancelAndWait(TimeSpan.FromSeconds(1.0));
-                        TwinCatManager();
+                        Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
+                        {
+                            var view = new DeviceScanDialog()
+                            {
+                                DataContext = new DeviceScanDialogViewModel()
+                            };
+                            await DialogHost.Show(view, "SplashDialog", ClosingEventHandler);
+                        }));
                     }
                     break;
                 default:
@@ -325,10 +336,7 @@ namespace FlexMold.MVVM.ViewModel
 
         }
 
-        private void _worker_ProgressStatusChanged(object sender, ProgressStatusChangedArgs e)
-        {
-            ProgressStatuses = e.Status;
-        }
+        private void Worker_ProgressStatusChanged(object sender, ProgressStatusChangedArgs e) => ProgressStatuses = e.Status;
 
         public void RunScript()
         {
@@ -358,9 +366,9 @@ namespace FlexMold.MVVM.ViewModel
                 //Access COM Running Objects Table
                 ROTAccess.CloseRunningDTETable(_runningScript.ScriptRootFolder + @"\" + _runningScript.ScriptName + ".sln");
 
-                _worker.ProgressChanged += new ProgressChangedEventHandler(_worker_ProgressChanged);
+                _worker.ProgressChanged += new ProgressChangedEventHandler(Worker_ProgressChanged);
 
-                _worker.ProgressStatusChanged += new EventHandler<ProgressStatusChangedArgs>(_worker_ProgressStatusChanged);
+                _worker.ProgressStatusChanged += new EventHandler<ProgressStatusChangedArgs>(Worker_ProgressStatusChanged);
 
 #if OLD
                 _factory.AppID = this.DTEInfo.ProgId;

@@ -143,11 +143,7 @@ namespace FlexMold.MVVM.ViewModel
             {
                 Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
                 {
-                    var view = new DeviceScanDialog()
-                    {
-                        DataContext = new DeviceScanDialogViewModel()
-                    };
-                    await DialogHost.Show(view, "SplashDialog", ClosingEventHandler);
+                    await DialogHost.Show(new DeviceScanDialog(), "SplashDialog", ClosingEventHandler);
                 }));
             }
         }

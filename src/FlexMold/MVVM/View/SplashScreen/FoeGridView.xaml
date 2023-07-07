@@ -1,5 +1,5 @@
 ﻿<UserControl
-    x:Class="FlexMold.MVVM.View.SplashScreen.DevicesGridView"
+    x:Class="FlexMold.MVVM.View.SplashScreen.FoeGridView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:convertor="clr-namespace:FlexMold.Convertor"
@@ -8,6 +8,8 @@
     xmlns:dgx="urn:tom-englert.de/DataGridExtensions"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+    xmlns:splashscreen="clr-namespace:FlexMold.MVVM.ViewModel.SplashScreen"
+    d:DataContext="{d:DesignInstance Type=splashscreen:FoeViewModel}"
     d:DesignHeight="500"
     mc:Ignorable="d">
     <UserControl.Resources>
@@ -16,9 +18,6 @@
             <CollectionViewSource.SortDescriptions>
                 <scm:SortDescription PropertyName="Foe_sNetId" />
             </CollectionViewSource.SortDescriptions>
-            <CollectionViewSource.GroupDescriptions>
-                <PropertyGroupDescription PropertyName="Status" />
-            </CollectionViewSource.GroupDescriptions>
         </CollectionViewSource>
         <ControlTemplate x:Key="MultipleChoiceFilter">
             <core:MultipleChoiceFilter Filter="{Binding Path=Filter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=dgx:DataGridFilterColumnControl}}" />
@@ -36,9 +35,8 @@
             dgx:DataGridFilter.IsAutoFilterEnabled="True"
             AutoGenerateColumns="False"
             CanUserAddRows="False"
+            GridLinesVisibility="All"
             ItemsSource="{Binding Source={StaticResource devices}}"
-            RowHeaderWidth="20"
-            ScrollViewer.HorizontalScrollBarVisibility="Visible"
             ScrollViewer.VerticalScrollBarVisibility="Auto"
             SelectedItem="{Binding Path=SelectedDeviceAndBox}"
             SelectionMode="Single"
@@ -60,38 +58,6 @@
                         Fill="Orange" />
                 </ControlTemplate>
             </DataGrid.Resources>
-            <DataGrid.GroupStyle>
-                <!--  Style for groups at top level.  -->
-                <GroupStyle>
-                    <GroupStyle.ContainerStyle>
-                        <Style TargetType="{x:Type GroupItem}">
-                            <Setter Property="Margin" Value="0,0,0,5" />
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="{x:Type GroupItem}">
-                                        <Expander IsExpanded="False">
-                                            <Expander.Header>
-                                                <DockPanel>
-                                                    <TextBlock
-                                                        Width="100"
-                                                        Margin="5,0,0,0"
-                                                        FontSize="15"
-                                                        Text="{Binding Path=Name}" />
-                                                    <TextBlock FontSize="15" Text="{Binding Path=ItemCount}" />
-                                                </DockPanel>
-                                            </Expander.Header>
-                                            <Expander.Content>
-                                                <ItemsPresenter />
-                                            </Expander.Content>
-                                        </Expander>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </GroupStyle.ContainerStyle>
-                </GroupStyle>
-                <!--  Style for groups under the top level.  -->
-            </DataGrid.GroupStyle>
             <DataGrid.ColumnHeaderStyle>
                 <Style BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader}" TargetType="DataGridColumnHeader">
                     <Setter Property="Height" Value="35" />
@@ -102,10 +68,18 @@
                 </Style>
             </DataGrid.ColumnHeaderStyle>
             <DataGrid.Columns>
-                <DataGridCheckBoxColumn
-                    dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
-                    Binding="{Binding Checked}"
-                    Header="-" />
+                <DataGridTemplateColumn dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}">
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <CheckBox Command="{Binding DataContext.CheckAllCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" IsChecked="{Binding DataContext.IsCheckedAll, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=IsChecked, UpdateSourceTrigger=PropertyChanged}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn
                     dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
                     Binding="{Binding Foe_nSlaveAddr}"
@@ -146,15 +120,7 @@
             <DataGrid.RowStyle>
                 <Style BasedOn="{StaticResource MahApps.Styles.DataGridRow}" TargetType="{x:Type DataGridRow}">
                     <Setter Property="FontSize" Value="14" />
-                    <Style.Triggers>
-                        <!--  IsMouseOver  -->
-                        <MultiDataTrigger>
-                            <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding Path=IsMouseOver, RelativeSource={RelativeSource Self}}" Value="true" />
-                            </MultiDataTrigger.Conditions>
-                            <Setter Property="Background" Value="#FF53DEF5" />
-                        </MultiDataTrigger>
-                    </Style.Triggers>
+                    <Setter Property="Foreground" Value="White" />
                 </Style>
             </DataGrid.RowStyle>
             <DataGrid.Style>
@@ -163,10 +129,5 @@
                 </Style>
             </DataGrid.Style>
         </DataGrid>
-        <CheckBox
-            Checked="GroupButton_Click"
-            Content="Groups"
-            IsChecked="True"
-            Unchecked="UngroupButton_Click" />
     </Grid>
 </UserControl>

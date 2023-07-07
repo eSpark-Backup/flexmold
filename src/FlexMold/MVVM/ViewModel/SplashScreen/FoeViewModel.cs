@@ -4,9 +4,12 @@ using FlexMold.Utility;
 using NLog;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Forms;
 using System.Windows.Media;
 using TwinCAT;
@@ -15,7 +18,7 @@ using TwinCAT.Ads.TypeSystem;
 
 namespace FlexMold.MVVM.ViewModel.SplashScreen
 {
-    internal class DeviceScanDialogViewModel : ObservableObject
+    internal class FoeViewModel : ObservableObject
     {
         private DevicesAndBoxes _MyDevicesAndBoxes;
         private int retry = 0;
@@ -39,7 +42,18 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
                 OnPropertyChanged();
             }
         }
+        private bool? _isCheckedAll;
 
+        public bool? IsCheckedAll
+        {
+            get => _isCheckedAll;
+            set
+            {
+                if (value == _isCheckedAll) return;
+                _isCheckedAll = value;
+                OnPropertyChanged();
+            }
+        }
         public DevicesAndBoxes MyDevicesAndBoxes
         {
             get { return _MyDevicesAndBoxes; }
@@ -49,6 +63,8 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
                 OnPropertyChanged();
             }
         }
+
+
         private Foe _SelectedDeviceAndBox;
         public Foe SelectedDeviceAndBox
         {
@@ -69,6 +85,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         int runningIndex = 0;
         private Logger log;
         public RelayCommand UpdateFirmwareCommand { get; set; }
+        public RelayCommand CheckAllCommand { get; set; }
         public RelayCommand BrowseFirmwareCommand { get; set; }
         private bool _BT_FirmwareEnable;
 
@@ -120,14 +137,14 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         {
             try
             {
-                var checkedSlaves  = MyDevicesAndBoxes.Where(a=>a.Checked==true).ToList();
+                var checkedSlaves = MyDevicesAndBoxes.Where(a => a.IsChecked == true).ToList();
                 RegisterNotification();
                 TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_dwPass}").FirstOrDefault().WriteValue(Foe_dwPass);
                 TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sPathName}").FirstOrDefault().WriteValue(Foe_sPathName);
                 Foe_sNetId = TwinCathelper.SAmsNetId;
                 for (UInt16 i = 0; i < checkedSlaves.Count; i++)
                 {
-                    runningIndex = MyDevicesAndBoxes.IndexOf(MyDevicesAndBoxes.Where(a=>a.Foe_nSlaveAddr== checkedSlaves[i].Foe_nSlaveAddr).FirstOrDefault());
+                    runningIndex = MyDevicesAndBoxes.IndexOf(MyDevicesAndBoxes.Where(a => a.Foe_nSlaveAddr == checkedSlaves[i].Foe_nSlaveAddr).FirstOrDefault());
                     ResetSetContols();
                     DeviceStatusIndex = $"Updating {i + 1}/{checkedSlaves.Count}";
                     TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(0);
@@ -404,11 +421,18 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
                 }
             }
         }
-        public DeviceScanDialogViewModel()
+        public FoeViewModel()
         {
             MyDevicesAndBoxes = new DevicesAndBoxes();
+            IsCheckedAll = true;
             for (int i = 0; i < TwinCathelper.DeviceCount; i++)
-                MyDevicesAndBoxes.Add(new Foe() { Foe_nSlaveAddr = TwinCathelper.SAmsPort[i], BusyForeground = Brushes.White, ErrorForeground = Brushes.White });
+                MyDevicesAndBoxes.Add(new Foe()
+                {
+                    Foe_nSlaveAddr = TwinCathelper.SAmsPort[i],
+                    BusyForeground = Brushes.White,
+                    ErrorForeground = Brushes.White,
+                    IsChecked = true
+                });
 
             BT_FirmwareEnable = true;
             Foe_dwPass = 287454020;
@@ -420,6 +444,12 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
                 FoeWroker.Start();
             });
             BrowseFirmwareCommand = new RelayCommand(o => { BrowseFirmwareFile(); });
+            CheckAllCommand = new RelayCommand(o =>
+            {
+                for (int i = 0; i < MyDevicesAndBoxes.Count; i++)
+                    MyDevicesAndBoxes[i].IsChecked = (bool)IsCheckedAll;
+
+            });
 
             TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(0);
             TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bBusy}").FirstOrDefault().WriteValue(0);

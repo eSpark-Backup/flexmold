@@ -13,7 +13,6 @@
     xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
     Width="780"
     Height="510"
-    d:DataContext="{d:DesignInstance Type=splashscreen:FoeViewModel}"
     mc:Ignorable="d">
     <Border Style="{StaticResource panelMenuBorder}">
         <Grid>
@@ -29,8 +28,7 @@
             <Button
                 Grid.Row="1"
                 Command="{x:Static wpf:DialogHost.CloseDialogCommand}"
-                IsCancel="True"
-                IsEnabled="{Binding CanClose}">
+                IsCancel="True">
                 <Button.CommandParameter>
                     <system:Boolean>False</system:Boolean>
                 </Button.CommandParameter>

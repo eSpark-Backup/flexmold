@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -93,12 +94,16 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
                 OnPropertyChanged();
             }
         }
-        private int _OverAllProgress;
+        private uint _OverAllProgress;
 
-        public int OverAllProgress
+        public uint OverAllProgress
         {
             get { return _OverAllProgress; }
-            set { _OverAllProgress = value; }
+            set
+            {
+                _OverAllProgress = value;
+                OnPropertyChanged();
+            }
         }
         int runningIndex = 0;
         private Logger log;
@@ -152,17 +157,24 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.ecs_bError}"));
             NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.ecs_nErrId}"));
         }
+        List<Foe> checkedSlaves;
+        int cur;
+        string curStr; 
         private void UpdateFirmwareMeth()
         {
             try
             {
-                var checkedSlaves = MyDevicesAndBoxes.Where(a => a.IsChecked == true).ToList();
+                OverAllProgress = 0;
+                cur = 0;
+                checkedSlaves = MyDevicesAndBoxes.Where(a => a.IsChecked == true).ToList();
                 RegisterNotification();
                 TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_dwPass}").FirstOrDefault().WriteValue(Foe_dwPass);
                 TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sPathName}").FirstOrDefault().WriteValue(Foe_sPathName);
                 Foe_sNetId = TwinCathelper.SAmsNetId;
                 for (UInt16 i = 0; i < checkedSlaves.Count; i++)
                 {
+                    cur = i;
+                    curStr = $"{i + 1}/{checkedSlaves.Count}";
                     runningIndex = MyDevicesAndBoxes.IndexOf(MyDevicesAndBoxes.Where(a => a.Foe_nSlaveAddr == checkedSlaves[i].Foe_nSlaveAddr).FirstOrDefault());
                     ResetSetContols();
                     DeviceStatusIndex = $"Updating {i + 1}/{checkedSlaves.Count}";
@@ -175,14 +187,14 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
                     TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nPercent}").FirstOrDefault().WriteValue(0);
                     Thread.Sleep(1000);
                     DeviceStatusIndex = $"Initializing {i + 1}/{checkedSlaves.Count}";
-                    if (ChengeBoxState(ESlaveStateMachine.EC_DEVICE_STATE_INIT))
+                    if (ChangeBoxState(ESlaveStateMachine.EC_DEVICE_STATE_INIT))
                     {
                         Init_Status = true;
                         TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_bExecute}").FirstOrDefault().WriteValue(0);
-                        DeviceStatusIndex = $"Setted into : {ESlaveStateMachine.EC_DEVICE_STATE_INIT} {i + 1}/{checkedSlaves.Count}";
+                        DeviceStatusIndex = $"Setted into : {ESlaveStateMachine.EC_DEVICE_STATE_INIT} {curStr}";
                         log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} State Updated");
                         TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(1);
-                        DeviceStatusIndex = $"Downloading {i + 1}/{checkedSlaves.Count}";
+                        DeviceStatusIndex = $"Downloading {curStr}";
                         if (FoeWait())
                         {
                             Op_Status = true;
@@ -222,9 +234,9 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             }
             catch (Exception ex)
             {
-                DeviceStatusIndex = ex.Message;
+                DeviceStatusIndex = ex.Message+ $" {curStr}";
                 Foe_Remarks = ex.Message;
-                log.Log(LogLevel.Error, $"{ex.Message}");
+                log.Log(LogLevel.Error, ex.Message + $" {curStr}");
             }
             finally
             {
@@ -257,12 +269,10 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
                 TwinCathelper.Client.AdsNotification -= Client_AdsNotificationFoe;
             }
         }
-
-
-
         private bool GetSlaveState(ESlaveStateMachine _EreqState)
         {
-            log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} Requesting Slave Box State....");
+            DeviceStatusIndex = $"Requesting Slave State {curStr}";
+            log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} Requesting Slave State....");
             TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecg_bExecute}").FirstOrDefault().WriteValue(0);
             TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecg_bExecute}").FirstOrDefault().WriteValue(1);
             Thread.Sleep(500);
@@ -272,6 +282,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             if (retry < 5)
             {
                 log.Log(LogLevel.Warn, $"{(retry != 0 ? ("Retrying : " + retry) : "")} Requesting Slave State Please Wait ....");
+                DeviceStatusIndex = $"Retrying[{retry}] Requesting Slave State {curStr}";
                 retry++;
                 if ((ESlaveStateMachine)state[0] != _EreqState)
                 {
@@ -288,10 +299,11 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             {
                 if (_EreqState == ESlaveStateMachine.EC_DEVICE_STATE_OP)
                 {
-                    if (ChengeBoxState(ESlaveStateMachine.EC_DEVICE_STATE_OP))
+                    if (ChangeBoxState(ESlaveStateMachine.EC_DEVICE_STATE_OP))
                     {
+                        DeviceStatusIndex = $"Slave State {ESlaveStateMachine.EC_DEVICE_STATE_OP} {curStr}";
                         log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr}" +
-                            $" Configuring Device State To {ESlaveStateMachine.EC_DEVICE_STATE_OP}");
+                            $" Configuring Slave State To {ESlaveStateMachine.EC_DEVICE_STATE_OP}");
                         return true;
                     }
                     else
@@ -303,9 +315,9 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
                 return false;
             }
         }
-
-        private bool ChengeBoxState(ESlaveStateMachine _EreqState)
+        private bool ChangeBoxState(ESlaveStateMachine _EreqState)
         {
+            DeviceStatusIndex = $"Changing Slave State to {_EreqState} {curStr}";
             log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} Changing Box State : {_EreqState}");
             TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_bExecute}").FirstOrDefault().WriteValue(0);
             TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_reqState}").FirstOrDefault().WriteValue((int)_EreqState);
@@ -315,11 +327,13 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
 
         private bool FoeWait()
         {
+            DeviceStatusIndex = $"Foe Wait {curStr}";
             Thread.Sleep(5000);
             if (!MyDevicesAndBoxes[runningIndex].Foe_bError)
             {
                 if (MyDevicesAndBoxes[runningIndex].Foe_bBusy | MyDevicesAndBoxes[runningIndex].Foe_nPercent != 100)
                 {
+                    DeviceStatusIndex = $"Foe Busy {curStr}";
                     log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} FOE System is busy please wait.");
                     return FoeWait();
                 }
@@ -339,11 +353,13 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
 
         private bool EcsWait(ESlaveStateMachine _EreqState)
         {
+            DeviceStatusIndex = $"Ecs Wait {curStr}";
             Thread.Sleep(2000);
             if (!MyDevicesAndBoxes[runningIndex].Ecs_bError)
             {
                 if (MyDevicesAndBoxes[runningIndex].Ecs_bBusy)
                 {
+                    DeviceStatusIndex = $"Ecs Busy {curStr}";
                     log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr}  Ecs System is busy please wait.");
                     Thread.Sleep(1000);
                     return EcsWait(_EreqState);
@@ -397,7 +413,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
 
                     case TCSymbols.foe_nErrID:
                         MyDevicesAndBoxes[runningIndex].Foe_nErrID = BitConverter.ToUInt32(e.Data.ToArray());
-                        DeviceStatusIndex = ((AdsErrorCode)MyDevicesAndBoxes[runningIndex].Foe_nErrID).ToString();
+                        DeviceStatusIndex = ((AdsErrorCode)MyDevicesAndBoxes[runningIndex].Foe_nErrID).ToString()+ $" {curStr}";
                         log.Log(MyDevicesAndBoxes[runningIndex].Foe_nErrID == 0 ? LogLevel.Info : LogLevel.Error, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} ==> {TCSymbols.foe_nErrID} : {(AdsErrorCode)MyDevicesAndBoxes[runningIndex].Foe_nErrID}");
                         break;
 
@@ -408,6 +424,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
 
                     case TCSymbols.foe_nPercent:
                         MyDevicesAndBoxes[runningIndex].Foe_nPercent = BitConverter.ToUInt32(e.Data.ToArray());
+                        OverAllProgress = (uint)((double)MyDevicesAndBoxes[runningIndex].Foe_nPercent / (double)checkedSlaves.Count + (100 / (double)checkedSlaves.Count) * (cur));
                         log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} ==> {TCSymbols.foe_nPercent} : {MyDevicesAndBoxes[runningIndex].Foe_nPercent}");
                         break;
 

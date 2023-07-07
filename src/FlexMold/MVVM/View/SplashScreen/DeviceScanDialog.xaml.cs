@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 
 namespace FlexMold.MVVM.View.Setting
 {
@@ -10,6 +11,7 @@ namespace FlexMold.MVVM.View.Setting
         public DeviceScanDialog()
         {
             InitializeComponent();
+            
         }
     }
 }

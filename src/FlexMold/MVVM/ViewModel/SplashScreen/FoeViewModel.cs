@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Forms;
@@ -20,6 +21,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
 {
     internal class FoeViewModel : ObservableObject
     {
+
         private DevicesAndBoxes _MyDevicesAndBoxes;
         private int retry = 0;
         private string foe_sPathName;
@@ -29,6 +31,22 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         private object foe_dwPass;
 
         private string _foe_Remarks;
+
+
+        private bool _canClose;
+
+        public bool CanClose
+        {
+            get 
+            {
+                return _canClose; 
+            }
+            set 
+            {
+                _canClose = value; 
+                OnPropertyChanged();
+            }
+        }
 
         public string Foe_Remarks
         {
@@ -122,6 +140,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         private List<int> NotificatioHandles;
         private void RegisterNotification()
         {
+            
             NotificatioHandles = new List<int>();
             TwinCathelper.Client.AdsNotification += Client_AdsNotificationFoe;
             NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.foe_nErrID}"));
@@ -212,6 +231,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
                 BT_FirmwareEnable = true;
                 DeleteNotifications();
             }
+            CanClose= false;
         }
         private void ResetSetContols()
         {
@@ -449,7 +469,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
                 for (int i = 0; i < MyDevicesAndBoxes.Count; i++)
                     MyDevicesAndBoxes[i].IsChecked = (bool)IsCheckedAll;
 
-            });
+            });  
 
             TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(0);
             TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bBusy}").FirstOrDefault().WriteValue(0);
@@ -459,6 +479,12 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nBytesWritten}").FirstOrDefault().WriteValue(0);
             TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nPercent}").FirstOrDefault().WriteValue(0);
             TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nSlaveAddr}").FirstOrDefault().WriteValue(0);
+        }
+
+        private void CloseDialog()
+        {
+            // Add code here to perform any necessary cleanup or additional actions before closing the dialog
+            CloseDialog();
         }
     }
 }

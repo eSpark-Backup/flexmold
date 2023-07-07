@@ -13,7 +13,6 @@
     xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
     Width="780"
     Height="510"
-    d:DataContext="{d:DesignInstance Type=splashscreen:DeviceScanDialogViewModel}"
     mc:Ignorable="d">
     <Border Style="{StaticResource panelMenuBorder}">
         <Grid>

@@ -250,7 +250,7 @@ namespace FlexMold.Utility
                            a.InstancePath == TCVarName.DeviceCount).ReadAnyValue(typeof(short));
                         PLCMotors = new EthercatDevice[DeviceCount];
                         PLCMotorsStates = new DeviceStatuses((uint)DeviceCount);
-                        SymbolEthercatDevice = MySymbols.Where(a => a.InstancePath == TCVarName.MainDevice).FirstOrDefault();
+                        SymbolEthercatDevice = MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.device}").FirstOrDefault();
                         structSize = (SymbolEthercatDevice.Size) / DeviceCount;
                         buffer = new byte[structSize * DeviceCount];
                         ReadAllEthercatDeviceData();
@@ -263,12 +263,16 @@ namespace FlexMold.Utility
                     case EMachineType.ScanDevices:
                         DeviceCount = (short)MySymbols.FirstOrDefault(a =>
                            a.InstancePath == TCVarName.DeviceCount).ReadAnyValue(typeof(short));
-                        if (SessionSystemService == null)
+                        if (MySymbols.Any(a => a.InstancePath == $"MAIN.{TCSymbols.SlaveCount}"))
                         {
-                            SessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
-                            ClientSystemService = (AdsConnection)SessionSystemService.Connect();
+                            if (SessionSystemService == null)
+                            {
+                                SessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
+                                ClientSystemService = (AdsConnection)SessionSystemService.Connect();
+                            }
+                            return true;
                         }
-                        return true;
+                        return false;
                     default:
                         return false;
                 }

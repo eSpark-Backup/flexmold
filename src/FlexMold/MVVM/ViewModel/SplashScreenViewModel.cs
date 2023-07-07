@@ -150,6 +150,7 @@ namespace FlexMold.MVVM.ViewModel
 
         private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
         {
+            TwinCathelper.TwinCatDiconnectConnect851();
             Console.WriteLine();
         }
         private void MachineSelectMethod(Machine _a)
@@ -281,7 +282,7 @@ namespace FlexMold.MVVM.ViewModel
                     }
                     else
                     {
-                        ProgressStatuses = "Slaves initalization failed see logs";
+                        ProgressStatuses = "Slaves initalization failed see logs or loaded different TwinCat project";
                     }
                 }
                 else
@@ -311,7 +312,7 @@ namespace FlexMold.MVVM.ViewModel
                             _ = _worker.CancelAndWait(TimeSpan.FromSeconds(1.0));
                         RunButtonEnable = true;
                     }
-                    else if (ProgressPercentage == 0)
+                    else if (!_worker.IsBuildSucceeded)
                     {
                         ICEnable = true;
                     }
@@ -324,6 +325,10 @@ namespace FlexMold.MVVM.ViewModel
                         if (_worker != null)
                             _worker.CancelAndWait(TimeSpan.FromSeconds(1.0));
                         TwincatConfig();
+                    }
+                    else if (!_worker.IsBuildSucceeded)
+                    {
+                        ICEnable = true;
                     }
                     break;
                 default:

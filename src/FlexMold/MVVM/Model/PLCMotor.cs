@@ -83,6 +83,7 @@ namespace FlexMold.MVVM.Model
 
     public enum TCSymbols
     {
+        SlaveCount,
         deviceCount,
         device,
         mPosition,

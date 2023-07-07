@@ -99,7 +99,7 @@
                 </StackPanel>
             </Button>
             <Grid Grid.Row="3" Grid.ColumnSpan="5">
-                <mah:MetroProgressBar Value="{Binding Foe_nPercent}" />
+                <mah:MetroProgressBar Value="{Binding OverAllProgress}" />
                 <TextBlock
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"

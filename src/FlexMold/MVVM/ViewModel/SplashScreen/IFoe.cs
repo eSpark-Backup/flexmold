@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FlexMold.MVVM.ViewModel.SplashScreen
 {
-    interface IFoe
+    public interface IFoe
     {
         void RefreshDataGrid();
     }

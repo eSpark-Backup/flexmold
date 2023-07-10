@@ -19,7 +19,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
     internal class FoeSettingDiaglogViewModel : ObservableObject
     {
         private Logger log;
-        public Foe MyFoe { get; set; }
+        public FoeModel MyFoe { get; set; }
         public RelayCommand UpdateFirmwareCommand { get; set; }
         public RelayCommand BrowseFirmwareCommand { get; set; }
         private bool _BT_FirmwareEnable;
@@ -39,7 +39,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
                 return;
             }
             BT_FirmwareEnable = true;
-            MyFoe = new Foe() { BusyForeground = Brushes.White, ErrorForeground = Brushes.White };
+            MyFoe = new FoeModel() { BusyForeground = Brushes.White, ErrorForeground = Brushes.White };
             //MyFoe.Foe_dwPass = 287454020;
             log = LogManager.GetLogger("Motor Firmaware Update");
             UpdateFirmwareCommand = new RelayCommand(o =>
@@ -116,7 +116,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
         {
             try
             {
-                FCAModel.FoeStatuses = new List<Foe>();
+                FCAModel.FoeStatuses = new List<FoeModel>();
                 RegisterNotification();
                 //TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_dwPass}").FirstOrDefault().WriteValue(MyFoe.Foe_dwPass);
                 //TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sPathName}").FirstOrDefault().WriteValue(MyFoe.Foe_sPathName);

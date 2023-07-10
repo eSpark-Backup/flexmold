@@ -1,4 +1,5 @@
 ﻿using FlexMold.Core;
+using FlexMold.MVVM.ViewModel.SplashScreen;
 using Microsoft.VisualStudio.Shell.Interop;
 using StructPacker;
 using System;
@@ -224,10 +225,15 @@ namespace FlexMold.MVVM.Model
         }
     }
 
-    public class Foe : ObservableObject
+    public class FoeModel : ObservableObject
     {
+        public IFoe View { get; set; }
+        void RefreshUI()
+        {
+            if (View == null) return;
+            View.RefreshDataGrid();
+        }
         private SolidColorBrush _ErrorForeground;
-
         public SolidColorBrush ErrorForeground
         { get => _ErrorForeground; set { _ErrorForeground = value; OnPropertyChanged(); } }
 
@@ -240,7 +246,7 @@ namespace FlexMold.MVVM.Model
 
         public bool IsChecked
         {
-            get  => _IsChecked; 
+            get => _IsChecked;
             set
             {
                 _IsChecked = value;
@@ -257,7 +263,7 @@ namespace FlexMold.MVVM.Model
         public string SlaveState
         {
             get { return _SlaveState; }
-            set { _SlaveState = value; OnPropertyChanged(); }
+            set { _SlaveState = value; OnPropertyChanged(); RefreshUI(); }
         }
 
         private string _DateTimeLU;
@@ -335,9 +341,9 @@ namespace FlexMold.MVVM.Model
         public UInt32 Foe_nPercent
         { get => _Foe_nPercent; set { _Foe_nPercent = value; OnPropertyChanged(); } }
 
-        public Foe ShallowCopy()
+        public FoeModel ShallowCopy()
         {
-            return (Foe)this.MemberwiseClone();
+            return (FoeModel)this.MemberwiseClone();
         }
     }
     public class MotorStatusControl : ObservableObject

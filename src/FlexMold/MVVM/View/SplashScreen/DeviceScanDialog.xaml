@@ -22,7 +22,7 @@
             </Grid.RowDefinitions>
             <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl">
                 <TabItem Header="FOE">
-                    <splashscreenV:Foe />
+                    <splashscreenV:FoeView />
                 </TabItem>
             </mah:MetroAnimatedSingleRowTabControl>
             <Button

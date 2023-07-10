@@ -4,6 +4,7 @@ using FlexMold.Utility;
 using NLog;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -22,8 +23,6 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
 {
     internal class FoeViewModel : ObservableObject
     {
-
-        private DevicesAndBoxes _MyDevicesAndBoxes;
         private int retry = 0;
         private string foe_sPathName;
         private bool Init_Status = false;
@@ -31,7 +30,6 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         private bool Op_Status = false;
         private object foe_dwPass;
 
-        public IFoe View { get; set; }
         private string _foe_Remarks;
 
         private bool _canClose;
@@ -73,19 +71,20 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
                 OnPropertyChanged();
             }
         }
-        public DevicesAndBoxes MyDevicesAndBoxes
-        {
-            get { return _MyDevicesAndBoxes; }
-            set
-            {
-                _MyDevicesAndBoxes = value;
-                OnPropertyChanged();
-            }
-        }
+        public ObservableCollection<FoeModel> MyDevicesAndBoxes { get; set; }
+        //public   
+        //{
+        //    get { return _MyDevicesAndBoxes; }
+        //    set
+        //    {
+        //        _MyDevicesAndBoxes = value;
+        //        OnPropertyChanged();
+        //    }
+        //}
 
 
-        private Foe _SelectedDeviceAndBox;
-        public Foe SelectedDeviceAndBox
+        private FoeModel _SelectedDeviceAndBox;
+        public FoeModel SelectedDeviceAndBox
         {
             get { return _SelectedDeviceAndBox; }
             set
@@ -158,13 +157,14 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.ecs_bError}"));
             NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.ecs_nErrId}"));
         }
-        List<Foe> checkedSlaves;
+        List<FoeModel> checkedSlaves;
         int cur;
         string curStr;
         private void UpdateFirmwareMeth()
         {
             try
             {
+                ResetDeviceCollection();
                 OverAllProgress = 0;
                 cur = 0;
                 checkedSlaves = MyDevicesAndBoxes.Where(a => a.IsChecked == true).ToList();
@@ -483,18 +483,37 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nPercent}").FirstOrDefault().WriteValue(0);
             TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nSlaveAddr}").FirstOrDefault().WriteValue(0);
         }
-        public FoeViewModel()
+        private void ResetFoeCollection()
         {
-            MyDevicesAndBoxes = new DevicesAndBoxes();
-            IsCheckedAll = true;
             for (int i = 0; i < TwinCathelper.DeviceCount; i++)
-                MyDevicesAndBoxes.Add(new Foe()
+                MyDevicesAndBoxes.Add(new FoeModel()
                 {
                     Foe_nSlaveAddr = TwinCathelper.SAmsPort[i],
                     BusyForeground = Brushes.White,
                     ErrorForeground = Brushes.White,
                     IsChecked = true
                 });
+        }
+        private void ResetDeviceCollection()
+        {
+            for (int i = 0; i < MyDevicesAndBoxes.Count; i++)
+            {
+                MyDevicesAndBoxes[i].DateTimeLU = "";
+                MyDevicesAndBoxes[i].Foe_nPercent = 0;
+                MyDevicesAndBoxes[i].Foe_nErrID = 0;
+                MyDevicesAndBoxes[i].Foe_bError = false;
+                MyDevicesAndBoxes[i].Foe_nBytesWritten = 0;
+                MyDevicesAndBoxes[i].Foe_bBusy = false;
+                MyDevicesAndBoxes[i].Foe_Status= false;
+                MyDevicesAndBoxes[i].SlaveState= "";
+                MyDevicesAndBoxes[i].SlaveStateBackground= Brushes.Transparent;
+            }
+        }
+        public FoeViewModel()
+        {
+            MyDevicesAndBoxes = new();
+            IsCheckedAll = true;
+            ResetFoeCollection();
 
             BT_FirmwareEnable = true;
             Foe_dwPass = 287454020;
@@ -508,8 +527,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             BrowseFirmwareCommand = new RelayCommand(o => { BrowseFirmwareFile(); });
             RefreshDataGridCommand = new RelayCommand(o =>
             {
-                if (View == null) return;
-                View.RefreshDataGrid();
+
             });
             CheckAllCommand = new RelayCommand(o =>
             {
@@ -520,5 +538,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
 
             ResetTwinCatVariables();
         }
+
+
     }
 }

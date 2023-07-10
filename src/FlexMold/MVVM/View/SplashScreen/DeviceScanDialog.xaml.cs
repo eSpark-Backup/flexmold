@@ -1,4 +1,4 @@
-﻿using System.Windows;
+﻿using FlexMold.MVVM.ViewModel.SplashScreen;
 using System.Windows.Controls;
 
 namespace FlexMold.MVVM.View.Setting
@@ -11,7 +11,8 @@ namespace FlexMold.MVVM.View.Setting
         public DeviceScanDialog()
         {
             InitializeComponent();
-            
+            FoeViewModel viewModel = new FoeViewModel();
+            DataContext = viewModel;
         }
     }
 }

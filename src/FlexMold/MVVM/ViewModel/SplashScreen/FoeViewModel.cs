@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.ConstrainedExecution;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -32,7 +33,34 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
 
         private string _foe_Remarks;
 
-        private bool _canClose;
+
+        private bool ValidateMyString(string filpath)
+        {
+            // Define your regex pattern
+            string pattern = @"\.(bin|hex)$";
+
+            if (string.IsNullOrEmpty(filpath))
+            {
+                // Handle the case when filePath is null or empty
+                return false;
+            }
+
+            // Perform the regex match
+            bool isMatch = Regex.IsMatch(filpath, pattern);
+
+            // Handle the validation result
+            if (isMatch)
+            {
+                return true;
+            }
+            else
+            {
+                log.Log(LogLevel.Info, "Please Select File Path");
+                return false;
+            }
+        }
+
+        private bool _canClose ;
 
         public bool CanClose
         {
@@ -42,8 +70,11 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             }
             set
             {
-                _canClose = value;
-                OnPropertyChanged();
+                if (_canClose != value)
+                {
+                    _canClose = value;
+                    OnPropertyChanged(nameof(CanClose));
+                }
             }
         }
 
@@ -164,6 +195,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         {
             try
             {
+                CanClose = false;
                 ResetDeviceCollection();
                 OverAllProgress = 0;
                 cur = 0;
@@ -243,9 +275,9 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             finally
             {
                 BT_FirmwareEnable = true;
+                CanClose = true;
                 DeleteNotifications();
             }
-            CanClose = false;
         }
         private void ResetSetContols()
         {
@@ -520,7 +552,9 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             log = LogManager.GetLogger("Motor Firmaware Update");
             UpdateFirmwareCommand = new RelayCommand(o =>
             {
+                ValidateMyString(Foe_sPathName);
                 BT_FirmwareEnable = false;
+                CanClose = false;
                 var FoeWroker = new Thread(UpdateFirmwareMeth) { IsBackground = true };
                 FoeWroker.Start();
             });

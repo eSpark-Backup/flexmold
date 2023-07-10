@@ -83,7 +83,12 @@
                 <DataGridTextColumn
                     dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
                     Binding="{Binding Foe_nSlaveAddr}"
-                    Header="Slave#"
+                    Header="#"
+                    IsReadOnly="True" />
+                <DataGridTextColumn
+                    dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
+                    Binding="{Binding DateTimeLU}"
+                    Header="Foe%"
                     IsReadOnly="True" />
                 <DataGridTextColumn
                     dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
@@ -92,30 +97,35 @@
                     IsReadOnly="True" />
                 <DataGridTextColumn
                     dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
-                    Binding="{Binding Foe_nBytesWritten}"
-                    Header="Foe Bytes"
-                    IsReadOnly="True" />
+                    Binding="{Binding SlaveState}"
+                    Header="State"
+                    IsReadOnly="True">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Background" Value="{Binding SlaveStateBackground}" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
                 <DataGridTextColumn
                     dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
-                    Binding="{Binding SlaveState}"
-                    Header="SlaveState"
+                    Binding="{Binding Foe_bError}"
+                    Header="Error"
                     IsReadOnly="True" />
                 <DataGridTextColumn
                     dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
                     Binding="{Binding Foe_nErrID}"
-                    Header="Foe Error Id"
-                    IsReadOnly="True" />
-                <DataGridTextColumn
-                    dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
-                    Binding="{Binding Foe_bError}"
-                    Header="Foe Error"
+                    Header="Err Id"
                     IsReadOnly="True" />
                 <DataGridTextColumn
                     dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
                     Binding="{Binding Foe_Remarks}"
-                    Header="Foe Remarks"
+                    Header="Remarks"
                     IsReadOnly="True" />
-
+                <DataGridTextColumn
+                    dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
+                    Binding="{Binding Foe_nBytesWritten}"
+                    Header="Bytes"
+                    IsReadOnly="True" />
             </DataGrid.Columns>
             <DataGrid.RowStyle>
                 <Style BasedOn="{StaticResource MahApps.Styles.DataGridRow}" TargetType="{x:Type DataGridRow}">

@@ -247,6 +247,11 @@ namespace FlexMold.MVVM.Model
                 OnPropertyChanged();
             }
         }
+
+        private SolidColorBrush _SlaveStateBackground;
+        public SolidColorBrush SlaveStateBackground
+        { get => _SlaveStateBackground; set { _SlaveStateBackground = value; OnPropertyChanged(); } }
+
         private string _SlaveState;
 
         public string SlaveState
@@ -255,6 +260,13 @@ namespace FlexMold.MVVM.Model
             set { _SlaveState = value; OnPropertyChanged(); }
         }
 
+        private string _DateTimeLU;
+
+        public string DateTimeLU
+        {
+            get { return _DateTimeLU; }
+            set { _DateTimeLU = value; OnPropertyChanged(); }
+        }
 
         public bool Init_Status { get; set; }
         public bool Foe_Status { get; set; }

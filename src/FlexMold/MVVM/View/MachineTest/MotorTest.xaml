@@ -88,6 +88,7 @@
             </Grid.ColumnDefinitions>
             <mah:NumericUpDown
                 Grid.ColumnSpan="2"
+                MaxWidth="190"
                 Maximum="300000"
                 Minimum="0"
                 Value="{Binding SelectedMotorRPM}" />
@@ -109,6 +110,7 @@
             </Grid.ColumnDefinitions>
             <mah:NumericUpDown
                 Grid.ColumnSpan="2"
+                MaxWidth="190"
                 Maximum="300000"
                 Minimum="0"
                 Value="{Binding SelectedMotorDisplacementValue, StringFormat=N2}" />
@@ -130,6 +132,7 @@
             </Grid.ColumnDefinitions>
             <mah:NumericUpDown
                 Grid.ColumnSpan="2"
+                MaxWidth="190"
                 Maximum="300000"
                 Minimum="0"
                 Value="{Binding SelectedMotorTimeValue, StringFormat=N2}" />
@@ -151,6 +154,7 @@
             </Grid.ColumnDefinitions>
             <mah:NumericUpDown
                 Grid.ColumnSpan="2"
+                MaxWidth="190"
                 Maximum="300000"
                 Minimum="0"
                 Value="{Binding SelectedMotorRampDelayValue, StringFormat=N2}" />

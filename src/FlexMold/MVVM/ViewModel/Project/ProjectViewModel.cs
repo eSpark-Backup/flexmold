@@ -1,15 +1,9 @@
-﻿using ControlzEx.Standard;
-using FlexMold.Core;
+﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.MVVM.View.Project;
-using FlexMold.MVVM.View.Setting;
-using FlexMold.MVVM.ViewModel.Setting;
 using FlexMold.Utility;
-using MahApps.Metro.Controls;
 using MaterialDesignThemes.Wpf;
-using Newtonsoft.Json;
 using NLog;
-using Sylvan.Data.Csv;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,9 +11,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using TwinCAT.Ads.TypeSystem;
 using TwinCAT.Ads;
-using System.Runtime.Intrinsics.Arm;
+using TwinCAT.Ads.TypeSystem;
 
 namespace FlexMold.MVVM.ViewModel.Project
 {

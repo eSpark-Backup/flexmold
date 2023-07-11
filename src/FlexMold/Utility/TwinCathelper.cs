@@ -239,24 +239,44 @@ namespace FlexMold.Utility
             TConnection_AdsStateChanged?.Invoke(null, e);
         }
 
-        public static bool InitializeMotors()
+        public static bool InitializeSlaves(EMachineType emt)
         {
             try
             {
-                DeviceCount = (short)MySymbols.FirstOrDefault(a =>
-                           a.InstancePath == TCVarName.DeviceCount).ReadAnyValue(typeof(short));
-                PLCMotors = new EthercatDevice[DeviceCount];
-                PLCMotorsStates = new DeviceStatuses((uint)DeviceCount);
-                SymbolEthercatDevice = MySymbols.Where(a => a.InstancePath == TCVarName.MainDevice).FirstOrDefault();
-                structSize = (SymbolEthercatDevice.Size) / DeviceCount;
-                buffer = new byte[structSize * DeviceCount];
-                ReadAllEthercatDeviceData();
-                if (SessionSystemService == null)
+                switch (emt)
                 {
-                    SessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
-                    ClientSystemService = (AdsConnection)SessionSystemService.Connect();
+                    case EMachineType.Motor:
+                        DeviceCount = (short)MySymbols.FirstOrDefault(a =>
+                           a.InstancePath == TCVarName.DeviceCount).ReadAnyValue(typeof(short));
+                        PLCMotors = new EthercatDevice[DeviceCount];
+                        PLCMotorsStates = new DeviceStatuses((uint)DeviceCount);
+                        SymbolEthercatDevice = MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.device}").FirstOrDefault();
+                        structSize = (SymbolEthercatDevice.Size) / DeviceCount;
+                        buffer = new byte[structSize * DeviceCount];
+                        ReadAllEthercatDeviceData();
+                        if (SessionSystemService == null)
+                        {
+                            SessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
+                            ClientSystemService = (AdsConnection)SessionSystemService.Connect();
+                        }
+                        return true;
+                    case EMachineType.ScanDevices:
+                        DeviceCount = (short)MySymbols.FirstOrDefault(a =>
+                           a.InstancePath == TCVarName.DeviceCount).ReadAnyValue(typeof(short));
+                        if (MySymbols.Any(a => a.InstancePath == $"MAIN.{TCSymbols.SlaveCount}"))
+                        {
+                            if (SessionSystemService == null)
+                            {
+                                SessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
+                                ClientSystemService = (AdsConnection)SessionSystemService.Connect();
+                            }
+                            return true;
+                        }
+                        return false;
+                    default:
+                        return false;
                 }
-                return true;
+
             }
             catch (Exception ex)
             {

@@ -1,4 +1,5 @@
 ﻿using FlexMold.Core;
+using FlexMold.MVVM.ViewModel.SplashScreen;
 using Microsoft.VisualStudio.Shell.Interop;
 using StructPacker;
 using System;
@@ -46,7 +47,7 @@ namespace FlexMold.MVVM.Model
         Time,
         CalibrationSeq01Request,
         CalibrationSeq02Request,
-        Abort, 
+        Abort,
         Project
     }
     public enum ETMode
@@ -83,6 +84,7 @@ namespace FlexMold.MVVM.Model
 
     public enum TCSymbols
     {
+        SlaveCount,
         deviceCount,
         device,
         mPosition,
@@ -223,10 +225,15 @@ namespace FlexMold.MVVM.Model
         }
     }
 
-    public class Foe : ObservableObject
+    public class FoeModel : ObservableObject
     {
+        public IFoe View { get; set; }
+        void RefreshUI()
+        {
+            if (View == null) return;
+            View.RefreshDataGrid();
+        }
         private SolidColorBrush _ErrorForeground;
-
         public SolidColorBrush ErrorForeground
         { get => _ErrorForeground; set { _ErrorForeground = value; OnPropertyChanged(); } }
 
@@ -235,30 +242,43 @@ namespace FlexMold.MVVM.Model
         public SolidColorBrush BusyForeground
         { get => _BusyForeground; set { _BusyForeground = value; OnPropertyChanged(); } }
 
-        private uint _Foe_dwPass;
+        private bool _IsChecked;
 
-        public UInt32 Foe_dwPass
+        public bool IsChecked
         {
-            get => _Foe_dwPass;
+            get => _IsChecked;
             set
             {
-                _Foe_dwPass = value;
+                _IsChecked = value;
                 OnPropertyChanged();
             }
+        }
+
+        private SolidColorBrush _SlaveStateBackground;
+        public SolidColorBrush SlaveStateBackground
+        { get => _SlaveStateBackground; set { _SlaveStateBackground = value; OnPropertyChanged(); } }
+
+        private string _SlaveState;
+
+        public string SlaveState
+        {
+            get { return _SlaveState; }
+            set { _SlaveState = value; OnPropertyChanged(); RefreshUI(); }
+        }
+
+        private string _DateTimeLU;
+
+        public string DateTimeLU
+        {
+            get { return _DateTimeLU; }
+            set { _DateTimeLU = value; OnPropertyChanged(); }
         }
 
         public bool Init_Status { get; set; }
         public bool Foe_Status { get; set; }
         public bool Op_Status { get; set; }
-        public UInt16 Foe_nSlaveAddr { get; set; }
-        private string _Foe_sPathName;
-
-        public string Foe_sPathName
-        {
-            get => _Foe_sPathName; set { _Foe_sPathName = value; OnPropertyChanged(); }
-        }
-
-        public string Foe_sNetId { get; set; }
+        public UInt16 Foe_nSlaveAddr { get => foe_nSlaveAddr; set { foe_nSlaveAddr = value; OnPropertyChanged(); } }
+        public string Foe_sNetId { get => foe_sNetId; set { foe_sNetId = value; OnPropertyChanged(); } }
         private bool _Foe_bLoad;
 
         public bool Foe_bLoad
@@ -315,13 +335,15 @@ namespace FlexMold.MVVM.Model
         { get => _Foe_nBytesWritten; set { _Foe_nBytesWritten = value; OnPropertyChanged(); } }
 
         private UInt32 _Foe_nPercent;
+        private string foe_sNetId;
+        private ushort foe_nSlaveAddr;
 
         public UInt32 Foe_nPercent
         { get => _Foe_nPercent; set { _Foe_nPercent = value; OnPropertyChanged(); } }
 
-        public Foe ShallowCopy()
+        public FoeModel ShallowCopy()
         {
-            return (Foe)this.MemberwiseClone();
+            return (FoeModel)this.MemberwiseClone();
         }
     }
     public class MotorStatusControl : ObservableObject

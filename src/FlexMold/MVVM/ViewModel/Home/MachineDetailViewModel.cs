@@ -31,11 +31,12 @@ namespace FlexMold.MVVM.ViewModel.Home
         {
             var log = LogManager.GetLogger("Machine Link Status");
             var v = GetMismatchedIndexes(Slave_Link_Status, _value);
+
             if (Slave_Link_Status != null)
             {
                 for (int i = 0; i < v.Length; i++)
                 {
-                    DispLinkStatus(_value, i, log);
+                    DispLinkStatus(_value, v[i], log);
                 }
             }
             else
@@ -56,13 +57,14 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 case ESlaveLink.EC_LINK_STATE_OK:
                     var _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Green);
-                    log.Log(LogLevel.Warn, _tmg);
+                    log.Log(LogLevel.Info, _tmg);
                     TNF.ShowSuccess(_tmg);
                     break;
                 case ESlaveLink.EC_LINK_STATE_Other_Fail:
                 case ESlaveLink.EC_LINK_STATE_ADDITIONAL_LINK:
                 case ESlaveLink.EC_LINK_STATE_NOT_PRESENT:
                 case ESlaveLink.EC_LINK_STATE_LINK_WITHOUT_COMM:
+                case ESlaveLink.ERR_PREOP_INIT_ERR:
                 case ESlaveLink.EC_LINK_STATE_MISSING_LINK:
                     _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Red);
                     log.Log(LogLevel.Warn, _tmg);
@@ -70,10 +72,13 @@ namespace FlexMold.MVVM.ViewModel.Home
                     break;
                 case ESlaveLink.UnAvailable:
                     _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.White);
-                    //log.Log(LogLevel.Warn, _tmg);
+                    log.Log(LogLevel.Trace, _tmg);
                     //TNF.ShowWarning(_tmg);
                     break;
                 default:
+                    _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Orange);
+                    log.Log(LogLevel.Error, "! Undocumented State ! " + _tmg);
+                    TNF.ShowError(_tmg);
                     break;
             }
         }
@@ -120,7 +125,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 for (int i = 0; i < v.Length; i++)
                 {
-                    DispStateMachine(_value, i, log);
+                    DispStateMachine(_value, v[i], log);
                 }
             }
             else
@@ -185,6 +190,9 @@ namespace FlexMold.MVVM.ViewModel.Home
                         log.Log(LogLevel.Error, _tmg);
                         break;
                     default:
+                        _tmg = SetUI(index, MySlaves[index].Slave_State_Machine, Brushes.Red);
+                        TNF.ShowError(_tmg);
+                        log.Log(LogLevel.Error, "! Undocumented State ! " + _tmg);
                         break;
                 }
             }

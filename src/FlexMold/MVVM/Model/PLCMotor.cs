@@ -149,6 +149,7 @@ namespace FlexMold.MVVM.Model
         EC_LINK_STATE_PORT_C = 0x40,
         EC_LINK_STATE_PORT_D = 0x80,
         EC_LINK_STATE_Other_Fail = 0x24,
+        ERR_PREOP_INIT_ERR = 0x60,
         UnAvailable = 0x99
     }
 

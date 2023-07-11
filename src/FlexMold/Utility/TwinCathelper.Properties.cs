@@ -24,7 +24,7 @@ namespace FlexMold.Utility
         public static ConnectionState MyConnectionStateOld { get; set; }
         public static ObservableCollection<Symbol> MySymbols { get; private set; }
         public static EthercatDevice[] PLCMotors { get; private set; }
-        public static DeviceStatuses PLCMotorsStates { get; private set; }
+        public static DeviceStatuses PLCMotorsStatuses { get; private set; }
         public static string SAmsNetId { get; private set; }
         public static ushort[] SAmsPort { get; private set; }
         public static AdsSession Session { get; private set; }
@@ -52,6 +52,7 @@ namespace FlexMold.Utility
         public static event EventHandler TConnection_AdsStateChanged;
 
         public static event EventHandler TMotor_PositionChanged;
+        public static event EventHandler TMotor_ModeChanged;
         public static event EventHandler TMotor_MotorDiagnosticChanged;
         public static event EventHandler TMotor_TemperatureChanged;
         public static event EventHandler TMotor_DeviceStatusChanged;

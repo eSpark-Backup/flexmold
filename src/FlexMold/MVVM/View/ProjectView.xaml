@@ -121,16 +121,13 @@
                         </Button>
                         <Button Content="Shape A" />
                         <Button Content="Shape B" />
-                        <Button
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            Command="{Binding StopMotorsCommand}">
+                        <Button Command="{Binding StopMotorsCommand}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconMaterial Margin="6" Kind="StopCircle" />
                                 <TextBlock VerticalAlignment="Center" Text="Stop" />
                             </StackPanel>
                         </Button>
-                        <Button>
+                        <Button Command="{Binding HomeMotorsCommand}" IsEnabled="{Binding DeviceStatus}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconMaterial Margin="6" Kind="Home" />
                                 <TextBlock

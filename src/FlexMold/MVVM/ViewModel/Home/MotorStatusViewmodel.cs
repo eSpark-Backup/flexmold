@@ -16,7 +16,7 @@ using System.Windows.Media;
 
 namespace FlexMold.MVVM.ViewModel.Home
 {
-    internal class MotorStatusViewmodel : StatusBaseViewModel
+    internal class MotorStatusViewmodel : StatusBaseViewModel, IMotorStatus
     {
         private readonly IMachineDetailViewModel _IMachineDetailViewModel;
         public ObservableCollection<MotorStatusControl> MyMotors { get; set; }
@@ -31,7 +31,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             Console.WriteLine();
         }
 
-        private void Calibrate()
+        public void Calibrate()
         {
             var log = LogManager.GetLogger("Calibration");
             CalibrateButton = false;
@@ -144,6 +144,10 @@ namespace FlexMold.MVVM.ViewModel.Home
                     CalibrateButton = false;
                     break;
                 default:
+                    _tmgs = SetUI(i, swe, Brushes.Red);
+                    TNF.ShowError(_tmgs);
+                    log.Log(LogLevel.Error, "! Undocumented Status !" + _tmgs);
+                    CalibrateButton = false;
                     break;
             }
         }
@@ -189,7 +193,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 for (int i = 0; i < v.Length; i++)
                 {
-                    DispDeviceStatus(_value, v[i]);
+                    DispDeviceStatus(_value, i);
                 }
             }
         }
@@ -245,6 +249,9 @@ namespace FlexMold.MVVM.ViewModel.Home
                     log.Log(LogLevel.Warn, _tmgs);
                     break;
                 default:
+                    _tmgs = SetUI(i, sw, Brushes.Red);
+                    TNF.ShowError(_tmgs);
+                    log.Log(LogLevel.Error,"! Undocumented Status !"+_tmgs);
                     break;
             }
         }
@@ -323,14 +330,14 @@ namespace FlexMold.MVVM.ViewModel.Home
         private void Motor_PositionChanged(object sender, EventArgs e)
         {
             var array = new float[TwinCathelper.DeviceCount];
-            Array.Copy(TwinCathelper.PLCMotorsStates.mPostion, array, array.Length);
+            Array.Copy(TwinCathelper.PLCMotorsStatuses.mPostion, array, array.Length);
             mPosition = array;
         }
         private void Motor_DeviceStatusChanged(object sender, EventArgs e)
         {
             var log = LogManager.GetLogger("Device Status");
             var array = new uint[TwinCathelper.DeviceCount];
-            Array.Copy(TwinCathelper.PLCMotorsStates.DeviceStatus, array, array.Length);
+            Array.Copy(TwinCathelper.PLCMotorsStatuses.DeviceStatus, array, array.Length);
             DeviceStatus = array;
             if (DeviceStatus.SequenceEqual(validSeq01Val))
             {
@@ -365,7 +372,7 @@ namespace FlexMold.MVVM.ViewModel.Home
         private void Motor_MotorDiagnosticChanged(object sender, EventArgs e)
         {
             var array = new uint[TwinCathelper.DeviceCount];
-            Array.Copy(TwinCathelper.PLCMotorsStates.MotorDiagnistic, array, array.Length);
+            Array.Copy(TwinCathelper.PLCMotorsStatuses.MotorDiagnistic, array, array.Length);
             MotorDiagnistics = array;
         }
         private bool _CalibrateButton;
@@ -378,6 +385,8 @@ namespace FlexMold.MVVM.ViewModel.Home
 
         public MotorStatusViewmodel()
         {
+            _MotorStatus = Application.Current.MainWindow.DataContext as IMotorStatus;
+
             if (TwinCathelper.Client == null)
             {
                 return;

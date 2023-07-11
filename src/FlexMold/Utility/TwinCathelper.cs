@@ -176,17 +176,17 @@ namespace FlexMold.Utility
                 {
                     case TCSymbols.mPosition:
                         for (int i = 0; i < PLCMotors.Length; i++)
-                            PLCMotorsStates.mPostion[i] = BitConverter.ToSingle(e.Data.ToArray(), i * sizeof(float));
+                            PLCMotorsStatuses.mPostion[i] = BitConverter.ToSingle(e.Data.ToArray(), i * sizeof(float));
                         TMotor_PositionChanged?.Invoke(null, e);
                         break;
                     case TCSymbols.MotorDiagnostic:
-                        Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStates.MotorDiagnistic, 0, e.Data.Length);
-                        _log.Log(LogLevel.Info, $"MotorDiagnistic Updated : {String.Join(",", PLCMotorsStates.MotorDiagnistic)}");
+                        Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStatuses.MotorDiagnistic, 0, e.Data.Length);
+                        _log.Log(LogLevel.Info, $"MotorDiagnistic Updated : {String.Join(",", PLCMotorsStatuses.MotorDiagnistic)}");
                         TMotor_MotorDiagnosticChanged?.Invoke(null, e);
                         break;
                     case TCSymbols.DeviceStatus:
-                        Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStates.DeviceStatus, 0, e.Data.Length);
-                        _log.Log(LogLevel.Info, $"DeviceStatus Updated : {String.Join(",", PLCMotorsStates.DeviceStatus)}");
+                        Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStatuses.DeviceStatus, 0, e.Data.Length);
+                        _log.Log(LogLevel.Info, $"DeviceStatus Updated : {String.Join(",", PLCMotorsStatuses.DeviceStatus)}");
                         TMotor_DeviceStatusChanged?.Invoke(null, e);
                         break;
                     default:
@@ -249,7 +249,7 @@ namespace FlexMold.Utility
                         DeviceCount = (short)MySymbols.FirstOrDefault(a =>
                            a.InstancePath == TCVarName.DeviceCount).ReadAnyValue(typeof(short));
                         PLCMotors = new EthercatDevice[DeviceCount];
-                        PLCMotorsStates = new DeviceStatuses((uint)DeviceCount);
+                        PLCMotorsStatuses = new DeviceStatuses((uint)DeviceCount);
                         SymbolEthercatDevice = MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.device}").FirstOrDefault();
                         structSize = (SymbolEthercatDevice.Size) / DeviceCount;
                         buffer = new byte[structSize * DeviceCount];

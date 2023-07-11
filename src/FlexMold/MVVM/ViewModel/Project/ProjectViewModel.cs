@@ -1,7 +1,10 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.MVVM.View.Project;
+using FlexMold.MVVM.ViewModel.Home;
+using FlexMold.MVVM.ViewModel.SplashScreen;
 using FlexMold.Utility;
+using MahApps.Metro.Controls;
 using MaterialDesignThemes.Wpf;
 using NLog;
 using System;
@@ -11,6 +14,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
 
@@ -22,6 +26,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         public RelayCommand SendCSVCommand { get; set; }
         public RelayCommand BrowseProjectCommand { get; set; }
         public RelayCommand StopMotorsCommand { get; set; }
+        public RelayCommand HomeMotorsCommand { get; set; }
         public int MotorDirValue;
         public float MotorRampDelayValue;
         public float MotorTime;
@@ -62,6 +67,22 @@ namespace FlexMold.MVVM.ViewModel.Project
         {
             get { return _LaserSendButton; }
             set { _LaserSendButton = value; OnPropertyChanged(); }
+        }
+        private float[] _Position;
+        public float[] Position
+        {
+            get { return _Position; }
+            set
+            {
+                _Position = value;
+            }
+        }
+        uint[] validForHome = new uint[TwinCathelper.DeviceCount];
+
+        private bool _DeviceStatus;
+        public bool DeviceStatus
+        {
+            get => _DeviceStatus; private set { _DeviceStatus = value; OnPropertyChanged(); }
         }
         private FileInfo _selectedFile;
 
@@ -160,15 +181,6 @@ namespace FlexMold.MVVM.ViewModel.Project
             }
         }
 
-        private float[] _Position;
-        public float[] Position
-        {
-            get { return _Position; }
-            set
-            {
-                _Position = value;
-            }
-        }
         private void Client_AdsNotification(object sender, AdsNotificationEventArgs e)
         {
             try
@@ -279,7 +291,16 @@ namespace FlexMold.MVVM.ViewModel.Project
             }
             WriteCSVData(csvdata);
         }
-
+        private void Motor_DeviceStatusChanged(object sender, EventArgs e)
+        {
+            var array = new uint[TwinCathelper.DeviceCount];
+            Array.Copy(TwinCathelper.PLCMotorsStatuses.DeviceStatus, array, array.Length);
+            if (array.SequenceEqual(validForHome))
+                DeviceStatus = true;
+            else
+                DeviceStatus = false;
+        }
+        public IMotorStatus _MotorStatus { get; set; }
         public ProjectViewModel()
         {
             lVM = new LaserProjectorViewModel(this);
@@ -296,6 +317,18 @@ namespace FlexMold.MVVM.ViewModel.Project
                     TwinCathelper.WriteEthercatDeviceData(i, TwinCathelper.DeviceSymbol.mMode, data.CastToArray());
                 log.Log(LogLevel.Warn, $"{EMode.Abort}");
             });
+            HomeMotorsCommand = new RelayCommand(o =>
+            {
+                _MotorStatus.Calibrate();
+                log.Log(LogLevel.Warn, $"Home Motors Triggered");
+                log.Log(LogLevel.Warn, $"CalibrationSeq01 Requested");
+
+                var data = (int)EMode.CalibrationSeq01Request;
+                for (uint i = 0; i < TwinCathelper.DeviceCount; i++)
+                    TwinCathelper.WriteEthercatDeviceData(i, TwinCathelper.DeviceSymbol.mMode, data.CastToArray());
+            });
+            TwinCathelper.TMotor_DeviceStatusChanged += Motor_DeviceStatusChanged;
+            Array.Fill<uint>(validForHome, (int)EDeviceStatus.None);
         }
     }
 }

@@ -58,16 +58,6 @@ namespace FlexMold.MVVM.ViewModel.Setting
             {
                 DeviceIds[i] = i;
             }
-            FirmwareCommand = new RelayCommand(o => { UpdateFirmware(); });
-        }
-
-        private async void UpdateFirmware()
-        {
-            var view = new FoeSettingDiaglog()
-            {
-                DataContext = new FoeSettingDiaglogViewModel()
-            };
-            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
         }
 
         private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)

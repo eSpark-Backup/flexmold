@@ -35,14 +35,14 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             CanClose = e;
         }
         FoeViewModel foeViewModel;
-        public TwinCatConfigViewModel()
+        public TwinCatConfigViewModel(FoeView foeView)
         {
             CanClose = true;
             foeViewModel = new();
             foeViewModel.TUpdate_Status += Update_Status;
             this.TabList = new ObservableCollection<TabItem>
             {
-                new TabItem(){Content= new FoeView(foeViewModel)},
+                new TabItem(){Content= foeView},
             };
         }
     }

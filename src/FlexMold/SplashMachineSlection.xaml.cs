@@ -8,11 +8,12 @@ namespace FlexMold
     /// </summary>
     public partial class SplashMachineSlection : MetroWindow
     {
-        public SplashMachineSlection()
+        private readonly SplashScreenViewModel _splashScreenViewModel;
+        public SplashMachineSlection(SplashScreenViewModel splashScreenViewModel)
         {
             InitializeComponent();
-            var vm = DataContext as SplashScreenViewModel;
-            vm.OnRequestClose += (s, e) => this.Close();
+            this._splashScreenViewModel = splashScreenViewModel;
+            this._splashScreenViewModel.OnRequestClose += (s, e) => this.Close();
         }
     }
 }

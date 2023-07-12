@@ -25,7 +25,7 @@ using TwinCAT.Ads;
 
 namespace FlexMold.MVVM.ViewModel
 {
-    internal class SplashScreenViewModel : ObservableObject
+    public class SplashScreenViewModel : ObservableObject
     {
         public VSInfo SelectedVS { get; set; }
         private bool _RunButtonEnable;
@@ -80,6 +80,7 @@ namespace FlexMold.MVVM.ViewModel
         }
 
         private bool _ICEnable;
+        private readonly TwinCatConfigViewModel _TwinCatConfigViewModel;
 
         public bool ICEnable
         {
@@ -100,7 +101,7 @@ namespace FlexMold.MVVM.ViewModel
 
         public event EventHandler OnRequestClose;
 
-        public SplashScreenViewModel()
+        public SplashScreenViewModel(TwinCatConfigViewModel twinCatConfigViewModel)
         {
             if (!TwinCathelper.LoadSetting())
                 Environment.Exit(0);
@@ -133,6 +134,7 @@ namespace FlexMold.MVVM.ViewModel
                 log.Log(LogLevel.Info, $"Closing ....");
                 OnRequestClose(this, new EventArgs());
             });
+            this._TwinCatConfigViewModel = twinCatConfigViewModel;
         }
         private void TwincatConfig()
         {
@@ -140,7 +142,7 @@ namespace FlexMold.MVVM.ViewModel
             {
                 Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
                 {
-                    await DialogHost.Show(new TwinCatConfigView() { DataContext = new TwinCatConfigViewModel() }, "SplashDialog", ClosingEventHandler);
+                    await DialogHost.Show(new TwinCatConfigView() { DataContext = _TwinCatConfigViewModel }, "SplashDialog", ClosingEventHandler);
                 }));
             }
         }

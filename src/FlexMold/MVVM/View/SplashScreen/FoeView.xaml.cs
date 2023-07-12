@@ -23,15 +23,18 @@ namespace FlexMold.MVVM.View.SplashScreen
     /// </summary>
     public partial class FoeView : UserControl, IFoe
     {
-        public FoeView()
+        public FoeView(FoeViewModel foeViewModel)
         {
+            this.DataContext = foeViewModel;
             InitializeComponent();
-            this.DataContext = new FoeViewModel();
-            foreach (var item in (DataContext as FoeViewModel).MyDevicesAndBoxes)
-            {
-                item.View = this as IFoe;
-            }
+            var aa = (FoeViewModel)mygrid.DataContext;
+            if (this.DataContext != null)
+                foreach (var item in (this.DataContext as FoeViewModel).MyDevicesAndBoxes)
+                {
+                    item.View = this as IFoe;
+                }
         }
+       
         public void RefreshDataGrid()
         {
             this.Dispatcher.Invoke(() =>

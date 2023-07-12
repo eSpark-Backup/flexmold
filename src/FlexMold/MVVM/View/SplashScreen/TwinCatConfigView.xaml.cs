@@ -6,13 +6,11 @@ namespace FlexMold.MVVM.View.Setting
     /// <summary>
     /// Interaction logic for FoeSettingDiaglog.xaml
     /// </summary>
-    public partial class DeviceScanDialog : UserControl
+    public partial class TwinCatConfigView : UserControl
     {
-        public DeviceScanDialog()
+        public TwinCatConfigView()
         {
             InitializeComponent();
-            FoeViewModel viewModel = new FoeViewModel();
-            DataContext = viewModel;
         }
     }
 }

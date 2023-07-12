@@ -140,7 +140,7 @@ namespace FlexMold.MVVM.ViewModel
             {
                 Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
                 {
-                    await DialogHost.Show(new DeviceScanDialog(), "SplashDialog", ClosingEventHandler);
+                    await DialogHost.Show(new TwinCatConfigView() { DataContext = new TwinCatConfigViewModel() }, "SplashDialog", ClosingEventHandler);
                 }));
             }
         }

@@ -5,15 +5,10 @@ using NLog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.ConstrainedExecution;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Forms;
 using System.Windows.Media;
 using TwinCAT;
@@ -22,7 +17,7 @@ using TwinCAT.Ads.TypeSystem;
 
 namespace FlexMold.MVVM.ViewModel.SplashScreen
 {
-    internal class FoeViewModel : ObservableObject
+    public class FoeViewModel : ObservableObject, ITabViewModel
     {
         private int retry = 0;
         private string foe_sPathName;
@@ -57,24 +52,6 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             {
                 log.Log(LogLevel.Info, "Please Select File Path");
                 return false;
-            }
-        }
-
-        private bool _canClose ;
-
-        public bool CanClose
-        {
-            get
-            {
-                return _canClose;
-            }
-            set
-            {
-                if (_canClose != value)
-                {
-                    _canClose = value;
-                    OnPropertyChanged(nameof(CanClose));
-                }
             }
         }
 
@@ -174,6 +151,8 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         public string Foe_sNetId { get; private set; }
 
         private List<int> NotificatioHandles;
+        public event EventHandler<bool> TUpdate_Status;
+
         private void RegisterNotification()
         {
 
@@ -195,7 +174,6 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         {
             try
             {
-                CanClose = false;
                 ResetDeviceCollection();
                 OverAllProgress = 0;
                 cur = 0;
@@ -275,7 +253,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             finally
             {
                 BT_FirmwareEnable = true;
-                CanClose = true;
+                TUpdate_Status?.Invoke(null, true);
                 DeleteNotifications();
             }
         }
@@ -554,7 +532,8 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             {
                 ValidateMyString(Foe_sPathName);
                 BT_FirmwareEnable = false;
-                CanClose = false;
+                //CanClose = false;
+                TUpdate_Status?.Invoke(null, false);
                 var FoeWroker = new Thread(UpdateFirmwareMeth) { IsBackground = true };
                 FoeWroker.Start();
             });

@@ -385,7 +385,7 @@ namespace FlexMold.MVVM.ViewModel.Home
 
         public MotorStatusViewmodel()
         {
-            _MotorStatus = Application.Current.MainWindow.DataContext as IMotorStatus;
+            //_MotorStatus = Application.Current.MainWindow.DataContext as IMotorStatus;
 
             if (TwinCathelper.Client == null)
             {

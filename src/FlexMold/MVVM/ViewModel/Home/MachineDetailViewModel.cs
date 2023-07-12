@@ -107,6 +107,7 @@ namespace FlexMold.MVVM.ViewModel.Home
         }
 
         private ESlaveStateMachine[] _Slave_StateMachine_Status;
+        private readonly ITwinCathelper _TwinCathelper;
 
         public ESlaveStateMachine[] Slave_StateMachine_Status
         {
@@ -141,28 +142,28 @@ namespace FlexMold.MVVM.ViewModel.Home
 
         private void SetDeviceMode(ESlaveStateMachine[] _value, Logger log)
         {
-            if (_value.SequenceEqual(TwinCathelper.ValidStateMachines))
+            if (_value.SequenceEqual(_TwinCathelper.ValidStateMachines))
             {
-                TwinCathelper.Slave_StateMachine_Abort = false;
-                TwinCathelper.SetDefaultMode(log);
+                _TwinCathelper.Slave_StateMachine_Abort = false;
+                _TwinCathelper.SetDefaultMode(log);
             }
             else
             {
-                TwinCathelper.Slave_StateMachine_Abort = true;
-                TwinCathelper.SetAbortMode(log);
+                _TwinCathelper.Slave_StateMachine_Abort = true;
+                _TwinCathelper.SetAbortMode(log);
             }
         }
         private void SetDeviceMode(ESlaveLink[] _value, Logger log)
         {
-            if (_value.SequenceEqual(TwinCathelper.ValidElinkStates))
+            if (_value.SequenceEqual(_TwinCathelper.ValidElinkStates))
             {
-                TwinCathelper.Slave_Link_Abort = false;
-                TwinCathelper.SetDefaultMode(log);
+                _TwinCathelper.Slave_Link_Abort = false;
+                _TwinCathelper.SetDefaultMode(log);
             }
             else
             {
-                TwinCathelper.Slave_Link_Abort = true;
-                TwinCathelper.SetAbortMode(log);
+                _TwinCathelper.Slave_Link_Abort = true;
+                _TwinCathelper.SetAbortMode(log);
             }
         }
         void DispStateMachine(ESlaveStateMachine[] _value, int index, Logger log)
@@ -199,16 +200,16 @@ namespace FlexMold.MVVM.ViewModel.Home
         }
         private void Slave_Link_Status_Changed(object? sender, EventArgs e)
         {
-            Slave_Link_Status = TwinCathelper.Slave_Link_Status;
+            Slave_Link_Status = _TwinCathelper.Slave_Link_Status;
         }
 
         private void Slave_StateMachine_Status_Changed(object? sender, EventArgs e)
         {
-            Slave_StateMachine_Status = TwinCathelper.Slave_StateMachine_Status;
+            Slave_StateMachine_Status = _TwinCathelper.Slave_StateMachine_Status;
         }
-        public MachineDetailViewModel()
+        public MachineDetailViewModel(ITwinCathelper twinCathelper)
         {
-            if (TwinCathelper.Client == null)
+            if (_TwinCathelper.Client == null)
             {
                 return;
             }
@@ -229,9 +230,10 @@ namespace FlexMold.MVVM.ViewModel.Home
                     $" State Machine : {ESlaveStateMachine.UnAvailable}\n"
                 };
             }
-            TwinCathelper.TSlave_Link_Status_Changed += Slave_Link_Status_Changed;
-            TwinCathelper.TSlave_StateMachine_Status_Changed += Slave_StateMachine_Status_Changed;
-            TwinCathelper.SetMachineStatusTimer();
+            _TwinCathelper.TSlave_Link_Status_Changed += Slave_Link_Status_Changed;
+            _TwinCathelper.TSlave_StateMachine_Status_Changed += Slave_StateMachine_Status_Changed;
+            _TwinCathelper.SetMachineStatusTimer();
+            this._TwinCathelper = twinCathelper;
         }
     }
 }

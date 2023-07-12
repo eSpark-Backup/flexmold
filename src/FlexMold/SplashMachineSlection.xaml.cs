@@ -8,8 +8,8 @@ namespace FlexMold
     /// </summary>
     public partial class SplashMachineSlection : MetroWindow
     {
-        private readonly SplashScreenViewModel _splashScreenViewModel;
-        public SplashMachineSlection(SplashScreenViewModel splashScreenViewModel)
+        private readonly ISplashScreenViewModel _splashScreenViewModel;
+        public SplashMachineSlection(ISplashScreenViewModel splashScreenViewModel)
         {
             InitializeComponent();
             this._splashScreenViewModel = splashScreenViewModel;

@@ -14,7 +14,7 @@ using System.Windows.Controls;
 
 namespace FlexMold.MVVM.ViewModel.SplashScreen
 {
-    public class TwinCatConfigViewModel : ObservableObject
+    public class TwinCatConfigViewModel : ObservableObject, ITwinCatConfigViewModel
     {
         public ObservableCollection<TabItem> TabList { get; set; }
         private bool _canClose;
@@ -35,10 +35,9 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             CanClose = e;
         }
         FoeViewModel foeViewModel;
-        public TwinCatConfigViewModel(FoeView foeView)
+        public TwinCatConfigViewModel(FoeView foeView, IFoeViewModel foeViewModel)
         {
             CanClose = true;
-            foeViewModel = new();
             foeViewModel.TUpdate_Status += Update_Status;
             this.TabList = new ObservableCollection<TabItem>
             {

@@ -35,6 +35,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
         }
 
         private uint[] _DeviceIds;
+        private readonly ITwinCathelper _TwinCathelper;
 
         public uint[] DeviceIds
         {
@@ -46,9 +47,10 @@ namespace FlexMold.MVVM.ViewModel.Setting
             }
         }
 
-        public MotorSettingViewModel()
+        public MotorSettingViewModel(ITwinCathelper twinCathelper)
         {
-            if (TwinCathelper.Client == null)
+            this._TwinCathelper = twinCathelper;
+            if (_TwinCathelper.Client == null)
             {
                 return;
             }

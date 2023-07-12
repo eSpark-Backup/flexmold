@@ -21,13 +21,16 @@ namespace FlexMold
             AppHost = Host.CreateDefaultBuilder()
             .ConfigureServices((hostContext, services) =>
             {
-                services.AddSingleton<SplashScreenViewModel>();
+                services.AddSingleton<ISplashScreenViewModel, SplashScreenViewModel>();
                 services.AddSingleton<SplashMachineSlection>();
-                services.AddScoped<Machine>();
-                services.AddScoped<MainWindow>();
-                services.AddScoped<FoeView>();
-                services.AddScoped<FoeViewModel>();
-                services.AddScoped<TwinCatConfigViewModel>();
+                services.AddSingleton<Machine>();
+                services.AddSingleton<MainWindow>();
+                services.AddSingleton<FoeView>();
+                services.AddSingleton<FlexMoldMachine1>();
+                services.AddSingleton<TcDeviceScanning>();
+                services.AddSingleton<IFoeViewModel, FoeViewModel>();
+                services.AddSingleton<ITwinCatConfigViewModel, TwinCatConfigViewModel>();
+                services.AddSingleton<ITwinCathelper,TwinCathelper>();
             }
             ).Build();
         }
@@ -36,7 +39,7 @@ namespace FlexMold
             await AppHost!.StartAsync();
 
             var startupScreen = AppHost.Services.GetRequiredService<SplashMachineSlection>();
-            startupScreen.DataContext = AppHost.Services.GetRequiredService<SplashScreenViewModel>();
+            startupScreen.DataContext = AppHost.Services.GetRequiredService<ISplashScreenViewModel>();
             startupScreen.Show();
 
             base.OnStartup(e);

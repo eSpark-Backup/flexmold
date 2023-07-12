@@ -23,7 +23,7 @@ namespace FlexMold.MVVM.View.SplashScreen
     /// </summary>
     public partial class FoeView : UserControl, IFoe
     {
-        public FoeView(FoeViewModel foeViewModel)
+        public FoeView(IFoeViewModel foeViewModel)
         {
             this.DataContext = foeViewModel;
             InitializeComponent();

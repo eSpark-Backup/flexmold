@@ -85,6 +85,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             get => _DeviceStatus; private set { _DeviceStatus = value; OnPropertyChanged(); }
         }
         private FileInfo _selectedFile;
+        private readonly ITwinCathelper _TwinCathelper;
 
         public FileInfo SelectedFile
         {
@@ -119,19 +120,19 @@ namespace FlexMold.MVVM.ViewModel.Project
         {
             for (int i = 0; i < data.Count; i++)
             {
-                TwinCathelper.PLCMotors[i].mDisplacement = (uint)data[i];
-                TwinCathelper.PLCMotors[i].mDirection = MotorDirValue == 0 ? false : true;
-                TwinCathelper.PLCMotors[i].mRampDelay = MotorRampDelayValue;
-                TwinCathelper.PLCMotors[i].mTime = MotorTime;
-                TwinCathelper.PLCMotors[i].mMode = (int)EMode.Project;
+                _TwinCathelper.PLCMotors[i].mDisplacement = (uint)data[i];
+                _TwinCathelper.PLCMotors[i].mDirection = MotorDirValue == 0 ? false : true;
+                _TwinCathelper.PLCMotors[i].mRampDelay = MotorRampDelayValue;
+                _TwinCathelper.PLCMotors[i].mTime = MotorTime;
+                _TwinCathelper.PLCMotors[i].mMode = (int)EMode.Project;
             }
-            TwinCathelper.WriteEthercatDeviceData();
+            _TwinCathelper.WriteEthercatDeviceData();
             log.Log(LogLevel.Info, $"{data.Count} csv value/s has been written sucessfully");
 
             Thread.Sleep(200);
             uint zero = 0;
             for (uint i = 0; i < data.Count; i++)
-                TwinCathelper.WriteEthercatDeviceData(i, TwinCathelper.DeviceSymbol.mDisplacement, zero.CastToArray());
+                _TwinCathelper.WriteEthercatDeviceData(i, TwinCathelper.DeviceSymbol.mDisplacement, zero.CastToArray());
             log.Log(LogLevel.Info, $"{data.Count} zero value/s has been written sucessfully");
         }
         private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
@@ -281,12 +282,12 @@ namespace FlexMold.MVVM.ViewModel.Project
                 TNF.ShowError($"CSV Failed");
                 return;
             }
-            if (TwinCathelper.PLCMotors.Length != csvdata.Count)
+            if (_TwinCathelper.PLCMotors.Length != csvdata.Count)
             {
                 log.Log(LogLevel.Error, $"Please select correct CSV");
                 log.Log(LogLevel.Error, $"Data and Box counts are not equal");
-                log.Log(LogLevel.Error, $"Data Count : {csvdata.Count} | Device Count : {TwinCathelper.PLCMotors.Length}");
-                TNF.ShowError($"CSV Failed\nDevice Count :{TwinCathelper.PLCMotors.Length} != Data Count :{csvdata.Count}");
+                log.Log(LogLevel.Error, $"Data Count : {csvdata.Count} | Device Count : {_TwinCathelper.PLCMotors.Length}");
+                TNF.ShowError($"CSV Failed\nDevice Count :{_TwinCathelper.PLCMotors.Length} != Data Count :{csvdata.Count}");
                 return;
             }
             WriteCSVData(csvdata);
@@ -294,14 +295,14 @@ namespace FlexMold.MVVM.ViewModel.Project
         private void Motor_DeviceStatusChanged(object sender, EventArgs e)
         {
             var array = new uint[TwinCathelper.DeviceCount];
-            Array.Copy(TwinCathelper.PLCMotorsStatuses.DeviceStatus, array, array.Length);
+            Array.Copy(_TwinCathelper.PLCMotorsStatuses.DeviceStatus, array, array.Length);
             if (array.SequenceEqual(validForHome))
                 DeviceStatus = true;
             else
                 DeviceStatus = false;
         }
         public IMotorStatus _MotorStatus { get; set; }
-        public ProjectViewModel()
+        public ProjectViewModel(ITwinCathelper twinCathelper)
         {
             lVM = new LaserProjectorViewModel(this);
             SendCSVCommand = new RelayCommand(async o =>
@@ -314,7 +315,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 log.Log(LogLevel.Warn, $"Stopping Motors");
                 var data = (int)EMode.Abort;
                 for (uint i = 0; i < TwinCathelper.DeviceCount; i++)
-                    TwinCathelper.WriteEthercatDeviceData(i, TwinCathelper.DeviceSymbol.mMode, data.CastToArray());
+                    _TwinCathelper.WriteEthercatDeviceData(i, TwinCathelper.DeviceSymbol.mMode, data.CastToArray());
                 log.Log(LogLevel.Warn, $"{EMode.Abort}");
             });
             HomeMotorsCommand = new RelayCommand(o =>
@@ -325,10 +326,11 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                 var data = (int)EMode.CalibrationSeq01Request;
                 for (uint i = 0; i < TwinCathelper.DeviceCount; i++)
-                    TwinCathelper.WriteEthercatDeviceData(i, TwinCathelper.DeviceSymbol.mMode, data.CastToArray());
+                    _TwinCathelper.WriteEthercatDeviceData(i, TwinCathelper.DeviceSymbol.mMode, data.CastToArray());
             });
-            TwinCathelper.TMotor_DeviceStatusChanged += Motor_DeviceStatusChanged;
+            _TwinCathelper.TMotor_DeviceStatusChanged += Motor_DeviceStatusChanged;
             Array.Fill<uint>(validForHome, (int)EDeviceStatus.None);
+            this._TwinCathelper = twinCathelper;
         }
     }
 }

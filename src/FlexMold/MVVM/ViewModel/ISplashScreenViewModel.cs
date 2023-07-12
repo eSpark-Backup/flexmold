@@ -7,7 +7,7 @@ using System.Collections.ObjectModel;
 
 namespace FlexMold.MVVM.ViewModel
 {
-    public interface ISplashScreenViewModel
+    public interface ISplashScreenViewModel : IViewModel
     {
         ConfigurationFactory _factory { get; set; }
         Script _runningScript { get; set; }

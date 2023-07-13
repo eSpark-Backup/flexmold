@@ -96,6 +96,8 @@ namespace FlexMold.MVVM.ViewModel
         private ITwinCatConfigViewModel _TwinCatConfigViewModel { get { return App.AppHost.Services.GetRequiredService<ITwinCatConfigViewModel>(); } }
         private ITwinCathelper _TwinCathelper { get { return App.AppHost.Services.GetRequiredService<ITwinCathelper>(); } }
         public event EventHandler OnRequestClose;
+        public event EventHandler OnRequestCollapsed;
+
         private void TwincatConfig()
         {
             if (Validataion())
@@ -231,7 +233,7 @@ namespace FlexMold.MVVM.ViewModel
 
         private void RunMainWindow()
         {
-            OnRequestClose(this, new EventArgs());
+            OnRequestCollapsed(this, new EventArgs());
             Application.Current.MainWindow = _mainWindow;
             _mainWindow.Show();
         }

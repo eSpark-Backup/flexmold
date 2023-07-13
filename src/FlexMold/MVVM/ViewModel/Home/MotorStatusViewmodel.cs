@@ -36,8 +36,7 @@ namespace FlexMold.MVVM.ViewModel.Home
         public void Calibrate()
         {
             var log = LogManager.GetLogger("Calibration");
-            CalibrateButton = false;
-
+            CalibrateButtonEnable = false;
             try
             {
                 log.Info("Please Select valid Calibration File ....");
@@ -50,32 +49,28 @@ namespace FlexMold.MVVM.ViewModel.Home
                 {
                     if (openFileDialog.FileName != _TwinCathelper.AppSettings.CalibrationFileFullPath())
                         File.Copy(openFileDialog.FileName, _TwinCathelper.AppSettings.CalibrationFileFullPath(), true);
+                    CalibrationData = CSVHelper.ReadCSV_DoubleData(new FileInfo(_TwinCathelper.AppSettings.CalibrationFileFullPath()));
+                    if (ValidateCSVData())
+                    {
+                        for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                            _TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationSeq01Request;
+                        _TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mMode);
+                        log.Log(LogLevel.Warn, $"Calibration Seq01 Request Sent. Please wait...");
+                        TNF.ShowSuccess("Calibration Request Sent. Please wait...");
+                    }
+                    else
+                        CalibrateButtonEnable = true;
                 }
                 else
-                {
-                    CalibrateButton = true;
-                    return;
-                }
+                    CalibrateButtonEnable = true;
             }
             catch (Exception ex)
             {
-                CalibrateButton = true;
+                CalibrateButtonEnable = true;
                 log.Error(ex.Message);
                 TNF.ShowError(ex.Message);
                 return;
             }
-            CalibrationData = CSVHelper.ReadCSV_DoubleData(new FileInfo(_TwinCathelper.AppSettings.CalibrationFileFullPath()));
-            if (CalibrationData.Count == 0)
-            {
-                log.Log(LogLevel.Error, $"No data found in Calibration.csv");
-                TNF.ShowError("Calibration.csv");
-                return;
-            }
-            for (int i = 0; i < TwinCathelper.DeviceCount; i++)
-                _TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationSeq01Request;
-            _TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mMode);
-            log.Log(LogLevel.Warn, $"Calibration Seq01 Request Sent. Please wait...");
-            TNF.ShowSuccess("Calibration Request Sent. Please wait...");
         }
         private float[] _mPosition;
         public float[] mPosition
@@ -107,49 +102,49 @@ namespace FlexMold.MVVM.ViewModel.Home
                     var _tmgs = SetUI(i, swe, Brushes.Transparent);
                     TNF.ShowInformation(_tmgs);
                     log.Log(LogLevel.Info, _tmgs);
-                    CalibrateButton = true;
+                    CalibrateButtonEnable = true;
                     break;
                 case (int)EDeviceStatus.CalibrationSquence01Started:
                     _tmgs = SetUI(i, swe, Brushes.Yellow);
                     TNF.ShowInformation(_tmgs);
                     log.Log(LogLevel.Info, _tmgs);
-                    CalibrateButton = false;
+                    CalibrateButtonEnable = false;
                     break;
                 case (int)EDeviceStatus.CalibrationSquence01Failed:
                     _tmgs = SetUI(i, swe, Brushes.Red);
                     TNF.ShowError(_tmgs);
                     log.Log(LogLevel.Error, _tmgs);
-                    CalibrateButton = true;
+                    CalibrateButtonEnable = true;
                     break;
                 case (int)EDeviceStatus.CalibrationSquence01Success:
                     _tmgs = SetUI(i, swe, Brushes.LightBlue);
                     TNF.ShowSuccess(_tmgs);
                     log.Log(LogLevel.Info, _tmgs);
-                    CalibrateButton = false;
+                    CalibrateButtonEnable = false;
                     break;
                 case (int)EDeviceStatus.CalibrationSquence02Started:
                     _tmgs = SetUI(i, swe, Brushes.Yellow);
                     TNF.ShowInformation(_tmgs);
                     log.Log(LogLevel.Info, _tmgs);
-                    CalibrateButton = false;
+                    CalibrateButtonEnable = false;
                     break;
                 case (int)EDeviceStatus.CalibrationSquence02Failed:
                     _tmgs = SetUI(i, swe, Brushes.Red);
                     TNF.ShowError(_tmgs);
                     log.Log(LogLevel.Error, _tmgs);
-                    CalibrateButton = false;
+                    CalibrateButtonEnable = false;
                     break;
                 case (int)EDeviceStatus.CalibrationSquence02Success:
                     _tmgs = SetUI(i, swe, Brushes.Blue);
                     TNF.ShowSuccess(_tmgs);
                     log.Log(LogLevel.Info, _tmgs);
-                    CalibrateButton = false;
+                    CalibrateButtonEnable = false;
                     break;
                 default:
                     _tmgs = SetUI(i, swe, Brushes.Red);
                     TNF.ShowError(_tmgs);
                     log.Log(LogLevel.Error, "! Undocumented Status !" + _tmgs);
-                    CalibrateButton = false;
+                    CalibrateButtonEnable = false;
                     break;
             }
         }
@@ -298,28 +293,21 @@ namespace FlexMold.MVVM.ViewModel.Home
         uint[] healthyMotorDiag = new uint[TwinCathelper.DeviceCount];
 
         public IList<double> CalibrationData { get; set; }
-
-        private void WriteDistpacementCSVData(IList<double> data)
+        private bool ValidateCSVData()
         {
-            var log = LogManager.GetLogger("Calibration");
-            if (data.Count != 0)
+            var log = LogManager.GetLogger("CSV Validator");
+            if (CalibrationData.Count != 0)
             {
-                if (_TwinCathelper.PLCMotors.Length == data.Count)
+                if (_TwinCathelper.PLCMotors.Length == CalibrationData.Count)
                 {
-                    for (int i = 0; i < data.Count; i++)
-                    {
-                        _TwinCathelper.PLCMotors[i].mDisplacement = (uint)data[i] * 1600;
-                    }
-                    _TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
-                    log.Log(LogLevel.Info, $"{data.Count} csv value/s has been written sucessfully");
-                    log.Log(LogLevel.Info, $"{JsonSerializer.Serialize(data)}");
+                    return true;
                 }
                 else
                 {
                     log.Log(LogLevel.Error, $"Please select correct CSV");
                     log.Log(LogLevel.Error, $"Data and Box count are not equal");
-                    log.Log(LogLevel.Error, $"Data Count : {data.Count} | Device Count : {_TwinCathelper.PLCMotors.Length}");
-                    TNF.ShowError($"CSV Failed\nDevice Count :{_TwinCathelper.PLCMotors.Length} != Data Count :{data.Count}");
+                    log.Log(LogLevel.Error, $"Data Count : {CalibrationData.Count} | Device Count : {_TwinCathelper.PLCMotors.Length}");
+                    TNF.ShowError($"CSV Failed\nDevice Count :{_TwinCathelper.PLCMotors.Length} != Data Count :{CalibrationData.Count}");
                 }
             }
             else
@@ -328,6 +316,18 @@ namespace FlexMold.MVVM.ViewModel.Home
                     $" File doesn't conatain desired data");
                 TNF.ShowError($"CSV Failed");
             }
+            return false;
+        }
+        private void WriteDistpacementCSVData(IList<double> data)
+        {
+            var log = LogManager.GetLogger("Calibration");
+            for (int i = 0; i < data.Count; i++)
+            {
+                _TwinCathelper.PLCMotors[i].mDisplacement = (uint)data[i] * 1600;
+            }
+            _TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
+            log.Log(LogLevel.Info, $"{data.Count} csv value/s has been written sucessfully");
+            log.Log(LogLevel.Info, $"{JsonSerializer.Serialize(data)}");
         }
         private void Motor_PositionChanged(object sender, EventArgs e)
         {
@@ -379,7 +379,7 @@ namespace FlexMold.MVVM.ViewModel.Home
         }
         private bool _CalibrateButton;
 
-        public bool CalibrateButton
+        public bool CalibrateButtonEnable
         {
             get { return _CalibrateButton; }
             set { _CalibrateButton = value; OnPropertyChanged(); }
@@ -392,7 +392,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 return;
             }
-            CalibrateButton = true;
+            CalibrateButtonEnable = true;
             CalibrationData = new List<double>();
             CalibrationData = CSVHelper.ReadCSV_DoubleData(new FileInfo(_TwinCathelper.AppSettings.CalibrationFileFullPath()));
             MyMotors = new ObservableCollection<MotorStatusControl>() { };

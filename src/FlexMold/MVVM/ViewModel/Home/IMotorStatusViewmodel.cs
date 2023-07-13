@@ -7,7 +7,7 @@ namespace FlexMold.MVVM.ViewModel.Home
 {
     public interface IMotorStatusViewmodel
     {
-        bool CalibrateButton { get; set; }
+        bool CalibrateButtonEnable { get; set; }
         RelayCommand CalibrateCommand { get; set; }
         IList<double> CalibrationData { get; set; }
         RelayCommand DebugDetailClickCommand { get; set; }

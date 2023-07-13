@@ -11,7 +11,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         bool BT_FirmwareEnable { get; set; }
         RelayCommand CheckAllCommand { get; set; }
         string DeviceStatusIndex { get; set; }
-        object Foe_dwPass { get; set; }
+        string Foe_dwPass { get; set; }
         string Foe_Remarks { get; set; }
         string Foe_sNetId { get; }
         string Foe_sPathName { get; set; }

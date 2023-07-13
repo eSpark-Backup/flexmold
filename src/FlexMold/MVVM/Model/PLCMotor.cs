@@ -234,6 +234,27 @@ namespace FlexMold.MVVM.Model
             if (View == null) return;
             View.RefreshDataGrid();
         }
+
+
+
+
+
+        private string _foe_Remarks;
+
+        public string Foe_Remarks
+        {
+            get
+            {
+                return _foe_Remarks;
+            }
+            set
+            {
+                _foe_Remarks = value;
+                OnPropertyChanged();
+                RefreshUI();
+            }
+        }
+
         private SolidColorBrush _ErrorForeground;
         public SolidColorBrush ErrorForeground
         { get => _ErrorForeground; set { _ErrorForeground = value; OnPropertyChanged(); } }
@@ -340,7 +361,7 @@ namespace FlexMold.MVVM.Model
         private ushort foe_nSlaveAddr;
 
         public UInt32 Foe_nPercent
-        { get => _Foe_nPercent; set { _Foe_nPercent = value; OnPropertyChanged(); } }
+        { get => _Foe_nPercent; set { _Foe_nPercent = value; OnPropertyChanged(); RefreshUI(); } }
 
         public FoeModel ShallowCopy()
         {

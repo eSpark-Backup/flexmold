@@ -8,6 +8,7 @@ namespace FlexMold.MVVM.ViewModel.Project
 {
     public interface ILaserProjectorViewModel
     {
+        IProjectViewModel _ProjectViewModel { get; }
         RelayCommand CallibrateProjectorCommand { get; set; }
         int LaserProjectorComMode { get; set; }
         RelayCommand LaunchLMPCommand { get; set; }
@@ -17,6 +18,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         RelayCommand ProjectionOnCommand { get; set; }
         RelayCommand ProjectorModeSelectionCommand { get; set; }
         RelayCommand SambaConfigCommand { get; set; }
+        bool SaveData { get; set; }
         SerialPort SelectedSerialPort { get; set; }
         RelayCommand SendLasFileCommand { get; set; }
         RelayCommand SerialConfigCommand { get; set; }

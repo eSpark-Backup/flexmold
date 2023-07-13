@@ -80,8 +80,7 @@ namespace FlexMold
                 services.AddSingleton<ILaserProjectorViewModel, LaserProjectorViewModel>();
 
                 services.AddSingleton<CSVDiaglogView>();
-                //services.AddSingleton<LaserProjectorView>();
-                //services.AddSingleton<SambaConfigWindow>();
+                services.AddSingleton<SambaConfigWindow>();
                 //services.AddSingleton<SerialPortConfigView>();
             }
             ).Build();

@@ -117,12 +117,18 @@
                             Binding="{Binding SlaveState}"
                             Header="State"
                             IsReadOnly="True">
+
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="{x:Type TextBlock}">
                                     <Setter Property="Background" Value="{Binding SlaveStateBackground}" />
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
+                        <DataGridTextColumn
+                            dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
+                            Binding="{Binding Foe_Remarks}"
+                            Header="Remarks"
+                            IsReadOnly="True" />
                         <DataGridTextColumn
                             dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
                             Binding="{Binding Foe_bError}"
@@ -133,11 +139,7 @@
                             Binding="{Binding Foe_nErrID}"
                             Header="Err Id"
                             IsReadOnly="True" />
-                        <DataGridTextColumn
-                            dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
-                            Binding="{Binding Foe_Remarks}"
-                            Header="Remarks"
-                            IsReadOnly="True" />
+
                         <DataGridTextColumn
                             dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
                             Binding="{Binding Foe_nBytesWritten}"
@@ -205,7 +207,7 @@
                 Name="pbox_pwd"
                 Grid.Row="0"
                 Grid.Column="4"
-                mah:TextBoxHelper.ClearTextButton="True">
+                mah:TextBoxHelper.ClearTextButton="False">
                 <TextBox.Text>
                     <Binding Path="Foe_dwPass">
                         <Binding.ValidationRules>

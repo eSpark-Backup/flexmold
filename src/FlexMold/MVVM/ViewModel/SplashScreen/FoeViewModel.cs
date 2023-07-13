@@ -25,9 +25,8 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         private bool Init_Status = false;
         private bool Foe_Status = false;
         private bool Op_Status = false;
-        private object foe_dwPass;
+        private string foe_dwPass;
 
-        private string _foe_Remarks;
 
 
         private bool ValidateMyString(string filpath)
@@ -56,18 +55,6 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             }
         }
 
-        public string Foe_Remarks
-        {
-            get
-            {
-                return _foe_Remarks;
-            }
-            set
-            {
-                _foe_Remarks = value;
-                OnPropertyChanged();
-            }
-        }
         private bool? _isCheckedAll;
 
         public bool? IsCheckedAll
@@ -130,6 +117,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         {
             using (var dialog = new OpenFileDialog())
             {
+                dialog.Filter = "bin files (*.bin)|*.bin|hex files (*.hex)|*.hex";
                 log.Log(LogLevel.Info, $"Select Project Folder");
                 DialogResult result = dialog.ShowDialog();
                 if (result == DialogResult.OK)
@@ -146,10 +134,16 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         }
 
         public string Foe_sPathName { get => foe_sPathName; set { foe_sPathName = value; OnPropertyChanged(); } }
-
-        public object Foe_dwPass { get => foe_dwPass; set { foe_dwPass = value; OnPropertyChanged(); } }
+        public string Foe_dwPass { get => foe_dwPass; 
+            set 
+            {
+                foe_dwPass = value; 
+                OnPropertyChanged();
+            } 
+        }
 
         public string Foe_sNetId { get; private set; }
+        public string Foe_Remarks { get;  set; }
 
         private List<int> NotificatioHandles;
         public event EventHandler<bool> TUpdate_Status;
@@ -180,7 +174,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
                 cur = 0;
                 checkedSlaves = MyDevicesAndBoxes.Where(a => a.IsChecked == true).ToList();
                 RegisterNotification();
-                _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_dwPass}").FirstOrDefault().WriteValue(Foe_dwPass);
+                _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_dwPass}").FirstOrDefault().WriteValue(Convert.ToInt32(Foe_dwPass, 16));
                 _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sPathName}").FirstOrDefault().WriteValue(Foe_sPathName);
                 Foe_sNetId = _TwinCathelper.SAmsNetId;
                 for (UInt16 i = 0; i < checkedSlaves.Count; i++)
@@ -206,23 +200,27 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
                         _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_bExecute}").FirstOrDefault().WriteValue(0);
                         DeviceStatusIndex = $"Setted into : {ESlaveStateMachine.EC_DEVICE_STATE_INIT} {curStr}";
                         log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} State Updated");
+                        MyDevicesAndBoxes[runningIndex].Foe_Remarks = "State Updated";
                         _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(1);
                         DeviceStatusIndex = $"Downloading {curStr}";
                         if (FoeWait())
                         {
                             Op_Status = true;
                             log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} Update Completed");
+                            MyDevicesAndBoxes[runningIndex].Foe_Remarks = "Update Completed";
                         }
                         else
                         {
                             Op_Status = false;
                             log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} Update Failed");
+                            MyDevicesAndBoxes[runningIndex].Foe_Remarks = "Update Failed";
                         }
                     }
                     else
                     {
                         Init_Status = false;
-                        log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} Deveice State not set");
+                        log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} Device State not set");
+                        MyDevicesAndBoxes[runningIndex].Foe_Remarks = "Device State not set";
                     }
                     MyDevicesAndBoxes[runningIndex].Init_Status = Init_Status;
                     MyDevicesAndBoxes[runningIndex].Foe_Status = Foe_Status;
@@ -533,16 +531,20 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             ResetFoeCollection();
 
             BT_FirmwareEnable = true;
-            Foe_dwPass = 287454020;
+            //Foe_dwPass = "287454020";
+            Foe_dwPass = "11223344";
             log = LogManager.GetLogger("Motor Firmaware Update");
             UpdateFirmwareCommand = new RelayCommand(o =>
             {
-                ValidateMyString(Foe_sPathName);
-                BT_FirmwareEnable = false;
-                //CanClose = false;
-                TUpdate_Status?.Invoke(null, false);
-                var FoeWroker = new Thread(UpdateFirmwareMeth) { IsBackground = true };
-                FoeWroker.Start();
+                if (ValidateMyString(Foe_sPathName))
+                {
+                    BT_FirmwareEnable = false;
+                    TUpdate_Status?.Invoke(null, false);
+                    var FoeWroker = new Thread(UpdateFirmwareMeth) { IsBackground = true };
+                    FoeWroker.Start();
+                }
+                else
+                    return;
             });
             BrowseFirmwareCommand = new RelayCommand(o => { BrowseFirmwareFile(); });
             RefreshDataGridCommand = new RelayCommand(o =>

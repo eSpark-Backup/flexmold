@@ -2,8 +2,10 @@
 using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.MVVM.View.Project;
+using FlexMold.MVVM.View.Setting;
 using FlexMold.Utility;
 using Humanizer;
+using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using System;
@@ -11,6 +13,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Ports;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace FlexMold.MVVM.ViewModel.Project
 {
@@ -58,7 +61,6 @@ namespace FlexMold.MVVM.ViewModel.Project
 
         public LaserProjector MyPorjector { get; set; }
         private SerialPort _SelectedSerialPort;
-        private readonly SambaConfigWindow _SambaConfigWindow;
 
         public SerialPort SelectedSerialPort
         {
@@ -209,6 +211,12 @@ namespace FlexMold.MVVM.ViewModel.Project
                 TNF.ShowError(ex.Message);
             }
         }
+        private SambaConfigWindow _SambaConfigWindow { get { return App.AppHost.Services.GetRequiredService<SambaConfigWindow>(); } }
+        private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
+        {
+            Console.WriteLine();
+        }
+        public bool SaveData { get; set; }
 
         private void SambaConfigWindow()
         {
@@ -217,12 +225,12 @@ namespace FlexMold.MVVM.ViewModel.Project
             {
                 log.Log(LogLevel.Info, $"Current IP {MyPorjector.IpAddres} UserName {MyPorjector.UserName}");
                 log.Log(LogLevel.Info, $"Please Enter Samba params");
-                var main = System.Windows.Application.Current.MainWindow as MainWindow;
-                var sv = new SambaConfigWindow(main, MyPorjector);
-                sv.ShowDialog();
-                if (sv.SaveData)
+                Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
                 {
-                    MyPorjector = sv.CurrentProjector;
+                    await DialogHost.Show(_SambaConfigWindow, "SplashDialog", ClosingEventHandler);
+                }));
+                if (SaveData)
+                {
                     log.Log(LogLevel.Info, $"Saved IP {MyPorjector.IpAddres}");
                     log.Log(LogLevel.Info, $"Saved PlotFolderName {MyPorjector.PlotFolderName}");
                     log.Log(LogLevel.Info, $"Saved UserName {MyPorjector.UserName}");

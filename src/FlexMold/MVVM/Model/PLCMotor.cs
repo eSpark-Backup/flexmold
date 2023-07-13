@@ -153,7 +153,7 @@ namespace FlexMold.MVVM.Model
         UnAvailable = 0x99
     }
 
-    internal class ST_EcSlaveState : ObservableObject
+    public class ST_EcSlaveState : ObservableObject
     {
         private int slaveID;
 

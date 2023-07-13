@@ -16,9 +16,6 @@
     d:DesignHeight="600"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <UserControl.DataContext>
-        <projectvm:ProjectViewModel />
-    </UserControl.DataContext>
     <UserControl.Resources>
         <convertor:HeightConverter x:Key="HeightConverter" />
         <convertor:BoolInverterConverter x:Key="BoolInverterConverter" />
@@ -141,8 +138,7 @@
                 <projectview:LaserProjectorView
                     Grid.Row="2"
                     Grid.Column="0"
-                    Grid.ColumnSpan="2"
-                    DataContext="{Binding lVM}" />
+                    Grid.ColumnSpan="2" />
             </Grid>
         </Grid>
     </Border>

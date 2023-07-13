@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FlexMold.MVVM.ViewModel.Project
 {
-    internal class CSVDiaglogViewModel : ObservableObject
+    public class CSVDiaglogViewModel : ObservableObject, ICSVDiaglogViewModel
     {
         private int _MotorDirPValue;
 

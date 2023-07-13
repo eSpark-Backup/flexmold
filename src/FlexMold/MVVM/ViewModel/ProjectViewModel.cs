@@ -6,6 +6,7 @@ using FlexMold.MVVM.ViewModel.SplashScreen;
 using FlexMold.Utility;
 using MahApps.Metro.Controls;
 using MaterialDesignThemes.Wpf;
+using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ using TwinCAT.Ads.TypeSystem;
 
 namespace FlexMold.MVVM.ViewModel.Project
 {
-    internal class ProjectViewModel : ObservableObject
+    public class ProjectViewModel : ObservableObject, IProjectViewModel
     {
         private Logger log = LogManager.GetLogger("Project");
         public RelayCommand SendCSVCommand { get; set; }
@@ -86,6 +87,9 @@ namespace FlexMold.MVVM.ViewModel.Project
         }
         private FileInfo _selectedFile;
         private readonly ITwinCathelper _TwinCathelper;
+        private readonly LaserProjectorViewModel _laserProjectorViewModel;
+        private ICSVDiaglogViewModel _CSVDiaglogViewModel { get { return App.AppHost.Services.GetRequiredService<ICSVDiaglogViewModel>(); } }
+        private CSVDiaglogView _CSVDiaglogView { get { return App.AppHost.Services.GetRequiredService<CSVDiaglogView>(); } }
 
         public FileInfo SelectedFile
         {
@@ -114,7 +118,6 @@ namespace FlexMold.MVVM.ViewModel.Project
             }
         }
 
-        public LaserProjectorViewModel lVM { get; set; }
 
         private void WriteCSVData(IList<double> data)
         {
@@ -266,12 +269,10 @@ namespace FlexMold.MVVM.ViewModel.Project
         }
         private async Task CSVSend()
         {
-            var csvdlgvm = new CSVDiaglogViewModel();
-            var view = new CSVDiaglog() { DataContext = csvdlgvm };
-            _ = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
-            MotorDirValue = csvdlgvm.MotorDirPValue;
-            MotorRampDelayValue = csvdlgvm.MotorRampDelayValue;
-            MotorTime = csvdlgvm.MotorTime;
+            _ = await DialogHost.Show(_CSVDiaglogView, "RootDialog", ClosingEventHandler);
+            MotorDirValue = _CSVDiaglogViewModel.MotorDirPValue;
+            MotorRampDelayValue = _CSVDiaglogViewModel.MotorRampDelayValue;
+            MotorTime = _CSVDiaglogViewModel.MotorTime;
             string dir = MotorDirValue == 0 ? "Clockwise" : "Anti-Clockwise";
             log.Log(LogLevel.Info, $"Selected Direction : {dir}");
             var csvdata = CSVHelper.ReadCSV_DoubleData(SelectedFile);
@@ -301,10 +302,11 @@ namespace FlexMold.MVVM.ViewModel.Project
             else
                 DeviceStatus = false;
         }
-        public IMotorStatus _MotorStatus { get; set; }
+        public IMotorStatusViewmodel _MotorStatus { get; set; }
+
         public ProjectViewModel(ITwinCathelper twinCathelper)
         {
-            lVM = new LaserProjectorViewModel(this);
+            this._TwinCathelper = twinCathelper;
             SendCSVCommand = new RelayCommand(async o =>
             {
                 await CSVSend();
@@ -330,7 +332,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             });
             _TwinCathelper.TMotor_DeviceStatusChanged += Motor_DeviceStatusChanged;
             Array.Fill<uint>(validForHome, (int)EDeviceStatus.None);
-            this._TwinCathelper = twinCathelper;
+
         }
     }
 }

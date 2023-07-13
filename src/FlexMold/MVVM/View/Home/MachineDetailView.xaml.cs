@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using FlexMold.MVVM.ViewModel.Home;
+using System.Windows.Controls;
 
 namespace FlexMold.MVVM.View.Home
 {
@@ -7,8 +8,9 @@ namespace FlexMold.MVVM.View.Home
     /// </summary>
     public partial class MachineDetailView : UserControl
     {
-        public MachineDetailView()
+        public MachineDetailView(IMachineDetailViewModel iMachineDetailViewModel)
         {
+            DataContext = iMachineDetailViewModel;
             InitializeComponent();
         }
     }

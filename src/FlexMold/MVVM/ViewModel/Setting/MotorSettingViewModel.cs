@@ -7,7 +7,7 @@ using System;
 
 namespace FlexMold.MVVM.ViewModel.Setting
 {
-    internal class MotorSettingViewModel : ObservableObject
+    public class MotorSettingViewModel : ObservableObject, IMotorSettingViewModel
     {
         private Logger log;
         public RelayCommand FirmwareCommand { get; set; }
@@ -46,7 +46,10 @@ namespace FlexMold.MVVM.ViewModel.Setting
                 OnPropertyChanged();
             }
         }
-
+        private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
+        {
+            Console.WriteLine();
+        }
         public MotorSettingViewModel(ITwinCathelper twinCathelper)
         {
             this._TwinCathelper = twinCathelper;
@@ -60,11 +63,6 @@ namespace FlexMold.MVVM.ViewModel.Setting
             {
                 DeviceIds[i] = i;
             }
-        }
-
-        private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
-        {
-            Console.WriteLine();
         }
     }
 }

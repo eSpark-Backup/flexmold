@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FlexMold.MVVM.ViewModel.Home
 {
-    internal class StatusBaseViewModel : ObservableObject
+    public class StatusBaseViewModel : ObservableObject
     {
         public int[] GetMismatchedIndexes<T>(T[] array1, T[] array2)
         {

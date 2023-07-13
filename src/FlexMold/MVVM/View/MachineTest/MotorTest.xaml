@@ -11,7 +11,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    GotFocus="ComboBox_Selected"
     mc:Ignorable="d">
     <b:Interaction.Triggers>
         <b:EventTrigger EventName="Loaded">
@@ -21,9 +20,6 @@
             <b:InvokeCommandAction Command="{Binding OnUnLoadedCommand}" />
         </b:EventTrigger>-->
     </b:Interaction.Triggers>
-    <UserControl.DataContext>
-        <machinetest:MotorTestViewModel />
-    </UserControl.DataContext>
     <UserControl.Resources>
         <convertor:RadioBoolToIntConverter x:Key="radioBoolToIntConverter" />
     </UserControl.Resources>

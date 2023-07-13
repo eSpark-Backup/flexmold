@@ -16,7 +16,7 @@ using TwinCAT.Ads.TypeSystem;
 
 namespace FlexMold.MVVM.ViewModel.MachineTest
 {
-    internal class MotorTestViewModel : ObservableObject
+    public class MotorTestViewModel : ObservableObject, IMotorTestViewModel
     {
         private Logger log;
         public RelayCommand SendAllCommand { get; set; }
@@ -320,6 +320,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         }
         public MotorTestViewModel(ITwinCathelper twinCathelper)
         {
+            this._TwinCathelper = twinCathelper;
             if (_TwinCathelper.Client == null)
             {
                 return;
@@ -340,7 +341,6 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             SendTimeCommand = new RelayCommand(o => { WriteTimeValue(); });
             SendRampCommand = new RelayCommand(o => { WriteRampValue(); });
             SendAllCommand = new RelayCommand(o => { WriteAllValue(); });
-            this._TwinCathelper = twinCathelper;
         }
 
 

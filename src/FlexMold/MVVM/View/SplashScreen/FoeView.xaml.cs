@@ -27,11 +27,11 @@ namespace FlexMold.MVVM.View.SplashScreen
         {
             this.DataContext = foeViewModel;
             InitializeComponent();
-            if (foeViewModel != null)
-                foreach (var item in foeViewModel.MyDevicesAndBoxes)
-                {
-                    item.View = this as IFoe;
-                }
+            //if (foeViewModel != null)
+            //    foreach (var item in foeViewModel.MyDevicesAndBoxes)
+            //    {
+            //        item.View = this as IFoe;
+            //    }
         }
 
         public void RefreshDataGrid()

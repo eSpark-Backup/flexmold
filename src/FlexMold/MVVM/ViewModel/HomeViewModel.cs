@@ -1,9 +1,11 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.View.Home;
+using FlexMold.Utility;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace FlexMold.MVVM.ViewModel
 {
-    internal class HomeViewModel : ObservableObject
+    public class HomeViewModel : ObservableObject, IHomeViewModel
     {
         /// <summary>
         /// Relay Commands
@@ -18,17 +20,7 @@ namespace FlexMold.MVVM.ViewModel
         public RelayCommand EmergencyStatusCommand { get; set; }
         public RelayCommand LaserStatusCommand { get; set; }
 
-        public VisualDisplayView VisualDisplayVM { get; set; }
-        public VaccumStatusView VaccumStatusVM { get; set; }
-        public MachineDetailView MachineDetailVM { get; set; }
-        public MotorStatusView MotorStatusMV { get; set; }
-        public HeaterStatusView HeaterStatusVM { get; set; }
-        public PowerStatusView PowerStatusVM { get; set; }
-        public EmergencyStatusView EmergencyStatusVM { get; set; }
-        public LaserStatusView LaserStatusVM { get; set; }
-
         private object _currentView;
-
         public object CurrentView
         {
             get { return _currentView; }
@@ -39,27 +31,28 @@ namespace FlexMold.MVVM.ViewModel
             }
         }
 
-        public HomeViewModel()
+        public HomeViewModel(
+            MachineDetailView machineDetailView,
+            MotorStatusView motorStatusView,
+            VisualDisplayView visualDisplayView,
+            VaccumStatusView vaccumStatusView,
+            HeaterStatusView heaterStatusView,
+            PowerStatusView powerStatusView,
+            EmergencyStatusView emergencyStatusView,
+            LaserStatusView laserStatusView
+            )
         {
-            VisualDisplayVM = new VisualDisplayView();
-            VaccumStatusVM = new VaccumStatusView();
-            MachineDetailVM = new MachineDetailView();
-            MotorStatusMV = new MotorStatusView();
-            HeaterStatusVM = new HeaterStatusView();
-            PowerStatusVM = new PowerStatusView();
-            EmergencyStatusVM = new EmergencyStatusView();
-            LaserStatusVM = new LaserStatusView();
 
-            CurrentView = VisualDisplayVM;
+            CurrentView = visualDisplayView;
 
-            VisualDisplayCommand = new RelayCommand(o => { CurrentView = VisualDisplayVM; });
-            VaccumStatusCommand = new RelayCommand(o => { CurrentView = VaccumStatusVM; });
-            MachineDetailCommand = new RelayCommand(o => { CurrentView = MachineDetailVM; });
-            MotorStatusCommand = new RelayCommand(o => { CurrentView = MotorStatusMV; });
-            HeaterStatusCommand = new RelayCommand(o => { CurrentView = HeaterStatusVM; });
-            PowerStatusCommand = new RelayCommand(o => { CurrentView = PowerStatusVM; });
-            EmergencyStatusCommand = new RelayCommand(o => { CurrentView = EmergencyStatusVM; });
-            LaserStatusCommand = new RelayCommand(o => { CurrentView = LaserStatusVM; });
+            VisualDisplayCommand = new RelayCommand(o => { CurrentView = visualDisplayView; });
+            VaccumStatusCommand = new RelayCommand(o => { CurrentView = vaccumStatusView; });
+            MachineDetailCommand = new RelayCommand(o => { CurrentView = machineDetailView; });
+            MotorStatusCommand = new RelayCommand(o => { CurrentView = motorStatusView; });
+            HeaterStatusCommand = new RelayCommand(o => { CurrentView = heaterStatusView; });
+            PowerStatusCommand = new RelayCommand(o => { CurrentView = powerStatusView; });
+            EmergencyStatusCommand = new RelayCommand(o => { CurrentView = emergencyStatusView; });
+            LaserStatusCommand = new RelayCommand(o => { CurrentView = laserStatusView; });
         }
     }
 }

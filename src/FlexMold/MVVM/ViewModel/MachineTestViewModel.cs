@@ -3,7 +3,7 @@ using FlexMold.MVVM.View.MachineTest;
 
 namespace FlexMold.MVVM.ViewModel
 {
-    internal class MachineTestViewModel : ObservableObject
+    public class MachineTestViewModel : ObservableObject, IMachineTestViewModel
     {
         /// <summary>
         /// Relay Commands
@@ -15,13 +15,6 @@ namespace FlexMold.MVVM.ViewModel
         public RelayCommand RenumberingCommand { get; set; }
         public RelayCommand PositionCommand { get; set; }
         public RelayCommand ResetCommand { get; set; }
-
-        public MotorTest MotorTestVM { get; set; }
-        public ReadMotorView ReadMotorVM { get; set; }
-        public PowerOnOffView PowerOnOfVM { get; set; }
-        public RenumberingView RenumberingVM { get; set; }
-        public PositionView PositionVM { get; set; }
-        public ResetView ResetVM { get; set; }
 
         private object _currentView;
 
@@ -35,23 +28,22 @@ namespace FlexMold.MVVM.ViewModel
             }
         }
 
-        public MachineTestViewModel()
+        public MachineTestViewModel(
+            MotorTest motorTest,
+            ReadMotorView readMotorView,
+            PowerOnOffView powerOnOffView,
+            RenumberingView renumberingView,
+            PositionView positionView,
+            ResetView resetView)
         {
-            MotorTestVM = new MotorTest();
-            ReadMotorVM = new ReadMotorView();
-            PowerOnOfVM = new PowerOnOffView();
-            RenumberingVM = new RenumberingView();
-            PositionVM = new PositionView();
-            ResetVM = new ResetView();
+            CurrentView = motorTest;
 
-            CurrentView = MotorTestVM;
-
-            MotorTestCommand = new RelayCommand(o => { CurrentView = MotorTestVM; });
-            ReadMotorCommand = new RelayCommand(o => { CurrentView = ReadMotorVM; });
-            PowerOnOffCommand = new RelayCommand(o => { CurrentView = PowerOnOfVM; });
-            RenumberingCommand = new RelayCommand(o => { CurrentView = RenumberingVM; });
-            PositionCommand = new RelayCommand(o => { CurrentView = PositionVM; });
-            ResetCommand = new RelayCommand(o => { CurrentView = ResetVM; });
+            MotorTestCommand = new RelayCommand(o => { CurrentView = motorTest; });
+            ReadMotorCommand = new RelayCommand(o => { CurrentView = readMotorView; });
+            PowerOnOffCommand = new RelayCommand(o => { CurrentView = powerOnOffView; });
+            RenumberingCommand = new RelayCommand(o => { CurrentView = renumberingView; });
+            PositionCommand = new RelayCommand(o => { CurrentView = positionView; });
+            ResetCommand = new RelayCommand(o => { CurrentView = resetView; });
         }
     }
 }

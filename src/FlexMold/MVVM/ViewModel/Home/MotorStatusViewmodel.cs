@@ -16,7 +16,7 @@ using System.Windows.Media;
 
 namespace FlexMold.MVVM.ViewModel.Home
 {
-    internal class MotorStatusViewmodel : StatusBaseViewModel, IMotorStatus
+    public class MotorStatusViewmodel : StatusBaseViewModel, IMotorStatusViewmodel
     {
         private readonly IMachineDetailViewModel _IMachineDetailViewModel;
         private readonly ITwinCathelper _TwinCathelper;
@@ -253,7 +253,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                 default:
                     _tmgs = SetUI(i, sw, Brushes.Red);
                     TNF.ShowError(_tmgs);
-                    log.Log(LogLevel.Error,"! Undocumented Status !"+_tmgs);
+                    log.Log(LogLevel.Error, "! Undocumented Status !" + _tmgs);
                     break;
             }
         }
@@ -387,8 +387,7 @@ namespace FlexMold.MVVM.ViewModel.Home
 
         public MotorStatusViewmodel(ITwinCathelper twinCathelper)
         {
-            //_MotorStatus = Application.Current.MainWindow.DataContext as IMotorStatus;
-
+            this._TwinCathelper = twinCathelper;
             if (_TwinCathelper.Client == null)
             {
                 return;
@@ -409,7 +408,6 @@ namespace FlexMold.MVVM.ViewModel.Home
             Array.Fill<uint>(validSeq01Val, (int)EDeviceStatus.CalibrationSquence01Success);
             Array.Fill<uint>(validSeq02Val, (int)EDeviceStatus.CalibrationSquence02Success);
             Array.Fill<uint>(healthyMotorDiag, (int)EmotorDiagnostic.Healthy);
-            this._TwinCathelper = twinCathelper;
         }
     }
 }

@@ -171,8 +171,6 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         List<FoeModel> checkedSlaves;
         int cur;
         string curStr;
-        private readonly ITwinCathelper _TwinCathelper;
-
         private void UpdateFirmwareMeth()
         {
             try
@@ -522,10 +520,14 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
                 MyDevicesAndBoxes[i].SlaveStateBackground = Brushes.Transparent;
             }
         }
-        public FoeViewModel()
+        private readonly ITwinCathelper _TwinCathelper; /*{ get { return App.AppHost.Services.GetRequiredService<ITwinCathelper>(); } }*/
+        public FoeViewModel(ITwinCathelper twinCathelper )
         {
-            this._TwinCathelper = App.AppHost.Services.GetRequiredService<ITwinCathelper>();
-
+            _TwinCathelper = twinCathelper;
+            if (this._TwinCathelper.Client==null)
+            {
+                return;
+            }
             MyDevicesAndBoxes = new();
             IsCheckedAll = true;
             ResetFoeCollection();

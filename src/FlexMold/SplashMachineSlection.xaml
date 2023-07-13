@@ -19,9 +19,6 @@
     ShowMaxRestoreButton="False"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
-    <mah:MetroWindow.DataContext>
-        <viewmodel:SplashScreenViewModel />
-    </mah:MetroWindow.DataContext>
     <mah:MetroWindow.Resources>
         <ResourceDictionary>
             <Style x:Key="LargeTileStyle" TargetType="mah:Tile">

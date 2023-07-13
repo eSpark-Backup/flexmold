@@ -11,7 +11,7 @@ using System.Windows.Threading;
 
 namespace FlexMold.MVVM.ViewModel.Home
 {
-    internal class MachineDetailViewModel : StatusBaseViewModel, IMachineDetailViewModel
+    public class MachineDetailViewModel : StatusBaseViewModel, IMachineDetailViewModel
     {
         public ST_EcSlaveState[] MySlaves
         { get => _MySlaves; set { _MySlaves = value; OnPropertyChanged(); } }
@@ -209,6 +209,7 @@ namespace FlexMold.MVVM.ViewModel.Home
         }
         public MachineDetailViewModel(ITwinCathelper twinCathelper)
         {
+            this._TwinCathelper = twinCathelper;
             if (_TwinCathelper.Client == null)
             {
                 return;
@@ -233,7 +234,6 @@ namespace FlexMold.MVVM.ViewModel.Home
             _TwinCathelper.TSlave_Link_Status_Changed += Slave_Link_Status_Changed;
             _TwinCathelper.TSlave_StateMachine_Status_Changed += Slave_StateMachine_Status_Changed;
             _TwinCathelper.SetMachineStatusTimer();
-            this._TwinCathelper = twinCathelper;
         }
     }
 }

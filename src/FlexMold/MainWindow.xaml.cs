@@ -24,13 +24,13 @@ namespace FlexMold
     public partial class MainWindow : MetroWindow
     {
         private Logger log = LogManager.GetLogger("Main");
-        private readonly ITwinCathelper _TwinCathelper;
-        private readonly ISplashScreenViewModel _SplashScreenViewModel;
         //MainViewModel _vm;
-        public MainWindow()
+        private readonly ITwinCathelper _TwinCathelper;/*{ get { return App.AppHost.Services.GetRequiredService<ITwinCathelper>(); } }*/
+        private ISplashScreenViewModel _SplashScreenViewModel { get { return App.AppHost.Services.GetRequiredService<ISplashScreenViewModel>(); } }
+
+        public MainWindow(ITwinCathelper twinCathelper)
         {
-            _SplashScreenViewModel = App.AppHost.Services.GetRequiredService<ISplashScreenViewModel>();
-            _TwinCathelper = App.AppHost.Services.GetRequiredService<ITwinCathelper>();
+            _TwinCathelper = twinCathelper;
             InitializeComponent();
             Version v = GetRunningVersion();
             string About = string.Format(CultureInfo.InvariantCulture, @"YourApp Version {0}.{1}.{2} (r{3})", v.Major, v.Minor, v.Build, v.Revision);
@@ -42,10 +42,10 @@ namespace FlexMold
             {
                 case EMachineType.Motor:
                     _TwinCathelper.InitializeNotifications();
-                    _TwinCathelper.TSession_ConnectionStateChanged += Session_ConnectionStateChanged;
-                    _TwinCathelper.TConnection_ConnectionStatusChanged += Connection_ConnectionStatusChanged;
-                    _TwinCathelper.TConnection_RouterStateChanged += Connection_RouterStateChanged;
-                    _TwinCathelper.TConnection_AdsStateChanged += Connection_AdsStateChanged;
+                    //_TwinCathelper.TSession_ConnectionStateChanged += Session_ConnectionStateChanged;
+                    //_TwinCathelper.TConnection_ConnectionStatusChanged += Connection_ConnectionStatusChanged;
+                    //_TwinCathelper.TConnection_RouterStateChanged += Connection_RouterStateChanged;
+                    //_TwinCathelper.TConnection_AdsStateChanged += Connection_AdsStateChanged;
                     break;
 
                 case EMachineType.Projector:
@@ -58,7 +58,6 @@ namespace FlexMold
             log.Log(LogLevel.Info, $"Application Loaded Sucessfully.....");
             log.Log(LogLevel.Info, $"Selected Machine Type : {_SplashScreenViewModel.SelectedMachine.MachineType} " +
                 $"Name : {_SplashScreenViewModel.SelectedMachine.Name} ID : {_SplashScreenViewModel.SelectedMachine.ID}");
-            this._TwinCathelper = _TwinCathelper;
         }
 
         //private void OnUnload(object sender, RoutedEventArgs e)
@@ -80,7 +79,7 @@ namespace FlexMold
 
         private void Session_ConnectionStateChanged(object sender, EventArgs e)
         {
-            Dispatcher.Invoke(() =>
+            App.Current.Dispatcher.BeginInvoke(() =>
             {
                 TwinCATSystemUpdate();
             });
@@ -88,7 +87,7 @@ namespace FlexMold
 
         private void Connection_AdsStateChanged(object sender, EventArgs e)
         {
-            Dispatcher.Invoke(() =>
+            App.Current.Dispatcher.BeginInvoke(() =>
             {
                 TwinCATSystemUpdate();
             });
@@ -96,7 +95,7 @@ namespace FlexMold
 
         private void Connection_RouterStateChanged(object sender, EventArgs e)
         {
-            Dispatcher.Invoke(() =>
+            App.Current.Dispatcher.BeginInvoke(() =>
             {
                 TwinCATSystemUpdate();
             });
@@ -104,7 +103,7 @@ namespace FlexMold
 
         private void Connection_ConnectionStatusChanged(object sender, EventArgs e)
         {
-            Dispatcher.Invoke(() =>
+            App.Current.Dispatcher.BeginInvoke(() =>
             {
                 TwinCATSystemUpdate();
             });
@@ -112,67 +111,67 @@ namespace FlexMold
 
         private void TwinCATSystemUpdate()
         {
-            if (_TwinCathelper.Client != null && _TwinCathelper.Client.IsConnected)
-            {
-                bt_TCC.Content = _TwinCathelper.Client.State.ToString();
-                _TwinCathelper.CurrentConnectionState = _TwinCathelper.Client.State;
-                switch (_TwinCathelper.Client.State)
-                {
-                    case ConnectionState.Connected:
-                        bt_TCC.Background = new SolidColorBrush(Colors.LightGreen);
-                        bt_TCC.Foreground = new SolidColorBrush(Colors.Black);
-                        break;
+            //if (_TwinCathelper.Client != null && _TwinCathelper.Client.IsConnected)
+            //{
+            //    bt_TCC.Content = _TwinCathelper.Client.State.ToString();
+            //    _TwinCathelper.CurrentConnectionState = _TwinCathelper.Client.State;
+            //    switch (_TwinCathelper.Client.State)
+            //    {
+            //        case ConnectionState.Connected:
+            //            bt_TCC.Background = new SolidColorBrush(Colors.LightGreen);
+            //            bt_TCC.Foreground = new SolidColorBrush(Colors.Black);
+            //            break;
 
-                    case ConnectionState.None:
-                    case ConnectionState.Disconnected:
-                    case ConnectionState.Lost:
-                        bt_TCC.Background = new SolidColorBrush(Colors.Red);
-                        bt_TCC.Foreground = new SolidColorBrush(Colors.White);
-                        ConnectionLost("Connection State Lost");
-                        break;
+            //        case ConnectionState.None:
+            //        case ConnectionState.Disconnected:
+            //        case ConnectionState.Lost:
+            //            bt_TCC.Background = new SolidColorBrush(Colors.Red);
+            //            bt_TCC.Foreground = new SolidColorBrush(Colors.White);
+            //            ConnectionLost("Connection State Lost");
+            //            break;
 
-                    default:
-                        break;
-                }
-                var info = _TwinCathelper.GetTwincatState();
-                bt_TCS.Content = info.AdsState.ToString();
-                switch (info.AdsState)
-                {
-                    case AdsState.Run:
-                        bt_TCS.Background = new SolidColorBrush(Colors.DarkGreen);
-                        bt_TCS.Foreground = new SolidColorBrush(Colors.White);
-                        break;
+            //        default:
+            //            break;
+            //    }
+            //    var info = _TwinCathelper.GetTwincatState();
+            //    bt_TCS.Content = info.AdsState.ToString();
+            //    switch (info.AdsState)
+            //    {
+            //        case AdsState.Run:
+            //            bt_TCS.Background = new SolidColorBrush(Colors.DarkGreen);
+            //            bt_TCS.Foreground = new SolidColorBrush(Colors.White);
+            //            break;
 
-                    case AdsState.Config:
-                    case AdsState.Stop:
-                    case AdsState.Error:
-                    case AdsState.Invalid:
-                    case AdsState.Idle:
-                    case AdsState.Reset:
-                    case AdsState.Init:
-                    case AdsState.Start:
-                    case AdsState.SaveConfig:
-                    case AdsState.LoadConfig:
-                    case AdsState.PowerFailure:
-                    case AdsState.PowerGood:
-                    case AdsState.Shutdown:
-                    case AdsState.Suspend:
-                    case AdsState.Resume:
-                    case AdsState.Reconfig:
-                    case AdsState.Stopping:
-                    case AdsState.Incompatible:
-                    case AdsState.Exception:
-                        bt_TCS.Background = new SolidColorBrush(Colors.DarkRed);
-                        bt_TCS.Foreground = new SolidColorBrush(Colors.White);
-                        ConnectionLost("Ads State Lost");
-                        break;
-                }
-            }
-            else
-            {
-                bt_TCC.Content = ConnectionState.None.ToString();
-                bt_TCC.Content = AdsState.Invalid.ToString();
-            }
+            //        case AdsState.Config:
+            //        case AdsState.Stop:
+            //        case AdsState.Error:
+            //        case AdsState.Invalid:
+            //        case AdsState.Idle:
+            //        case AdsState.Reset:
+            //        case AdsState.Init:
+            //        case AdsState.Start:
+            //        case AdsState.SaveConfig:
+            //        case AdsState.LoadConfig:
+            //        case AdsState.PowerFailure:
+            //        case AdsState.PowerGood:
+            //        case AdsState.Shutdown:
+            //        case AdsState.Suspend:
+            //        case AdsState.Resume:
+            //        case AdsState.Reconfig:
+            //        case AdsState.Stopping:
+            //        case AdsState.Incompatible:
+            //        case AdsState.Exception:
+            //            bt_TCS.Background = new SolidColorBrush(Colors.DarkRed);
+            //            bt_TCS.Foreground = new SolidColorBrush(Colors.White);
+            //            ConnectionLost("Ads State Lost");
+            //            break;
+            //    }
+            //}
+            //else
+            //{
+            //    bt_TCC.Content = ConnectionState.None.ToString();
+            //    bt_TCC.Content = AdsState.Invalid.ToString();
+            //}
         }
 
         private async void ConnectionLost(string _msg)

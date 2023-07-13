@@ -73,7 +73,6 @@ namespace FlexMold.MVVM.ViewModel
         }
 
         private bool _ICEnable;
-        private readonly ITwinCatConfigViewModel _TwinCatConfigViewModel;
 
         public bool ICEnable
         {
@@ -91,14 +90,12 @@ namespace FlexMold.MVVM.ViewModel
         public RelayCommand RunButtonCommand { get; set; }
         public ObservableCollection<Machine> MyMachines { get; set; }
         public List<VSInfo> AvailableVS { get; private set; }
-        private readonly ITwinCathelper _TwinCathelper;
-        private readonly MainWindow mainWindow;
-        private readonly FlexMoldMachine1 _FlexMoldMachine1;
-        private readonly TcDeviceScanning _TcDeviceScanning;
-
+        private FlexMoldMachine1 _FlexMoldMachine1 { get { return App.AppHost.Services.GetRequiredService<FlexMoldMachine1>(); } }
+        private TcDeviceScanning _TcDeviceScanning { get { return App.AppHost.Services.GetRequiredService<TcDeviceScanning>(); } }
+        private MainWindow _mainWindow { get { return App.AppHost.Services.GetRequiredService<MainWindow>(); } }
+        private ITwinCatConfigViewModel _TwinCatConfigViewModel { get { return App.AppHost.Services.GetRequiredService<ITwinCatConfigViewModel>(); } }
+        private ITwinCathelper _TwinCathelper { get { return App.AppHost.Services.GetRequiredService<ITwinCathelper>(); } }
         public event EventHandler OnRequestClose;
-
-
         private void TwincatConfig()
         {
             if (Validataion())
@@ -235,8 +232,8 @@ namespace FlexMold.MVVM.ViewModel
         private void RunMainWindow()
         {
             OnRequestClose(this, new EventArgs());
-            mainWindow.Show();
-            Application.Current.MainWindow = mainWindow;
+            Application.Current.MainWindow = _mainWindow;
+            _mainWindow.Show();
         }
 
         private bool Validataion()
@@ -353,11 +350,6 @@ namespace FlexMold.MVVM.ViewModel
         }
         public SplashScreenViewModel()
         {
-            this._TwinCatConfigViewModel = App.AppHost.Services.GetRequiredService<ITwinCatConfigViewModel>();
-            _TwinCathelper = App.AppHost.Services.GetRequiredService<ITwinCathelper>();
-            this.mainWindow = App.AppHost.Services.GetRequiredService<MainWindow>();
-            this._FlexMoldMachine1 = App.AppHost.Services.GetRequiredService<FlexMoldMachine1>(); ;
-            this._TcDeviceScanning = App.AppHost.Services.GetRequiredService<TcDeviceScanning>();
             if (!_TwinCathelper.LoadSetting())
                 Environment.Exit(0);
             ICEnable = true;
@@ -389,7 +381,6 @@ namespace FlexMold.MVVM.ViewModel
                 log.Log(LogLevel.Info, $"Closing ....");
                 OnRequestClose(this, new EventArgs());
             });
-           
         }
     }
 }

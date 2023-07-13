@@ -3,23 +3,17 @@ using FlexMold.MVVM.View.Setting;
 
 namespace FlexMold.MVVM.ViewModel
 {
-    internal class SettingViewModel : ObservableObject
+    public class SettingViewModel : ObservableObject, ISettingViewModel
     {
         /// <summary>
         /// Relay Commands
         /// </summary>
-        public RelayCommand MachineTestCommand { get; set; }
+        public RelayCommand MachineSettingCommand { get; set; }
 
         public RelayCommand PowerSettingCommand { get; set; }
         public RelayCommand MotorSettingCommand { get; set; }
         public RelayCommand VacuumSettingCommand { get; set; }
         public RelayCommand LaserSettingCommand { get; set; }
-
-        public MachineTestView MachineTestVM { get; set; }
-        public PowerSettingView PowerSettingVM { get; set; }
-        public MotorSettingView MotorSettingVM { get; set; }
-        public VacuumSettingView VacuumSettingMV { get; set; }
-        public LaserProjectorSettingView LaserSettingMV { get; set; }
 
         private object _currentView;
 
@@ -33,21 +27,21 @@ namespace FlexMold.MVVM.ViewModel
             }
         }
 
-        public SettingViewModel()
+        public SettingViewModel(
+            MachineSettingView machineSettingView,
+            PowerSettingView powerSettingView,
+            MotorSettingView motorSettingView,
+            VacuumSettingView vacuumSettingView,
+            LaserProjectorSettingView laserProjectorSettingView
+            )
         {
-            MachineTestVM = new MachineTestView();
-            PowerSettingVM = new PowerSettingView();
-            MotorSettingVM = new MotorSettingView();
-            VacuumSettingMV = new VacuumSettingView();
-            LaserSettingMV = new LaserProjectorSettingView();
+            CurrentView = machineSettingView;
 
-            CurrentView = MachineTestVM;
-
-            MachineTestCommand = new RelayCommand(o => { CurrentView = MachineTestVM; });
-            PowerSettingCommand = new RelayCommand(o => { CurrentView = PowerSettingVM; });
-            MotorSettingCommand = new RelayCommand(o => { CurrentView = MotorSettingVM; });
-            VacuumSettingCommand = new RelayCommand(o => { CurrentView = VacuumSettingMV; });
-            LaserSettingCommand = new RelayCommand(o => { CurrentView = LaserSettingMV; });
+            MachineSettingCommand = new RelayCommand(o => { CurrentView = machineSettingView; });
+            PowerSettingCommand = new RelayCommand(o => { CurrentView = powerSettingView; });
+            MotorSettingCommand = new RelayCommand(o => { CurrentView = motorSettingView; });
+            VacuumSettingCommand = new RelayCommand(o => { CurrentView = vacuumSettingView; });
+            LaserSettingCommand = new RelayCommand(o => { CurrentView = laserProjectorSettingView; });
         }
     }
 }

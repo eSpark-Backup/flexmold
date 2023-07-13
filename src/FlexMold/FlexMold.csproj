@@ -68,7 +68,7 @@
 		<PackageReference Include="ToastNotifications.Messages" Version="2.5.1" />
 	</ItemGroup>
 	<ItemGroup>
-		<Compile Update="MVVM\View\Project\CSVDiaglog.xaml.cs">
+		<Compile Update="MVVM\View\Project\CSVDiaglogView.xaml.cs">
 		  <SubType>Code</SubType>
 		</Compile>
 		<Compile Update="MVVM\View\SplashScreen\TwinCatConfigView.xaml.cs">

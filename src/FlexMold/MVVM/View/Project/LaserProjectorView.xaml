@@ -10,9 +10,6 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <!--<UserControl.DataContext>
-        <project:LaserProjectorViewModel />
-    </UserControl.DataContext>-->
     <UserControl.Resources>
         <convertor:RadioBoolToIntConverter x:Key="radioBoolToIntConverter" />
     </UserControl.Resources>
@@ -53,7 +50,7 @@
                 <Button
                     Grid.Row="2"
                     Command="{Binding SendLasFileCommand}"
-                    IsEnabled="{Binding Parent.LaserSendButton}">
+                    IsEnabled="{Binding _ProjectViewModel.LaserSendButton}">
                     <StackPanel Orientation="Horizontal">
                         <iconPacks:PackIconMaterial Margin="6" Kind="Send" />
                         <TextBlock

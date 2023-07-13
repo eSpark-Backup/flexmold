@@ -1,5 +1,7 @@
 ﻿using FlexMold.MVVM.Model;
+using FlexMold.MVVM.ViewModel.Project;
 using MahApps.Metro.Controls;
+using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using System.Windows.Media.Effects;
 

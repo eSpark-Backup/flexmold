@@ -2,6 +2,7 @@
 using FlexMold.MVVM.View.SplashScreen;
 using FlexMold.Utility;
 using MahApps.Metro.Controls;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -34,14 +35,17 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         {
             CanClose = e;
         }
-        FoeViewModel foeViewModel;
-        public TwinCatConfigViewModel(FoeView foeView, IFoeViewModel foeViewModel)
+        private readonly IFoeViewModel _FoeViewModel; /*{ get { return App.AppHost.Services.GetRequiredService<IFoeViewModel>(); } }*/
+        private FoeView _FoeView { get { return App.AppHost.Services.GetRequiredService<FoeView>(); } }
+
+        public TwinCatConfigViewModel(IFoeViewModel foeViewModel)
         {
+            _FoeViewModel = foeViewModel;
             CanClose = true;
-            foeViewModel.TUpdate_Status += Update_Status;
+            _FoeViewModel.TUpdate_Status += Update_Status;
             this.TabList = new ObservableCollection<TabItem>
             {
-                new TabItem(){Content= foeView},
+                new TabItem(){Content= _FoeView},
             };
         }
     }

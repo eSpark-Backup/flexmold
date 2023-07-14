@@ -124,7 +124,7 @@
                                 <TextBlock VerticalAlignment="Center" Text="Stop" />
                             </StackPanel>
                         </Button>
-                        <Button Command="{Binding HomeMotorsCommand}" IsEnabled="{Binding DeviceStatus}">
+                        <Button Command="{Binding HomeMotorsCommand}" IsEnabled="{Binding MotorStatus.IsMotorsIdle}">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconMaterial Margin="6" Kind="Home" />
                                 <TextBlock

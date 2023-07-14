@@ -10,7 +10,7 @@ namespace FlexMold
     /// </summary>
     public partial class SplashMachineSlection : MetroWindow
     {
-        ISplashScreenViewModel _SplashScreenViewModel = App.AppHost.Services.GetRequiredService<ISplashScreenViewModel>();
+        ISplashScreenViewModel _SplashScreenViewModel { get { return App.AppHost.Services.GetRequiredService<ISplashScreenViewModel>(); } }
         public SplashMachineSlection()
         {
             _SplashScreenViewModel.OnRequestClose += (s, e) => this.Close();

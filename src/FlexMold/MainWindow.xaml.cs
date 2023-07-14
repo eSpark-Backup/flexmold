@@ -71,7 +71,7 @@ namespace FlexMold
 
         private void Session_ConnectionStateChanged(object sender, EventArgs e)
         {
-            App.Current.Dispatcher.BeginInvoke(() =>
+            System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 TwinCATSystemUpdate();
             });
@@ -79,7 +79,7 @@ namespace FlexMold
 
         private void Connection_AdsStateChanged(object sender, EventArgs e)
         {
-            App.Current.Dispatcher.BeginInvoke(() =>
+            System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 TwinCATSystemUpdate();
             });
@@ -87,7 +87,7 @@ namespace FlexMold
 
         private void Connection_RouterStateChanged(object sender, EventArgs e)
         {
-            App.Current.Dispatcher.BeginInvoke(() =>
+            System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 TwinCATSystemUpdate();
             });
@@ -95,7 +95,7 @@ namespace FlexMold
 
         private void Connection_ConnectionStatusChanged(object sender, EventArgs e)
         {
-            App.Current.Dispatcher.BeginInvoke(() =>
+            System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 TwinCATSystemUpdate();
             });

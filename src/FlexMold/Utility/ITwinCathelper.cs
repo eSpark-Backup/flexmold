@@ -57,7 +57,7 @@ namespace FlexMold.Utility
         void InitializeNotifications();
         bool InitializeSlaves(EMachineType emt);
         bool LoadSetting();
-        byte[]? ReadEthercatDeviceData(TwinCathelper.DeviceSymbol deviceSymbol);
+        void ReadEthercatDeviceData(TwinCathelper.DeviceSymbol deviceSymbol);
         void ReadEthercatDeviceData(uint _motorNumber);
         byte[] ReadEthercatDeviceData(uint _motorNumber, TwinCathelper.DeviceSymbol deviceSymbol, int dataLength);
         void ReConfigPLC();

@@ -322,27 +322,37 @@ namespace FlexMold.Utility
                 SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
             PLCMotors[_motorNumber].Unpack(mtarray);
         }
-        public byte[]? ReadEthercatDeviceData(DeviceSymbol deviceSymbol)
+        public void ReadEthercatDeviceData(DeviceSymbol deviceSymbol)
         {
-            byte[] data = null;
             switch (deviceSymbol)
             {
                 case DeviceSymbol.mDirection:
+                    for (uint i = 0; i < DeviceCount; i++)
+                        PLCMotors[i].mDirection =Convert.ToBoolean(ReadEthercatDeviceData(i, deviceSymbol, sizeof(float))[0]);
                     break;
                 case DeviceSymbol.mRPM:
+                    for (uint i = 0; i < DeviceCount; i++)
+                        PLCMotors[i].mRPM = Convert.ToSingle(ReadEthercatDeviceData(i, deviceSymbol, sizeof(float)));
                     break;
                 case DeviceSymbol.mDisplacement:
                     for (uint i = 0; i < DeviceCount; i++)
-                        data = ReadEthercatDeviceData(i, deviceSymbol, sizeof(float));
+                        PLCMotors[i].mDisplacement = Convert.ToSingle(ReadEthercatDeviceData(i, deviceSymbol, sizeof(float)));
                     break;
                 case DeviceSymbol.mTime:
+                    for (uint i = 0; i < DeviceCount; i++)
+                        PLCMotors[i].mTime = Convert.ToSingle(ReadEthercatDeviceData(i, deviceSymbol, sizeof(float)));
                     break;
                 case DeviceSymbol.mMode:
+                    for (uint i = 0; i < DeviceCount; i++)
+                        PLCMotors[i].mMode = Convert.ToUInt32(ReadEthercatDeviceData(i, deviceSymbol, sizeof(float)));
+                    break;    
+                case DeviceSymbol.mRampDelay:
+                    for (uint i = 0; i < DeviceCount; i++)
+                        PLCMotors[i].mRampDelay = Convert.ToSingle(ReadEthercatDeviceData(i, deviceSymbol, sizeof(float)));
                     break;
                 default:
                     break;
             }
-            return data;
         }
         public byte[] ReadEthercatDeviceData(uint _motorNumber, DeviceSymbol deviceSymbol, int dataLength)
         {
@@ -391,6 +401,8 @@ namespace FlexMold.Utility
             switch (deviceSymbol)
             {
                 case DeviceSymbol.mDirection:
+                    for (uint i = 0; i < DeviceCount; i++)
+                        WriteEthercatDeviceData(i, deviceSymbol,new byte[] { PLCMotors[i].mDirection.CastToArray()[0] });
                     break;
                 case DeviceSymbol.mRPM:
                     for (uint i = 0; i < DeviceCount; i++)
@@ -401,6 +413,8 @@ namespace FlexMold.Utility
                         WriteEthercatDeviceData(i, deviceSymbol, PLCMotors[i].mDisplacement.CastToArray());
                     break;
                 case DeviceSymbol.mTime:
+                    for (uint i = 0; i < DeviceCount; i++)
+                        WriteEthercatDeviceData(i, deviceSymbol, PLCMotors[i].mTime.CastToArray());
                     break;
                 case DeviceSymbol.mMode:
                     for (uint i = 0; i < DeviceCount; i++)

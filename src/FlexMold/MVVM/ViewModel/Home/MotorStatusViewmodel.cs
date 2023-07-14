@@ -13,14 +13,13 @@ using System.Text.Json;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media;
+using static FlexMold.Utility.TwinCathelper;
 
 namespace FlexMold.MVVM.ViewModel.Home
 {
     public class MotorStatusViewmodel : StatusBaseViewModel, IMotorStatusViewmodel
     {
-        private readonly IMachineDetailViewModel _IMachineDetailViewModel;
         private readonly ITwinCathelper _TwinCathelper;
-
         public ObservableCollection<MotorStatusControl> MyMotors { get; set; }
         public RelayCommand CalibrateCommand { get; set; }
         public RelayCommand DebugDetailClickCommand { get; set; }
@@ -31,6 +30,13 @@ namespace FlexMold.MVVM.ViewModel.Home
         {
             MessageBox.Show(o.ToolTip);
             Console.WriteLine();
+        }
+        private bool _IsMotorsIdle;
+
+        public bool IsMotorsIdle
+        {
+            get { return _IsMotorsIdle; }
+            set { _IsMotorsIdle = value; OnPropertyChanged(); }
         }
 
         public void Calibrate()
@@ -52,9 +58,9 @@ namespace FlexMold.MVVM.ViewModel.Home
                     CalibrationData = CSVHelper.ReadCSV_DoubleData(new FileInfo(_TwinCathelper.AppSettings.CalibrationFileFullPath()));
                     if (ValidateCSVData())
                     {
-                        for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                        for (int i = 0; i < DeviceCount; i++)
                             _TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationSeq01Request;
-                        _TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mMode);
+                        _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mMode);
                         log.Log(LogLevel.Warn, $"Calibration Seq01 Request Sent. Please wait...");
                         TNF.ShowSuccess("Calibration Request Sent. Please wait...");
                     }
@@ -138,6 +144,12 @@ namespace FlexMold.MVVM.ViewModel.Home
                     _tmgs = SetUI(i, swe, Brushes.Blue);
                     TNF.ShowSuccess(_tmgs);
                     log.Log(LogLevel.Info, _tmgs);
+                    CalibrateButtonEnable = false;
+                    break;
+                case (int)EDeviceStatus.HomePosition:
+                    _tmgs = SetUI(i, swe, Brushes.Gray);
+                    TNF.ShowSuccess(_tmgs);
+                    log.Log(LogLevel.Warn, _tmgs);
                     CalibrateButtonEnable = false;
                     break;
                 default:
@@ -288,9 +300,10 @@ namespace FlexMold.MVVM.ViewModel.Home
                 _TwinCathelper.SetAbortMode(log);
             }
         }
-        uint[] validSeq01Val = new uint[TwinCathelper.DeviceCount];
-        uint[] validSeq02Val = new uint[TwinCathelper.DeviceCount];
-        uint[] healthyMotorDiag = new uint[TwinCathelper.DeviceCount];
+        uint[] validSeq01Val = new uint[DeviceCount];
+        uint[] validSeq02Val = new uint[DeviceCount];
+        uint[] healthyMotorDiag = new uint[DeviceCount];
+        uint[] validForHome = new uint[DeviceCount];
 
         public IList<double> CalibrationData { get; set; }
         private bool ValidateCSVData()
@@ -325,20 +338,21 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 _TwinCathelper.PLCMotors[i].mDisplacement = (uint)data[i] * 1600;
             }
-            _TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
+            _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mDisplacement);
             log.Log(LogLevel.Info, $"{data.Count} csv value/s has been written sucessfully");
             log.Log(LogLevel.Info, $"{JsonSerializer.Serialize(data)}");
         }
         private void Motor_PositionChanged(object sender, EventArgs e)
         {
-            var array = new float[TwinCathelper.DeviceCount];
+            var array = new float[DeviceCount];
             Array.Copy(_TwinCathelper.PLCMotorsStatuses.mPostion, array, array.Length);
             mPosition = array;
         }
         private void Motor_DeviceStatusChanged(object sender, EventArgs e)
         {
+            IsMotorsIdle = false;
             var log = LogManager.GetLogger("Device Status");
-            var array = new uint[TwinCathelper.DeviceCount];
+            var array = new uint[DeviceCount];
             Array.Copy(_TwinCathelper.PLCMotorsStatuses.DeviceStatus, array, array.Length);
             DeviceStatus = array;
             if (DeviceStatus.SequenceEqual(validSeq01Val))
@@ -346,34 +360,39 @@ namespace FlexMold.MVVM.ViewModel.Home
                 Thread.Sleep((int)_TwinCathelper.AppSettings.CalibrationSeq02Delay);
                 //Read the contents of the file into a stream
                 WriteDistpacementCSVData(CalibrationData);
-                for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                for (int i = 0; i < DeviceCount; i++)
                 {
                     _TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationSeq02Request;
                 }
-                _TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mMode);
+                _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mMode);
                 log.Log(LogLevel.Warn, $"{EMode.CalibrationSeq02Request}. Please wait...");
                 TNF.ShowSuccess("Calibration Seq02 Requested");
                 Thread.Sleep(200);
-                for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                for (int i = 0; i < DeviceCount; i++)
                     _TwinCathelper.PLCMotors[i].mDisplacement = 0;
-                _TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
-                log.Log(LogLevel.Info, $"{TwinCathelper.DeviceCount} zero value/s has been written sucessfully");
+                _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mDisplacement);
+                log.Log(LogLevel.Info, $"{DeviceCount} zero value/s has been written sucessfully");
             }
             if (DeviceStatus.SequenceEqual(validSeq02Val))
             {
                 log.Log(LogLevel.Info, $"Calibration Sucessful");
-                for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                for (int i = 0; i < DeviceCount; i++)
                 {
                     _TwinCathelper.PLCMotors[i].mMode = (int)EMode.Displacement;
                 }
-                _TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mMode);
+                _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mMode);
                 log.Log(LogLevel.Info, $"Device Mode Changed to : {EMode.Displacement}");
                 TNF.ShowSuccess("Calibration Sucessful");
+            }
+            if (DeviceStatus.SequenceEqual(validForHome))
+            {
+                log.Log(LogLevel.Info, $"All Motors Device Status : {EDeviceStatus.None}");
+                IsMotorsIdle = true;
             }
         }
         private void Motor_MotorDiagnosticChanged(object sender, EventArgs e)
         {
-            var array = new uint[TwinCathelper.DeviceCount];
+            var array = new uint[DeviceCount];
             Array.Copy(_TwinCathelper.PLCMotorsStatuses.MotorDiagnistic, array, array.Length);
             MotorDiagnistics = array;
         }
@@ -396,7 +415,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             CalibrationData = new List<double>();
             CalibrationData = CSVHelper.ReadCSV_DoubleData(new FileInfo(_TwinCathelper.AppSettings.CalibrationFileFullPath()));
             MyMotors = new ObservableCollection<MotorStatusControl>() { };
-            for (int j = 0; j < TwinCathelper.DeviceCount; j++)
+            for (int j = 0; j < DeviceCount; j++)
             {
                 MyMotors.Add(new MotorStatusControl() { MotorID = j, FillColor = Brushes.Red, ToolTip = "", StrokeColor = Brushes.White });
             }
@@ -408,6 +427,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             Array.Fill<uint>(validSeq01Val, (int)EDeviceStatus.CalibrationSquence01Success);
             Array.Fill<uint>(validSeq02Val, (int)EDeviceStatus.CalibrationSquence02Success);
             Array.Fill<uint>(healthyMotorDiag, (int)EmotorDiagnostic.Healthy);
+            Array.Fill<uint>(validForHome, (int)EDeviceStatus.None);
         }
     }
 }

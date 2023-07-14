@@ -250,7 +250,7 @@ namespace FlexMold.MVVM.ViewModel
                     }
                     else
                     {
-                        ProgressStatuses = "Slaves initalization failed see logs or loaded different TwinCat project";
+                        ProgressStatuses = "Slaves initalization failed see logs or Rebuild TwinCat Project";
                     }
                 }
                 else

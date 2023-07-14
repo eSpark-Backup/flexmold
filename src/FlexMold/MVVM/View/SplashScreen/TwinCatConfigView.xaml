@@ -11,8 +11,6 @@
     xmlns:splashscreenV="clr-namespace:FlexMold.MVVM.View.SplashScreen"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
     xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
-    Width="780"
-    Height="510"
     d:DataContext="{d:DesignInstance Type=splashscreen:TwinCatConfigViewModel}"
     mc:Ignorable="d">
     <Border Style="{StaticResource panelMenuBorder}">
@@ -21,15 +19,10 @@
                 <RowDefinition />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" ItemsSource="{Binding TabList}">
-                <!--<TabControl.Resources>
-                    <DataTemplate DataType="{x:Type splashscreen:FoeViewModel}">
-                        <splashscreenV:FoeView />
-                    </DataTemplate>
-                </TabControl.Resources>-->
-            </mah:MetroAnimatedSingleRowTabControl>
+            <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" ItemsSource="{Binding TabList}" />
             <Button
                 Grid.Row="1"
+                Margin="10"
                 Command="{x:Static wpf:DialogHost.CloseDialogCommand}"
                 IsCancel="True"
                 IsEnabled="{Binding CanClose}">

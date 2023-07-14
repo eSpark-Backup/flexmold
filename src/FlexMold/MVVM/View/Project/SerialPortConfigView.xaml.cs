@@ -1,6 +1,8 @@
-﻿using MahApps.Metro.Controls;
+﻿using FlexMold.MVVM.ViewModel.Project;
+using Microsoft.Extensions.DependencyInjection;
 using System.IO.Ports;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media.Effects;
 
 namespace FlexMold.MVVM.View.Project
@@ -8,56 +10,32 @@ namespace FlexMold.MVVM.View.Project
     /// <summary>
     /// Interaction logic for SerialPortConfigView.xaml
     /// </summary>
-    public partial class SerialPortConfigView : MetroWindow
+    public partial class SerialPortConfigView : UserControl
     {
-        public MainWindow main { get; set; }
         public SerialPort CurrentPort { get; set; }
         public bool SaveData { get; set; }
+        ILaserProjectorViewModel _LaserProjectorViewModel = App.AppHost.Services.GetRequiredService<ILaserProjectorViewModel>();
 
-        public SerialPortConfigView(MainWindow _main, SerialPort _SelectedSerialPort)
+        public SerialPortConfigView()
         {
-            main = _main;
-            main.IsEnabled = false;
-            main.Effect = new BlurEffect();
+            DataContext = _LaserProjectorViewModel;
             InitializeComponent();
-            SaveData = false;
+            _LaserProjectorViewModel.SaveData = false;
             CurrentPort = new SerialPort();
-            CurrentPort = _SelectedSerialPort;
+            CurrentPort =_LaserProjectorViewModel.SelectedSerialPort;
             CB_SerialBaudRate.ItemsSource = new int[] { 4800, 9600, 14400, 19200, 38400, 57600, 115200, 128000, 256000 };
             CB_SerialPortName.ItemsSource = SerialPort.GetPortNames();
-            CB_SerialBaudRate.SelectedItem = _SelectedSerialPort.BaudRate;
-            CB_SerialPortName.SelectedItem = _SelectedSerialPort.PortName;
+            CB_SerialBaudRate.SelectedItem = _LaserProjectorViewModel.SelectedSerialPort.BaudRate;
+            CB_SerialPortName.SelectedItem = _LaserProjectorViewModel.SelectedSerialPort.PortName;
             if (CB_SerialPortName.SelectedItem == null)
                 CB_SerialPortName.SelectedIndex = 0;
-        }
-
-        private void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            if (SaveData)
-            {
-                main.Effect = null;
-                main.IsEnabled = true;
-                CurrentPort.PortName = CB_SerialPortName.SelectedItem.ToString();
-                CurrentPort.BaudRate = (int)CB_SerialBaudRate.SelectedItem;
-            }
-            else
-            {
-                main.Effect = null;
-                main.IsEnabled = true;
-            }
-        }
-
-        private void MetroWindow_Closing(object sender, RoutedEventArgs e)
-        {
-            this.Close();
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             if (CB_SerialBaudRate.SelectedItem != null & CB_SerialPortName.SelectedItem.ToString() != "")
             {
-                SaveData = true;
-                this.Close();
+                _LaserProjectorViewModel.SaveData = true;
             }
             else
             {

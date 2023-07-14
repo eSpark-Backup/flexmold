@@ -81,7 +81,7 @@ namespace FlexMold
 
                 services.AddSingleton<CSVDiaglogView>();
                 services.AddSingleton<SambaConfigWindow>();
-                //services.AddSingleton<SerialPortConfigView>();
+                services.AddSingleton<SerialPortConfigView>();
             }
             ).Build();
         }

@@ -17,7 +17,6 @@ namespace FlexMold.MVVM.View.Project
 
     public partial class SambaConfigWindow : UserControl
     {
-        public MainWindow main { get; set; }
         ILaserProjectorViewModel _LaserProjectorViewModel = App.AppHost.Services.GetRequiredService<ILaserProjectorViewModel>();
 
         public SambaConfigWindow()
@@ -49,16 +48,6 @@ namespace FlexMold.MVVM.View.Project
                 _LaserProjectorViewModel.MyPorjector.UserName = tb_username.Text;
                 _LaserProjectorViewModel.MyPorjector.PlotFolderName = tb_sharename.Text;
             }
-        }
-
-
-
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
-        {
-           var parent = this.Parent as Panel;
-                // Remove the UserControl from its parent container
-                parent?.Children.Remove(this);
-           
         }
     }
 }

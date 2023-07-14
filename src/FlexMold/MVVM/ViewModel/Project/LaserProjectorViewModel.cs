@@ -184,6 +184,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 log.Log(LogLevel.Error, ex.Message);
             }
         }
+        private SerialPortConfigView _SerialConfigWindow { get { return App.AppHost.Services.GetRequiredService<SerialPortConfigView>(); } }
 
         private void SerialConfigWindow()
         {
@@ -192,12 +193,13 @@ namespace FlexMold.MVVM.ViewModel.Project
             {
                 log.Log(LogLevel.Info, $"Current port {SelectedSerialPort.PortName} Baud {SelectedSerialPort.BaudRate}");
                 log.Log(LogLevel.Info, $"Please Select Port params from available list ");
-                var main = System.Windows.Application.Current.MainWindow as MainWindow;
-                var sv = new SerialPortConfigView(main, SelectedSerialPort);
-                sv.ShowDialog();
-                if (sv.SaveData)
+                Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
                 {
-                    SelectedSerialPort = sv.CurrentPort;
+                    await DialogHost.Show(_SerialConfigWindow, "RootDialog", ClosingEventHandler);
+                }));
+                if (SaveData)
+                {
+                    SelectedSerialPort = _SerialConfigWindow.CurrentPort;
                     log.Log(LogLevel.Info, $"Saved Port {SelectedSerialPort.PortName} Baud {SelectedSerialPort.BaudRate}");
                 }
                 else
@@ -227,7 +229,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 log.Log(LogLevel.Info, $"Please Enter Samba params");
                 Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
                 {
-                    await DialogHost.Show(_SambaConfigWindow, "SplashDialog", ClosingEventHandler);
+                    await DialogHost.Show(_SambaConfigWindow, "RootDialog", ClosingEventHandler);
                 }));
                 if (SaveData)
                 {

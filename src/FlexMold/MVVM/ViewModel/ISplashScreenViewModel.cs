@@ -4,6 +4,7 @@ using ScriptingTest;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Windows;
 
 namespace FlexMold.MVVM.ViewModel
 {
@@ -26,6 +27,7 @@ namespace FlexMold.MVVM.ViewModel
         Machine SelectedMachine { get; set; }
         Script SelectedScript { get; set; }
         VSInfo SelectedVS { get; set; }
+        event EventHandler OnRequestCollapsed;
 
         event EventHandler OnRequestClose;
 

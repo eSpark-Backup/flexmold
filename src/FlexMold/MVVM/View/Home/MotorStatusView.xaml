@@ -51,6 +51,6 @@
             VerticalAlignment="Bottom"
             Command="{Binding CalibrateCommand}"
             Content="Calibrate"
-            IsEnabled="{Binding CalibrateButton}" />
+            IsEnabled="{Binding CalibrateButtonEnable}" />
     </UniformGrid>
 </UserControl>

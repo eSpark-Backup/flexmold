@@ -7,12 +7,11 @@ namespace FlexMold.MVVM.ViewModel.Project
 {
     public interface IProjectViewModel
     {
-        IMotorStatusViewmodel _MotorStatus { get; set; }
         RelayCommand BrowseProjectCommand { get; set; }
         bool CSVWriteButton { get; set; }
-        bool DeviceStatus { get; }
         RelayCommand HomeMotorsCommand { get; set; }
         bool LaserSendButton { get; set; }
+        IMotorStatusViewmodel MotorStatus { get; }
         Porjects myDataModels { get; set; }
         float[] Position { get; set; }
         FileInfo SelectedFile { get; set; }

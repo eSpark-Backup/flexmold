@@ -66,6 +66,7 @@ namespace FlexMold.MVVM.Model
         CalibrationSquence02Success,
         ShapeFormingStarted,
         ShapeFormingCompleted,
+        HomePosition
     }
     public static class TCVarName
     {

@@ -2,8 +2,6 @@
 using FlexMold.Utility;
 using MahApps.Metro.Controls;
 using Microsoft.Extensions.DependencyInjection;
-using System.Windows;
-using System.Windows.Forms;
 
 namespace FlexMold
 {
@@ -12,10 +10,11 @@ namespace FlexMold
     /// </summary>
     public partial class SplashMachineSlection : MetroWindow
     {
-        ISplashScreenViewModel _SplashScreenViewModel = App.AppHost.Services.GetRequiredService<ISplashScreenViewModel>();
+        ISplashScreenViewModel _SplashScreenViewModel { get { return App.AppHost.Services.GetRequiredService<ISplashScreenViewModel>(); } }
         public SplashMachineSlection()
         {
-            _SplashScreenViewModel.OnRequestClose += (s, e) => this.Visibility = Visibility.Collapsed;
+            _SplashScreenViewModel.OnRequestClose += (s, e) => this.Close();
+            _SplashScreenViewModel.OnRequestCollapsed += (s, e) => this.Visibility = System.Windows.Visibility.Collapsed;
             DataContext = _SplashScreenViewModel;
             InitializeComponent();
         }

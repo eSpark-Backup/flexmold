@@ -328,7 +328,7 @@ namespace FlexMold.Utility
             {
                 case DeviceSymbol.mDirection:
                     for (uint i = 0; i < DeviceCount; i++)
-                        PLCMotors[i].mDirection =Convert.ToBoolean(ReadEthercatDeviceData(i, deviceSymbol, sizeof(float))[0]);
+                        PLCMotors[i].mDirection = Convert.ToBoolean(ReadEthercatDeviceData(i, deviceSymbol, sizeof(float))[0]);
                     break;
                 case DeviceSymbol.mRPM:
                     for (uint i = 0; i < DeviceCount; i++)
@@ -345,7 +345,7 @@ namespace FlexMold.Utility
                 case DeviceSymbol.mMode:
                     for (uint i = 0; i < DeviceCount; i++)
                         PLCMotors[i].mMode = Convert.ToUInt32(ReadEthercatDeviceData(i, deviceSymbol, sizeof(float)));
-                    break;    
+                    break;
                 case DeviceSymbol.mRampDelay:
                     for (uint i = 0; i < DeviceCount; i++)
                         PLCMotors[i].mRampDelay = Convert.ToSingle(ReadEthercatDeviceData(i, deviceSymbol, sizeof(float)));
@@ -402,7 +402,7 @@ namespace FlexMold.Utility
             {
                 case DeviceSymbol.mDirection:
                     for (uint i = 0; i < DeviceCount; i++)
-                        WriteEthercatDeviceData(i, deviceSymbol,new byte[] { PLCMotors[i].mDirection.CastToArray()[0] });
+                        WriteEthercatDeviceData(i, deviceSymbol, new byte[] { PLCMotors[i].mDirection.CastToArray()[0] });
                     break;
                 case DeviceSymbol.mRPM:
                     for (uint i = 0; i < DeviceCount; i++)
@@ -508,9 +508,26 @@ namespace FlexMold.Utility
             try
             {
                 // Read the complete contents of the text file
-                string appSettings =
-                    File.ReadAllText(AppSettings.SettingRoot + "AppSettings.xml");
+                string appSettings;
+                if (!File.Exists(AppSettings.SettingRoot + "AppSettings.xml"))
+                {
+                    log.Log(LogLevel.Warn, "AppSettings.xml doesn't exist");
+                    log.Log(LogLevel.Warn, "Loading Default AppSettings.xml");
+                    if (File.Exists(AppSettings.SettingRoot + "AppSettings_Default.xml"))
+                    {
+                        log.Log(LogLevel.Warn, "Loading the Default AppSettings.xml");
+                        // Create a StringWriter to hold the XML
+                        StringWriter stringWriter = new();
+                        // Serialize the object to XML
+                        serializer.Serialize(stringWriter, new AppSettings());
 
+                        // Write the content to the text file
+                        if (!Directory.Exists(AppSettings.SettingRoot))
+                            Directory.CreateDirectory(AppSettings.SettingRoot);
+                        File.WriteAllText(AppSettings.SettingRoot + "AppSettings.xml", stringWriter.ToString());
+                    }
+                }
+                appSettings = File.ReadAllText(AppSettings.SettingRoot + "AppSettings.xml");
                 using StringReader reader = new(appSettings);
                 // Deserialize the XML back into a Person object
                 AppSettings = serializer.Deserialize(reader) as AppSettings;
@@ -518,19 +535,7 @@ namespace FlexMold.Utility
             }
             catch (Exception ex)
             {
-                if (!File.Exists(AppSettings.SettingRoot + "AppSettings_Default.xml"))
-                {
-                    // Create a StringWriter to hold the XML
-                    StringWriter stringWriter = new();
-                    // Serialize the object to XML
-                    serializer.Serialize(stringWriter, new AppSettings());
-
-                    // Write the content to the text file
-                    if (!Directory.Exists(AppSettings.SettingRoot))
-                        Directory.CreateDirectory(AppSettings.SettingRoot);
-                    File.WriteAllText(AppSettings.SettingRoot + "AppSettings_Default.xml", stringWriter.ToString());
-                }
-                var tmsg = $"AppSettings.xml : {ex.Message}";
+                var tmsg = $"AppSettings_Default.xml : {ex.Message}";
                 log.Log(LogLevel.Error, tmsg);
                 MessageBox.Show(tmsg);
                 return false;

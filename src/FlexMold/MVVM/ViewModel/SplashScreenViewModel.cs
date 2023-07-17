@@ -267,7 +267,11 @@ namespace FlexMold.MVVM.ViewModel
             }
             return false;
         }
-
+        /// <summary>
+        /// Worker Progeress
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             ProgressPercentage = e.ProgressPercentage;
@@ -306,7 +310,10 @@ namespace FlexMold.MVVM.ViewModel
         }
 
         private void Worker_ProgressStatusChanged(object sender, ProgressStatusChangedArgs e) => ProgressStatuses = e.Status;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <exception cref="ApplicationException"></exception>
         public void RunScript()
         {
             ICEnable = false;

@@ -81,6 +81,7 @@
                         <Grid>
                             <mah:Tile
                                 Title="{Binding Path=Name}"
+                                AutomationProperties.AutomationId="TileClick"
                                 Command="{Binding ElementName=MyItems, Path=DataContext.MachineClickCommand}"
                                 CommandParameter="{Binding}"
                                 Content="{Binding Path=IconT}"
@@ -113,6 +114,7 @@
                 Grid.Row="3"
                 Grid.Column="2"
                 Margin="10"
+                AutomationProperties.AutomationId="SP_Close"
                 Command="{Binding RunButtonCommand}"
                 IsEnabled="{Binding RunButtonEnable}">
                 <StackPanel Orientation="Horizontal">

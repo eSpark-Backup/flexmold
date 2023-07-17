@@ -1,5 +1,4 @@
 ﻿using FlexMold.MVVM.Model;
-using FlexMold.MVVM.View;
 using FlexMold.MVVM.ViewModel;
 using FlexMold.Utility;
 using MahApps.Metro.Controls;
@@ -11,7 +10,6 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Media;
 using System.Reflection;
-using System.Threading;
 using System.Windows.Media;
 using TwinCAT;
 using TwinCAT.Ads;

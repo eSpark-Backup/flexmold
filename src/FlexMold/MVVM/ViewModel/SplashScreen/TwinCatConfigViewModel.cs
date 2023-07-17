@@ -1,16 +1,8 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.View.SplashScreen;
-using FlexMold.Utility;
-using MahApps.Metro.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Data;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace FlexMold.MVVM.ViewModel.SplashScreen

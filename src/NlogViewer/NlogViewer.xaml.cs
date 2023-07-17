@@ -1,5 +1,4 @@
-﻿using Humanizer;
-using NLog;
+﻿using NLog;
 using NLog.Common;
 using System;
 using System.Collections.ObjectModel;

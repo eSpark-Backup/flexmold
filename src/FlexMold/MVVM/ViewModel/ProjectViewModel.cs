@@ -2,9 +2,7 @@
 using FlexMold.MVVM.Model;
 using FlexMold.MVVM.View.Project;
 using FlexMold.MVVM.ViewModel.Home;
-using FlexMold.MVVM.ViewModel.SplashScreen;
 using FlexMold.Utility;
-using MahApps.Metro.Controls;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
@@ -16,7 +14,6 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Forms;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;

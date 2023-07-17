@@ -1,5 +1,4 @@
-﻿using ControlzEx.Standard;
-using FlexMold.Core;
+﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.Utility;
 using NLog;

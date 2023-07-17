@@ -1,17 +1,11 @@
-﻿using EnvDTE80;
-using FlexMold.Core;
+﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.Utility;
 using NLog;
-using NLog.Fluent;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
-using TwinCAT;
-using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
 
 namespace FlexMold.MVVM.ViewModel.MachineTest

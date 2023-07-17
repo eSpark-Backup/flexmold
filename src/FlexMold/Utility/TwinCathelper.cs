@@ -1,12 +1,10 @@
 ﻿using FlexMold.MVVM.Model;
 using FlexMold.MVVM.ViewModel;
-using Newtonsoft.Json.Linq;
 using NLog;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Printing.IndexedProperties;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;

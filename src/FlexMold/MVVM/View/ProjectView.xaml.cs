@@ -1,5 +1,4 @@
-﻿using FlexMold.MVVM.ViewModel;
-using FlexMold.MVVM.ViewModel.Project;
+﻿using FlexMold.MVVM.ViewModel.Project;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows.Controls;
 

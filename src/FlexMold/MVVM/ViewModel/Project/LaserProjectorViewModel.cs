@@ -2,7 +2,6 @@
 using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.MVVM.View.Project;
-using FlexMold.MVVM.View.Setting;
 using FlexMold.Utility;
 using Humanizer;
 using MaterialDesignThemes.Wpf;

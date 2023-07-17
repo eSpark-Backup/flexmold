@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System.IO.Ports;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Effects;
 
 namespace FlexMold.MVVM.View.Project
 {

@@ -1,6 +1,5 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.ViewModel.SplashScreen;
-using Microsoft.VisualStudio.Shell.Interop;
 using StructPacker;
 using System;
 using System.Runtime.InteropServices;

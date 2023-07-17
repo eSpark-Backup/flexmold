@@ -1,5 +1,4 @@
 ﻿using FlexMold.MVVM.ViewModel;
-using FlexMold.Utility;
 using MahApps.Metro.Controls;
 using Microsoft.Extensions.DependencyInjection;
 

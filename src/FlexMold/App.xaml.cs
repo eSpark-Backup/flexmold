@@ -1,8 +1,4 @@
-﻿using FlexMold.Extenstions;
-using FlexMold.MVVM.Model;
-using FlexMold.MVVM.View;
-using FlexMold.MVVM.View.Accessory;
-using FlexMold.MVVM.View.Home;
+﻿using FlexMold.MVVM.View.Home;
 using FlexMold.MVVM.View.MachineTest;
 using FlexMold.MVVM.View.Project;
 using FlexMold.MVVM.View.Setting;

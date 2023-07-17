@@ -1,13 +1,10 @@
-﻿using ControlzEx.Standard;
-using FlexMold.Core;
-using FlexMold.MVVM.Model;
+﻿using FlexMold.MVVM.Model;
 using FlexMold.Utility;
 using NLog;
 using System;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace FlexMold.MVVM.ViewModel.Home
 {

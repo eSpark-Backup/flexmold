@@ -1,5 +1,4 @@
-﻿using FlexMold.MVVM.ViewModel.SplashScreen;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 
 namespace FlexMold.MVVM.View.Setting
 {

@@ -1,7 +1,5 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.View.Home;
-using FlexMold.Utility;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace FlexMold.MVVM.ViewModel
 {

@@ -1,5 +1,4 @@
 ﻿using FlexMold.Core;
-using FlexMold.MVVM.View.Setting;
 using FlexMold.Utility;
 using MaterialDesignThemes.Wpf;
 using NLog;

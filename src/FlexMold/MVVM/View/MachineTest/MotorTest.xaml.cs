@@ -1,5 +1,4 @@
 ﻿using FlexMold.MVVM.ViewModel.MachineTest;
-using System.Windows;
 using System.Windows.Controls;
 
 namespace FlexMold.MVVM.View.MachineTest

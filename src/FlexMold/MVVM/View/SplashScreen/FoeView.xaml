@@ -116,7 +116,6 @@
                             Binding="{Binding SlaveState}"
                             Header="State"
                             IsReadOnly="True">
-
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="{x:Type TextBlock}">
                                     <Setter Property="Background" Value="{Binding SlaveStateBackground}" />

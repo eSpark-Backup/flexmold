@@ -289,13 +289,33 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecg_bExecute}").FirstOrDefault().WriteValue(1);
             Thread.Sleep(500);
             var state = BitConverter.GetBytes((UInt16)_TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.state}").FirstOrDefault().ReadAnyValue(typeof(UInt16)));
-            MyDevicesAndBoxes[runningIndex].SlaveState = ((ESlaveStateMachine)state[0]).ToString();
+            var aa = (ESlaveStateMachine)state[0];
             switch ((ESlaveStateMachine)state[0])
             {
                 case ESlaveStateMachine.EC_DEVICE_STATE_OP:
+                    MyDevicesAndBoxes[runningIndex].SlaveState = ((ESlaveStateMachine)state[0]).ToString();
                     MyDevicesAndBoxes[runningIndex].SlaveStateBackground = Brushes.Green;
                     break;
+                case ESlaveStateMachine.EC_DEVICE_STATE_INIT:
+                case ESlaveStateMachine.EC_DEVICE_STATE_PREOP:
+                case ESlaveStateMachine.EC_DEVICE_STATE_BOOTSTRAP:
+                case ESlaveStateMachine.EC_DEVICE_STATE_SAFEOP:
+                case ESlaveStateMachine.EC_DEVICE_STATE_ERROR:
+                case ESlaveStateMachine.EC_DEVICE_STATE_INVALID_VPRS:
+                case ESlaveStateMachine.EC_DEVICE_STATE_INITCMD_ERROR:
+                case ESlaveStateMachine.EC_DEVICE_STATE_DISABLED:
+                case ESlaveStateMachine.RESET_FIRMWARE_REQUIRED:
+                    MyDevicesAndBoxes[runningIndex].SlaveState = ((ESlaveStateMachine)state[0]).ToString();
+                    MyDevicesAndBoxes[runningIndex].SlaveStateBackground = Brushes.Red;
+                    break;
+                case ESlaveStateMachine.BAD_FIRMWARE_FILE:
+                    MyDevicesAndBoxes[runningIndex].SlaveState = ((ESlaveStateMachine)state[0]).ToString();
+                    MyDevicesAndBoxes[runningIndex].SlaveStateBackground = Brushes.Red;
+                    break;
+                case ESlaveStateMachine.UnAvailable:
+                    break;
                 default:
+                    MyDevicesAndBoxes[runningIndex].SlaveState = ((ESlaveStateMachine)state[0]).ToString()+ " ! Undocumented State !";
                     MyDevicesAndBoxes[runningIndex].SlaveStateBackground = Brushes.Red;
                     break;
             }

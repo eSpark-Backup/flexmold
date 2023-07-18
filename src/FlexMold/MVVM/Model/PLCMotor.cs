@@ -133,7 +133,9 @@ namespace FlexMold.MVVM.Model
         EC_DEVICE_STATE_ERROR = 0x10,
         EC_DEVICE_STATE_INVALID_VPRS = 0x20,
         EC_DEVICE_STATE_INITCMD_ERROR = 0x40,
+        RESET_FIRMWARE_REQUIRED = 0x41,
         EC_DEVICE_STATE_DISABLED = 0x80,
+        BAD_FIRMWARE_FILE = 0x52,
         UnAvailable = 0x99
     }
 
@@ -285,7 +287,12 @@ namespace FlexMold.MVVM.Model
         public string SlaveState
         {
             get { return _SlaveState; }
-            set { _SlaveState = value; OnPropertyChanged(); RefreshUI(); }
+            set 
+            { 
+                _SlaveState = value; 
+                OnPropertyChanged(); 
+                RefreshUI(); 
+            }
         }
 
         private string _DateTimeLU;

@@ -335,7 +335,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             var log = LogManager.GetLogger("Calibration");
             for (int i = 0; i < data.Count; i++)
             {
-                _TwinCathelper.PLCMotors[i].mDisplacement = (uint)data[i] * 1600;
+                _TwinCathelper.PLCMotors[i].mDisplacement = (uint)data[i];
             }
             _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mDisplacement);
             log.Log(LogLevel.Info, $"{data.Count} csv value/s has been written sucessfully");

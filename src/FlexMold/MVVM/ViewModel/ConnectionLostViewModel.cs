@@ -22,9 +22,10 @@ namespace FlexMold.MVVM.ViewModel
 
         private bool _Restore;
 
-        public ConnectionLostViewModel(string _msg)
+        public ConnectionLostViewModel(string _msg, ITwinCathelper twinCathelper)
         {
             EventMessage = _msg;
+            this._TwinCathelper = twinCathelper;
             Thread thread = new Thread(new ThreadStart(WorkThreadFunction));
             thread.Start();
         }
@@ -37,7 +38,7 @@ namespace FlexMold.MVVM.ViewModel
                 {
                     case "Connection State Lost":
                         Thread.Sleep(500);
-                        TwinCathelper.Client.Close();
+                        _TwinCathelper.Client.Close();
                         break;
 
                     case "Ads State Lost":
@@ -56,13 +57,14 @@ namespace FlexMold.MVVM.ViewModel
         }
 
         private int retry;
+        private readonly ITwinCathelper _TwinCathelper;
 
         private bool setState()
         {
             log.Log(LogLevel.Info, $"{retry} Attempting to Start PLC ....");
-            TwinCathelper.StartpPLC();
+            _TwinCathelper.StartpPLC();
             Thread.Sleep(500);
-            var info = TwinCathelper.GetTwincatState();
+            var info = _TwinCathelper.GetTwincatState();
             if (info.AdsState != AdsState.Run)
             {
                 if (retry < 5)

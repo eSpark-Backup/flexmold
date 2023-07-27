@@ -4,20 +4,22 @@ using FlexMold.MVVM.Model;
 using FlexMold.MVVM.View.Project;
 using FlexMold.Utility;
 using Humanizer;
+using MaterialDesignThemes.Wpf;
+using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Ports;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace FlexMold.MVVM.ViewModel.Project
 {
-    internal class LaserProjectorViewModel : TelnetHelper
+    public class LaserProjectorViewModel : TelnetHelper, ILaserProjectorViewModel
     {
-        private readonly ProjectViewModel _parent;
+        public IProjectViewModel _ProjectViewModel { get { return App.AppHost.Services.GetRequiredService<IProjectViewModel>(); } }
 
-        public ProjectViewModel Parent => _parent;
         private Logger log;
         public RelayCommand ProjectorModeSelectionCommand { get; set; }
         public RelayCommand SendLasFileCommand { get; set; }
@@ -70,98 +72,6 @@ namespace FlexMold.MVVM.ViewModel.Project
                 _SelectedSerialPort = value;
             }
         }
-
-
-        public LaserProjectorViewModel(ProjectViewModel parent)
-        {
-            log = LogManager.GetLogger("LaseProjector");
-            _parent = parent;
-            SendLasFileCommand = new RelayCommand(o => { _ = sendLasFileAsync(Parent.SelectedFile); });
-            SerialConfigCommand = new RelayCommand(o => { SerialConfigWindow(); });
-            LaunchLPMCommand = new RelayCommand(o =>
-            {
-                Process secondProc = new Process();
-                secondProc.StartInfo.FileName = @"C:\Z-LASER\LPM 9.0\LPM.exe";
-                secondProc.Start();
-            });
-            SambaConfigCommand = new RelayCommand(o => { SambaConfigWindow(); });
-            ProjectionOnCommand = new RelayCommand(async o =>
-            {
-                if (ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort) == null)
-                {
-                    var ii = await ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
-                    if (!ii)
-                    {
-                        var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
-                        log.Log(LogLevel.Error, tmsg);
-                        TNF.ShowError(tmsg);
-                        return;
-                    }
-                }
-                else
-                {
-                    SendMessage = "ZN; " + "\r\n";
-                    _ = SendTelnetMessgae();
-                }
-            });
-            ProjectionOffCommand = new RelayCommand(async o =>
-            {
-                if (ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort) == null)
-                {
-                    var ii = await ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
-                    if (!ii)
-                    {
-                        var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
-                        log.Log(LogLevel.Error, tmsg);
-                        TNF.ShowError(tmsg);
-                        return;
-                    }
-                }
-                else
-                {
-                    SendMessage = "ZF; " + "\r\n";
-                    _ = SendTelnetMessgae();
-                }
-            });
-            CallibrateProjectorCommand = new RelayCommand(async o =>
-            {
-                if (ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort) == null)
-                {
-                    var ii = await ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
-                    if (!ii)
-                    {
-                        var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
-                        log.Log(LogLevel.Error, tmsg);
-                        TNF.ShowError(tmsg);
-                        return;
-                    }
-                }
-                else
-                {
-                    SendMessage = "ZD; " + "\r\n";
-                    _ = SendTelnetMessgae();
-                }
-            });
-            LaunchLMPCommand = new RelayCommand(o => { DisconnectTelnet(); });
-            if (MyPorjector == null)
-            {
-                MyPorjector = new LaserProjector()
-                {
-                    Name = "p1",
-                    IpAddres = "192.168.50.22",
-                    UserName = "123",
-                    Status = 1,
-                    TelnetPort = 23,
-                    Password = "123456",
-                };
-            }
-            LaserProjectorComMode = (int)EProjectorComMode.Telnet;
-            if (SelectedSerialPort == null)
-            {
-                SelectedSerialPort = new SerialPort();
-            }
-        }
-
         public async Task sendLasFileAsync(FileInfo _slectedFile)
         {
             try
@@ -273,6 +183,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 log.Log(LogLevel.Error, ex.Message);
             }
         }
+        private SerialPortConfigView _SerialConfigWindow { get { return App.AppHost.Services.GetRequiredService<SerialPortConfigView>(); } }
 
         private void SerialConfigWindow()
         {
@@ -281,12 +192,13 @@ namespace FlexMold.MVVM.ViewModel.Project
             {
                 log.Log(LogLevel.Info, $"Current port {SelectedSerialPort.PortName} Baud {SelectedSerialPort.BaudRate}");
                 log.Log(LogLevel.Info, $"Please Select Port params from available list ");
-                var main = System.Windows.Application.Current.MainWindow as MainWindow;
-                var sv = new SerialPortConfigView(main, SelectedSerialPort);
-                sv.ShowDialog();
-                if (sv.SaveData)
+                Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
                 {
-                    SelectedSerialPort = sv.CurrentPort;
+                    await DialogHost.Show(_SerialConfigWindow, "RootDialog", ClosingEventHandler);
+                }));
+                if (SaveData)
+                {
+                    SelectedSerialPort = _SerialConfigWindow.CurrentPort;
                     log.Log(LogLevel.Info, $"Saved Port {SelectedSerialPort.PortName} Baud {SelectedSerialPort.BaudRate}");
                 }
                 else
@@ -300,6 +212,12 @@ namespace FlexMold.MVVM.ViewModel.Project
                 TNF.ShowError(ex.Message);
             }
         }
+        private SambaConfigWindow _SambaConfigWindow { get { return App.AppHost.Services.GetRequiredService<SambaConfigWindow>(); } }
+        private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
+        {
+            Console.WriteLine();
+        }
+        public bool SaveData { get; set; }
 
         private void SambaConfigWindow()
         {
@@ -308,12 +226,12 @@ namespace FlexMold.MVVM.ViewModel.Project
             {
                 log.Log(LogLevel.Info, $"Current IP {MyPorjector.IpAddres} UserName {MyPorjector.UserName}");
                 log.Log(LogLevel.Info, $"Please Enter Samba params");
-                var main = System.Windows.Application.Current.MainWindow as MainWindow;
-                var sv = new SambaConfigWindow(main, MyPorjector);
-                sv.ShowDialog();
-                if (sv.SaveData)
+                Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
                 {
-                    MyPorjector = sv.CurrentProjector;
+                    await DialogHost.Show(_SambaConfigWindow, "RootDialog", ClosingEventHandler);
+                }));
+                if (SaveData)
+                {
                     log.Log(LogLevel.Info, $"Saved IP {MyPorjector.IpAddres}");
                     log.Log(LogLevel.Info, $"Saved PlotFolderName {MyPorjector.PlotFolderName}");
                     log.Log(LogLevel.Info, $"Saved UserName {MyPorjector.UserName}");
@@ -328,6 +246,95 @@ namespace FlexMold.MVVM.ViewModel.Project
                 log.Log(LogLevel.Error, ex, ex.Message);
                 TNF.ShowError(ex.Message);
             }
+        }
+        public LaserProjectorViewModel()
+        {
+            log = LogManager.GetLogger("LaseProjector");
+            SendLasFileCommand = new RelayCommand(o => { _ = sendLasFileAsync(_ProjectViewModel.SelectedFile); });
+            SerialConfigCommand = new RelayCommand(o => { /*SerialConfigWindow();*/ });
+            LaunchLPMCommand = new RelayCommand(o =>
+            {
+                Process secondProc = new Process();
+                secondProc.StartInfo.FileName = @"C:\Z-LASER\LPM 9.0\LPM.exe";
+                secondProc.Start();
+            });
+            SambaConfigCommand = new RelayCommand(o => { /*SambaConfigWindow(); */});
+            ProjectionOnCommand = new RelayCommand(async o =>
+            {
+                if (ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort) == null)
+                {
+                    var ii = await ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
+                    if (!ii)
+                    {
+                        var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
+                        log.Log(LogLevel.Error, tmsg);
+                        TNF.ShowError(tmsg);
+                        return;
+                    }
+                }
+                else
+                {
+                    SendMessage = "ZN; " + "\r\n";
+                    _ = SendTelnetMessgae();
+                }
+            });
+            ProjectionOffCommand = new RelayCommand(async o =>
+            {
+                if (ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort) == null)
+                {
+                    var ii = await ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
+                    if (!ii)
+                    {
+                        var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
+                        log.Log(LogLevel.Error, tmsg);
+                        TNF.ShowError(tmsg);
+                        return;
+                    }
+                }
+                else
+                {
+                    SendMessage = "ZF; " + "\r\n";
+                    _ = SendTelnetMessgae();
+                }
+            });
+            CallibrateProjectorCommand = new RelayCommand(async o =>
+            {
+                if (ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort) == null)
+                {
+                    var ii = await ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
+                    if (!ii)
+                    {
+                        var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
+                        log.Log(LogLevel.Error, tmsg);
+                        TNF.ShowError(tmsg);
+                        return;
+                    }
+                }
+                else
+                {
+                    SendMessage = "ZD; " + "\r\n";
+                    _ = SendTelnetMessgae();
+                }
+            });
+            LaunchLMPCommand = new RelayCommand(o => { DisconnectTelnet(); });
+            if (MyPorjector == null)
+            {
+                MyPorjector = new LaserProjector()
+                {
+                    Name = "p1",
+                    IpAddres = "192.168.50.22",
+                    UserName = "123",
+                    Status = 1,
+                    TelnetPort = 23,
+                    Password = "123456",
+                };
+            }
+            LaserProjectorComMode = (int)EProjectorComMode.Telnet;
+            if (SelectedSerialPort == null)
+            {
+                SelectedSerialPort = new SerialPort();
+            }
+
         }
     }
 }

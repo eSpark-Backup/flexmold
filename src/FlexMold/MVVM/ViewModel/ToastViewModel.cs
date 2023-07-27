@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows;
-using System.Windows.Threading;
 using ToastNotifications;
 using ToastNotifications.Core;
 using ToastNotifications.Lifetime;

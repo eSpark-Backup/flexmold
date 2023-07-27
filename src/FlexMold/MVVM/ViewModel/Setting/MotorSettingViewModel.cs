@@ -1,5 +1,4 @@
 ﻿using FlexMold.Core;
-using FlexMold.MVVM.View.Setting;
 using FlexMold.Utility;
 using MaterialDesignThemes.Wpf;
 using NLog;
@@ -7,7 +6,7 @@ using System;
 
 namespace FlexMold.MVVM.ViewModel.Setting
 {
-    internal class MotorSettingViewModel : ObservableObject
+    public class MotorSettingViewModel : ObservableObject, IMotorSettingViewModel
     {
         private Logger log;
         public RelayCommand FirmwareCommand { get; set; }
@@ -35,6 +34,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
         }
 
         private uint[] _DeviceIds;
+        private readonly ITwinCathelper _TwinCathelper;
 
         public uint[] DeviceIds
         {
@@ -45,10 +45,14 @@ namespace FlexMold.MVVM.ViewModel.Setting
                 OnPropertyChanged();
             }
         }
-
-        public MotorSettingViewModel()
+        private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
         {
-            if (TwinCathelper.Client == null)
+            Console.WriteLine();
+        }
+        public MotorSettingViewModel(ITwinCathelper twinCathelper)
+        {
+            this._TwinCathelper = twinCathelper;
+            if (_TwinCathelper.Client == null)
             {
                 return;
             }
@@ -58,21 +62,6 @@ namespace FlexMold.MVVM.ViewModel.Setting
             {
                 DeviceIds[i] = i;
             }
-            FirmwareCommand = new RelayCommand(o => { UpdateFirmware(); });
-        }
-
-        private async void UpdateFirmware()
-        {
-            var view = new FoeSettingDiaglog()
-            {
-                DataContext = new FoeSettingDiaglogViewModel()
-            };
-            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
-        }
-
-        private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
-        {
-            Console.WriteLine();
         }
     }
 }

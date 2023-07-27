@@ -14,8 +14,6 @@
     xmlns:spc="clr-namespace:FlexMold.MVVM.View.SplashScreen"
     xmlns:splashscreen="clr-namespace:FlexMold.MVVM.ViewModel.SplashScreen"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
     mc:Ignorable="d">
     <!--<UserControl.DataContext>
         <splashscreen:FoeViewModel />
@@ -31,13 +29,13 @@
             <core:MultipleChoiceFilter Filter="{Binding Path=Filter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=dgx:DataGridFilterColumnControl}}" />
         </ControlTemplate>
     </UserControl.Resources>
-    <Grid>
+    <Grid x:Name="mygrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="270" />
             <RowDefinition />
         </Grid.RowDefinitions>
         <ScrollViewer
-            Margin="2"
+            Margin="10"
             HorizontalScrollBarVisibility="Auto"
             VerticalScrollBarVisibility="Auto">
             <Grid>
@@ -49,6 +47,7 @@
                 <DataGrid
                     x:Name="dataGrid1"
                     Grid.Row="1"
+                    Width="750"
                     dgx:DataGridFilter.IsAutoFilterEnabled="True"
                     AutoGenerateColumns="False"
                     CanUserAddRows="False"
@@ -125,6 +124,11 @@
                         </DataGridTextColumn>
                         <DataGridTextColumn
                             dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
+                            Binding="{Binding Foe_Remarks}"
+                            Header="Remarks"
+                            IsReadOnly="True" />
+                        <DataGridTextColumn
+                            dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
                             Binding="{Binding Foe_bError}"
                             Header="Error"
                             IsReadOnly="True" />
@@ -133,11 +137,7 @@
                             Binding="{Binding Foe_nErrID}"
                             Header="Err Id"
                             IsReadOnly="True" />
-                        <DataGridTextColumn
-                            dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
-                            Binding="{Binding Foe_Remarks}"
-                            Header="Remarks"
-                            IsReadOnly="True" />
+
                         <DataGridTextColumn
                             dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
                             Binding="{Binding Foe_nBytesWritten}"
@@ -205,7 +205,7 @@
                 Name="pbox_pwd"
                 Grid.Row="0"
                 Grid.Column="4"
-                mah:TextBoxHelper.ClearTextButton="True">
+                mah:TextBoxHelper.ClearTextButton="False">
                 <TextBox.Text>
                     <Binding Path="Foe_dwPass">
                         <Binding.ValidationRules>
@@ -217,6 +217,7 @@
             <Button
                 Grid.Row="1"
                 Grid.ColumnSpan="5"
+                Margin="10"
                 Command="{Binding UpdateFirmwareCommand}"
                 IsDefault="True"
                 IsEnabled="{Binding BT_FirmwareEnable}">
@@ -225,7 +226,10 @@
                     <TextBlock VerticalAlignment="Center" Text="Update Firmware" />
                 </StackPanel>
             </Button>
-            <Grid Grid.Row="3" Grid.ColumnSpan="5">
+            <Grid
+                Grid.Row="3"
+                Grid.ColumnSpan="5"
+                Margin="10">
                 <mah:MetroProgressBar Value="{Binding OverAllProgress}" />
                 <TextBlock
                     HorizontalAlignment="Center"

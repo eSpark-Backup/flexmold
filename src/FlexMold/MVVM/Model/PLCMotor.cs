@@ -1,6 +1,5 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.ViewModel.SplashScreen;
-using Microsoft.VisualStudio.Shell.Interop;
 using StructPacker;
 using System;
 using System.Runtime.InteropServices;
@@ -66,6 +65,7 @@ namespace FlexMold.MVVM.Model
         CalibrationSquence02Success,
         ShapeFormingStarted,
         ShapeFormingCompleted,
+        HomePosition
     }
     public static class TCVarName
     {
@@ -133,7 +133,9 @@ namespace FlexMold.MVVM.Model
         EC_DEVICE_STATE_ERROR = 0x10,
         EC_DEVICE_STATE_INVALID_VPRS = 0x20,
         EC_DEVICE_STATE_INITCMD_ERROR = 0x40,
+        RESET_FIRMWARE_REQUIRED = 0x41,
         EC_DEVICE_STATE_DISABLED = 0x80,
+        BAD_FIRMWARE_FILE = 0x52,
         UnAvailable = 0x99
     }
 
@@ -149,10 +151,11 @@ namespace FlexMold.MVVM.Model
         EC_LINK_STATE_PORT_C = 0x40,
         EC_LINK_STATE_PORT_D = 0x80,
         EC_LINK_STATE_Other_Fail = 0x24,
+        ERR_PREOP_INIT_ERR = 0x60,
         UnAvailable = 0x99
     }
 
-    internal class ST_EcSlaveState : ObservableObject
+    public class ST_EcSlaveState : ObservableObject
     {
         private int slaveID;
 
@@ -233,6 +236,27 @@ namespace FlexMold.MVVM.Model
             if (View == null) return;
             View.RefreshDataGrid();
         }
+
+
+
+
+
+        private string _foe_Remarks;
+
+        public string Foe_Remarks
+        {
+            get
+            {
+                return _foe_Remarks;
+            }
+            set
+            {
+                _foe_Remarks = value;
+                OnPropertyChanged();
+                RefreshUI();
+            }
+        }
+
         private SolidColorBrush _ErrorForeground;
         public SolidColorBrush ErrorForeground
         { get => _ErrorForeground; set { _ErrorForeground = value; OnPropertyChanged(); } }
@@ -263,7 +287,12 @@ namespace FlexMold.MVVM.Model
         public string SlaveState
         {
             get { return _SlaveState; }
-            set { _SlaveState = value; OnPropertyChanged(); RefreshUI(); }
+            set 
+            { 
+                _SlaveState = value; 
+                OnPropertyChanged(); 
+                RefreshUI(); 
+            }
         }
 
         private string _DateTimeLU;
@@ -339,7 +368,7 @@ namespace FlexMold.MVVM.Model
         private ushort foe_nSlaveAddr;
 
         public UInt32 Foe_nPercent
-        { get => _Foe_nPercent; set { _Foe_nPercent = value; OnPropertyChanged(); } }
+        { get => _Foe_nPercent; set { _Foe_nPercent = value; OnPropertyChanged(); RefreshUI(); } }
 
         public FoeModel ShallowCopy()
         {

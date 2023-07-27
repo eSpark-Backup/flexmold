@@ -3,11 +3,11 @@
 namespace FlexMold.MVVM.View.Accessory
 {
     /// <summary>
-    /// Interaction logic for HeaterStatusView.xaml
+    /// Interaction logic for LaserStatusView.xaml
     /// </summary>
-    public partial class HeaterStatusView : UserControl
+    public partial class LaserView : UserControl
     {
-        public HeaterStatusView()
+        public LaserView()
         {
             InitializeComponent();
         }

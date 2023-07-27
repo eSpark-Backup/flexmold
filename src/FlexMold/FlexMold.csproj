@@ -57,6 +57,7 @@
 		<PackageReference Include="MahApps.Metro.IconPacks" Version="4.11.0" />
 		<PackageReference Include="MaterialDesignThemes.MahApps" Version="0.3.0" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="NLog.Schema" Version="5.2.2" />
 		<PackageReference Include="StructPacker" Version="1.0.8" />
@@ -67,10 +68,10 @@
 		<PackageReference Include="ToastNotifications.Messages" Version="2.5.1" />
 	</ItemGroup>
 	<ItemGroup>
-		<Compile Update="MVVM\View\Project\CSVDiaglog.xaml.cs">
+		<Compile Update="MVVM\View\Project\CSVDiaglogView.xaml.cs">
 		  <SubType>Code</SubType>
 		</Compile>
-		<Compile Update="MVVM\View\SplashScreen\DeviceScanDialog.xaml.cs">
+		<Compile Update="MVVM\View\SplashScreen\TwinCatConfigView.xaml.cs">
 		  <SubType>Code</SubType>
 		</Compile>
 		<Compile Update="Properties\Settings.Designer.cs">

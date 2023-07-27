@@ -5,15 +5,10 @@ using NLog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.ConstrainedExecution;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Forms;
 using System.Windows.Media;
 using TwinCAT;
@@ -22,16 +17,15 @@ using TwinCAT.Ads.TypeSystem;
 
 namespace FlexMold.MVVM.ViewModel.SplashScreen
 {
-    internal class FoeViewModel : ObservableObject
+    public class FoeViewModel : ObservableObject, ITabViewModel, IFoeViewModel
     {
         private int retry = 0;
         private string foe_sPathName;
         private bool Init_Status = false;
         private bool Foe_Status = false;
         private bool Op_Status = false;
-        private object foe_dwPass;
+        private string foe_dwPass;
 
-        private string _foe_Remarks;
 
 
         private bool ValidateMyString(string filpath)
@@ -60,36 +54,6 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             }
         }
 
-        private bool _canClose ;
-
-        public bool CanClose
-        {
-            get
-            {
-                return _canClose;
-            }
-            set
-            {
-                if (_canClose != value)
-                {
-                    _canClose = value;
-                    OnPropertyChanged(nameof(CanClose));
-                }
-            }
-        }
-
-        public string Foe_Remarks
-        {
-            get
-            {
-                return _foe_Remarks;
-            }
-            set
-            {
-                _foe_Remarks = value;
-                OnPropertyChanged();
-            }
-        }
         private bool? _isCheckedAll;
 
         public bool? IsCheckedAll
@@ -152,6 +116,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         {
             using (var dialog = new OpenFileDialog())
             {
+                dialog.Filter = "bin files (*.bin)|*.bin|hex files (*.hex)|*.hex";
                 log.Log(LogLevel.Info, $"Select Project Folder");
                 DialogResult result = dialog.ShowDialog();
                 if (result == DialogResult.OK)
@@ -168,25 +133,33 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         }
 
         public string Foe_sPathName { get => foe_sPathName; set { foe_sPathName = value; OnPropertyChanged(); } }
-
-        public object Foe_dwPass { get => foe_dwPass; set { foe_dwPass = value; OnPropertyChanged(); } }
+        public string Foe_dwPass { get => foe_dwPass; 
+            set 
+            {
+                foe_dwPass = value; 
+                OnPropertyChanged();
+            } 
+        }
 
         public string Foe_sNetId { get; private set; }
+        public string Foe_Remarks { get;  set; }
 
         private List<int> NotificatioHandles;
+        public event EventHandler<bool> TUpdate_Status;
+
         private void RegisterNotification()
         {
 
             NotificatioHandles = new List<int>();
-            TwinCathelper.Client.AdsNotification += Client_AdsNotificationFoe;
-            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.foe_nErrID}"));
-            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.foe_bBusy}"));
-            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.foe_bError}"));
-            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.foe_nPercent}"));
-            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.foe_nBytesWritten}"));
-            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.ecs_bBusy}"));
-            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.ecs_bError}"));
-            NotificatioHandles.Add(TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.ecs_nErrId}"));
+            _TwinCathelper.Client.AdsNotification += Client_AdsNotificationFoe;
+            NotificatioHandles.Add(_TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.foe_nErrID}"));
+            NotificatioHandles.Add(_TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.foe_bBusy}"));
+            NotificatioHandles.Add(_TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.foe_bError}"));
+            NotificatioHandles.Add(_TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.foe_nPercent}"));
+            NotificatioHandles.Add(_TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.foe_nBytesWritten}"));
+            NotificatioHandles.Add(_TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.ecs_bBusy}"));
+            NotificatioHandles.Add(_TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.ecs_bError}"));
+            NotificatioHandles.Add(_TwinCathelper.RegisterNotification($"MAIN.{TCSymbols.ecs_nErrId}"));
         }
         List<FoeModel> checkedSlaves;
         int cur;
@@ -195,15 +168,14 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         {
             try
             {
-                CanClose = false;
                 ResetDeviceCollection();
                 OverAllProgress = 0;
                 cur = 0;
                 checkedSlaves = MyDevicesAndBoxes.Where(a => a.IsChecked == true).ToList();
                 RegisterNotification();
-                TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_dwPass}").FirstOrDefault().WriteValue(Foe_dwPass);
-                TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sPathName}").FirstOrDefault().WriteValue(Foe_sPathName);
-                Foe_sNetId = TwinCathelper.SAmsNetId;
+                _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_dwPass}").FirstOrDefault().WriteValue(Convert.ToInt32(Foe_dwPass, 16));
+                _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sPathName}").FirstOrDefault().WriteValue(Foe_sPathName);
+                Foe_sNetId = _TwinCathelper.SAmsNetId;
                 for (UInt16 i = 0; i < checkedSlaves.Count; i++)
                 {
                     cur = i;
@@ -211,39 +183,43 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
                     runningIndex = MyDevicesAndBoxes.IndexOf(MyDevicesAndBoxes.Where(a => a.Foe_nSlaveAddr == checkedSlaves[i].Foe_nSlaveAddr).FirstOrDefault());
                     ResetSetContols();
                     DeviceStatusIndex = $"Updating {i + 1}/{checkedSlaves.Count}";
-                    TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(0);
-                    TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nSlaveAddr}").FirstOrDefault().WriteValue(MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr);
-                    TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bBusy}").FirstOrDefault().WriteValue(0);
-                    TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bError}").FirstOrDefault().WriteValue(0);
-                    TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nErrID}").FirstOrDefault().WriteValue(0);
-                    TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nBytesWritten}").FirstOrDefault().WriteValue(0);
-                    TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nPercent}").FirstOrDefault().WriteValue(0);
+                    _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(0);
+                    _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nSlaveAddr}").FirstOrDefault().WriteValue(MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr);
+                    _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bBusy}").FirstOrDefault().WriteValue(0);
+                    _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bError}").FirstOrDefault().WriteValue(0);
+                    _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nErrID}").FirstOrDefault().WriteValue(0);
+                    _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nBytesWritten}").FirstOrDefault().WriteValue(0);
+                    _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nPercent}").FirstOrDefault().WriteValue(0);
 
                     Thread.Sleep(1000);
                     DeviceStatusIndex = $"Initializing {i + 1}/{checkedSlaves.Count}";
                     if (ChangeBoxState(ESlaveStateMachine.EC_DEVICE_STATE_INIT))
                     {
                         Init_Status = true;
-                        TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_bExecute}").FirstOrDefault().WriteValue(0);
+                        _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_bExecute}").FirstOrDefault().WriteValue(0);
                         DeviceStatusIndex = $"Setted into : {ESlaveStateMachine.EC_DEVICE_STATE_INIT} {curStr}";
                         log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} State Updated");
-                        TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(1);
+                        MyDevicesAndBoxes[runningIndex].Foe_Remarks = "State Updated";
+                        _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(1);
                         DeviceStatusIndex = $"Downloading {curStr}";
                         if (FoeWait())
                         {
                             Op_Status = true;
                             log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} Update Completed");
+                            MyDevicesAndBoxes[runningIndex].Foe_Remarks = "Update Completed";
                         }
                         else
                         {
                             Op_Status = false;
                             log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} Update Failed");
+                            MyDevicesAndBoxes[runningIndex].Foe_Remarks = "Update Failed";
                         }
                     }
                     else
                     {
                         Init_Status = false;
-                        log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} Deveice State not set");
+                        log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} Device State not set");
+                        MyDevicesAndBoxes[runningIndex].Foe_Remarks = "Device State not set";
                     }
                     MyDevicesAndBoxes[runningIndex].Init_Status = Init_Status;
                     MyDevicesAndBoxes[runningIndex].Foe_Status = Foe_Status;
@@ -275,7 +251,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             finally
             {
                 BT_FirmwareEnable = true;
-                CanClose = true;
+                TUpdate_Status?.Invoke(null, true);
                 DeleteNotifications();
             }
         }
@@ -293,33 +269,53 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         }
         private void DeleteNotifications()
         {
-            if (TwinCathelper.Client.State == ConnectionState.Connected)
+            if (_TwinCathelper.Client.State == ConnectionState.Connected)
             {
                 foreach (var item in NotificatioHandles)
                 {
                     if (item != -1)
                     {
-                        TwinCathelper.Client.DeleteDeviceNotification((uint)item);
+                        _TwinCathelper.Client.DeleteDeviceNotification((uint)item);
                     }
                 }
-                TwinCathelper.Client.AdsNotification -= Client_AdsNotificationFoe;
+                _TwinCathelper.Client.AdsNotification -= Client_AdsNotificationFoe;
             }
         }
         private bool GetSlaveState(ESlaveStateMachine _EreqState)
         {
             DeviceStatusIndex = $"Requesting Slave State {curStr}";
             log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} Requesting Slave State....");
-            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecg_bExecute}").FirstOrDefault().WriteValue(0);
-            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecg_bExecute}").FirstOrDefault().WriteValue(1);
+            _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecg_bExecute}").FirstOrDefault().WriteValue(0);
+            _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecg_bExecute}").FirstOrDefault().WriteValue(1);
             Thread.Sleep(500);
-            var state = BitConverter.GetBytes((UInt16)TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.state}").FirstOrDefault().ReadAnyValue(typeof(UInt16)));
-            MyDevicesAndBoxes[runningIndex].SlaveState = ((ESlaveStateMachine)state[0]).ToString();
+            var state = BitConverter.GetBytes((UInt16)_TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.state}").FirstOrDefault().ReadAnyValue(typeof(UInt16)));
+            var aa = (ESlaveStateMachine)state[0];
             switch ((ESlaveStateMachine)state[0])
             {
                 case ESlaveStateMachine.EC_DEVICE_STATE_OP:
+                    MyDevicesAndBoxes[runningIndex].SlaveState = ((ESlaveStateMachine)state[0]).ToString();
                     MyDevicesAndBoxes[runningIndex].SlaveStateBackground = Brushes.Green;
                     break;
+                case ESlaveStateMachine.EC_DEVICE_STATE_INIT:
+                case ESlaveStateMachine.EC_DEVICE_STATE_PREOP:
+                case ESlaveStateMachine.EC_DEVICE_STATE_BOOTSTRAP:
+                case ESlaveStateMachine.EC_DEVICE_STATE_SAFEOP:
+                case ESlaveStateMachine.EC_DEVICE_STATE_ERROR:
+                case ESlaveStateMachine.EC_DEVICE_STATE_INVALID_VPRS:
+                case ESlaveStateMachine.EC_DEVICE_STATE_INITCMD_ERROR:
+                case ESlaveStateMachine.EC_DEVICE_STATE_DISABLED:
+                case ESlaveStateMachine.RESET_FIRMWARE_REQUIRED:
+                    MyDevicesAndBoxes[runningIndex].SlaveState = ((ESlaveStateMachine)state[0]).ToString();
+                    MyDevicesAndBoxes[runningIndex].SlaveStateBackground = Brushes.Red;
+                    break;
+                case ESlaveStateMachine.BAD_FIRMWARE_FILE:
+                    MyDevicesAndBoxes[runningIndex].SlaveState = ((ESlaveStateMachine)state[0]).ToString();
+                    MyDevicesAndBoxes[runningIndex].SlaveStateBackground = Brushes.Red;
+                    break;
+                case ESlaveStateMachine.UnAvailable:
+                    break;
                 default:
+                    MyDevicesAndBoxes[runningIndex].SlaveState = ((ESlaveStateMachine)state[0]).ToString()+ " ! Undocumented State !";
                     MyDevicesAndBoxes[runningIndex].SlaveStateBackground = Brushes.Red;
                     break;
             }
@@ -337,7 +333,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
                 }
                 else
                 {
-                    TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecg_bExecute}").FirstOrDefault().WriteValue(0);
+                    _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecg_bExecute}").FirstOrDefault().WriteValue(0);
                     return true;
                 }
             }
@@ -365,9 +361,9 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
         {
             DeviceStatusIndex = $"Changing Slave State to {_EreqState} {curStr}";
             log.Log(LogLevel.Warn, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} Changing Box State : {_EreqState}");
-            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_bExecute}").FirstOrDefault().WriteValue(0);
-            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_reqState}").FirstOrDefault().WriteValue((int)_EreqState);
-            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_bExecute}").FirstOrDefault().WriteValue(1);
+            _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_bExecute}").FirstOrDefault().WriteValue(0);
+            _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_reqState}").FirstOrDefault().WriteValue((int)_EreqState);
+            _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ecs_bExecute}").FirstOrDefault().WriteValue(1);
             return EcsWait(_EreqState);
         }
 
@@ -421,7 +417,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
 
         private void Client_AdsNotificationFoe(object sender, AdsNotificationEventArgs e)
         {
-            var pdd = (UInt16)(TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nSlaveAddr}").FirstOrDefault().ReadAnyValue(typeof(UInt16)));
+            var pdd = (UInt16)(_TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nSlaveAddr}").FirstOrDefault().ReadAnyValue(typeof(UInt16)));
 
             if (pdd != 0)
             {
@@ -504,23 +500,23 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
                 }
             }
         }
-        private static void ResetTwinCatVariables()
+        private void ResetTwinCatVariables()
         {
-            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(0);
-            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bBusy}").FirstOrDefault().WriteValue(0);
-            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bError}").FirstOrDefault().WriteValue(0);
-            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nErrID}").FirstOrDefault().WriteValue(0);
-            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(0);
-            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nBytesWritten}").FirstOrDefault().WriteValue(0);
-            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nPercent}").FirstOrDefault().WriteValue(0);
-            TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nSlaveAddr}").FirstOrDefault().WriteValue(0);
+            _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(0);
+            _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bBusy}").FirstOrDefault().WriteValue(0);
+            _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bError}").FirstOrDefault().WriteValue(0);
+            _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nErrID}").FirstOrDefault().WriteValue(0);
+            _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_bLoad}").FirstOrDefault().WriteValue(0);
+            _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nBytesWritten}").FirstOrDefault().WriteValue(0);
+            _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nPercent}").FirstOrDefault().WriteValue(0);
+            _TwinCathelper.MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_nSlaveAddr}").FirstOrDefault().WriteValue(0);
         }
         private void ResetFoeCollection()
         {
             for (int i = 0; i < TwinCathelper.DeviceCount; i++)
                 MyDevicesAndBoxes.Add(new FoeModel()
                 {
-                    Foe_nSlaveAddr = TwinCathelper.SAmsPort[i],
+                    Foe_nSlaveAddr = _TwinCathelper.SAmsPort[i],
                     BusyForeground = Brushes.White,
                     ErrorForeground = Brushes.White,
                     IsChecked = true
@@ -536,27 +532,38 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
                 MyDevicesAndBoxes[i].Foe_bError = false;
                 MyDevicesAndBoxes[i].Foe_nBytesWritten = 0;
                 MyDevicesAndBoxes[i].Foe_bBusy = false;
-                MyDevicesAndBoxes[i].Foe_Status= false;
-                MyDevicesAndBoxes[i].SlaveState= "";
-                MyDevicesAndBoxes[i].SlaveStateBackground= Brushes.Transparent;
+                MyDevicesAndBoxes[i].Foe_Status = false;
+                MyDevicesAndBoxes[i].SlaveState = "";
+                MyDevicesAndBoxes[i].SlaveStateBackground = Brushes.Transparent;
             }
         }
-        public FoeViewModel()
+        private readonly ITwinCathelper _TwinCathelper; /*{ get { return App.AppHost.Services.GetRequiredService<ITwinCathelper>(); } }*/
+        public FoeViewModel(ITwinCathelper twinCathelper )
         {
+            _TwinCathelper = twinCathelper;
+            if (this._TwinCathelper.Client==null)
+            {
+                return;
+            }
             MyDevicesAndBoxes = new();
             IsCheckedAll = true;
             ResetFoeCollection();
 
             BT_FirmwareEnable = true;
-            Foe_dwPass = 287454020;
+            //Foe_dwPass = "287454020";
+            Foe_dwPass = "11223344";
             log = LogManager.GetLogger("Motor Firmaware Update");
             UpdateFirmwareCommand = new RelayCommand(o =>
             {
-                ValidateMyString(Foe_sPathName);
-                BT_FirmwareEnable = false;
-                CanClose = false;
-                var FoeWroker = new Thread(UpdateFirmwareMeth) { IsBackground = true };
-                FoeWroker.Start();
+                if (ValidateMyString(Foe_sPathName))
+                {
+                    BT_FirmwareEnable = false;
+                    TUpdate_Status?.Invoke(null, false);
+                    var FoeWroker = new Thread(UpdateFirmwareMeth) { IsBackground = true };
+                    FoeWroker.Start();
+                }
+                else
+                    return;
             });
             BrowseFirmwareCommand = new RelayCommand(o => { BrowseFirmwareFile(); });
             RefreshDataGridCommand = new RelayCommand(o =>
@@ -567,7 +574,6 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             {
                 for (int i = 0; i < MyDevicesAndBoxes.Count; i++)
                     MyDevicesAndBoxes[i].IsChecked = (bool)IsCheckedAll;
-
             });
 
             ResetTwinCatVariables();

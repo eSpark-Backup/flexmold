@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FlexMold.Utility
 {
-    internal class TelnetHelper : ObservableObject
+    public class TelnetHelper : ObservableObject
     {
         public string ReceivedMessage
         {

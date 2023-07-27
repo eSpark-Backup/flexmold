@@ -1,4 +1,4 @@
-﻿using System.Windows;
+﻿using FlexMold.MVVM.ViewModel.MachineTest;
 using System.Windows.Controls;
 
 namespace FlexMold.MVVM.View.MachineTest
@@ -8,13 +8,10 @@ namespace FlexMold.MVVM.View.MachineTest
     /// </summary>
     public partial class MotorTest : UserControl
     {
-        public MotorTest()
+        public MotorTest(IMotorTestViewModel motorTestViewModel)
         {
+            DataContext = motorTestViewModel;
             InitializeComponent();
-        }
-
-        private void ComboBox_Selected(object sender, RoutedEventArgs e)
-        {
         }
     }
 }

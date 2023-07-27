@@ -22,6 +22,10 @@ namespace FlexMold.MVVM.ViewModel
     public class TcDeviceScanning
         : ScriptEarlyBound
     {
+        public TcDeviceScanning(ITwinCathelper twinCathelper)
+        {
+            this._TwinCathelper = twinCathelper;
+        }
         private ITcSysManager4 systemManager = null;
         private EnvDTE.Project project = null;
 
@@ -111,12 +115,12 @@ namespace FlexMold.MVVM.ViewModel
             if (worker.CancellationPending)
                 throw new Exception("Cancelled");
             worker.ProgressStatus = $"Connecting to TwinCAT Via ADS On Port {(int)AmsPort.SystemService}";
-            TwinCathelper.SessionSystemService = new AdsSession(AmsNetId.Local, (int)AmsPort.SystemService);
-            TwinCathelper.ClientSystemService = (AdsConnection)TwinCathelper.SessionSystemService.Connect();
+            _TwinCathelper.SessionSystemService = new AdsSession(AmsNetId.Local, (int)AmsPort.SystemService);
+            _TwinCathelper.ClientSystemService = (AdsConnection)_TwinCathelper.SessionSystemService.Connect();
             worker.Progress = 8;
 
             worker.ProgressStatus = $"Configuring TwinCAT System into ConfigMode ....";
-            TwinCathelper.ReConfigPLC();
+            _TwinCathelper.ReConfigPLC();
             WaitForState(AdsState.Config, 3000);
             worker.Progress = 10;
 
@@ -348,7 +352,7 @@ namespace FlexMold.MVVM.ViewModel
             {
                 try
                 {
-                    if (TwinCathelper.ClientSystemService.ReadState().AdsState == state)
+                    if (_TwinCathelper.ClientSystemService.ReadState().AdsState == state)
                     {
                         return true;
                     }
@@ -552,6 +556,8 @@ Compilation of the project and Generating a Boot project.  Access and adjustment
         public int AvaiableDevicesCount { get; set; }
         public List<ITcSmTreeItem> AvailableBoxes { get; set; }
         List<ITcSmTreeItem> devices;
+        private readonly ITwinCathelper _TwinCathelper;
+
         public void ScanDevicesAndBoxes(IWorker worker)
         {
             FCAModel.MyBoxes = new List<TreeItem>();

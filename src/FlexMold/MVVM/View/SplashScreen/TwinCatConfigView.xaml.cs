@@ -1,13 +1,13 @@
 ﻿using System.Windows.Controls;
 
-namespace FlexMold.MVVM.View.Project
+namespace FlexMold.MVVM.View.Setting
 {
     /// <summary>
     /// Interaction logic for FoeSettingDiaglog.xaml
     /// </summary>
-    public partial class CSVDiaglog : UserControl
+    public partial class TwinCatConfigView : UserControl
     {
-        public CSVDiaglog()
+        public TwinCatConfigView()
         {
             InitializeComponent();
         }

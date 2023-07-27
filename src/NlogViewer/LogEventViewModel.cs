@@ -1,5 +1,4 @@
-﻿using Humanizer;
-using NLog;
+﻿using NLog;
 using System.Globalization;
 using System.Windows.Media;
 

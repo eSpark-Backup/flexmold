@@ -1,31 +1,23 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.MVVM.View.Setting;
-using FlexMold.MVVM.ViewModel.Setting;
 using FlexMold.MVVM.ViewModel.SplashScreen;
 using FlexMold.Utility;
 using MaterialDesignThemes.Wpf;
+using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using ScriptingTest;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Data.SqlTypes;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Threading;
 using System.Windows;
-using System.Windows.Media;
-using System.Windows.Threading;
-using System.Xml;
-using System.Xml.Serialization;
 using TwinCAT.Ads;
 
 namespace FlexMold.MVVM.ViewModel
 {
-    internal class SplashScreenViewModel : ObservableObject
+    public class SplashScreenViewModel : ObservableObject, ISplashScreenViewModel
     {
         public VSInfo SelectedVS { get; set; }
         private bool _RunButtonEnable;
@@ -97,57 +89,28 @@ namespace FlexMold.MVVM.ViewModel
         public RelayCommand RunButtonCommand { get; set; }
         public ObservableCollection<Machine> MyMachines { get; set; }
         public List<VSInfo> AvailableVS { get; private set; }
-
+        private FlexMoldMachine1 _FlexMoldMachine1 { get { return App.AppHost.Services.GetRequiredService<FlexMoldMachine1>(); } }
+        private TcDeviceScanning _TcDeviceScanning { get { return App.AppHost.Services.GetRequiredService<TcDeviceScanning>(); } }
+        private MainWindow _mainWindow { get { return App.AppHost.Services.GetRequiredService<MainWindow>(); } }
+        private ITwinCatConfigViewModel _TwinCatConfigViewModel { get { return App.AppHost.Services.GetRequiredService<ITwinCatConfigViewModel>(); } }
+        private ITwinCathelper _TwinCathelper { get { return App.AppHost.Services.GetRequiredService<ITwinCathelper>(); } }
         public event EventHandler OnRequestClose;
+        public event EventHandler OnRequestCollapsed;
 
-        public SplashScreenViewModel()
-        {
-            if (!TwinCathelper.LoadSetting())
-                Environment.Exit(0);
-            ICEnable = true;
-            log.Log(LogLevel.Info, $"Flexmold application loading");
-            RunButtonEnable = false;
-            CloseButtonEnable = true;
-            SelectedMachine = new Machine();
-            MyMachines = new ObservableCollection<Machine>
-            {
-                new Machine()
-                { ID = 1, Location = "R0", MachineType = EMachineType.Motor, Name = "M1" },
-                new Machine()
-                { ID = 2, Location = "R1", MachineType = EMachineType.Motor, Name = "M2" },
-                new Machine()
-                { ID = 3, Location = "R2", MachineType = EMachineType.Projector, Name = "P1" },
-                new Machine()
-                { ID = 3, Location = "Device Scan", MachineType = EMachineType.ScanDevices, Name = "TwinCat Config" },
-            };
-            log.Log(LogLevel.Info, $"{MyMachines.Count} Machines Found");
-
-            MachineClickCommand = new RelayCommand(o => MachineSelectMethod(o as Machine));
-            RunButtonCommand = new RelayCommand(o =>
-            {
-                if (Validataion())
-                    RunMainWindow();
-            });
-            CloseButtonCommand = new RelayCommand(o =>
-            {
-                log.Log(LogLevel.Info, $"Closing ....");
-                OnRequestClose(this, new EventArgs());
-            });
-        }
         private void TwincatConfig()
         {
             if (Validataion())
             {
                 Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
                 {
-                    await DialogHost.Show(new DeviceScanDialog(), "SplashDialog", ClosingEventHandler);
+                    await DialogHost.Show(new TwinCatConfigView() { DataContext = _TwinCatConfigViewModel }, "SplashDialog", ClosingEventHandler);
                 }));
             }
         }
 
         private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
         {
-            TwinCathelper.TwinCatDiconnectConnect851();
+            _TwinCathelper.TwinCatDiconnectConnect851();
             Console.WriteLine();
         }
         private void MachineSelectMethod(Machine _a)
@@ -164,7 +127,7 @@ namespace FlexMold.MVVM.ViewModel
                     }
                     else
                     {
-                        SelectedScript = new TcDeviceScanning();
+                        SelectedScript = _TcDeviceScanning;
                         ComRegistration = true;
                         updateVSInstallations();
 
@@ -196,7 +159,7 @@ namespace FlexMold.MVVM.ViewModel
                     }
                     else
                     {
-                        SelectedScript = new FlexMoldMachine1();
+                        SelectedScript = _FlexMoldMachine1;
                         //SelectedScript = new FlexMoldMachineDebug();
                         ComRegistration = true;
                         updateVSInstallations();
@@ -269,25 +232,24 @@ namespace FlexMold.MVVM.ViewModel
 
         private void RunMainWindow()
         {
-            MainWindow mw = new MainWindow(SelectedMachine);
-            OnRequestClose(this, new EventArgs());
-            mw.Show();
-            Application.Current.MainWindow = mw;
+            OnRequestCollapsed(this, new EventArgs());
+            Application.Current.MainWindow = _mainWindow;
+            _mainWindow.Show();
         }
 
         private bool Validataion()
         {
             try
             {
-                if (TwinCathelper.TwinCatConnect851())
+                if (_TwinCathelper.TwinCatConnect851())
                 {
-                    if (TwinCathelper.InitializeSlaves(SelectedMachine.MachineType))
+                    if (_TwinCathelper.InitializeSlaves(SelectedMachine.MachineType))
                     {
                         return true;
                     }
                     else
                     {
-                        ProgressStatuses = "Slaves initalization failed see logs or loaded different TwinCat project";
+                        ProgressStatuses = "Slaves initalization failed see logs or Rebuild TwinCat Project";
                     }
                 }
                 else
@@ -296,7 +258,7 @@ namespace FlexMold.MVVM.ViewModel
                 $"TwinCAT Script is not running or TwinCAT is in Config mode \n" +
                 $"Please Start/Restart TwinCAT serivce or Build TwinCAT Solution from FCA \n";
                 }
-                TwinCathelper.TwinCatDiconnectConnect851();
+                _TwinCathelper.TwinCatDiconnectConnect851();
             }
             catch (Exception ex)
             {
@@ -304,7 +266,11 @@ namespace FlexMold.MVVM.ViewModel
             }
             return false;
         }
-
+        /// <summary>
+        /// Worker Progeress
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             ProgressPercentage = e.ProgressPercentage;
@@ -343,7 +309,10 @@ namespace FlexMold.MVVM.ViewModel
         }
 
         private void Worker_ProgressStatusChanged(object sender, ProgressStatusChangedArgs e) => ProgressStatuses = e.Status;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <exception cref="ApplicationException"></exception>
         public void RunScript()
         {
             ICEnable = false;
@@ -386,6 +355,40 @@ namespace FlexMold.MVVM.ViewModel
                 _factory.SuppressUI = true;
                 _worker.BeginScriptExecution();
             }
+        }
+        public SplashScreenViewModel()
+        {
+            if (!_TwinCathelper.LoadSetting())
+                Environment.Exit(0);
+            ICEnable = true;
+            log.Log(LogLevel.Info, $"Flexmold application loading");
+            RunButtonEnable = false;
+            CloseButtonEnable = true;
+            SelectedMachine = new Machine();
+            MyMachines = new ObservableCollection<Machine>
+            {
+                new Machine()
+                { ID = 1, Location = "R0", MachineType = EMachineType.Motor, Name = "M1" },
+                new Machine()
+                { ID = 2, Location = "R1", MachineType = EMachineType.Motor, Name = "M2" },
+                new Machine()
+                { ID = 3, Location = "R2", MachineType = EMachineType.Projector, Name = "P1" },
+                new Machine()
+                { ID = 3, Location = "Device Scan", MachineType = EMachineType.ScanDevices, Name = "TwinCat Config" },
+            };
+            log.Log(LogLevel.Info, $"{MyMachines.Count} Machines Found");
+
+            MachineClickCommand = new RelayCommand(o => MachineSelectMethod(o as Machine));
+            RunButtonCommand = new RelayCommand(o =>
+            {
+                if (Validataion())
+                    RunMainWindow();
+            });
+            CloseButtonCommand = new RelayCommand(o =>
+            {
+                log.Log(LogLevel.Info, $"Closing ....");
+                OnRequestClose(this, new EventArgs());
+            });
         }
     }
 }

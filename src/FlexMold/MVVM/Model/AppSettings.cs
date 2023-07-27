@@ -1,14 +1,5 @@
-﻿using FlexMold.Utility;
-using Microsoft.VisualStudio.WCFReference.Interop;
-using NLog;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Xml.Serialization;
 
 namespace FlexMold.MVVM.Model
 {

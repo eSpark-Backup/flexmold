@@ -11,9 +11,6 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <UserControl.DataContext>
-        <home:MotorStatusViewmodel />
-    </UserControl.DataContext>
     <UniformGrid Rows="2">
         <ItemsControl x:Name="MyItems" ItemsSource="{Binding MyMotors}">
             <ItemsControl.ItemsPanel>
@@ -54,6 +51,6 @@
             VerticalAlignment="Bottom"
             Command="{Binding CalibrateCommand}"
             Content="Calibrate"
-            IsEnabled="{Binding CalibrateButton}" />
+            IsEnabled="{Binding CalibrateButtonEnable}" />
     </UniformGrid>
 </UserControl>

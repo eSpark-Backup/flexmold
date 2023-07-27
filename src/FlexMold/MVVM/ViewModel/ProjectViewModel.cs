@@ -1,27 +1,33 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.MVVM.View.Project;
+using FlexMold.MVVM.ViewModel.Home;
 using FlexMold.Utility;
 using MaterialDesignThemes.Wpf;
+using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
+using static FlexMold.Utility.TwinCathelper;
 
 namespace FlexMold.MVVM.ViewModel.Project
 {
-    internal class ProjectViewModel : ObservableObject
+    public class ProjectViewModel : ObservableObject, IProjectViewModel
     {
         private Logger log = LogManager.GetLogger("Project");
         public RelayCommand SendCSVCommand { get; set; }
         public RelayCommand BrowseProjectCommand { get; set; }
         public RelayCommand StopMotorsCommand { get; set; }
+        public RelayCommand HomeMotorsCommand { get; set; }
         public int MotorDirValue;
         public float MotorRampDelayValue;
         public float MotorTime;
@@ -63,7 +69,20 @@ namespace FlexMold.MVVM.ViewModel.Project
             get { return _LaserSendButton; }
             set { _LaserSendButton = value; OnPropertyChanged(); }
         }
+        private float[] _Position;
+        public float[] Position
+        {
+            get { return _Position; }
+            set
+            {
+                _Position = value;
+            }
+        }
         private FileInfo _selectedFile;
+        private readonly ITwinCathelper _TwinCathelper;
+        private readonly LaserProjectorViewModel _laserProjectorViewModel;
+        private ICSVDiaglogViewModel _CSVDiaglogViewModel { get { return App.AppHost.Services.GetRequiredService<ICSVDiaglogViewModel>(); } }
+        private CSVDiaglogView _CSVDiaglogView { get { return App.AppHost.Services.GetRequiredService<CSVDiaglogView>(); } }
 
         public FileInfo SelectedFile
         {
@@ -91,26 +110,23 @@ namespace FlexMold.MVVM.ViewModel.Project
                 OnPropertyChanged();
             }
         }
-
-        public LaserProjectorViewModel lVM { get; set; }
-
         private void WriteCSVData(IList<double> data)
         {
             for (int i = 0; i < data.Count; i++)
             {
-                TwinCathelper.PLCMotors[i].mDisplacement = (uint)data[i];
-                TwinCathelper.PLCMotors[i].mDirection = MotorDirValue == 0 ? false : true;
-                TwinCathelper.PLCMotors[i].mRampDelay = MotorRampDelayValue;
-                TwinCathelper.PLCMotors[i].mTime = MotorTime;
-                TwinCathelper.PLCMotors[i].mMode = (int)EMode.Project;
+                _TwinCathelper.PLCMotors[i].mDisplacement = (uint)data[i];
+                _TwinCathelper.PLCMotors[i].mDirection = MotorDirValue == 0 ? false : true;
+                _TwinCathelper.PLCMotors[i].mRampDelay = MotorRampDelayValue;
+                _TwinCathelper.PLCMotors[i].mTime = MotorTime;
+                _TwinCathelper.PLCMotors[i].mMode = (int)EMode.Project;
             }
-            TwinCathelper.WriteEthercatDeviceData();
+            _TwinCathelper.WriteEthercatDeviceData();
             log.Log(LogLevel.Info, $"{data.Count} csv value/s has been written sucessfully");
 
             Thread.Sleep(200);
             uint zero = 0;
             for (uint i = 0; i < data.Count; i++)
-                TwinCathelper.WriteEthercatDeviceData(i, TwinCathelper.DeviceSymbol.mDisplacement, zero.CastToArray());
+                _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
             log.Log(LogLevel.Info, $"{data.Count} zero value/s has been written sucessfully");
         }
         private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
@@ -126,7 +142,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 {
                     log.Log(LogLevel.Info, $"Select Project Folder");
                     System.Windows.Forms.DialogResult result = dialog.ShowDialog();
-                    if (result == System.Windows.Forms.DialogResult.OK)
+                    if (result == DialogResult.OK)
                     {
                         myDataModels = new Porjects();
                         string selectedPath = dialog.SelectedPath;
@@ -160,15 +176,6 @@ namespace FlexMold.MVVM.ViewModel.Project
             }
         }
 
-        private float[] _Position;
-        public float[] Position
-        {
-            get { return _Position; }
-            set
-            {
-                _Position = value;
-            }
-        }
         private void Client_AdsNotification(object sender, AdsNotificationEventArgs e)
         {
             try
@@ -182,7 +189,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     switch (aa)
                     {
                         case TCSymbols.mPosition:
-                            Position = new float[TwinCathelper.DeviceCount];
+                            Position = new float[DeviceCount];
                             Buffer.BlockCopy(e.Data.ToArray(), 0, Position, 0, e.Data.Length);
                             log.Log(LogLevel.Info, $"Positions Updated : {String.Join(",", Position)}");
                             break;
@@ -253,12 +260,10 @@ namespace FlexMold.MVVM.ViewModel.Project
         }
         private async Task CSVSend()
         {
-            var csvdlgvm = new CSVDiaglogViewModel();
-            var view = new CSVDiaglog() { DataContext = csvdlgvm };
-            _ = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
-            MotorDirValue = csvdlgvm.MotorDirPValue;
-            MotorRampDelayValue = csvdlgvm.MotorRampDelayValue;
-            MotorTime = csvdlgvm.MotorTime;
+            _ = await DialogHost.Show(_CSVDiaglogView, "RootDialog", ClosingEventHandler);
+            MotorDirValue = _CSVDiaglogViewModel.MotorDirPValue;
+            MotorRampDelayValue = _CSVDiaglogViewModel.MotorRampDelayValue;
+            MotorTime = _CSVDiaglogViewModel.MotorTime;
             string dir = MotorDirValue == 0 ? "Clockwise" : "Anti-Clockwise";
             log.Log(LogLevel.Info, $"Selected Direction : {dir}");
             var csvdata = CSVHelper.ReadCSV_DoubleData(SelectedFile);
@@ -269,20 +274,48 @@ namespace FlexMold.MVVM.ViewModel.Project
                 TNF.ShowError($"CSV Failed");
                 return;
             }
-            if (TwinCathelper.PLCMotors.Length != csvdata.Count)
+            if (_TwinCathelper.PLCMotors.Length != csvdata.Count)
             {
                 log.Log(LogLevel.Error, $"Please select correct CSV");
                 log.Log(LogLevel.Error, $"Data and Box counts are not equal");
-                log.Log(LogLevel.Error, $"Data Count : {csvdata.Count} | Device Count : {TwinCathelper.PLCMotors.Length}");
-                TNF.ShowError($"CSV Failed\nDevice Count :{TwinCathelper.PLCMotors.Length} != Data Count :{csvdata.Count}");
+                log.Log(LogLevel.Error, $"Data Count : {csvdata.Count} | Device Count : {_TwinCathelper.PLCMotors.Length}");
+                TNF.ShowError($"CSV Failed\nDevice Count :{_TwinCathelper.PLCMotors.Length} != Data Count :{csvdata.Count}");
                 return;
             }
             WriteCSVData(csvdata);
         }
-
-        public ProjectViewModel()
+        public IMotorStatusViewmodel MotorStatus { get { return App.AppHost.Services.GetRequiredService<IMotorStatusViewmodel>(); } }
+        private void HomeTrigger()
         {
-            lVM = new LaserProjectorViewModel(this);
+            log.Log(LogLevel.Info, $"Home Command Triggered");
+
+            var data = (uint)EMode.Displacement;
+            for (uint i = 0; i < DeviceCount; i++)
+                _TwinCathelper.PLCMotors[i].mMode = data;
+            _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mMode);
+            log.Log(LogLevel.Info, $"Mode values written to all Slaves : {EMode.Displacement}");
+
+            _TwinCathelper.ReadEthercatDeviceData(DeviceSymbol.mDirection);
+            for (uint i = 0; i < DeviceCount; i++)
+                _TwinCathelper.PLCMotors[i].mDirection = !_TwinCathelper.PLCMotors[i].mDirection;
+            _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mDirection);
+            log.Log(LogLevel.Info, $"Reverse Direction written to all Slaves");
+
+            for (uint i = 0; i < DeviceCount; i++)
+                _TwinCathelper.PLCMotors[i].mDisplacement = MotorStatus.mPosition[i] * 1600;
+            _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mDisplacement);
+            log.Log(LogLevel.Info, $"Displacement values written to all Slaves : \n\t {JsonSerializer.Serialize(MotorStatus.mPosition)}");
+
+            Thread.Sleep(200);
+
+            for (uint i = 0; i < DeviceCount; i++)
+                _TwinCathelper.PLCMotors[i].mDisplacement = 0;
+            _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mDisplacement);
+            log.Log(LogLevel.Info, $"Zero Displacement values written to all Slaves");
+        }
+        public ProjectViewModel(ITwinCathelper twinCathelper)
+        {
+            this._TwinCathelper = twinCathelper;
             SendCSVCommand = new RelayCommand(async o =>
             {
                 await CSVSend();
@@ -292,10 +325,17 @@ namespace FlexMold.MVVM.ViewModel.Project
             {
                 log.Log(LogLevel.Warn, $"Stopping Motors");
                 var data = (int)EMode.Abort;
-                for (uint i = 0; i < TwinCathelper.DeviceCount; i++)
-                    TwinCathelper.WriteEthercatDeviceData(i, TwinCathelper.DeviceSymbol.mMode, data.CastToArray());
+                for (uint i = 0; i < DeviceCount; i++)
+                    _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mMode, data.CastToArray());
                 log.Log(LogLevel.Warn, $"{EMode.Abort}");
             });
+            HomeMotorsCommand = new RelayCommand(o =>
+            {
+                HomeTrigger();
+            });
+
         }
+
+        
     }
 }

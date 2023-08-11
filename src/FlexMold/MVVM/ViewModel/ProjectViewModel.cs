@@ -114,7 +114,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         {
             for (int i = 0; i < data.Count; i++)
             {
-                _TwinCathelper.PLCMotors[i].mDisplacement = (uint)data[i];
+                _TwinCathelper.PLCMotors[i].mDisplacement = (float)data[i];
                 _TwinCathelper.PLCMotors[i].mDirection = MotorDirValue == 0 ? false : true;
                 _TwinCathelper.PLCMotors[i].mRampDelay = MotorRampDelayValue;
                 _TwinCathelper.PLCMotors[i].mTime = MotorTime;
@@ -302,7 +302,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             log.Log(LogLevel.Info, $"Reverse Direction written to all Slaves");
 
             for (uint i = 0; i < DeviceCount; i++)
-                _TwinCathelper.PLCMotors[i].mDisplacement = MotorStatus.mPosition[i] * 1600;
+                _TwinCathelper.PLCMotors[i].mDisplacement = MotorStatus.mPosition[i];
             _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mDisplacement);
             log.Log(LogLevel.Info, $"Displacement values written to all Slaves : \n\t {JsonSerializer.Serialize(MotorStatus.mPosition)}");
 

@@ -231,12 +231,12 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         {
             if (!justread)
             {
-                MyPLCMotor[SelectedMotorIndex].mDisplacement = (float)SelectedMotorDisplacementValue * 1600;
+                MyPLCMotor[SelectedMotorIndex].mDisplacement = (float)SelectedMotorDisplacementValue;
                 _TwinCathelper.WriteEthercatDeviceData(
                     SelectedMotorIndex,
                     TwinCathelper.DeviceSymbol.mDisplacement,
                     MyPLCMotor[SelectedMotorIndex].mDisplacement.CastToArray());
-                log.Log(LogLevel.Info, "Motor Displacement Value Has Been Written with * 1600");
+                log.Log(LogLevel.Info, "Motor Displacement Value Has Been Written");
 
                 Thread.Sleep(200);
                 MyPLCMotor[SelectedMotorIndex].mDisplacement = 0;
@@ -292,11 +292,11 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             {
                 for (int i = 0; i < TwinCathelper.DeviceCount; i++)
                 {
-                    MyPLCMotor[i].mDisplacement = (float)SelectedMotorDisplacementValue * 1600;
+                    MyPLCMotor[i].mDisplacement = (float)SelectedMotorDisplacementValue;
                     MyPLCMotor[i].mRPM = (float)SelectedMotorRPM;
                 }
                 _TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
-                log.Log(LogLevel.Info, "All Motors Displacement Value Has Been Written * 1600");
+                log.Log(LogLevel.Info, "All Motors Displacement Value Has Been Written");
                 _TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mRPM);
                 log.Log(LogLevel.Info, "All Motors RPM Value Has Been Written");
                 Thread.Sleep(200);
@@ -336,7 +336,5 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             SendRampCommand = new RelayCommand(o => { WriteRampValue(); });
             SendAllCommand = new RelayCommand(o => { WriteAllValue(); });
         }
-
-
     }
 }

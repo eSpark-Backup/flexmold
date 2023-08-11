@@ -1,17 +1,14 @@
-﻿using ControlzEx.Standard;
-using FlexMold.Core;
-using FlexMold.MVVM.Model;
+﻿using FlexMold.MVVM.Model;
 using FlexMold.Utility;
 using NLog;
 using System;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace FlexMold.MVVM.ViewModel.Home
 {
-    internal class MachineDetailViewModel : StatusBaseViewModel, IMachineDetailViewModel
+    public class MachineDetailViewModel : StatusBaseViewModel, IMachineDetailViewModel
     {
         public ST_EcSlaveState[] MySlaves
         { get => _MySlaves; set { _MySlaves = value; OnPropertyChanged(); } }
@@ -31,11 +28,12 @@ namespace FlexMold.MVVM.ViewModel.Home
         {
             var log = LogManager.GetLogger("Machine Link Status");
             var v = GetMismatchedIndexes(Slave_Link_Status, _value);
+
             if (Slave_Link_Status != null)
             {
                 for (int i = 0; i < v.Length; i++)
                 {
-                    DispLinkStatus(_value, i, log);
+                    DispLinkStatus(_value, v[i], log);
                 }
             }
             else
@@ -56,13 +54,14 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 case ESlaveLink.EC_LINK_STATE_OK:
                     var _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Green);
-                    log.Log(LogLevel.Warn, _tmg);
+                    log.Log(LogLevel.Info, _tmg);
                     TNF.ShowSuccess(_tmg);
                     break;
                 case ESlaveLink.EC_LINK_STATE_Other_Fail:
                 case ESlaveLink.EC_LINK_STATE_ADDITIONAL_LINK:
                 case ESlaveLink.EC_LINK_STATE_NOT_PRESENT:
                 case ESlaveLink.EC_LINK_STATE_LINK_WITHOUT_COMM:
+                case ESlaveLink.ERR_PREOP_INIT_ERR:
                 case ESlaveLink.EC_LINK_STATE_MISSING_LINK:
                     _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Red);
                     log.Log(LogLevel.Warn, _tmg);
@@ -70,10 +69,13 @@ namespace FlexMold.MVVM.ViewModel.Home
                     break;
                 case ESlaveLink.UnAvailable:
                     _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.White);
-                    //log.Log(LogLevel.Warn, _tmg);
+                    log.Log(LogLevel.Trace, _tmg);
                     //TNF.ShowWarning(_tmg);
                     break;
                 default:
+                    _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Orange);
+                    log.Log(LogLevel.Error, "! Undocumented State ! " + _tmg);
+                    TNF.ShowError(_tmg);
                     break;
             }
         }
@@ -102,6 +104,7 @@ namespace FlexMold.MVVM.ViewModel.Home
         }
 
         private ESlaveStateMachine[] _Slave_StateMachine_Status;
+        private readonly ITwinCathelper _TwinCathelper;
 
         public ESlaveStateMachine[] Slave_StateMachine_Status
         {
@@ -120,7 +123,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 for (int i = 0; i < v.Length; i++)
                 {
-                    DispStateMachine(_value, i, log);
+                    DispStateMachine(_value, v[i], log);
                 }
             }
             else
@@ -136,28 +139,28 @@ namespace FlexMold.MVVM.ViewModel.Home
 
         private void SetDeviceMode(ESlaveStateMachine[] _value, Logger log)
         {
-            if (_value.SequenceEqual(TwinCathelper.ValidStateMachines))
+            if (_value.SequenceEqual(_TwinCathelper.ValidStateMachines))
             {
-                TwinCathelper.Slave_StateMachine_Abort = false;
-                TwinCathelper.SetDefaultMode(log);
+                _TwinCathelper.Slave_StateMachine_Abort = false;
+                _TwinCathelper.SetDefaultMode(log);
             }
             else
             {
-                TwinCathelper.Slave_StateMachine_Abort = true;
-                TwinCathelper.SetAbortMode(log);
+                _TwinCathelper.Slave_StateMachine_Abort = true;
+                _TwinCathelper.SetAbortMode(log);
             }
         }
         private void SetDeviceMode(ESlaveLink[] _value, Logger log)
         {
-            if (_value.SequenceEqual(TwinCathelper.ValidElinkStates))
+            if (_value.SequenceEqual(_TwinCathelper.ValidElinkStates))
             {
-                TwinCathelper.Slave_Link_Abort = false;
-                TwinCathelper.SetDefaultMode(log);
+                _TwinCathelper.Slave_Link_Abort = false;
+                _TwinCathelper.SetDefaultMode(log);
             }
             else
             {
-                TwinCathelper.Slave_Link_Abort = true;
-                TwinCathelper.SetAbortMode(log);
+                _TwinCathelper.Slave_Link_Abort = true;
+                _TwinCathelper.SetAbortMode(log);
             }
         }
         void DispStateMachine(ESlaveStateMachine[] _value, int index, Logger log)
@@ -185,22 +188,26 @@ namespace FlexMold.MVVM.ViewModel.Home
                         log.Log(LogLevel.Error, _tmg);
                         break;
                     default:
+                        _tmg = SetUI(index, MySlaves[index].Slave_State_Machine, Brushes.Red);
+                        TNF.ShowError(_tmg);
+                        log.Log(LogLevel.Error, "! Undocumented State ! " + _tmg);
                         break;
                 }
             }
         }
         private void Slave_Link_Status_Changed(object? sender, EventArgs e)
         {
-            Slave_Link_Status = TwinCathelper.Slave_Link_Status;
+            Slave_Link_Status = _TwinCathelper.Slave_Link_Status;
         }
 
         private void Slave_StateMachine_Status_Changed(object? sender, EventArgs e)
         {
-            Slave_StateMachine_Status = TwinCathelper.Slave_StateMachine_Status;
+            Slave_StateMachine_Status = _TwinCathelper.Slave_StateMachine_Status;
         }
-        public MachineDetailViewModel()
+        public MachineDetailViewModel(ITwinCathelper twinCathelper)
         {
-            if (TwinCathelper.Client == null)
+            this._TwinCathelper = twinCathelper;
+            if (_TwinCathelper.Client == null)
             {
                 return;
             }
@@ -221,9 +228,9 @@ namespace FlexMold.MVVM.ViewModel.Home
                     $" State Machine : {ESlaveStateMachine.UnAvailable}\n"
                 };
             }
-            TwinCathelper.TSlave_Link_Status_Changed += Slave_Link_Status_Changed;
-            TwinCathelper.TSlave_StateMachine_Status_Changed += Slave_StateMachine_Status_Changed;
-            TwinCathelper.SetMachineStatusTimer();
+            _TwinCathelper.TSlave_Link_Status_Changed += Slave_Link_Status_Changed;
+            _TwinCathelper.TSlave_StateMachine_Status_Changed += Slave_StateMachine_Status_Changed;
+            _TwinCathelper.SetMachineStatusTimer();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using FlexMold.MVVM.ViewModel.Setting;
+using System.Windows.Controls;
 
 namespace FlexMold.MVVM.View.Setting
 {
@@ -7,8 +8,9 @@ namespace FlexMold.MVVM.View.Setting
     /// </summary>
     public partial class MotorSettingView : UserControl
     {
-        public MotorSettingView()
+        public MotorSettingView(IMotorSettingViewModel motorSettingViewModel)
         {
+            DataContext = motorSettingViewModel;
             InitializeComponent();
         }
     }

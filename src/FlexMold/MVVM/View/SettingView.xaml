@@ -9,9 +9,6 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <UserControl.DataContext>
-        <viewmodel:SettingViewModel />
-    </UserControl.DataContext>
 
     <Border Style="{StaticResource panelMenuBorder}">
         <Grid>
@@ -28,7 +25,7 @@
                 ScrollViewer.CanContentScroll="True">
 
                 <RadioButton
-                    Command="{Binding MachineTestCommand}"
+                    Command="{Binding MachineSettingCommand}"
                     Content="Machine"
                     IsChecked="True"
                     Style="{StaticResource MenuButtonTheme}" />

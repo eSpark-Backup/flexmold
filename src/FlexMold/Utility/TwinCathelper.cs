@@ -1,12 +1,10 @@
 ﻿using FlexMold.MVVM.Model;
 using FlexMold.MVVM.ViewModel;
-using Newtonsoft.Json.Linq;
 using NLog;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Printing.IndexedProperties;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
@@ -18,9 +16,9 @@ using TwinCAT.TypeSystem;
 
 namespace FlexMold.Utility
 {
-    internal static partial class TwinCathelper
+    public partial class TwinCathelper : ITwinCathelper
     {
-        public static void SetMachineStatusTimer()
+        public void SetMachineStatusTimer()
         {
             ValidStateMachines = new ESlaveStateMachine[DeviceCount];
             ValidElinkStates = new ESlaveLink[DeviceCount];
@@ -37,11 +35,11 @@ namespace FlexMold.Utility
             dispatcherTimer.Interval = new TimeSpan(0, 0, 3);
             dispatcherTimer.Start();
         }
-        private static void Timer_Elapsed(object sender, EventArgs e)
+        private void Timer_Elapsed(object sender, EventArgs e)
         {
             GetSlaveMachineState();
         }
-        private static void GetSlaveMachineState()
+        private void GetSlaveMachineState()
         {
             try
             {
@@ -70,7 +68,7 @@ namespace FlexMold.Utility
                 _log.Log(LogLevel.Error, ex.Message);
             }
         }
-        public static ESlaveLink[] Slave_Link_Status
+        public ESlaveLink[] Slave_Link_Status
         {
             get => _Slave_Link_Status;
             set
@@ -79,7 +77,7 @@ namespace FlexMold.Utility
                 TSlave_Link_Status_Changed.Invoke(null, null);
             }
         }
-        public static ESlaveStateMachine[] Slave_StateMachine_Status
+        public ESlaveStateMachine[] Slave_StateMachine_Status
         {
             get => _Slave_StateMachine_Status;
             set
@@ -88,7 +86,7 @@ namespace FlexMold.Utility
                 TSlave_StateMachine_Status_Changed.Invoke(null, null);
             }
         }
-        public static void SetDefaultMode(Logger log)
+        public void SetDefaultMode(Logger log)
         {
             if (Motor_Diagnostic_Abort == false &&
                 Slave_Link_Abort == false &&
@@ -101,26 +99,26 @@ namespace FlexMold.Utility
                 TNF.ShowSuccess($"Default Device Mode : {EMode.Displacement}");
             }
         }
-        public static void SetAbortMode(Logger log)
+        public void SetAbortMode(Logger log)
         {
             if (Motor_Diagnostic_Abort == true ||
                 Slave_Link_Abort == true ||
                 Slave_StateMachine_Abort == true)
             {
-                for (int i = 0; i < DeviceCount; i++)
-                    PLCMotors[i].mRPM = 0;
-                WriteEthercatDeviceData(DeviceSymbol.mRPM);
+                //for (int i = 0; i < DeviceCount; i++)
+                //    PLCMotors[i].mRPM = 0;
+                //WriteEthercatDeviceData(DeviceSymbol.mRPM);
 
                 for (int i = 0; i < DeviceCount; i++)
                     PLCMotors[i].mMode = (int)EMode.Abort;
 
                 WriteEthercatDeviceData(DeviceSymbol.mMode);
                 log.Log(LogLevel.Warn, $"Device Mode Changed to : {EMode.Abort}");
-                log.Log(LogLevel.Warn, $"RPM values Changed to : 0");
+                //log.Log(LogLevel.Warn, $"RPM values Changed to : 0");
                 TNF.ShowError($"Device Mode: {EMode.Abort}");
             }
         }
-        public static bool TwinCatConnect851()
+        public bool TwinCatConnect851()
         {
             _port = 851;
             _log.Log(LogLevel.Info, $"Connecting to Local Host, Port : {_port}");
@@ -140,7 +138,7 @@ namespace FlexMold.Utility
             }
             return false;
         }
-        public static void TwinCatDiconnectConnect851()
+        public void TwinCatDiconnectConnect851()
         {
             _log.Log(LogLevel.Info, $"DisConnecting to Local Host, Port : {_port}");
             if (Client.IsConnected)
@@ -150,7 +148,7 @@ namespace FlexMold.Utility
             Client = null;
             Session = null;
         }
-        public static void InitializeNotifications()
+        public void InitializeNotifications()
         {
             Session.ConnectionStateChanged += Session_ConnectionStateChanged;
             ClientSystemService.ConnectionStateChanged += Connection_ConnectionStatusChanged;
@@ -162,7 +160,7 @@ namespace FlexMold.Utility
             RegisterNotification($"MAIN.{TCSymbols.DeviceStatus}");
             Client.AdsNotification += Client_AdsNotification;
         }
-        private static void Client_AdsNotification(object sender, AdsNotificationEventArgs e)
+        private void Client_AdsNotification(object sender, AdsNotificationEventArgs e)
         {
             try
             {
@@ -176,17 +174,17 @@ namespace FlexMold.Utility
                 {
                     case TCSymbols.mPosition:
                         for (int i = 0; i < PLCMotors.Length; i++)
-                            PLCMotorsStates.mPostion[i] = BitConverter.ToSingle(e.Data.ToArray(), i * sizeof(float));
+                            PLCMotorsStatuses.mPostion[i] = BitConverter.ToSingle(e.Data.ToArray(), i * sizeof(float));
                         TMotor_PositionChanged?.Invoke(null, e);
                         break;
                     case TCSymbols.MotorDiagnostic:
-                        Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStates.MotorDiagnistic, 0, e.Data.Length);
-                        _log.Log(LogLevel.Info, $"MotorDiagnistic Updated : {String.Join(",", PLCMotorsStates.MotorDiagnistic)}");
+                        Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStatuses.MotorDiagnistic, 0, e.Data.Length);
+                        _log.Log(LogLevel.Info, $"MotorDiagnistic Updated : {String.Join(",", PLCMotorsStatuses.MotorDiagnistic)}");
                         TMotor_MotorDiagnosticChanged?.Invoke(null, e);
                         break;
                     case TCSymbols.DeviceStatus:
-                        Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStates.DeviceStatus, 0, e.Data.Length);
-                        _log.Log(LogLevel.Info, $"DeviceStatus Updated : {String.Join(",", PLCMotorsStates.DeviceStatus)}");
+                        Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStatuses.DeviceStatus, 0, e.Data.Length);
+                        _log.Log(LogLevel.Info, $"DeviceStatus Updated : {String.Join(",", PLCMotorsStatuses.DeviceStatus)}");
                         TMotor_DeviceStatusChanged?.Invoke(null, e);
                         break;
                     default:
@@ -201,7 +199,7 @@ namespace FlexMold.Utility
             TMotor_PositionChanged?.Invoke(null, e);
         }
 
-        private static void Session_ConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
+        private void Session_ConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
         {
             MyConnectionStateOld = e.OldState;
             MyConnectionStateNew = e.NewState;
@@ -209,7 +207,7 @@ namespace FlexMold.Utility
             _log.Log(LogLevel.Info, $"Session Connection Status : {MyConnectionStateNew}");
             TSession_ConnectionStateChanged?.Invoke(null, e);
         }
-        private static void Connection_ConnectionStatusChanged(object sender, ConnectionStateChangedEventArgs e)
+        private void Connection_ConnectionStatusChanged(object sender, ConnectionStateChangedEventArgs e)
         {
             MyConnectionStateOld = e.OldState;
             MyConnectionStateNew = e.NewState;
@@ -218,13 +216,13 @@ namespace FlexMold.Utility
             TConnection_ConnectionStatusChanged?.Invoke(null, e);
             TConnection_ConnectionStatusChanged?.Invoke(null, e);
         }
-        private static void Connection_RouterStateChanged(object sender, AmsRouterNotificationEventArgs e)
+        private void Connection_RouterStateChanged(object sender, AmsRouterNotificationEventArgs e)
         {
             MyAmsRouterState = e.State;
             _log.Log(LogLevel.Info, $"Router State : {MyAmsRouterState}");
             TConnection_RouterStateChanged?.Invoke(null, e);
         }
-        private static void Connection_AdsStateChanged(object sender, AdsStateChangedEventArgs e)
+        private void Connection_AdsStateChanged(object sender, AdsStateChangedEventArgs e)
         {
             MyAdsState = e.State.AdsState;
             switch (e.State.AdsState)
@@ -239,24 +237,44 @@ namespace FlexMold.Utility
             TConnection_AdsStateChanged?.Invoke(null, e);
         }
 
-        public static bool InitializeMotors()
+        public bool InitializeSlaves(EMachineType emt)
         {
             try
             {
-                DeviceCount = (short)MySymbols.FirstOrDefault(a =>
-                           a.InstancePath == TCVarName.DeviceCount).ReadAnyValue(typeof(short));
-                PLCMotors = new EthercatDevice[DeviceCount];
-                PLCMotorsStates = new DeviceStatuses((uint)DeviceCount);
-                SymbolEthercatDevice = MySymbols.Where(a => a.InstancePath == TCVarName.MainDevice).FirstOrDefault();
-                structSize = (SymbolEthercatDevice.Size) / DeviceCount;
-                buffer = new byte[structSize * DeviceCount];
-                ReadAllEthercatDeviceData();
-                if (SessionSystemService == null)
+                switch (emt)
                 {
-                    SessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
-                    ClientSystemService = (AdsConnection)SessionSystemService.Connect();
+                    case EMachineType.Motor:
+                        DeviceCount = (short)MySymbols.FirstOrDefault(a =>
+                           a.InstancePath == TCVarName.DeviceCount).ReadAnyValue(typeof(short));
+                        PLCMotors = new EthercatDevice[DeviceCount];
+                        PLCMotorsStatuses = new DeviceStatuses((uint)DeviceCount);
+                        SymbolEthercatDevice = MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.device}").FirstOrDefault();
+                        structSize = (SymbolEthercatDevice.Size) / DeviceCount;
+                        buffer = new byte[structSize * DeviceCount];
+                        ReadAllEthercatDeviceData();
+                        if (SessionSystemService == null)
+                        {
+                            SessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
+                            ClientSystemService = (AdsConnection)SessionSystemService.Connect();
+                        }
+                        return true;
+                    case EMachineType.ScanDevices:
+                        DeviceCount = (short)MySymbols.FirstOrDefault(a =>
+                           a.InstancePath == TCVarName.DeviceCount).ReadAnyValue(typeof(short));
+                        if (MySymbols.Any(a => a.InstancePath == $"MAIN.{TCSymbols.SlaveCount}"))
+                        {
+                            if (SessionSystemService == null)
+                            {
+                                SessionSystemService = new AdsSession(TwinCAT.Ads.AmsNetId.Local, (int)AmsPort.SystemService);
+                                ClientSystemService = (AdsConnection)SessionSystemService.Connect();
+                            }
+                            return true;
+                        }
+                        return false;
+                    default:
+                        return false;
                 }
-                return true;
+
             }
             catch (Exception ex)
             {
@@ -265,7 +283,7 @@ namespace FlexMold.Utility
             }
         }
 
-        public static int RegisterNotification(string _deviceStatusVariableName)
+        public int RegisterNotification(string _deviceStatusVariableName)
         {
             if (Client.State == ConnectionState.Connected)
             {
@@ -277,7 +295,7 @@ namespace FlexMold.Utility
             return -1;
         }
 
-        private static void ReadAllEthercatDeviceData()
+        private void ReadAllEthercatDeviceData()
         {
             Client.Read(SymbolEthercatDevice.IndexGroup,
                 SymbolEthercatDevice.IndexOffset, buffer.AsMemory());
@@ -289,42 +307,52 @@ namespace FlexMold.Utility
             }
         }
 
-        private static void InitializeVarables()
+        private void InitializeVarables()
         {
             SAmsNetId = (string)MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sAmsNetId}").FirstOrDefault().ReadAnyValue(typeof(string));
             SAmsPort = (UInt16[])MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sAmsPort}").FirstOrDefault().ReadAnyValue(typeof(UInt16[]));
         }
 
-        public static void ReadEthercatDeviceData(uint _motorNumber)
+        public void ReadEthercatDeviceData(uint _motorNumber)
         {
             var mtarray = new byte[structSize];
             Client.Read(SymbolEthercatDevice.IndexGroup,
                 SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
             PLCMotors[_motorNumber].Unpack(mtarray);
         }
-        public static byte[]? ReadEthercatDeviceData(DeviceSymbol deviceSymbol)
+        public void ReadEthercatDeviceData(DeviceSymbol deviceSymbol)
         {
-            byte[] data = null;
             switch (deviceSymbol)
             {
                 case DeviceSymbol.mDirection:
+                    for (uint i = 0; i < DeviceCount; i++)
+                        PLCMotors[i].mDirection = Convert.ToBoolean(ReadEthercatDeviceData(i, deviceSymbol, sizeof(float))[0]);
                     break;
                 case DeviceSymbol.mRPM:
+                    for (uint i = 0; i < DeviceCount; i++)
+                        PLCMotors[i].mRPM = Convert.ToSingle(ReadEthercatDeviceData(i, deviceSymbol, sizeof(float)));
                     break;
                 case DeviceSymbol.mDisplacement:
                     for (uint i = 0; i < DeviceCount; i++)
-                        data = ReadEthercatDeviceData(i, deviceSymbol, sizeof(UInt32));
+                        PLCMotors[i].mDisplacement = Convert.ToSingle(ReadEthercatDeviceData(i, deviceSymbol, sizeof(float)));
                     break;
                 case DeviceSymbol.mTime:
+                    for (uint i = 0; i < DeviceCount; i++)
+                        PLCMotors[i].mTime = Convert.ToSingle(ReadEthercatDeviceData(i, deviceSymbol, sizeof(float)));
                     break;
                 case DeviceSymbol.mMode:
+                    for (uint i = 0; i < DeviceCount; i++)
+                        PLCMotors[i].mMode = Convert.ToUInt32(ReadEthercatDeviceData(i, deviceSymbol, sizeof(float)));
+                    break;
+                case DeviceSymbol.mRampDelay:
+                    for (uint i = 0; i < DeviceCount; i++)
+                        PLCMotors[i].mRampDelay = Convert.ToSingle(ReadEthercatDeviceData(i, deviceSymbol, sizeof(float)));
                     break;
                 default:
                     break;
             }
-            return data;
         }
-        public static byte[] ReadEthercatDeviceData(uint _motorNumber, DeviceSymbol deviceSymbol, int dataLength)
+        public byte[] ReadEthercatDeviceData(uint _motorNumber, DeviceSymbol deviceSymbol, int dataLength)
         {
             var aa = SymbolEthercatDevice
                       .SubSymbols[(int)_motorNumber]
@@ -342,7 +370,7 @@ namespace FlexMold.Utility
             return mtarray;
         }
 
-        public static void WriteEthercatDeviceData()
+        public void WriteEthercatDeviceData()
         {
             for (int i = 0; i < PLCMotors.Length; i++)
             {
@@ -352,7 +380,7 @@ namespace FlexMold.Utility
                 SymbolEthercatDevice.IndexOffset, buffer.AsMemory());
         }
 
-        public static void WriteEthercatDeviceData(uint _motorNumber)
+        public void WriteEthercatDeviceData(uint _motorNumber)
         {
             try
             {
@@ -366,19 +394,25 @@ namespace FlexMold.Utility
                 _log.Log(LogLevel.Error, ex.Message);
             }
         }
-        public static void WriteEthercatDeviceData(DeviceSymbol deviceSymbol)
+        public void WriteEthercatDeviceData(DeviceSymbol deviceSymbol)
         {
             switch (deviceSymbol)
             {
                 case DeviceSymbol.mDirection:
+                    for (uint i = 0; i < DeviceCount; i++)
+                        WriteEthercatDeviceData(i, deviceSymbol, new byte[] { PLCMotors[i].mDirection.CastToArray()[0] });
                     break;
                 case DeviceSymbol.mRPM:
+                    for (uint i = 0; i < DeviceCount; i++)
+                        WriteEthercatDeviceData(i, deviceSymbol, PLCMotors[i].mRPM.CastToArray());
                     break;
                 case DeviceSymbol.mDisplacement:
                     for (uint i = 0; i < DeviceCount; i++)
                         WriteEthercatDeviceData(i, deviceSymbol, PLCMotors[i].mDisplacement.CastToArray());
                     break;
                 case DeviceSymbol.mTime:
+                    for (uint i = 0; i < DeviceCount; i++)
+                        WriteEthercatDeviceData(i, deviceSymbol, PLCMotors[i].mTime.CastToArray());
                     break;
                 case DeviceSymbol.mMode:
                     for (uint i = 0; i < DeviceCount; i++)
@@ -389,7 +423,7 @@ namespace FlexMold.Utility
             }
         }
 
-        public static void WriteEthercatDeviceData(uint _motorNumber, DeviceSymbol deviceSymbol, byte[] data)
+        public void WriteEthercatDeviceData(uint _motorNumber, DeviceSymbol deviceSymbol, byte[] data)
         {
             var aa = SymbolEthercatDevice
                       .SubSymbols[(int)_motorNumber]
@@ -407,28 +441,28 @@ namespace FlexMold.Utility
             }
         }
 
-        public static void StartpPLC()
+        public void StartpPLC()
         {
             _log.Log(LogLevel.Info, $"Resuming PLC ....");
             Client.WriteControl(new StateInfo(AdsState.Run, ClientSystemService.ReadState().DeviceState));
         }
 
-        public static void StoppPLC()
+        public void StoppPLC()
         {
             ClientSystemService.WriteControl(new StateInfo(AdsState.Stop, ClientSystemService.ReadState().DeviceState));
         }
 
-        public static void ConfigPLC()
+        public void ConfigPLC()
         {
             ClientSystemService.WriteControl(new StateInfo(AdsState.Config, ClientSystemService.ReadState().DeviceState));
         }
 
-        public static void ReConfigPLC()
+        public void ReConfigPLC()
         {
             ClientSystemService.WriteControl(new StateInfo(AdsState.Reconfig, ClientSystemService.ReadState().DeviceState));
         }
 
-        public static StateInfo GetTwincatState()
+        public StateInfo GetTwincatState()
         {
             StateInfo info = new StateInfo();
             if (Client.IsConnected)
@@ -438,7 +472,7 @@ namespace FlexMold.Utility
             return info;
         }
 
-        private static bool GetPLCVariables()
+        private bool GetPLCVariables()
         {
             _log.Log(LogLevel.Info, $"Fetching PLC Variables");
             MySymbols = new ObservableCollection<Symbol>();
@@ -463,7 +497,7 @@ namespace FlexMold.Utility
             _log.Log(LogLevel.Error, "No Symbol Found...");
             return false;
         }
-        public static bool LoadSetting()
+        public bool LoadSetting()
         {
             var log = LogManager.GetLogger("AppSettings");
 
@@ -472,9 +506,26 @@ namespace FlexMold.Utility
             try
             {
                 // Read the complete contents of the text file
-                string appSettings =
-                    File.ReadAllText(AppSettings.SettingRoot + "AppSettings.xml");
+                string appSettings;
+                if (!File.Exists(AppSettings.SettingRoot + "AppSettings.xml"))
+                {
+                    log.Log(LogLevel.Warn, "AppSettings.xml doesn't exist");
+                    log.Log(LogLevel.Warn, "Loading Default AppSettings.xml");
+                    if (File.Exists(AppSettings.SettingRoot + "AppSettings_Default.xml"))
+                    {
+                        log.Log(LogLevel.Warn, "Loading the Default AppSettings.xml");
+                        // Create a StringWriter to hold the XML
+                        StringWriter stringWriter = new();
+                        // Serialize the object to XML
+                        serializer.Serialize(stringWriter, new AppSettings());
 
+                        // Write the content to the text file
+                        if (!Directory.Exists(AppSettings.SettingRoot))
+                            Directory.CreateDirectory(AppSettings.SettingRoot);
+                        File.WriteAllText(AppSettings.SettingRoot + "AppSettings.xml", stringWriter.ToString());
+                    }
+                }
+                appSettings = File.ReadAllText(AppSettings.SettingRoot + "AppSettings.xml");
                 using StringReader reader = new(appSettings);
                 // Deserialize the XML back into a Person object
                 AppSettings = serializer.Deserialize(reader) as AppSettings;
@@ -482,25 +533,13 @@ namespace FlexMold.Utility
             }
             catch (Exception ex)
             {
-                if (!File.Exists(AppSettings.SettingRoot + "AppSettings_Default.xml"))
-                {
-                    // Create a StringWriter to hold the XML
-                    StringWriter stringWriter = new();
-                    // Serialize the object to XML
-                    serializer.Serialize(stringWriter, new AppSettings());
-
-                    // Write the content to the text file
-                    if (!Directory.Exists(AppSettings.SettingRoot))
-                        Directory.CreateDirectory(AppSettings.SettingRoot);
-                    File.WriteAllText(AppSettings.SettingRoot + "AppSettings_Default.xml", stringWriter.ToString());
-                }
-                var tmsg = $"AppSettings.xml : {ex.Message}";
+                var tmsg = $"AppSettings_Default.xml : {ex.Message}";
                 log.Log(LogLevel.Error, tmsg);
                 MessageBox.Show(tmsg);
                 return false;
             }
         }
-        public static bool WriteSetting()
+        public bool WriteSetting()
         {
             var log = LogManager.GetLogger("AppSettings");
 

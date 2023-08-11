@@ -1,14 +1,12 @@
 ﻿using FlexMold.Core;
-using FlexMold.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FlexMold.MVVM.ViewModel.Home
 {
-    internal class StatusBaseViewModel : ObservableObject
+    public class StatusBaseViewModel : ObservableObject
     {
         public int[] GetMismatchedIndexes<T>(T[] array1, T[] array2)
         {

@@ -1,23 +1,38 @@
 ﻿using FlexMold.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FlexMold.MVVM.ViewModel.Project
 {
-    internal class CSVDiaglogViewModel : ObservableObject
+    public class CSVDiaglogViewModel : ObservableObject, ICSVDiaglogViewModel
     {
-        private int _SelectedMotorDirPValue;
+        private int _MotorDirPValue;
 
-        public int SelectedMotorDirPValue
+        public int MotorDirPValue
         {
-            get { return _SelectedMotorDirPValue; }
+            get { return _MotorDirPValue; }
             set
             {
-                _SelectedMotorDirPValue = value;
+                _MotorDirPValue = value;
+                OnPropertyChanged();
+            }
+        }
+        private float _MotorRampDelayValue;
+
+        public float MotorRampDelayValue
+        {
+            get { return _MotorRampDelayValue; }
+            set
+            {
+                _MotorRampDelayValue = value;
+                OnPropertyChanged();
+            }
+        }
+        private float _MotorTime;
+        public float MotorTime
+        {
+            get { return _MotorTime; }
+            set
+            {
+                _MotorTime = value;
                 OnPropertyChanged();
             }
         }

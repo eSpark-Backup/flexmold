@@ -2,8 +2,10 @@
 
 namespace FlexMold.MVVM.ViewModel.Home
 {
-    internal interface IMachineDetailViewModel
+    public interface IMachineDetailViewModel
     {
-        public ST_EcSlaveState[] MySlaves { get; set; }
+        ST_EcSlaveState[] MySlaves { get; set; }
+        ESlaveLink[] Slave_Link_Status { get; set; }
+        ESlaveStateMachine[] Slave_StateMachine_Status { get; set; }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.Windows.Controls;
+﻿using FlexMold.MVVM.ViewModel.Project;
+using Microsoft.Extensions.DependencyInjection;
+using System.Windows.Controls;
 
 namespace FlexMold.MVVM.View
 {
@@ -7,8 +9,10 @@ namespace FlexMold.MVVM.View
     /// </summary>
     public partial class ProjectView : UserControl
     {
+        private IProjectViewModel _ProjectViewModel { get { return App.AppHost.Services.GetRequiredService<IProjectViewModel>(); } }
         public ProjectView()
         {
+            DataContext = _ProjectViewModel;
             InitializeComponent();
         }
     }

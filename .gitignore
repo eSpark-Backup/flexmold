@@ -285,3 +285,8 @@ _CompileInfo/
 _Libraries/
 _ModuleInstall/
 src/Binaries/
+
+# LibreOffice locks
+.~lock.*#
+*.dtmp
+*.bkp

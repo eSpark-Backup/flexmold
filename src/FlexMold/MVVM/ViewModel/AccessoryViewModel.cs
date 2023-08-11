@@ -12,8 +12,8 @@ namespace FlexMold.MVVM.ViewModel
 
         public RelayCommand LaserStatusCommand { get; set; }
 
-        public HeaterStatusView HeaterStatusVM { get; set; }
-        public LaserStatusView LaserStatusVM { get; set; }
+        public HeaterView HeaterStatusVM { get; set; }
+        public LaserView LaserStatusVM { get; set; }
 
         private object _currentView;
 
@@ -29,8 +29,8 @@ namespace FlexMold.MVVM.ViewModel
 
         public AccessoryViewModel()
         {
-            HeaterStatusVM = new HeaterStatusView();
-            LaserStatusVM = new LaserStatusView();
+            HeaterStatusVM = new HeaterView();
+            LaserStatusVM = new LaserView();
 
             CurrentView = HeaterStatusVM;
 

@@ -1,9 +1,10 @@
-﻿using System.ComponentModel;
+﻿using FlexMold.MVVM.ViewModel;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace FlexMold.Core
 {
-    public class ObservableObject : INotifyPropertyChanged
+    public class ObservableObject : INotifyPropertyChanged, IViewModel
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

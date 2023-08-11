@@ -5,9 +5,9 @@ namespace FlexMold.MVVM.View.Setting
     /// <summary>
     /// Interaction logic for MachineTestView.xaml
     /// </summary>
-    public partial class MachineTestView : UserControl
+    public partial class MachineSettingView : UserControl
     {
-        public MachineTestView()
+        public MachineSettingView()
         {
             InitializeComponent();
         }

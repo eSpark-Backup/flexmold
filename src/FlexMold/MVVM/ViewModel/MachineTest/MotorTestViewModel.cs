@@ -1,27 +1,23 @@
-﻿using EnvDTE80;
-using FlexMold.Core;
+﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
 using FlexMold.Utility;
 using NLog;
-using NLog.Fluent;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
-using TwinCAT;
-using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
 
 namespace FlexMold.MVVM.ViewModel.MachineTest
 {
-    internal class MotorTestViewModel : ObservableObject
+    public class MotorTestViewModel : ObservableObject, IMotorTestViewModel
     {
         private Logger log;
+        public RelayCommand SendAllCommand { get; set; }
         public RelayCommand SendRPMCommand { get; set; }
         public RelayCommand SendDisplacementCommand { get; set; }
         public RelayCommand SendTimeCommand { get; set; }
+        public RelayCommand SendRampCommand { get; set; }
         public RelayCommand OnLoadedCommand { get; set; }
         public RelayCommand OnUnLoadedCommand { get; set; }
         public int structSize { get; set; }
@@ -72,7 +68,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             set
             {
                 _SelectedMotorIndex = value;
-                TwinCathelper.ReadEthercatDeviceData(value);
+                _TwinCathelper.ReadEthercatDeviceData(value);
                 SetContols(value);
                 OnPropertyChanged();
             }
@@ -85,7 +81,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             SelectedMotorRPM = MyPLCMotor[value].mRPM;
             SelectedMotorDisplacementValue = MyPLCMotor[value].mDisplacement;
             SelectedMotorTimeValue = MyPLCMotor[value].mTime;
-            Position = TwinCathelper.PLCMotorsStates.mPostion[SelectedMotorIndex];
+            SelectedMotorRampDelayValue = MyPLCMotor[value].mRampDelay;
+            Position = _TwinCathelper.PLCMotorsStatuses.mPostion[SelectedMotorIndex];
             justread = false;
         }
 
@@ -101,7 +98,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 if (!justread)
                 {
                     MyPLCMotor[SelectedMotorIndex].mMode = (uint)value;
-                    TwinCathelper
+                    _TwinCathelper
                   .WriteEthercatDeviceData(
                   SelectedMotorIndex,
                   TwinCathelper.DeviceSymbol.mMode,
@@ -125,49 +122,55 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 if (!justread)
                 {
                     MyPLCMotor[SelectedMotorIndex].mDirection = value == 0 ? false : true;
-                    TwinCathelper
-                   .WriteEthercatDeviceData(
-                   SelectedMotorIndex,
-                   TwinCathelper.DeviceSymbol.mDirection,
-                   new byte[] { MyPLCMotor[SelectedMotorIndex].mDirection.CastToArray().FirstOrDefault() }
-                   );
+                    _TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex, TwinCathelper.DeviceSymbol.mDirection,
+                   new byte[] { MyPLCMotor[SelectedMotorIndex].mDirection.CastToArray().FirstOrDefault() });
                 }
                 _SelectedMotorDirValue = MyPLCMotor[SelectedMotorIndex].mDirection == false ? 0 : 1;
                 OnPropertyChanged();
             }
         }
 
-        private UInt32 _SelectedMotorTimeValue;
+        private double _SelectedMotorTimeValue;
 
-        public UInt32 SelectedMotorTimeValue
+        public double SelectedMotorTimeValue
         {
             get { return _SelectedMotorTimeValue; }
             set
             {
-                _SelectedMotorTimeValue = value;
+                _SelectedMotorTimeValue = Math.Round(value, 2);
+                OnPropertyChanged();
+            }
+        }
+        private double _SelectedMotorRampDelayValue;
+
+        public double SelectedMotorRampDelayValue
+        {
+            get { return _SelectedMotorRampDelayValue; }
+            set
+            {
+                _SelectedMotorRampDelayValue = Math.Round(value, 2);
                 OnPropertyChanged();
             }
         }
 
-        private UInt32 _SelectedMotorRPM;
-        public UInt32 SelectedMotorRPM
+        private double _SelectedMotorRPM;
+        public double SelectedMotorRPM
         {
             get { return _SelectedMotorRPM; }
             set
             {
-                _SelectedMotorRPM = value;
-
+                _SelectedMotorRPM = Math.Round(value, 2);
                 OnPropertyChanged();
             }
         }
-        private UInt32 _SelectedMotorDisplacementValue;
+        private double _SelectedMotorDisplacementValue;
 
-        public UInt32 SelectedMotorDisplacementValue
+        public double SelectedMotorDisplacementValue
         {
             get { return _SelectedMotorDisplacementValue; }
             set
             {
-                _SelectedMotorDisplacementValue = value;
+                _SelectedMotorDisplacementValue = Math.Round(value, 2);
 
                 OnPropertyChanged();
             }
@@ -176,12 +179,14 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         public byte[] buffer { get; set; }
 
         bool positionNofication = false;
+        private readonly ITwinCathelper _TwinCathelper;
+
         public void OnLoaded()
         {
             if (!positionNofication)
             {
 
-                TwinCathelper.TMotor_PositionChanged += Client_AdsNotificationMT;
+                _TwinCathelper.TMotor_PositionChanged += Client_AdsNotificationMT;
                 SelectedMotorIndex = 0;
                 positionNofication = true;
             }
@@ -189,32 +194,33 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
 
         private void OnUnLoaded()
         {
-            //if (TwinCathelper.Client.State == ConnectionState.Connected)
+            //if (_TwinCathelper.Client.State == ConnectionState.Connected)
             //{
             //    foreach (var item in NotificatioHandles)
             //    {
             //        if (item != -1)
             //        {
-            //            TwinCathelper.Client.DeleteDeviceNotification((uint)item);
+            //            _TwinCathelper.Client.DeleteDeviceNotification((uint)item);
             //        }
             //    }
-            //    TwinCathelper.Client.AdsNotification -= Client_AdsNotificationMT;
+            //    _TwinCathelper.Client.AdsNotification -= Client_AdsNotificationMT;
             //}
         }
         private void Client_AdsNotificationMT(object sender, EventArgs e)
         {
-            Position = TwinCathelper.PLCMotorsStates.mPostion[SelectedMotorIndex];
+            Position = _TwinCathelper.PLCMotorsStatuses.mPostion[SelectedMotorIndex];
         }
         void WriteRPMValue()
         {
             if (!justread)
             {
-                MyPLCMotor[SelectedMotorIndex].mRPM = SelectedMotorRPM;
-                TwinCathelper
-                   .WriteEthercatDeviceData(
+                MyPLCMotor[SelectedMotorIndex].mRPM = (float)SelectedMotorRPM;
+                _TwinCathelper.WriteEthercatDeviceData(
                    SelectedMotorIndex,
                    TwinCathelper.DeviceSymbol.mRPM,
                    MyPLCMotor[SelectedMotorIndex].mRPM.CastToArray());
+                log.Log(LogLevel.Info, "Motor RPM Value Has Been Written");
+
             }
             else
             {
@@ -225,19 +231,21 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         {
             if (!justread)
             {
-                MyPLCMotor[SelectedMotorIndex].mDisplacement = SelectedMotorDisplacementValue * 1600;
-                TwinCathelper
-                    .WriteEthercatDeviceData(
+                MyPLCMotor[SelectedMotorIndex].mDisplacement = (float)SelectedMotorDisplacementValue;
+                _TwinCathelper.WriteEthercatDeviceData(
                     SelectedMotorIndex,
                     TwinCathelper.DeviceSymbol.mDisplacement,
                     MyPLCMotor[SelectedMotorIndex].mDisplacement.CastToArray());
+                log.Log(LogLevel.Info, "Motor Displacement Value Has Been Written");
+
                 Thread.Sleep(200);
                 MyPLCMotor[SelectedMotorIndex].mDisplacement = 0;
-                TwinCathelper
-                   .WriteEthercatDeviceData(
+                _TwinCathelper.WriteEthercatDeviceData(
                    SelectedMotorIndex,
                    TwinCathelper.DeviceSymbol.mDisplacement,
                    MyPLCMotor[SelectedMotorIndex].mDisplacement.CastToArray());
+                log.Log(LogLevel.Info, "Motor Displacement Value Has Been Written 0");
+
             }
             else
             {
@@ -248,12 +256,29 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         {
             if (!justread)
             {
-                MyPLCMotor[SelectedMotorIndex].mTime = SelectedMotorTimeValue;
-                TwinCathelper
-                    .WriteEthercatDeviceData(
+                MyPLCMotor[SelectedMotorIndex].mTime = (float)SelectedMotorTimeValue;
+                _TwinCathelper.WriteEthercatDeviceData(
                     SelectedMotorIndex,
                     TwinCathelper.DeviceSymbol.mTime,
                     MyPLCMotor[SelectedMotorIndex].mTime.CastToArray());
+                log.Log(LogLevel.Info, "Motor Time Value Has Been Written");
+
+            }
+            else
+            {
+                justread = false;
+            }
+        }
+        private void WriteRampValue()
+        {
+            if (!justread)
+            {
+                MyPLCMotor[SelectedMotorIndex].mRampDelay = (float)SelectedMotorRampDelayValue;
+                _TwinCathelper.WriteEthercatDeviceData(
+                    SelectedMotorIndex,
+                    TwinCathelper.DeviceSymbol.mRampDelay,
+                    MyPLCMotor[SelectedMotorIndex].mRampDelay.CastToArray());
+                log.Log(LogLevel.Info, "Motor Ramp Delay Value Has Been Written");
             }
             else
             {
@@ -261,9 +286,36 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             }
         }
 
-        public MotorTestViewModel()
+        private void WriteAllValue()
         {
-            if (TwinCathelper.Client == null)
+            if (!justread)
+            {
+                for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                {
+                    MyPLCMotor[i].mDisplacement = (float)SelectedMotorDisplacementValue;
+                    MyPLCMotor[i].mRPM = (float)SelectedMotorRPM;
+                }
+                _TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
+                log.Log(LogLevel.Info, "All Motors Displacement Value Has Been Written");
+                _TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mRPM);
+                log.Log(LogLevel.Info, "All Motors RPM Value Has Been Written");
+                Thread.Sleep(200);
+                for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                {
+                    MyPLCMotor[i].mDisplacement = 0;
+                }
+                _TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
+                log.Log(LogLevel.Info, "All Motors Displacement Value Has Been Written : 0");
+            }
+            else
+            {
+                justread = false;
+            }
+        }
+        public MotorTestViewModel(ITwinCathelper twinCathelper)
+        {
+            this._TwinCathelper = twinCathelper;
+            if (_TwinCathelper.Client == null)
             {
                 return;
             }
@@ -274,13 +326,15 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             {
                 DeviceIds[i] = i;
             }
-            MyPLCMotor = TwinCathelper.PLCMotors;
+            MyPLCMotor = _TwinCathelper.PLCMotors;
             SetContols(SelectedMotorIndex);
             OnLoadedCommand = new RelayCommand(o => OnLoaded());
             OnUnLoadedCommand = new RelayCommand(o => { OnUnLoaded(); });
             SendRPMCommand = new RelayCommand(o => { WriteRPMValue(); });
             SendDisplacementCommand = new RelayCommand(o => { WriteSpeedValue(); });
             SendTimeCommand = new RelayCommand(o => { WriteTimeValue(); });
+            SendRampCommand = new RelayCommand(o => { WriteRampValue(); });
+            SendAllCommand = new RelayCommand(o => { WriteAllValue(); });
         }
     }
 }

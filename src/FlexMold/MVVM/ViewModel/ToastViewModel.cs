@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows;
-using System.Windows.Threading;
 using ToastNotifications;
 using ToastNotifications.Core;
 using ToastNotifications.Lifetime;
@@ -12,7 +11,7 @@ namespace FlexMold.MVVM.ViewModel
     public static class TNF
     {
         private static readonly Notifier _Notifier;
-
+        public static bool show;
         static TNF()
         {
             _messageCounter = 5;
@@ -47,38 +46,42 @@ namespace FlexMold.MVVM.ViewModel
 
         public static void ShowInformation(string message)
         {
-            Application.Current.Dispatcher.BeginInvoke(() =>
-            {
-                _Notifier.ShowInformation(message, CreateOptions());
-                RememberMessage(message);
-            });
+            if (show)
+                Application.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    _Notifier.ShowInformation(message, CreateOptions());
+                    RememberMessage(message);
+                });
         }
 
         public static void ShowError(string message)
         {
-            Application.Current.Dispatcher.BeginInvoke(() =>
-            {
-                _Notifier.ShowError(message, CreateOptions());
-                RememberMessage(message);
-            });
+            if (show)
+                Application.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    _Notifier.ShowError(message, CreateOptions());
+                    RememberMessage(message);
+                });
         }
 
         public static void ShowSuccess(string message)
         {
-            Application.Current.Dispatcher.BeginInvoke(() =>
-            {
-                _Notifier.ShowSuccess(message, CreateOptions());
-                RememberMessage(message);
-            });
+            if (show)
+                Application.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    _Notifier.ShowSuccess(message, CreateOptions());
+                    RememberMessage(message);
+                });
         }
 
         public static void ShowWarning(string message)
         {
-            Application.Current.Dispatcher.BeginInvoke(() =>
-            {
-                _Notifier.ShowWarning(message, CreateOptions());
-                RememberMessage(message);
-            });
+            if (show)
+                Application.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    _Notifier.ShowWarning(message, CreateOptions());
+                    RememberMessage(message);
+                });
         }
 
         private static MessageOptions CreateOptions()

@@ -114,7 +114,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         {
             for (int i = 0; i < data.Count; i++)
             {
-                _TwinCathelper.PLCMotors[i].mDisplacement = (uint)data[i];
+                _TwinCathelper.PLCMotors[i].mDisplacement = (float)data[i];
                 _TwinCathelper.PLCMotors[i].mDirection = MotorDirValue == 0 ? false : true;
                 _TwinCathelper.PLCMotors[i].mRampDelay = MotorRampDelayValue;
                 _TwinCathelper.PLCMotors[i].mTime = MotorTime;

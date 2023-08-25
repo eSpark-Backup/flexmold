@@ -3,8 +3,10 @@ using FlexMold.MVVM.ViewModel;
 using NLog;
 using System;
 using System.Collections.ObjectModel;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
@@ -13,6 +15,7 @@ using TwinCAT;
 using TwinCAT.Ads;
 using TwinCAT.Ads.TypeSystem;
 using TwinCAT.TypeSystem;
+using static FlexMold.Utility.TwinCathelper;
 
 namespace FlexMold.Utility
 {
@@ -43,13 +46,17 @@ namespace FlexMold.Utility
         {
             try
             {
+                _log.Log(LogLevel.Trace, $"Writing {TCSymbols.ECAbExecute} : 1");
+
                 var pp = MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ECAbExecute}").FirstOrDefault().TryWriteValue(1, 200);
 
                 ECAbError = (bool)MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ECAbError}").FirstOrDefault().ReadAnyValue(typeof(bool));
+                _log.Log(LogLevel.Trace, $"Readed {TCSymbols.ECAbError} : {JsonSerializer.Serialize(ECAbError)}");
 
                 if (!ECAbError)
                 {
                     var deviceandlinkstatusbytes = (byte[])MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ECAdevStates}").FirstOrDefault().ReadValue();
+                    _log.Log(LogLevel.Trace, $"Readed {TCSymbols.ECAdevStates} : {JsonSerializer.Serialize(deviceandlinkstatusbytes)}");
 
                     var oddIndexesValues = deviceandlinkstatusbytes.Where((value, index) => index % 2 != 0);
                     Slave_Link_Status = oddIndexesValues.Select(b => (ESlaveLink)Enum.ToObject(typeof(ESlaveLink), b)).ToArray();
@@ -61,6 +68,8 @@ namespace FlexMold.Utility
                     Slave_Link_Status = defaultElinkStates;
                     Slave_StateMachine_Status = defaultStateMachines;
                 }
+                _log.Log(LogLevel.Trace, $"Writing {TCSymbols.ECAbExecute} : 0");
+
                 MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ECAbExecute}").FirstOrDefault().WriteValue(0);
             }
             catch (Exception ex)
@@ -173,16 +182,21 @@ namespace FlexMold.Utility
                 switch (aa)
                 {
                     case TCSymbols.mPosition:
+                        var data = BitConverter.ToSingle(e.Data.ToArray());
+                        _log.Log(LogLevel.Trace, $"Readed {TCSymbols.mPosition} : {JsonSerializer.Serialize(data)}");
                         for (int i = 0; i < PLCMotors.Length; i++)
                             PLCMotorsStatuses.mPostion[i] = BitConverter.ToSingle(e.Data.ToArray(), i * sizeof(float));
                         TMotor_PositionChanged?.Invoke(null, e);
                         break;
                     case TCSymbols.MotorDiagnostic:
+                        _log.Log(LogLevel.Trace, $"Readed {TCSymbols.MotorDiagnostic} : {JsonSerializer.Serialize(e.Data.ToArray())}");
+
                         Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStatuses.MotorDiagnistic, 0, e.Data.Length);
                         _log.Log(LogLevel.Info, $"MotorDiagnistic Updated : {String.Join(",", PLCMotorsStatuses.MotorDiagnistic)}");
                         TMotor_MotorDiagnosticChanged?.Invoke(null, e);
                         break;
                     case TCSymbols.DeviceStatus:
+                        _log.Log(LogLevel.Trace, $"Readed {TCSymbols.DeviceStatus} : {JsonSerializer.Serialize(e.Data.ToArray())}");
                         Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStatuses.DeviceStatus, 0, e.Data.Length);
                         _log.Log(LogLevel.Info, $"DeviceStatus Updated : {String.Join(",", PLCMotorsStatuses.DeviceStatus)}");
                         TMotor_DeviceStatusChanged?.Invoke(null, e);
@@ -213,7 +227,6 @@ namespace FlexMold.Utility
             MyConnectionStateNew = e.NewState;
             MyConnectionStateChangedReason = e.Reason;
             _log.Log(LogLevel.Info, $"Connection Status : {MyConnectionStateNew}");
-            TConnection_ConnectionStatusChanged?.Invoke(null, e);
             TConnection_ConnectionStatusChanged?.Invoke(null, e);
         }
         private void Connection_RouterStateChanged(object sender, AmsRouterNotificationEventArgs e)
@@ -299,18 +312,23 @@ namespace FlexMold.Utility
         {
             Client.Read(SymbolEthercatDevice.IndexGroup,
                 SymbolEthercatDevice.IndexOffset, buffer.AsMemory());
+
             for (int i = 0; i < DeviceCount; i++)
             {
                 var mtarray = new byte[structSize];
                 Array.Copy(buffer, structSize * i, mtarray, 0, structSize);
                 PLCMotors[i].Unpack(mtarray);
             }
+            _log.Log(LogLevel.Trace, $"Readed SymbolEthercatDevice : {JsonSerializer.Serialize(PLCMotors)}");
+
         }
 
         private void InitializeVarables()
         {
             SAmsNetId = (string)MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sAmsNetId}").FirstOrDefault().ReadAnyValue(typeof(string));
+            _log.Log(LogLevel.Trace, $"Readed SAmsNetId : {JsonSerializer.Serialize(SAmsNetId)}");
             SAmsPort = (UInt16[])MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.foe_sAmsPort}").FirstOrDefault().ReadAnyValue(typeof(UInt16[]));
+            _log.Log(LogLevel.Trace, $"Readed SAmsPort : {JsonSerializer.Serialize(SAmsPort)}");
         }
 
         public void ReadEthercatDeviceData(uint _motorNumber)
@@ -319,6 +337,7 @@ namespace FlexMold.Utility
             Client.Read(SymbolEthercatDevice.IndexGroup,
                 SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
             PLCMotors[_motorNumber].Unpack(mtarray);
+            _log.Log(LogLevel.Trace, $"Readed SymbolEthercatDevice[{_motorNumber}] : {JsonSerializer.Serialize(PLCMotors[_motorNumber])}");
         }
         public void ReadEthercatDeviceData(DeviceSymbol deviceSymbol)
         {
@@ -367,6 +386,7 @@ namespace FlexMold.Utility
             {
                 _log.Log(LogLevel.Error, $"Motor[{_motorNumber}] Variable : {deviceSymbol} " + ex.Message);
             }
+            _log.Log(LogLevel.Trace, $"Readed {deviceSymbol} : {JsonSerializer.Serialize(mtarray)}");
             return mtarray;
         }
 
@@ -376,6 +396,7 @@ namespace FlexMold.Utility
             {
                 PLCMotors[i].Pack().CopyTo(buffer, structSize * i);
             }
+            _log.Log(LogLevel.Trace, $"Writing SymbolEthercatDevice : {JsonSerializer.Serialize(buffer)}");
             Client.Write(SymbolEthercatDevice.IndexGroup,
                 SymbolEthercatDevice.IndexOffset, buffer.AsMemory());
         }
@@ -386,6 +407,7 @@ namespace FlexMold.Utility
             {
                 var mtarray = new byte[structSize];
                 PLCMotors[_motorNumber].Pack().CopyTo(mtarray, 0);
+                _log.Log(LogLevel.Trace, $"Writing SymbolEthercatDevice[{_motorNumber}] : {JsonSerializer.Serialize(mtarray)}");
                 Client.Write(SymbolEthercatDevice.IndexGroup,
                     SymbolEthercatDevice.IndexOffset + (uint)_motorNumber * (uint)structSize, mtarray.AsMemory());
             }
@@ -433,6 +455,7 @@ namespace FlexMold.Utility
                 var mtarray = new byte[data.Length];
                 Array.Copy(data, mtarray, mtarray.Length);
                 var handle = Client.CreateVariableHandle(aa);
+                _log.Log(LogLevel.Trace, $"Writing {deviceSymbol} : {JsonSerializer.Serialize(data)}");
                 Client.Write(handle, mtarray.AsMemory());
             }
             catch (Exception ex)

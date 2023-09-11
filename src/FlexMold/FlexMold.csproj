@@ -19,6 +19,9 @@
 		</Resource>
 	</ItemGroup>
 	<ItemGroup>
+		<None Update="Appdata\AppSettings_Default.xml">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 		<None Update="Nlog.config">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>

@@ -67,7 +67,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         {
             get { return _MotorTime; }
             set
-           {
+            {
                 if (value != _MotorTime)
                 {
                     _MotorTime = value;
@@ -103,18 +103,22 @@ namespace FlexMold.MVVM.ViewModel.Project
                     //total time = (d * 60) / (RPM * 2)
                     BtnEnbl = true;
                     Message = "";
-                if (time != _MotorTime)
-                {
-                    //total time = (d * 60) / (RPM * 2)
-                    MotorTime = time;
-                }
+                    if (time != _MotorTime)
+                    {
+                        //total time = (d * 60) / (RPM * 2)
+                        MotorTime = time;
+                    }
+                    if (RecommendedRPM <= maxRPM)
+                    {
+                        BtnEnbl = true;
+                        Message = "";
+                    }
                     else
                     {
                         Message = "Value cannot exceed more than Maximum RPM";
                         BtnEnbl = false;
                     }
                 }
-                
                 OnPropertyChanged();
             }
         }

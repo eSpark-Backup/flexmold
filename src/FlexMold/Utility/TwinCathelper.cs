@@ -117,12 +117,12 @@ namespace FlexMold.Utility
                 //for (int i = 0; i < DeviceCount; i++)
                 //    PLCMotors[i].mRPM = 0;
                 //WriteEthercatDeviceData(DeviceSymbol.mRPM);
-
+                
                 for (int i = 0; i < DeviceCount; i++)
                     PLCMotors[i].mMode = (int)EMode.Abort;
 
                 WriteEthercatDeviceData(DeviceSymbol.mMode);
-                log.Log(LogLevel.Warn, $"Device Mode Changed to : {EMode.Abort}");
+                log.Log(LogLevel.Warn, $"Device Mode Changed to : {EMode.Abort} This is an Abort Command");
                 //log.Log(LogLevel.Warn, $"RPM values Changed to : 0");
                 TNF.ShowError($"Device Mode: {EMode.Abort}");
             }

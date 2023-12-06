@@ -13,6 +13,7 @@ using System.IO;
 using System.IO.Ports;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Configuration;
 
 namespace FlexMold.MVVM.ViewModel.Project
 {
@@ -319,13 +320,26 @@ namespace FlexMold.MVVM.ViewModel.Project
             LaunchLMPCommand = new RelayCommand(o => { DisconnectTelnet(); });
             if (MyPorjector == null)
             {
+                string ZlaserIP = "";
+                int ZlaserPort = 23;
+
+                try
+                { 
+                ZlaserIP = ConfigurationManager.AppSettings["ZlaserIP"].ToString();
+                ZlaserPort = int.Parse(ConfigurationManager.AppSettings["ZlaserPort"].ToString());
+                }
+                catch(Exception ex) {
+                    log.Log( LogLevel.Error, ex, ex.Message);
+                    TNF.ShowError(ex.Message);
+                }
+
                 MyPorjector = new LaserProjector()
                 {
                     Name = "p1",
-                    IpAddres = "192.168.50.22",
+                    IpAddres = ZlaserIP,
                     UserName = "123",
                     Status = 1,
-                    TelnetPort = 23,
+                    TelnetPort = ZlaserPort,
                     Password = "123456",
                 };
             }

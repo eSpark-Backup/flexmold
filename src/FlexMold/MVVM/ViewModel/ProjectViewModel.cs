@@ -260,12 +260,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         }
         private async Task CSVSend()
         {
-            _ = await DialogHost.Show(_CSVDiaglogView, "RootDialog", ClosingEventHandler);
-            MotorDirValue = _CSVDiaglogViewModel.MotorDirPValue;
-            MotorRampDelayValue = _CSVDiaglogViewModel.MotorRampDelayValue;
-            MotorTime = _CSVDiaglogViewModel.MotorTime;
-            string dir = MotorDirValue == 0 ? "Clockwise" : "Anti-Clockwise";
-            log.Log(LogLevel.Info, $"Selected Direction : {dir}");
+           
             var csvdata = CSVHelper.ReadCSV_DoubleData(SelectedFile);
             if (csvdata.Count == 0)
             {
@@ -276,12 +271,21 @@ namespace FlexMold.MVVM.ViewModel.Project
             }
             if (_TwinCathelper.PLCMotors.Length != csvdata.Count)
             {
+
                 log.Log(LogLevel.Error, $"Please select correct CSV");
                 log.Log(LogLevel.Error, $"Data and Box counts are not equal");
                 log.Log(LogLevel.Error, $"Data Count : {csvdata.Count} | Device Count : {_TwinCathelper.PLCMotors.Length}");
                 TNF.ShowError($"CSV Failed\nDevice Count :{_TwinCathelper.PLCMotors.Length} != Data Count :{csvdata.Count}");
                 return;
             }
+            _CSVDiaglogViewModel.MaxDisplacement = (float)csvdata.Max();
+            _CSVDiaglogViewModel.MaxRPM = _TwinCathelper.AppSettings.MaxRPM;
+            _ = await DialogHost.Show(_CSVDiaglogView, "RootDialog", ClosingEventHandler);
+            MotorDirValue = _CSVDiaglogViewModel.MotorDirPValue;
+            MotorRampDelayValue = _CSVDiaglogViewModel.MotorRampDelayValue;
+            MotorTime = _CSVDiaglogViewModel.MotorTime;
+            string dir = MotorDirValue == 0 ? "Clockwise" : "Anti-Clockwise";
+            log.Log(LogLevel.Info, $"Selected Direction : {dir}");
             WriteCSVData(csvdata);
         }
         public IMotorStatusViewmodel MotorStatus { get { return App.AppHost.Services.GetRequiredService<IMotorStatusViewmodel>(); } }

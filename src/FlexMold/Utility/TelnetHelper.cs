@@ -1,4 +1,4 @@
-﻿using FlexMold.Core;
+using FlexMold.Core;
 using FlexMold.MVVM.ViewModel;
 using NLog;
 using System;
@@ -9,6 +9,28 @@ namespace FlexMold.Utility
 {
     public class TelnetHelper : ObservableObject
     {
+        private Logger log;
+        private static Logger logst;
+        public static TelnetHelper instance;
+        public static TelnetHelper Instance
+        {
+            get
+            {
+                if (instance == null)
+                { 
+                    instance = new TelnetHelper();
+                    logst = LogManager.GetLogger("Laser Projector");
+                    logst.Log(LogLevel.Info, $"New Instance created!!!!!!!!");
+                }
+                return instance;
+            }
+        }
+        public TelnetHelper()
+        {
+            log = LogManager.GetLogger("Laser Projector");
+            //SendMessage = "echo";
+        }
+
         public string ReceivedMessage
         {
             get { return _ReceivedMessage; }
@@ -36,13 +58,6 @@ namespace FlexMold.Utility
         private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         public TelnetClient MyTelnetClient { get; set; }
 
-        private Logger log;
-
-        public TelnetHelper()
-        {
-            log = LogManager.GetLogger("Laser Projector");
-            //SendMessage = "echo";
-        }
 
         public void DisconnectTelnet()
         {
@@ -63,11 +78,14 @@ namespace FlexMold.Utility
             // CancellationTokenSource provides the token and have authority to cancel the token
             try
             {
-                MyTelnetClient = new TelnetClient(IpAddres, TelnetPort, TimeSpan.FromSeconds(3), cancellationTokenSource.Token);
-                MyTelnetClient.ConnectionClosed += HandleConnectionClosed;
-                MyTelnetClient.MessageReceived += HandleMessageReceived;
-                log.Log(LogLevel.Info, $"Connecting to {IpAddres}:{TelnetPort}...");
-                await MyTelnetClient.Connect();
+                if (MyTelnetClient == null)
+                {
+                    MyTelnetClient = new TelnetClient(IpAddres, TelnetPort, TimeSpan.FromSeconds(3), cancellationTokenSource.Token);
+                    MyTelnetClient.ConnectionClosed += HandleConnectionClosed;
+                    MyTelnetClient.MessageReceived += HandleMessageReceived;
+                    log.Log(LogLevel.Info, $"Connecting to {IpAddres}:{TelnetPort}...");
+                    await MyTelnetClient.Connect();
+                }
                 return true;
             }
             catch (Exception err)

@@ -17,7 +17,7 @@ using System.Configuration;
 
 namespace FlexMold.MVVM.ViewModel.Project
 {
-    public class LaserProjectorViewModel : TelnetHelper, ILaserProjectorViewModel
+    public class LaserProjectorViewModel : ILaserProjectorViewModel //TelnetHelper,
     {
         public IProjectViewModel _ProjectViewModel { get { return App.AppHost.Services.GetRequiredService<IProjectViewModel>(); } }
 
@@ -143,9 +143,9 @@ namespace FlexMold.MVVM.ViewModel.Project
                             log.Log(LogLevel.Info, $"Sending file via Telnet");
                             try
                             {
-                                if (ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort) == null)
+                                if (TelnetHelper.Instance.ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort) == null)
                                 {
-                                    var ii = await ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
+                                    var ii = await TelnetHelper.Instance.ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
                                     if (!ii)
                                     {
                                         var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
@@ -156,8 +156,8 @@ namespace FlexMold.MVVM.ViewModel.Project
                                 }
                                 else
                                 {
-                                    SendMessage = await MixUtil.ReadTextFromFileAsync(_slectedFile.FullName);
-                                    _ = SendTelnetMessgae();
+                                    TelnetHelper.Instance.SendMessage = await MixUtil.ReadTextFromFileAsync(_slectedFile.FullName);
+                                    _ = TelnetHelper.Instance.SendTelnetMessgae();
                                     return;
                                 }
                                 return;
@@ -250,6 +250,19 @@ namespace FlexMold.MVVM.ViewModel.Project
         }
         public LaserProjectorViewModel()
         {
+            string ZlaserIP = "";
+            int ZlaserPort = 23;
+
+            try
+            {
+                ZlaserIP = ConfigurationManager.AppSettings["ZlaserIP"].ToString();
+                ZlaserPort = int.Parse(ConfigurationManager.AppSettings["ZlaserPort"].ToString());
+            }
+            catch (System.Exception ex)
+            {
+                log.Log(LogLevel.Error, ex, ex.Message);
+                TNF.ShowError(ex.Message);
+            }
             log = LogManager.GetLogger("LaseProjector");
             SendLasFileCommand = new RelayCommand(o => { _ = sendLasFileAsync(_ProjectViewModel.SelectedFile); });
             SerialConfigCommand = new RelayCommand(o => { /*SerialConfigWindow();*/ });
@@ -262,9 +275,9 @@ namespace FlexMold.MVVM.ViewModel.Project
             SambaConfigCommand = new RelayCommand(o => { /*SambaConfigWindow(); */});
             ProjectionOnCommand = new RelayCommand(async o =>
             {
-                if (ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort) == null)
+                if (TelnetHelper.Instance.ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort) == null)
                 {
-                    var ii = await ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
+                    var ii = await TelnetHelper.Instance.ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
                     if (!ii)
                     {
                         var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
@@ -275,15 +288,15 @@ namespace FlexMold.MVVM.ViewModel.Project
                 }
                 else
                 {
-                    SendMessage = "ZN; " + "\r\n";
-                    _ = SendTelnetMessgae();
+                    TelnetHelper.Instance.SendMessage = "ZN; " + "\r\n";
+                    _ = TelnetHelper.Instance.SendTelnetMessgae();
                 }
             });
             ProjectionOffCommand = new RelayCommand(async o =>
             {
-                if (ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort) == null)
+                if (TelnetHelper.Instance.ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort) == null)
                 {
-                    var ii = await ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
+                    var ii = await TelnetHelper.Instance.ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
                     if (!ii)
                     {
                         var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
@@ -294,15 +307,15 @@ namespace FlexMold.MVVM.ViewModel.Project
                 }
                 else
                 {
-                    SendMessage = "ZF; " + "\r\n";
-                    _ = SendTelnetMessgae();
+                    TelnetHelper.Instance.SendMessage = "ZF; " + "\r\n";
+                    _ = TelnetHelper.Instance.SendTelnetMessgae();
                 }
             });
             CallibrateProjectorCommand = new RelayCommand(async o =>
             {
-                if (ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort) == null)
+                if (TelnetHelper.Instance.ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort) == null)
                 {
-                    var ii = await ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
+                    var ii = await TelnetHelper.Instance.ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
                     if (!ii)
                     {
                         var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
@@ -313,11 +326,11 @@ namespace FlexMold.MVVM.ViewModel.Project
                 }
                 else
                 {
-                    SendMessage = "ZD; " + "\r\n";
-                    _ = SendTelnetMessgae();
+                    TelnetHelper.Instance.SendMessage = "ZD; " + "\r\n";
+                    _ = TelnetHelper.Instance.SendTelnetMessgae();
                 }
             });
-            LaunchLMPCommand = new RelayCommand(o => { DisconnectTelnet(); });
+            LaunchLMPCommand = new RelayCommand(o => { TelnetHelper.Instance.DisconnectTelnet(); });
             if (MyPorjector == null)
             {
                 string ZlaserIP = "";

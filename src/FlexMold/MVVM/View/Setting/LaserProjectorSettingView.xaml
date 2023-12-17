@@ -55,13 +55,13 @@
             Maximum="65535"
             Minimum="0"
             Value="{Binding LP.TelnetPort}" />
-        <TextBox
+        <TextBox x:Name="txtSendmsg"
             Grid.Row="2"
             Grid.Column="1"
             Grid.ColumnSpan="2"
             Height="100"
             Text="{Binding SendMessage}" />
-        <TextBox
+        <TextBox x:Name="txtRecvmsg"
             Grid.Row="3"
             Grid.Column="1"
             Grid.ColumnSpan="2"

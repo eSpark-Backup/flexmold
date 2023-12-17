@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+using FlexMold.Utility;
+using System.Windows.Controls;
 
 namespace FlexMold.MVVM.View.Setting
 {
@@ -10,6 +11,11 @@ namespace FlexMold.MVVM.View.Setting
         public LaserProjectorSettingView()
         {
             InitializeComponent();
+        }
+
+        private void Button_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            TelnetHelper.Instance.SendMessage = this.txtSendmsg.Text;
         }
     }
 }

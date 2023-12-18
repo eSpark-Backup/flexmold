@@ -24,7 +24,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
             set
             {
                 _LP = value;
-                OnPropertyChanged();
+                //OnPropertyChanged();
             }
         }
 

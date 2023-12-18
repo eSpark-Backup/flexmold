@@ -8,6 +8,7 @@ namespace FlexMold.MVVM.Model
         public string SettingRoot { get; set; } = @"./AppData/";
         public string CalibrationFile { get; set; } = "Calibration.csv";
         public uint CalibrationSeq02Delay { get; set; } = 5000;
+        public uint MaxRPM { get; set; } = 200;
 
         public string CalibrationFileFullPath()
         {

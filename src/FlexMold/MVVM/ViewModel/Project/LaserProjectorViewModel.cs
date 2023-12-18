@@ -55,7 +55,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     default:
                         break;
                 }
-                OnPropertyChanged();
+                //OnPropertyChanged();
             }
         }
 
@@ -333,9 +333,6 @@ namespace FlexMold.MVVM.ViewModel.Project
             LaunchLMPCommand = new RelayCommand(o => { TelnetHelper.Instance.DisconnectTelnet(); });
             if (MyPorjector == null)
             {
-                string ZlaserIP = "";
-                int ZlaserPort = 23;
-
                 try
                 { 
                 ZlaserIP = ConfigurationManager.AppSettings["ZlaserIP"].ToString();

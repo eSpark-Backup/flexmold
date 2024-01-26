@@ -338,7 +338,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                 _TwinCathelper.PLCMotors[i].mDisplacement = (float)data[i];
             }
             _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mDisplacement);
-            log.Log(LogLevel.Info, $"{data.Count} csv value/s has been written sucessfully");
+            log.Log(LogLevel.Info, $"{data.Count} csv value(s) has been written sucessfully");
             log.Log(LogLevel.Info, $"{JsonSerializer.Serialize(data)}");
         }
         private void Motor_PositionChanged(object sender, EventArgs e)
@@ -370,7 +370,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                 for (int i = 0; i < DeviceCount; i++)
                     _TwinCathelper.PLCMotors[i].mDisplacement = 0;
                 _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mDisplacement);
-                log.Log(LogLevel.Info, $"{DeviceCount} zero value/s has been written sucessfully");
+                log.Log(LogLevel.Info, $"{DeviceCount} zero value(s) has been written sucessfully");
             }
             if (DeviceStatus.SequenceEqual(validSeq02Val))
             {

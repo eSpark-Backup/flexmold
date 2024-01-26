@@ -1,4 +1,4 @@
-﻿using FlexMold.MVVM.Model;
+using FlexMold.MVVM.Model;
 using FlexMold.MVVM.ViewModel;
 using FlexMold.Utility;
 using MahApps.Metro.Controls;
@@ -69,34 +69,34 @@ namespace FlexMold
 
         private void Session_ConnectionStateChanged(object sender, EventArgs e)
         {
-            System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
+            System.Windows.Application.Current.Dispatcher.BeginInvoke((Action)(() =>
             {
                 TwinCATSystemUpdate();
-            });
+            }));
         }
 
         private void Connection_AdsStateChanged(object sender, EventArgs e)
         {
-            System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
+            System.Windows.Application.Current.Dispatcher.BeginInvoke((Action)(() =>
             {
                 TwinCATSystemUpdate();
-            });
+            }));
         }
 
         private void Connection_RouterStateChanged(object sender, EventArgs e)
         {
-            System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
+            System.Windows.Application.Current.Dispatcher.BeginInvoke((Action)(() =>
             {
                 TwinCATSystemUpdate();
-            });
+            }));
         }
 
         private void Connection_ConnectionStatusChanged(object sender, EventArgs e)
         {
-            System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
+            System.Windows.Application.Current.Dispatcher.BeginInvoke((Action)(() =>
             {
                 TwinCATSystemUpdate();
-            });
+            }));
         }
 
         private void TwinCATSystemUpdate()

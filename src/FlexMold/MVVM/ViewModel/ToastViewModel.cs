@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows;
 using ToastNotifications;
 using ToastNotifications.Core;
@@ -47,41 +47,41 @@ namespace FlexMold.MVVM.ViewModel
         public static void ShowInformation(string message)
         {
             if (show)
-                Application.Current.Dispatcher.BeginInvoke(() =>
+                Application.Current.Dispatcher.BeginInvoke((Action)(() =>
                 {
                     _Notifier.ShowInformation(message, CreateOptions());
                     RememberMessage(message);
-                });
+                }));
         }
 
         public static void ShowError(string message)
         {
             if (show)
-                Application.Current.Dispatcher.BeginInvoke(() =>
+                Application.Current.Dispatcher.BeginInvoke((Action)(() =>
                 {
                     _Notifier.ShowError(message, CreateOptions());
                     RememberMessage(message);
-                });
+                }));
         }
 
         public static void ShowSuccess(string message)
         {
             if (show)
-                Application.Current.Dispatcher.BeginInvoke(() =>
+                Application.Current.Dispatcher.BeginInvoke((Action)(() =>
                 {
                     _Notifier.ShowSuccess(message, CreateOptions());
                     RememberMessage(message);
-                });
+                }));
         }
 
         public static void ShowWarning(string message)
         {
             if (show)
-                Application.Current.Dispatcher.BeginInvoke(() =>
+                Application.Current.Dispatcher.BeginInvoke((Action)(() =>
                 {
                     _Notifier.ShowWarning(message, CreateOptions());
                     RememberMessage(message);
-                });
+                }));
         }
 
         private static MessageOptions CreateOptions()

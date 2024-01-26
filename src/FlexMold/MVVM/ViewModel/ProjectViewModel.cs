@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -32,7 +33,8 @@ namespace FlexMold.MVVM.ViewModel.Project
         public float MotorRampDelayValue;
         public float MotorTime;
         private Model.Project _selectedMyDataModel;
-
+        private List<double> csvdata;
+        
         public Model.Project selectedMyDataModel
         {
             get { return _selectedMyDataModel; }
@@ -121,13 +123,13 @@ namespace FlexMold.MVVM.ViewModel.Project
                 _TwinCathelper.PLCMotors[i].mMode = (int)EMode.Project;
             }
             _TwinCathelper.WriteEthercatDeviceData();
-            log.Log(LogLevel.Info, $"{data.Count} csv value/s has been written sucessfully");
+            log.Log(LogLevel.Info, $"{data.Count} csv value(s) has been written sucessfully");
 
             Thread.Sleep(200);
             uint zero = 0;
             for (uint i = 0; i < data.Count; i++)
                 _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
-            log.Log(LogLevel.Info, $"{data.Count} zero value/s has been written sucessfully");
+            log.Log(LogLevel.Info, $"{data.Count} zero value(s) has been written sucessfully");
         }
         private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
         {
@@ -261,7 +263,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         private async Task CSVSend()
         {
            
-            var csvdata = CSVHelper.ReadCSV_DoubleData(SelectedFile);
+            csvdata = CSVHelper.ReadCSV_DoubleData(SelectedFile);
             if (csvdata.Count == 0)
             {
                 log.Log(LogLevel.Error, $"Please select correct CSV\n" +
@@ -278,6 +280,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 TNF.ShowError($"CSV Failed\nDevice Count :{_TwinCathelper.PLCMotors.Length} != Data Count :{csvdata.Count}");
                 return;
             }
+            
             _CSVDiaglogViewModel.MaxDisplacement = (float)csvdata.Max();
             _CSVDiaglogViewModel.MaxRPM = _TwinCathelper.AppSettings.MaxRPM;
             _ = await DialogHost.Show(_CSVDiaglogView, "RootDialog", ClosingEventHandler);
@@ -292,30 +295,35 @@ namespace FlexMold.MVVM.ViewModel.Project
         private void HomeTrigger()
         {
             log.Log(LogLevel.Info, $"Home Command Triggered");
+            float MaxPosition = MotorStatus.mPosition.Max();
 
-            var data = (uint)EMode.Displacement;
-            for (uint i = 0; i < DeviceCount; i++)
-                _TwinCathelper.PLCMotors[i].mMode = data;
-            _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mMode);
-            log.Log(LogLevel.Info, $"Mode values written to all Slaves : {EMode.Displacement}");
+            float PositionRPMs = MaxPosition / 2;
+            float RPM_Assume = float.Parse(ConfigurationManager.AppSettings["RPM_Assume"].ToString());
+            float RPMTimeMins = PositionRPMs / RPM_Assume;
 
-            _TwinCathelper.ReadEthercatDeviceData(DeviceSymbol.mDirection);
-            for (uint i = 0; i < DeviceCount; i++)
-                _TwinCathelper.PLCMotors[i].mDirection = !_TwinCathelper.PLCMotors[i].mDirection;
-            _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mDirection);
-            log.Log(LogLevel.Info, $"Reverse Direction written to all Slaves");
+            //float currentRotations = MaxPosition / 2; // rotations of current motor position
+            //float CurrentRPMInMins = currentRotations / RPMTimeMins;
+            float CurrentRPMInSecs = RPMTimeMins * 60F;
+            float CurrentRampDelay = RPMTimeMins * 60 * 0.1F;
 
-            for (uint i = 0; i < DeviceCount; i++)
-                _TwinCathelper.PLCMotors[i].mDisplacement = MotorStatus.mPosition[i];
-            _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mDisplacement);
-            log.Log(LogLevel.Info, $"Displacement values written to all Slaves : \n\t {JsonSerializer.Serialize(MotorStatus.mPosition)}");
+            for (int i = 0; i < DeviceCount; i++)
+            {
+                _TwinCathelper.PLCMotors[i].mDisplacement = Math.Abs(MotorStatus.mPosition[i]);
+                _TwinCathelper.PLCMotors[i].mDirection = (int)MotorStatus.mPosition[i] < 0 ? false : true;// on -ive position "Clockwise" else "AntiClockwise"
+                _TwinCathelper.PLCMotors[i].mRampDelay = Math.Abs(CurrentRampDelay);//RampDelayTime(sec)=5
+                _TwinCathelper.PLCMotors[i].mTime = Math.Abs(CurrentRPMInSecs);//Time(sec)=40
+                _TwinCathelper.PLCMotors[i].mMode = (int)EMode.Project;
+            }
+
+            _TwinCathelper.WriteEthercatDeviceData();
+            log.Log(LogLevel.Info, $"{DeviceCount} Home value(s) has been written sucessfully");
 
             Thread.Sleep(200);
-
+            uint zero = 0;
             for (uint i = 0; i < DeviceCount; i++)
-                _TwinCathelper.PLCMotors[i].mDisplacement = 0;
-            _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mDisplacement);
-            log.Log(LogLevel.Info, $"Zero Displacement values written to all Slaves");
+                _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
+            log.Log(LogLevel.Info, $"{DeviceCount} zero value(s) has been written sucessfully");
+            
         }
         public ProjectViewModel(ITwinCathelper twinCathelper)
         {

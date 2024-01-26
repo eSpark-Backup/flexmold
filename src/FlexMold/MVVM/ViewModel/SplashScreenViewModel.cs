@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using TwinCAT.Ads;
@@ -339,6 +340,14 @@ namespace FlexMold.MVVM.ViewModel
 
                 ProgressStatuses = "Closing Opened Instances of current TwinCAT sln";
                 //Access COM Running Objects Table
+                
+                if (!File.Exists(_runningScript.ScriptRootFolder + @"\" + _runningScript.ScriptName + ".sln"))
+                {
+                    //throw new ApplicationException("Twincat solution"+ _runningScript.ScriptName + ".sln not found!");
+                    MessageBox.Show("Twincat solution" + _runningScript.ScriptName + ".sln not found!","Twincat config error");
+                    return;
+                }
+                
                 ROTAccess.CloseRunningDTETable(_runningScript.ScriptRootFolder + @"\" + _runningScript.ScriptName + ".sln");
 
                 _worker.ProgressChanged += new ProgressChangedEventHandler(Worker_ProgressChanged);

@@ -13,5 +13,6 @@ namespace FlexMold.MVVM.ViewModel
         RelayCommand PowerStatusCommand { get; set; }
         RelayCommand VaccumStatusCommand { get; set; }
         RelayCommand VisualDisplayCommand { get; set; }
+        RelayCommand HomingStatusCommand { get; set; }
     }
 }

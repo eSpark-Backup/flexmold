@@ -10,7 +10,7 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid>
+    <Grid Margin="0,-2,0,2">
         <Grid.Resources />
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -38,13 +38,10 @@
             Grid.Row="3"
             Grid.Column="0"
             Content="Temperature Time :" />
-        <mah:ToggleSwitch
-            Grid.Row="0"
-            Grid.Column="1"
-            OffContent="Off"
-            OnContent="On" />
-        <ComboBox Grid.Row="1" Grid.Column="1" />
-        <ComboBox Grid.Row="2" Grid.Column="1" />
-        <ComboBox Grid.Row="3" Grid.Column="1" />
+        <mah:ToggleSwitch Grid.Row="0" Grid.Column="1" OffContent="Off" OnContent="On" />
+        <TextBox Grid.Row="1" Grid.Column="1" Text="Heater Current!" Margin="5,5,5,5" IsEnabled="{Binding editingEnable}"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Text="Heater temperature!" Margin="5,5,5,5" IsEnabled="{Binding editingEnable}"/>
+        <TextBox Grid.Row="3" Grid.Column="1" Text="Heater time!" Margin="5,5,5,5" IsEnabled="{Binding editingEnable}"/>
+        
     </Grid>
 </UserControl>

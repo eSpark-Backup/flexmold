@@ -38,16 +38,8 @@
                     Content="Power On/Off"
                     Style="{StaticResource MenuButtonTheme}" />
                 <RadioButton
-                    Command="{Binding RenumberingCommand}"
-                    Content="Renumbering"
-                    Style="{StaticResource MenuButtonTheme}" />
-                <RadioButton
                     Command="{Binding PositionCommand}"
                     Content="Position"
-                    Style="{StaticResource MenuButtonTheme}" />
-                <RadioButton
-                    Command="{Binding ResetCommand}"
-                    Content="Reset"
                     Style="{StaticResource MenuButtonTheme}" />
             </StackPanel>
             <ContentControl

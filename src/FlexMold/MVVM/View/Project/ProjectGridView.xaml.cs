@@ -31,7 +31,7 @@ namespace FlexMold.MVVM.View.Project
             if (cvTasks != null && cvTasks.CanGroup == true)
             {
                 cvTasks.GroupDescriptions.Clear();
-                cvTasks.GroupDescriptions.Add(new PropertyGroupDescription("ProjectName"));
+                cvTasks.GroupDescriptions.Add(new PropertyGroupDescription("Panel"));
                 //cvTasks.GroupDescriptions.Add(new PropertyGroupDescription("Complete"));
             }
         }

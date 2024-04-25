@@ -8,7 +8,8 @@
     xmlns:core="clr-namespace:FlexMold.Core"
     xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
     xmlns:dgx="urn:tom-englert.de/DataGridExtensions"
-    d:DesignHeight="500"
+    d:DesignHeight="600"
+    d:DesignWidth="800"
     mc:Ignorable="d">
     <UserControl.Resources>
         <convertor:DistinctConverter x:Key="distinctConverter" />
@@ -18,7 +19,7 @@
                 <scm:SortDescription PropertyName="Panel" />
             </CollectionViewSource.SortDescriptions>
             <CollectionViewSource.GroupDescriptions>
-                <PropertyGroupDescription PropertyName="ProjectName" />
+                <PropertyGroupDescription PropertyName="Panel" />
             </CollectionViewSource.GroupDescriptions>
         </CollectionViewSource>
         <ControlTemplate x:Key="MultipleChoiceFilter">
@@ -33,18 +34,18 @@
         <!--  IsSynchronizedWithCurrentItem="True"  -->
         <DataGrid
             x:Name="dataGrid1"
-            Grid.Row="1"
-            dgx:DataGridFilter.IsAutoFilterEnabled="True"
+            Grid.Row="1"            
+            ItemsSource="{Binding Source={StaticResource cvsTasks}}"
             AutoGenerateColumns="False"
             CanUserAddRows="False"
-            IsReadOnly="True"
-            ItemsSource="{Binding Source={StaticResource cvsTasks}}"
-            RowHeaderWidth="20"
+            IsReadOnly="True"            
+            RowHeaderWidth="30"
             ScrollViewer.HorizontalScrollBarVisibility="Auto"
             ScrollViewer.VerticalScrollBarVisibility="Auto"
             SelectedItem="{Binding Path=selectedMyDataModel}"
             SelectionMode="Single"
             SelectionUnit="FullRow">
+
             <DataGrid.Resources>
                 <Style TargetType="{x:Type CheckBox}">
                     <Setter Property="Foreground" Value="Black" />
@@ -96,8 +97,8 @@
             </DataGrid.GroupStyle>
             <DataGrid.ColumnHeaderStyle>
                 <Style BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader}" TargetType="DataGridColumnHeader">
-                    <Setter Property="Height" Value="35" />
-                    <Setter Property="FontSize" Value="20" />
+                    <Setter Property="Height" Value="5" />
+                    <Setter Property="FontSize" Value="10" />
                     <Style.Triggers>
                         <Trigger Property="IsMouseOver" Value="True" />
                     </Style.Triggers>
@@ -105,17 +106,12 @@
             </DataGrid.ColumnHeaderStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn
-                    dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
                     Binding="{Binding ProjectName}"
-                    Header="Project" />
-                <DataGridTextColumn
-                    dgx:DataGridFilterColumn.Template="{StaticResource MultipleChoiceFilter}"
-                    Binding="{Binding Panel}"
-                    Header="Panel" />
+                    Header="Available Panels" />
             </DataGrid.Columns>
             <DataGrid.RowStyle>
                 <Style BasedOn="{StaticResource MahApps.Styles.DataGridRow}" TargetType="{x:Type DataGridRow}">
-                    <Setter Property="FontSize" Value="14" />
+                    <Setter Property="FontSize" Value="24" />
                     <Style.Triggers>
                         <!--  IsMouseOver  -->
                         <MultiDataTrigger>

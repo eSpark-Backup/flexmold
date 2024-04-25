@@ -29,18 +29,18 @@
                     Content="Machine"
                     IsChecked="True"
                     Style="{StaticResource MenuButtonTheme}" />
-                <RadioButton
+                <!--<RadioButton
                     Command="{Binding PowerSettingCommand}"
                     Content="Power"
-                    Style="{StaticResource MenuButtonTheme}" />
+                    Style="{StaticResource MenuButtonTheme}" />-->
                 <RadioButton
                     Command="{Binding MotorSettingCommand}"
                     Content="Motor"
                     Style="{StaticResource MenuButtonTheme}" />
-                <RadioButton
+                <!--<RadioButton
                     Command="{Binding VacuumSettingCommand}"
                     Content="Vacuum"
-                    Style="{StaticResource MenuButtonTheme}" />
+                    Style="{StaticResource MenuButtonTheme}" />-->
                 <RadioButton
                     Command="{Binding LaserSettingCommand}"
                     Content="Laser Projector"

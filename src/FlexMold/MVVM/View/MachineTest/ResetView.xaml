@@ -10,6 +10,45 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <Grid>
-        <TextBlock>ResetView</TextBlock>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="200"/>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBox Name="txtResponding"
+            Grid.Row="0"
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            Grid.RowSpan="2"
+            Text="{Binding HomingOffsetDataCommand}" />
+        <Button
+            Grid.Row="2"
+            Grid.Column="0"
+            Content="Get List"             
+            MaxWidth="150"
+            MaxHeight="100"
+            MinHeight="100"            
+            Command="{Binding GetHomingCommand}"  />
+        <Button
+            Grid.Row="2"
+            Grid.Column="1"
+            Content="Update"            
+            MinHeight="100"
+            MaxWidth="150"
+            MaxHeight="100"            
+            Command="{Binding UpdateHomingCommand}" />
+        <Button            
+            Grid.Row="2"
+            Grid.Column="3"
+            Content="Home Calibrate" 
+            MaxWidth="150"
+            MaxHeight="100"
+            MinHeight="100"            
+            Command="{Binding HardCalibrCommand}"  />
     </Grid>
 </UserControl>

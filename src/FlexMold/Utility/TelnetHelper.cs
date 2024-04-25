@@ -20,7 +20,7 @@ namespace FlexMold.Utility
                 { 
                     instance = new TelnetHelper();
                     logst = LogManager.GetLogger("Laser Projector");
-                    logst.Log(LogLevel.Info, $"New Instance created!!!!!!!!");
+                    logst.Log(LogLevel.Info, $"Zlaser new laser connected!!!!!!!");
                 }
                 return instance;
             }

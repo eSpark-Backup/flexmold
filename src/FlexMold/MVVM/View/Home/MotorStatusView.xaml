@@ -11,8 +11,8 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <UniformGrid Rows="2">
-        <ItemsControl x:Name="MyItems" ItemsSource="{Binding MyMotors}">
+    <UniformGrid Rows="3">
+        <ItemsControl x:Name="MyItems" ItemsSource="{Binding MyMotors}" Grid.Row="0" MinHeight="80" MinWidth="80">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <UniformGrid />
@@ -28,8 +28,8 @@
                 <DataTemplate>
                     <Grid>
                         <Button
-                            MaxWidth="40"
-                            MaxHeight="40"
+                            MaxWidth="50"
+                            MaxHeight="50"
                             Background="{Binding FillColor}"
                             BorderBrush="{Binding StrokeColor}"
                             BorderThickness="5"
@@ -47,10 +47,16 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
         <Button
-            HorizontalAlignment="Center"
-            VerticalAlignment="Bottom"
+            MaxHeight="100"
+            MaxWidth="150"
             Command="{Binding CalibrateCommand}"
-            Content="Calibrate"
+            Content="Calibrate Seq01"
+            IsEnabled="{Binding CalibrateButtonEnable}" />
+        <Button
+            MaxHeight="100"
+            MaxWidth="150"
+            Command="{Binding Calibrate02Command}"
+            Content="Calibrate Seq02"
             IsEnabled="{Binding CalibrateButtonEnable}" />
     </UniformGrid>
 </UserControl>

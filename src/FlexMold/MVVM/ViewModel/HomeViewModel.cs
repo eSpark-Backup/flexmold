@@ -13,6 +13,7 @@ namespace FlexMold.MVVM.ViewModel
         public RelayCommand VaccumStatusCommand { get; set; }
         public RelayCommand MachineDetailCommand { get; set; }
         public RelayCommand MotorStatusCommand { get; set; }
+        public RelayCommand HomingStatusCommand { get; set; }
         public RelayCommand HeaterStatusCommand { get; set; }
         public RelayCommand PowerStatusCommand { get; set; }
         public RelayCommand EmergencyStatusCommand { get; set; }
@@ -28,10 +29,11 @@ namespace FlexMold.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-
+        //FlexMold.MVVM.View.MachineTest.ResetView
         public HomeViewModel(
             MachineDetailView machineDetailView,
             MotorStatusView motorStatusView,
+            View.MachineTest.ResetView homingStatusView,
             VisualDisplayView visualDisplayView,
             VaccumStatusView vaccumStatusView,
             HeaterStatusView heaterStatusView,
@@ -47,6 +49,7 @@ namespace FlexMold.MVVM.ViewModel
             VaccumStatusCommand = new RelayCommand(o => { CurrentView = vaccumStatusView; });
             MachineDetailCommand = new RelayCommand(o => { CurrentView = machineDetailView; });
             MotorStatusCommand = new RelayCommand(o => { CurrentView = motorStatusView; });
+            HomingStatusCommand = new RelayCommand(o => { CurrentView = homingStatusView; });
             HeaterStatusCommand = new RelayCommand(o => { CurrentView = heaterStatusView; });
             PowerStatusCommand = new RelayCommand(o => { CurrentView = powerStatusView; });
             EmergencyStatusCommand = new RelayCommand(o => { CurrentView = emergencyStatusView; });

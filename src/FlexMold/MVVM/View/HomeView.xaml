@@ -29,19 +29,24 @@
                     Content="Visual Display"
                     IsChecked="True"
                     Style="{StaticResource MenuButtonTheme}" />
-                <RadioButton
+                <!--<RadioButton
                     Command="{Binding VaccumStatusCommand}"
                     Content="Vaccum Status"
-                    Style="{StaticResource MenuButtonTheme}" />
+                    Style="{StaticResource MenuButtonTheme}" />-->
                 <RadioButton
                     Command="{Binding MachineDetailCommand}"
-                    Content="Machine Details"
+                    Content="Machine Status"
                     Style="{StaticResource MenuButtonTheme}" />
                 <RadioButton
                     Command="{Binding MotorStatusCommand}"
-                    Content="Motor Status"
+                    Content="Motors Status"
                     Style="{StaticResource MenuButtonTheme}" />
                 <RadioButton
+                    Command="{Binding HomingStatusCommand}"
+                    Content="Homing Status"
+                    Style="{StaticResource MenuButtonTheme}" />
+
+                <!--<RadioButton
                     Command="{Binding HeaterStatusCommand}"
                     Content="Heater Status"
                     Style="{StaticResource MenuButtonTheme}" />
@@ -56,7 +61,7 @@
                 <RadioButton
                     Command="{Binding LaserStatusCommand}"
                     Content="Laser Status"
-                    Style="{StaticResource MenuButtonTheme}" />
+                    Style="{StaticResource MenuButtonTheme}" />-->
             </StackPanel>
             <ContentControl
                 Grid.Row="1"

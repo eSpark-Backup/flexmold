@@ -20,8 +20,16 @@ namespace FlexMold.MVVM.ViewModel.Home
             get => _Slave_Link_Status;
             set
             {
-                SetLinkStatus(value);
-                _Slave_Link_Status = value;
+                try
+                {
+                    SetLinkStatus(value);
+                    _Slave_Link_Status = value;
+                }
+                catch (Exception ex)
+                {
+                    var log = LogManager.GetLogger("Machine Link Status");
+                    log.Log(LogLevel.Error, ex.Message);
+                }
             }
         }
         private void SetLinkStatus(ESlaveLink[] _value)
@@ -50,10 +58,17 @@ namespace FlexMold.MVVM.ViewModel.Home
         void DispLinkStatus(ESlaveLink[] _value, int index, Logger log)
         {
             MySlaves[index].Slave_Link_State = _value[index];
+            CSVHelper.MachineEnabled = false;
+            HomeMachineStatus = false;
+
             switch (MySlaves[index].Slave_Link_State)
             {
                 case ESlaveLink.EC_LINK_STATE_OK:
                     var _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Green);
+                    
+                    CSVHelper.MachineEnabled = true;
+                    HomeMachineStatus = true;
+
                     log.Log(LogLevel.Info, _tmg);
                     TNF.ShowSuccess(_tmg);
                     break;
@@ -69,6 +84,11 @@ namespace FlexMold.MVVM.ViewModel.Home
                     break;
                 case ESlaveLink.UnAvailable:
                     _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.White);
+                    log.Log(LogLevel.Trace, _tmg);
+                    //TNF.ShowWarning(_tmg);
+                    break;
+                case ESlaveLink.EC_DEVICE_STATE_INIT:
+                    _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Blue);
                     log.Log(LogLevel.Trace, _tmg);
                     //TNF.ShowWarning(_tmg);
                     break;
@@ -111,8 +131,16 @@ namespace FlexMold.MVVM.ViewModel.Home
             get => _Slave_StateMachine_Status;
             set
             {
+                try { 
                 SetStateMachine(value);
                 _Slave_StateMachine_Status = value;
+                }
+                catch (Exception ex)
+                {
+                    var log = LogManager.GetLogger("Machine Link Status");
+                    log.Log(LogLevel.Error, ex.Message);
+                }
+
             }
         }
         private void SetStateMachine(ESlaveStateMachine[] _value)
@@ -167,14 +195,21 @@ namespace FlexMold.MVVM.ViewModel.Home
         {
             MySlaves[index].Slave_State_Machine = _value[index];
             {
+                CSVHelper.MachineEnabled = false;
+                HomeMachineStatus = false;
+
                 switch (MySlaves[index].Slave_State_Machine)
                 {
                     case ESlaveStateMachine.EC_DEVICE_STATE_OP:
                         var _tmg = SetUI(index, MySlaves[index].Slave_State_Machine, Brushes.Green);
+
+                        CSVHelper.MachineEnabled = true;
+                        HomeMachineStatus = true;
+
                         TNF.ShowSuccess(_tmg);
                         log.Log(LogLevel.Info, _tmg);
                         break;
-
+                    case ESlaveStateMachine.EC_DEVICE_STATE_OK:
                     case ESlaveStateMachine.EC_DEVICE_STATE_INIT:
                     case ESlaveStateMachine.EC_DEVICE_STATE_PREOP:
                     case ESlaveStateMachine.EC_DEVICE_STATE_BOOTSTRAP:
@@ -206,6 +241,7 @@ namespace FlexMold.MVVM.ViewModel.Home
         }
         public MachineDetailViewModel(ITwinCathelper twinCathelper)
         {
+            try { 
             this._TwinCathelper = twinCathelper;
             if (_TwinCathelper.Client == null)
             {
@@ -231,6 +267,15 @@ namespace FlexMold.MVVM.ViewModel.Home
             _TwinCathelper.TSlave_Link_Status_Changed += Slave_Link_Status_Changed;
             _TwinCathelper.TSlave_StateMachine_Status_Changed += Slave_StateMachine_Status_Changed;
             _TwinCathelper.SetMachineStatusTimer();
+
+                HomeMachineStatus = false;
+            }
+            catch (Exception ex)
+            {
+                var log = LogManager.GetLogger("Machine Link Status");
+                log.Log(LogLevel.Error, ex.Message);
+            }
+
         }
     }
 }

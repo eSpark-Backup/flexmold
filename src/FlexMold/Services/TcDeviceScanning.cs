@@ -121,7 +121,11 @@ namespace FlexMold.MVVM.ViewModel
 
             worker.ProgressStatus = $"Configuring TwinCAT System into ConfigMode ....";
             _TwinCathelper.ReConfigPLC();
-            WaitForState(AdsState.Config, 3000);
+            //int timeoutmsec = int.Parse(System.Configuration.ConfigurationManager.AppSettings["AdsStateTimeout"].ToString()) * 1000;
+            int timeoutmsec = CSVHelper.AdsStateTimeout * 1000;
+
+            WaitForState(AdsState.Config, timeoutmsec);
+            //WaitForState(AdsState.Config, 3000);
             worker.Progress = 10;
 
             /* =================================================================================================

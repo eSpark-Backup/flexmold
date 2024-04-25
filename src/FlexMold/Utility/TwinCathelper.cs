@@ -21,6 +21,7 @@ namespace FlexMold.Utility
 {
     public partial class TwinCathelper : ITwinCathelper
     {
+        private bool machineEmergencyDisconnected = false;
         public void SetMachineStatusTimer()
         {
             ValidStateMachines = new ESlaveStateMachine[DeviceCount];
@@ -62,6 +63,32 @@ namespace FlexMold.Utility
                     Slave_Link_Status = oddIndexesValues.Select(b => (ESlaveLink)Enum.ToObject(typeof(ESlaveLink), b)).ToArray();
                     var evenIndexesValues = deviceandlinkstatusbytes.Where((value, index) => index % 2 == 0);
                     Slave_StateMachine_Status = evenIndexesValues.Select(b => (ESlaveStateMachine)Enum.ToObject(typeof(ESlaveStateMachine), b)).ToArray();
+
+                    if (Slave_Link_Status[0].ToString().Contains("EC_LINK_STATE_NOT_PRESENT"))
+                    {
+                        if (!machineEmergencyDisconnected)//if false
+                        {
+                            machineEmergencyDisconnected = true;
+                            //FlexMold.MVVM.ViewModel.Project.ProjectViewModel.EventStopToggle = true;
+
+                            //if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled)
+                            //{
+                            //    _log.Log(LogLevel.Info, "Starting timer for Stop/Resume!");
+
+                            if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'N')
+                            {
+                                FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'N';
+                                FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start(); }
+                            //}
+                        }
+
+                    }
+                    //2024-02-12 14:25:11.9061|INFO|Machine Link Status|FlexMold.MVVM.ViewModel.Home.MachineDetailViewModel.DispLinkStatus|Box_16 --> Link State EC_LINK_STATE_OK
+                    else if (Slave_Link_Status[0].ToString().Contains("EC_LINK_STATE_OK") || Slave_Link_Status[0].ToString().Contains("EC_DEVICE_STATE_INIT"))//&& machineEmergencyDisconnected
+                    {
+                        machineEmergencyDisconnected = false;
+                        //FlexMold.MVVM.ViewModel.Project.ProjectViewModel.EventStopToggle = true;                        
+                    }
                 }
                 else
                 {
@@ -75,6 +102,13 @@ namespace FlexMold.Utility
             catch (Exception ex)
             {
                 _log.Log(LogLevel.Error, ex.Message);
+
+
+                //if (!machineEmergencyDisconnected)
+                //{
+                //    machineEmergencyDisconnected = true;
+                //    FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start();
+                //}
             }
         }
         public ESlaveLink[] Slave_Link_Status
@@ -150,9 +184,9 @@ namespace FlexMold.Utility
         public void TwinCatDiconnectConnect851()
         {
             _log.Log(LogLevel.Info, $"DisConnecting to Local Host, Port : {_port}");
-            if (Client.IsConnected)
+            if (Client!=null && Client.IsConnected)
                 Client.Disconnect();
-            if (Session.IsConnected)
+            if (Session != null &&  Session.IsConnected)
                 Session.Disconnect();
             Client = null;
             Session = null;
@@ -171,6 +205,7 @@ namespace FlexMold.Utility
         }
         private void Client_AdsNotification(object sender, AdsNotificationEventArgs e)
         {
+
             try
             {
                 var _mysymbol = e.UserData as Symbol;
@@ -192,14 +227,23 @@ namespace FlexMold.Utility
                         _log.Log(LogLevel.Trace, $"Readed {TCSymbols.MotorDiagnostic} : {JsonSerializer.Serialize(e.Data.ToArray())}");
 
                         Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStatuses.MotorDiagnistic, 0, e.Data.Length);
-                        _log.Log(LogLevel.Info, $"MotorDiagnistic Updated : {String.Join(",", PLCMotorsStatuses.MotorDiagnistic)}");
                         TMotor_MotorDiagnosticChanged?.Invoke(null, e);
+                        try { _log.Log(LogLevel.Info, $"MotorDiagnistic Updated : {(EDeviceStatus)int.Parse(String.Join(",", PLCMotorsStatuses.MotorDiagnistic))}"); } catch { }
                         break;
                     case TCSymbols.DeviceStatus:
                         _log.Log(LogLevel.Trace, $"Readed {TCSymbols.DeviceStatus} : {JsonSerializer.Serialize(e.Data.ToArray())}");
-                        Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStatuses.DeviceStatus, 0, e.Data.Length);
-                        _log.Log(LogLevel.Info, $"DeviceStatus Updated : {String.Join(",", PLCMotorsStatuses.DeviceStatus)}");
+                        Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStatuses.DeviceStatus, 0, e.Data.Length);                        
                         TMotor_DeviceStatusChanged?.Invoke(null, e);
+                        
+                        try
+                        {
+                            if (((EDeviceStatus)int.Parse(String.Join(",", PLCMotorsStatuses.DeviceStatus))).ToString() == "CalibrationSquence02Success")
+                            {
+                                CalibrateSeq02_HomeUp();
+                            }
+                        }
+                        catch { }
+                        try { _log.Log(LogLevel.Info, $"DeviceStatus Updated : {(EDeviceStatus)int.Parse(String.Join(",", PLCMotorsStatuses.DeviceStatus))}"); } catch { }
                         break;
                     default:
                         break;
@@ -211,6 +255,38 @@ namespace FlexMold.Utility
             }
 
             TMotor_PositionChanged?.Invoke(null, e);
+        }
+
+        void CalibrateSeq02_HomeUp()
+        {
+            try
+            {
+                Thread.Sleep(200);
+
+                for (int i = 0; i < DeviceCount; i++)
+                {
+                    PLCMotors[i].mDisplacement = 0.200F;
+                    PLCMotors[i].mDirection = false;
+                    PLCMotors[i].mRampDelay = CSVHelper.MotorRampDelayValue;
+                    PLCMotors[i].mTime = 6.3334F;
+                    PLCMotors[i].mMode = (int)EMode.Project;
+
+                    //log.Log(LogLevel.Info, "CalibrateHard-WriteCSVData loop1:" + i.ToString() + " : " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + _TwinCathelper.PLCMotors[i].mDirection.ToString()
+                    //+ "  >> RampDlay: " + CSVHelper.MotorRampDelayValue.ToString()
+                    //+ "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime.ToString()
+                    //+ "  >> mMode: " + EMode.Project.ToString());
+                }
+
+                WriteEthercatDeviceData();
+                _log.Log(LogLevel.Info, $"{DeviceCount} CalibrateHard value(s) has been written sucessfully");
+
+                Thread.Sleep(200);
+                uint zero = 0;
+                for (uint i = 0; i < DeviceCount; i++)
+                    WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
+                _log.Log(LogLevel.Info, $"{DeviceCount} zero value(s) has been written sucessfully");
+            }
+            catch (Exception ee){ _log.Log(LogLevel.Info, "CalibrateSeq02_HomeUp>>>>"+ ee.Message); }
         }
 
         private void Session_ConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
@@ -392,13 +468,17 @@ namespace FlexMold.Utility
 
         public void WriteEthercatDeviceData()
         {
-            for (int i = 0; i < PLCMotors.Length; i++)
+            try
             {
-                PLCMotors[i].Pack().CopyTo(buffer, structSize * i);
+                for (int i = 0; i < PLCMotors.Length; i++)
+                {
+                    PLCMotors[i].Pack().CopyTo(buffer, structSize * i);
+                }
+                _log.Log(LogLevel.Trace, $"Writing SymbolEthercatDevice : {JsonSerializer.Serialize(buffer)}");
+                Client.Write(SymbolEthercatDevice.IndexGroup,
+                    SymbolEthercatDevice.IndexOffset, buffer.AsMemory());
             }
-            _log.Log(LogLevel.Trace, $"Writing SymbolEthercatDevice : {JsonSerializer.Serialize(buffer)}");
-            Client.Write(SymbolEthercatDevice.IndexGroup,
-                SymbolEthercatDevice.IndexOffset, buffer.AsMemory());
+            catch(Exception ee) { _log.Log(LogLevel.Trace, $"Writing SymbolEthercatDevice WriteEthercatDeviceData1111:"+ee.Message); }
         }
 
         public void WriteEthercatDeviceData(uint _motorNumber)
@@ -413,35 +493,42 @@ namespace FlexMold.Utility
             }
             catch (Exception ex)
             {
-                _log.Log(LogLevel.Error, ex.Message);
+                _log.Log(LogLevel.Error, "WriteEthercatDeviceData>>>>>>22222" + ex.Message);
             }
         }
         public void WriteEthercatDeviceData(DeviceSymbol deviceSymbol)
         {
-            switch (deviceSymbol)
+            try
             {
-                case DeviceSymbol.mDirection:
-                    for (uint i = 0; i < DeviceCount; i++)
-                        WriteEthercatDeviceData(i, deviceSymbol, new byte[] { PLCMotors[i].mDirection.CastToArray()[0] });
-                    break;
-                case DeviceSymbol.mRPM:
-                    for (uint i = 0; i < DeviceCount; i++)
-                        WriteEthercatDeviceData(i, deviceSymbol, PLCMotors[i].mRPM.CastToArray());
-                    break;
-                case DeviceSymbol.mDisplacement:
-                    for (uint i = 0; i < DeviceCount; i++)
-                        WriteEthercatDeviceData(i, deviceSymbol, PLCMotors[i].mDisplacement.CastToArray());
-                    break;
-                case DeviceSymbol.mTime:
-                    for (uint i = 0; i < DeviceCount; i++)
-                        WriteEthercatDeviceData(i, deviceSymbol, PLCMotors[i].mTime.CastToArray());
-                    break;
-                case DeviceSymbol.mMode:
-                    for (uint i = 0; i < DeviceCount; i++)
-                        WriteEthercatDeviceData(i, deviceSymbol, PLCMotors[i].mMode.CastToArray());
-                    break;
-                default:
-                    break;
+                switch (deviceSymbol)
+                {
+                    case DeviceSymbol.mDirection:
+                        for (uint i = 0; i < DeviceCount; i++)
+                            WriteEthercatDeviceData(i, deviceSymbol, new byte[] { PLCMotors[i].mDirection.CastToArray()[0] });
+                        break;
+                    case DeviceSymbol.mRPM:
+                        for (uint i = 0; i < DeviceCount; i++)
+                            WriteEthercatDeviceData(i, deviceSymbol, PLCMotors[i].mRPM.CastToArray());
+                        break;
+                    case DeviceSymbol.mDisplacement:
+                        for (uint i = 0; i < DeviceCount; i++)
+                            WriteEthercatDeviceData(i, deviceSymbol, PLCMotors[i].mDisplacement.CastToArray());
+                        break;
+                    case DeviceSymbol.mTime:
+                        for (uint i = 0; i < DeviceCount; i++)
+                            WriteEthercatDeviceData(i, deviceSymbol, PLCMotors[i].mTime.CastToArray());
+                        break;
+                    case DeviceSymbol.mMode:
+                        for (uint i = 0; i < DeviceCount; i++)
+                            WriteEthercatDeviceData(i, deviceSymbol, PLCMotors[i].mMode.CastToArray());
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Log(LogLevel.Error, "WriteEthercatDeviceData>>>>>>3333" + ex.Message);
             }
         }
 
@@ -460,7 +547,7 @@ namespace FlexMold.Utility
             }
             catch (Exception ex)
             {
-                _log.Log(LogLevel.Error, $"Motor[{_motorNumber}] Variable : {deviceSymbol} " + ex.Message);
+                _log.Log(LogLevel.Error, $"WriteEthercatDeviceData>>>>>>>Motor[{_motorNumber}] Variable : {deviceSymbol} " + ex.Message);
             }
         }
 

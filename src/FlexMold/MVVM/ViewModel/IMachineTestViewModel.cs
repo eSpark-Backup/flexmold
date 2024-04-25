@@ -9,7 +9,7 @@ namespace FlexMold.MVVM.ViewModel
         RelayCommand PositionCommand { get; set; }
         RelayCommand PowerOnOffCommand { get; set; }
         RelayCommand ReadMotorCommand { get; set; }
-        RelayCommand RenumberingCommand { get; set; }
+        //RelayCommand RenumberingCommand { get; set; }
         RelayCommand ResetCommand { get; set; }
     }
 }

@@ -12,7 +12,7 @@ namespace FlexMold.MVVM.ViewModel
 
         public RelayCommand ReadMotorCommand { get; set; }
         public RelayCommand PowerOnOffCommand { get; set; }
-        public RelayCommand RenumberingCommand { get; set; }
+        //public RelayCommand RenumberingCommand { get; set; }
         public RelayCommand PositionCommand { get; set; }
         public RelayCommand ResetCommand { get; set; }
 
@@ -32,7 +32,7 @@ namespace FlexMold.MVVM.ViewModel
             MotorTest motorTest,
             ReadMotorView readMotorView,
             PowerOnOffView powerOnOffView,
-            RenumberingView renumberingView,
+            //RenumberingView renumberingView,
             PositionView positionView,
             ResetView resetView)
         {
@@ -41,7 +41,7 @@ namespace FlexMold.MVVM.ViewModel
             MotorTestCommand = new RelayCommand(o => { CurrentView = motorTest; });
             ReadMotorCommand = new RelayCommand(o => { CurrentView = readMotorView; });
             PowerOnOffCommand = new RelayCommand(o => { CurrentView = powerOnOffView; });
-            RenumberingCommand = new RelayCommand(o => { CurrentView = renumberingView; });
+            //RenumberingCommand = new RelayCommand(o => { CurrentView = renumberingView; });
             PositionCommand = new RelayCommand(o => { CurrentView = positionView; });
             ResetCommand = new RelayCommand(o => { CurrentView = resetView; });
         }

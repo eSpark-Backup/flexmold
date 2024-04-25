@@ -1,3 +1,4 @@
+﻿using NLog;
 using System;
 using System.Windows;
 using ToastNotifications;
@@ -46,42 +47,70 @@ namespace FlexMold.MVVM.ViewModel
 
         public static void ShowInformation(string message)
         {
+            try { 
             if (show)
                 Application.Current.Dispatcher.BeginInvoke((Action)(() =>
                 {
                     _Notifier.ShowInformation(message, CreateOptions());
                     RememberMessage(message);
                 }));
+            }
+            catch (Exception ex)
+            {
+                var log = LogManager.GetLogger("Project");
+                log.Log(LogLevel.Error, "MainWindow-MetroClosing" + ex.Message);
+            }
         }
 
         public static void ShowError(string message)
         {
-            if (show)
+            try{
+                if (show)
                 Application.Current.Dispatcher.BeginInvoke((Action)(() =>
                 {
                     _Notifier.ShowError(message, CreateOptions());
                     RememberMessage(message);
                 }));
         }
+            catch (Exception ex)
+            {
+                var log = LogManager.GetLogger("Project");
+        log.Log(LogLevel.Error, "MainWindow-MetroClosing" + ex.Message);
+            }
+}
 
-        public static void ShowSuccess(string message)
+public static void ShowSuccess(string message)
         {
+            try { 
             if (show)
                 Application.Current.Dispatcher.BeginInvoke((Action)(() =>
                 {
                     _Notifier.ShowSuccess(message, CreateOptions());
                     RememberMessage(message);
                 }));
+}
+            catch (Exception ex)
+{
+    var log = LogManager.GetLogger("Project");
+    log.Log(LogLevel.Error, "MainWindow-MetroClosing" + ex.Message);
+}
         }
 
         public static void ShowWarning(string message)
         {
+            try { 
             if (show)
                 Application.Current.Dispatcher.BeginInvoke((Action)(() =>
                 {
                     _Notifier.ShowWarning(message, CreateOptions());
                     RememberMessage(message);
                 }));
+}
+            catch (Exception ex)
+{
+    var log = LogManager.GetLogger("Project");
+    log.Log(LogLevel.Error, "MainWindow-MetroClosing" + ex.Message);
+}
         }
 
         private static MessageOptions CreateOptions()

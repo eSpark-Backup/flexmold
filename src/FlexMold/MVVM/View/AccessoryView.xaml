@@ -28,14 +28,24 @@
                 ScrollViewer.CanContentScroll="True">
 
                 <RadioButton
-                    Command="{Binding HeaterStatusCommand}"
-                    Content="Heater Status"
+                    Command="{Binding VacuumStatusCommand}"
+                    Content="Vacuum"
                     IsChecked="True"
                     Style="{StaticResource MenuButtonTheme}" />
                 <RadioButton
-                    Command="{Binding LaserStatusCommand}"
-                    Content="LaserStatus"
+                    Command="{Binding PowerStatusCommand}"
+                    Content="Power"
+                    IsChecked="True"
                     Style="{StaticResource MenuButtonTheme}" />
+                <RadioButton
+                    Command="{Binding HeaterStatusCommand}"
+                    Content="Heater"
+                    IsChecked="True"
+                    Style="{StaticResource MenuButtonTheme}" />
+                <!--<RadioButton
+                    Command="{Binding LaserStatusCommand}"
+                    Content="Laser"
+                    Style="{StaticResource MenuButtonTheme}" />-->
             </StackPanel>
             <ContentControl
                 Grid.Row="1"

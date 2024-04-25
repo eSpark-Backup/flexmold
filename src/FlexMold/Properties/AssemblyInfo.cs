@@ -10,8 +10,8 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("FlexMold")]
-[assembly: AssemblyCopyright("Copyright ©  2024")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCopyright("Copyright©2024®eSpark")]
+[assembly: AssemblyTrademark("®eSpark")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
@@ -47,5 +47,5 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.23.01.2024")]
-[assembly: AssemblyFileVersion("1.23.01.2024")]
+[assembly: AssemblyVersion("1.24.05.2024")]
+[assembly: AssemblyFileVersion("1.24.05.2024")]

@@ -42,9 +42,9 @@ namespace FlexMold.MVVM.Model
             }
         }
 
-        private List<FileInfo> _laserFile;
+        private List<ProjectFilePanel> _laserFile;
 
-        public List<FileInfo> LaserFile
+        public List<ProjectFilePanel> LaserFile
         {
             get { return _laserFile; }
             set

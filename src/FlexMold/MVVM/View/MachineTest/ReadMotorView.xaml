@@ -32,24 +32,27 @@
         <mah:NumericUpDown
             Grid.Row="0"
             Grid.Column="1"
-            Maximum="65535"
-            Minimum="0" />
+            Maximum="500"
+            Minimum="1" Value="{Binding NumMotorFrom}"/>
         <mah:NumericUpDown
             Grid.Row="1"
             Grid.Column="1"
-            Maximum="65535"
-            Minimum="0" />
+            Maximum="500"
+            Minimum="1" Value="{Binding NumMotorTo}"/>
         <Button
             Grid.Row="2"
             Grid.ColumnSpan="2"
-            Content="Read" />
+            Content="Read" 
+            Command="{Binding ReadMotorVCommand}" />
         <TextBox
+            Name="txtResponding"
             Grid.Row="3"
             Grid.ColumnSpan="2"
-            Text=" Motors Responding" />
+            Text="{Binding RespondingCommand}" />
         <TextBox
+            Name="txtNonResponding"            
             Grid.Row="4"
             Grid.ColumnSpan="2"
-            Text=" Motors Not Responding" />
+            Text="{Binding NonRespondingCommand}" />
     </Grid>
 </UserControl>

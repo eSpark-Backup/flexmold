@@ -12,55 +12,88 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
+
+
     <Grid>
-        <Grid.ColumnDefinitions />
+        <Grid.Resources />
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" MinWidth="185" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <!--<RowDefinition Height="Auto" />-->
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-
-        <GroupBox Header="Motor Firmware Update">
-            <Grid>
-                <Button
-                    Grid.Column="2"
-                    Command="{Binding FirmwareCommand}"
-                    Content="Update Firmware" />
-            </Grid>
-        </GroupBox>
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Label
-                Grid.Row="0"
-                Grid.Column="0"
-                Content="Motor Count :" />
-            <TextBox
-                Grid.Row="0"
-                Grid.Column="1"
-                Text="1" />
-            <TextBox
-                Grid.Row="0"
-                Grid.Column="2"
-                Text="150" />
-            <Button
-                Grid.Row="0"
-                Grid.Column="3"
-                Content="Search" />
-        </Grid>
-        <TextBlock
+        <Label
+            Grid.Row="0"
+            Grid.Column="0"
+            Content="Max RPM :" Margin="5,5,0,5" Width="134" />
+        <Label
+            Grid.Row="1"
+            Grid.Column="0"
+            Content="Rec. RPM :" Margin="5,5,0,5" Width="169" />
+        <!--<Label
             Grid.Row="2"
             Grid.Column="0"
-            Margin="5"
-            Background="AliceBlue"
-            Text="Size :" />
+            Content="RPM Assume :" Margin="5,5,0,5" Width="153" />-->
+        <Label
+            Grid.Row="3"
+            Content="Acceleration : " Margin="5,5,0,5" Width="185" Grid.ColumnSpan="2" />
+        <Label
+            Grid.Row="4"
+            Content="Motor time(s) : " Margin="5,5,0,5" Width="185" Grid.ColumnSpan="2" />
+        <Label
+            Grid.Row="5"
+            Content="Max Move(mm) : " Margin="5,5,0,5" Width="185" Grid.ColumnSpan="2" />
+        <TextBox
+            Grid.Row="0"
+            Grid.Column="1"
+            Text="{Binding txtMaxRPM}" Margin="5,5,5,5" IsEnabled="{Binding editingEnable}"/>
+        <TextBox
+            Grid.Row="1"
+            Grid.Column="1"
+            Text="{Binding txtRecRPM}" Margin="5,5,5,5" IsEnabled="{Binding editingEnable}"/>
+        <!--<TextBox
+            Grid.Row="2"
+            Grid.Column="1"
+            Text="{Binding txtrpmAssume}" Margin="5,5,5,5" IsEnabled="{Binding editingEnable}"/>-->
+        <ComboBox Grid.Row="3" Grid.Column="1" SelectedValue="{Binding RampUpDown}" SelectedValuePath="Tag" IsEnabled="{Binding editingEnable}">
+            <ComboBoxItem Tag="False">Up</ComboBoxItem>
+            <ComboBoxItem Tag="True">Down</ComboBoxItem>
+        </ComboBox>
+        <!--<TextBox
+            Grid.Row="3"
+            Grid.Column="1"
+            Text="{Binding txtmotorDirVal}" Margin="5,5,5,5" IsEnabled="{Binding editingEnable}"/>-->
+        <!--<TextBox
+            Grid.Row="4"
+            Grid.Column="1"
+            Text="{Binding txtdefaultTimeSec}" Margin="5,5,5,5" IsEnabled="{Binding editingEnable}"/>-->
+        <ComboBox Grid.Row="4" Grid.Column="1" SelectedValuePath="Tag" SelectedValue="{Binding txtdefaultTimeSec}" IsEnabled="{Binding editingEnable}">
+            <ComboBoxItem Tag="1">1</ComboBoxItem>
+            <ComboBoxItem Tag="2">2</ComboBoxItem>
+            <ComboBoxItem Tag="3">3</ComboBoxItem>
+            <ComboBoxItem Tag="4">4</ComboBoxItem>
+            <ComboBoxItem Tag="5">5</ComboBoxItem>
+        </ComboBox>
+
+        <TextBox
+            Grid.Row="5"
+            Grid.Column="1"
+            Text="{Binding txtmaxMotorMove}" Margin="5,5,5,5" IsEnabled="{Binding editingEnable}"/>
+        <Button
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            Command="{Binding UpdateMotorSettingCommand}"
+            Content="Update"
+            IsEnabled="{Binding editingEnable}" Height="65" Width="171" Grid.Column="1" Margin="152,0,0,-95" Grid.Row="7"/>
+
     </Grid>
+
 </UserControl>

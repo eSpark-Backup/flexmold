@@ -4,9 +4,62 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:FlexMold.MVVM.View.Home"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid />
+
+    <Grid>
+        <Grid.Resources />
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" MinWidth="185" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Label
+            Grid.Row="0"
+            Grid.Column="0"
+            Content="Vacuum Status" Margin="5,5,0,5" Width="169" />
+        <Label
+            Grid.Row="1"
+            Grid.Column="0"
+            Content="Machine Status" Margin="5,5,0,5" Width="169" />
+        <Label
+            Grid.Row="2"
+            Grid.Column="0"
+            Content="Motor Status" Margin="5,5,0,5" Width="134" />
+        <Label
+            Grid.Row="3"
+            Grid.Column="0"
+            Content="Heater Status" Margin="5,5,0,5" Width="153" />
+        <Label
+            Grid.Row="4"
+            Grid.Column="0"
+            Content="Power Status" Margin="5,11,0,0" Width="185" Grid.ColumnSpan="2" />
+        <Label
+            Grid.Row="5"
+            Grid.Column="0"
+            Content="Emergency Status" Margin="5,8,0,6" Width="185" Grid.ColumnSpan="2" />
+        <Label
+            Grid.Row="6"
+            Content="Laser Status " Margin="5,8,0,6" Width="185" Grid.ColumnSpan="2" />
+
+        <mah:ToggleSwitch Name="TSWHomeVacuumStatus" Grid.Row="0" Grid.Column="1" IsOn="{Binding HomeVacuumStatus}" IsEnabled="False" />
+        <mah:ToggleSwitch Name="TSWHomeMachineStatus" Grid.Row="1" Grid.Column="1" IsOn="{Binding HomeMachineStatus}" IsEnabled="False" />
+        <mah:ToggleSwitch Name="TSWHomeMotorStatus" Grid.Row="2" Grid.Column="1" IsOn="{Binding HomeMotorStatus}" IsEnabled="False" />
+        <mah:ToggleSwitch Name="TSWHomeHeaterStatus" Grid.Row="3" Grid.Column="1" IsOn="{Binding HomeHeaterStatus}" IsEnabled="False" />
+        <mah:ToggleSwitch Name="TSWHomePowerStatus" Grid.Row="4" Grid.Column="1" IsOn="{Binding HomePowerStatus}" IsEnabled="False" />
+        <mah:ToggleSwitch Name="TSWHomeEmergencyStatus" Grid.Row="5" Grid.Column="1" IsOn="{Binding HomeEmergencyStatus}" IsEnabled="False" />
+        <mah:ToggleSwitch Name="TSWHomeLaserStatus" Grid.Row="6" Grid.Column="1" IsOn="{Binding HomeLaserStatus}" IsEnabled="False" />
+    </Grid>
+
 </UserControl>

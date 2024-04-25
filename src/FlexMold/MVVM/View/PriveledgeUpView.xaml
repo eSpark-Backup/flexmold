@@ -1,0 +1,58 @@
+﻿<UserControl
+    x:Class="FlexMold.MVVM.View.PriveledgeUpView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+    xmlns:local="clr-namespace:FlexMold.MVVM.View.Project"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodel="clr-namespace:FlexMold.MVVM.ViewModel"
+    xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
+    Width="400"
+    Height="175"
+    d:DesignHeight="175"
+    d:DesignWidth="400"
+    mc:Ignorable="d">
+    <Border Style="{StaticResource panelMenuBorder}" Margin="0,0,0,10">
+        <Grid Margin="0,0,0,54">
+            <Grid.Resources />
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <!--<RowDefinition Height="Auto" />-->
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label
+            Grid.Row="0"
+            Grid.Column="0"
+            Content="Password" />
+            <TextBox
+            Name="LP_ZLaserIPSelect"
+            Text="{Binding VerifyCredsCommand}"
+            Grid.Row="0"
+            Grid.Column="1"/>
+            <UniformGrid
+            Grid.Row="2"
+            Grid.ColumnSpan="2"
+            Columns="2">
+                <Button Command="{x:Static wpf:DialogHost.CloseDialogCommand}" Margin="49,7,2,-3">
+                    <StackPanel Orientation="Horizontal">
+                        <iconPacks:PackIconMaterial Margin="6" Kind="Login" />
+                        <TextBlock HorizontalAlignment="Center" Text="Login" />
+                    </StackPanel>
+                </Button>
+                <Button Margin="14,7,37,-3" Click="btnChangePasswd_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <iconPacks:PackIconMaterial Margin="6" Kind="Logout" />
+                        <TextBlock HorizontalAlignment="Center" Text="Update" />
+                    </StackPanel>
+                </Button>
+
+            </UniformGrid>
+        </Grid>
+    </Border>
+</UserControl>

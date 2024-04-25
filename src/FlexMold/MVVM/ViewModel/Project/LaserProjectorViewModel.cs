@@ -91,53 +91,53 @@ namespace FlexMold.MVVM.ViewModel.Project
                 {
                     switch (LaserProjectorComMode)
                     {
-                        case (int)EProjectorComMode.Serial:
-                            log.Log(LogLevel.Info, ErrorMessages.Sending_File_Via_Serial.Humanize());
-                            try
-                            {
-                                using (FileStream fs = File.OpenRead(_slectedFile.FullName))
-                                {
-                                    log.Log(LogLevel.Info, $"Opening Port {SelectedSerialPort.PortName} Baud rate {SelectedSerialPort.BaudRate}");
-                                    SelectedSerialPort.Open();
-                                    SelectedSerialPort.WriteTimeout = 2000;
-                                    SelectedSerialPort.Write((new BinaryReader(fs)).ReadBytes((int)fs.Length), 0, (int)fs.Length);
-                                    log.Log(LogLevel.Info, $"File Write Sucessfully");
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                TNF.ShowError(ex.Message);
-                                log.Log(LogLevel.Error, ex.Message);
-                            }
-                            finally
-                            {
-                                SelectedSerialPort.Close();
-                            }
-                            break;
+                        //case (int)EProjectorComMode.Serial:
+                        //    log.Log(LogLevel.Info, ErrorMessages.Sending_File_Via_Serial.Humanize());
+                        //    try
+                        //    {
+                        //        using (FileStream fs = File.OpenRead(_slectedFile.FullName))
+                        //        {
+                        //            log.Log(LogLevel.Info, $"Opening Port {SelectedSerialPort.PortName} Baud rate {SelectedSerialPort.BaudRate}");
+                        //            SelectedSerialPort.Open();
+                        //            SelectedSerialPort.WriteTimeout = 2000;
+                        //            SelectedSerialPort.Write((new BinaryReader(fs)).ReadBytes((int)fs.Length), 0, (int)fs.Length);
+                        //            log.Log(LogLevel.Info, $"File Write Sucessfully");
+                        //        }
+                        //    }
+                        //    catch (Exception ex)
+                        //    {
+                        //        TNF.ShowError(ex.Message);
+                        //        log.Log(LogLevel.Error, ex.Message);
+                        //    }
+                        //    finally
+                        //    {
+                        //        SelectedSerialPort.Close();
+                        //    }
+                        //    break;
 
-                        case (int)EProjectorComMode.Samba:
-                            string _tmsg = $"Sending file via samba";
-                            log.Log(LogLevel.Info, _tmsg);
-                            TNF.ShowInformation(_tmsg);
-                            try
-                            {
-                                log.Log(LogLevel.Info, $"Connecting to {MyPorjector.IpAddres}");
-                                using (NetworkShareAccesser.Access(MyPorjector.IpAddres, MyPorjector.UserName, MyPorjector.Password))
-                                {
-                                    log.Log(LogLevel.Info, $"Credentials Accepted");
-                                    log.Log(LogLevel.Info, $"Copying File");
-                                    File.Copy(_slectedFile.FullName,
-                                        $@"\\{MyPorjector.IpAddres}\{MyPorjector.PlotFolderName}\{_slectedFile.Name}",
-                                        true);
-                                    log.Log(LogLevel.Info, $"File Copied Sucessfully");
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                TNF.ShowError(ex.Message);
-                                log.Log(LogLevel.Error, ex.Message);
-                            }
-                            break;
+                        //case (int)EProjectorComMode.Samba:
+                        //    string _tmsg = $"Sending file via samba";
+                        //    log.Log(LogLevel.Info, _tmsg);
+                        //    TNF.ShowInformation(_tmsg);
+                        //    try
+                        //    {
+                        //        log.Log(LogLevel.Info, $"Connecting to {MyPorjector.IpAddres}");
+                        //        using (NetworkShareAccesser.Access(MyPorjector.IpAddres, MyPorjector.UserName, MyPorjector.Password))
+                        //        {
+                        //            log.Log(LogLevel.Info, $"Credentials Accepted");
+                        //            log.Log(LogLevel.Info, $"Copying File");
+                        //            File.Copy(_slectedFile.FullName,
+                        //                $@"\\{MyPorjector.IpAddres}\{MyPorjector.PlotFolderName}\{_slectedFile.Name}",
+                        //                true);
+                        //            log.Log(LogLevel.Info, $"File Copied Sucessfully");
+                        //        }
+                        //    }
+                        //    catch (Exception ex)
+                        //    {
+                        //        TNF.ShowError(ex.Message);
+                        //        log.Log(LogLevel.Error, ex.Message);
+                        //    }
+                        //    break;
 
                         case (int)EProjectorComMode.Telnet:
                             log.Log(LogLevel.Info, $"Sending file via Telnet");
@@ -148,6 +148,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                                     var ii = await TelnetHelper.Instance.ConnectTelnet(MyPorjector.IpAddres, MyPorjector.TelnetPort);
                                     if (!ii)
                                     {
+                                        CSVHelper.LaserEnabled = false;
                                         var tmsg = $"Telnet Failed to connect : {MyPorjector.IpAddres} , {MyPorjector.TelnetPort}";
                                         log.Log(LogLevel.Error, tmsg);
                                         TNF.ShowError(tmsg);
@@ -156,6 +157,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                                 }
                                 else
                                 {
+                                    CSVHelper.LaserEnabled = true;
                                     TelnetHelper.Instance.SendMessage = await MixUtil.ReadTextFromFileAsync(_slectedFile.FullName);
                                     _ = TelnetHelper.Instance.SendTelnetMessgae();
                                     return;
@@ -255,8 +257,10 @@ namespace FlexMold.MVVM.ViewModel.Project
 
             try
             {
-                ZlaserIP = ConfigurationManager.AppSettings["ZlaserIP"].ToString();
-                ZlaserPort = int.Parse(ConfigurationManager.AppSettings["ZlaserPort"].ToString());
+                //ZlaserIP = ConfigurationManager.AppSettings["ZlaserIP"].ToString();
+                //ZlaserPort = int.Parse(ConfigurationManager.AppSettings["ZlaserPort"].ToString());
+                ZlaserIP = CSVHelper.IpAddres;
+                ZlaserPort = CSVHelper.TelnetPort;
             }
             catch (System.Exception ex)
             {
@@ -264,7 +268,12 @@ namespace FlexMold.MVVM.ViewModel.Project
                 TNF.ShowError(ex.Message);
             }
             log = LogManager.GetLogger("LaseProjector");
-            SendLasFileCommand = new RelayCommand(o => { _ = sendLasFileAsync(_ProjectViewModel.SelectedFile); });
+            SendLasFileCommand = new RelayCommand(o => {
+                FileInfo SelectedFile_finf = new FileInfo(_ProjectViewModel.SelectedFile.FileFullName);
+                _ = sendLasFileAsync(SelectedFile_finf);
+                CSVHelper.LaserEnabled = true;
+            });
+
             SerialConfigCommand = new RelayCommand(o => { /*SerialConfigWindow();*/ });
             LaunchLPMCommand = new RelayCommand(o =>
             {
@@ -307,6 +316,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 }
                 else
                 {
+                    CSVHelper.LaserEnabled = false;
                     TelnetHelper.Instance.SendMessage = "ZF; " + "\r\n";
                     _ = TelnetHelper.Instance.SendTelnetMessgae();
                 }
@@ -326,17 +336,20 @@ namespace FlexMold.MVVM.ViewModel.Project
                 }
                 else
                 {
+                    CSVHelper.LaserEnabled = true;
                     TelnetHelper.Instance.SendMessage = "ZD; " + "\r\n";
                     _ = TelnetHelper.Instance.SendTelnetMessgae();
                 }
             });
-            LaunchLMPCommand = new RelayCommand(o => { TelnetHelper.Instance.DisconnectTelnet(); });
+            LaunchLMPCommand = new RelayCommand(o => { TelnetHelper.Instance.DisconnectTelnet(); CSVHelper.LaserEnabled = false; });
             if (MyPorjector == null)
             {
                 try
-                { 
-                ZlaserIP = ConfigurationManager.AppSettings["ZlaserIP"].ToString();
-                ZlaserPort = int.Parse(ConfigurationManager.AppSettings["ZlaserPort"].ToString());
+                {
+                    //ZlaserIP = ConfigurationManager.AppSettings["ZlaserIP"].ToString();
+                    //ZlaserPort = int.Parse(ConfigurationManager.AppSettings["ZlaserPort"].ToString());
+                    ZlaserIP = CSVHelper.IpAddres;
+                    ZlaserPort = CSVHelper.TelnetPort;
                 }
                 catch(Exception ex) {
                     log.Log( LogLevel.Error, ex, ex.Message);

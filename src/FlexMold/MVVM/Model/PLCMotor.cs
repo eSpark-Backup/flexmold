@@ -47,7 +47,8 @@ namespace FlexMold.MVVM.Model
         CalibrationSeq01Request,
         CalibrationSeq02Request,
         Abort,
-        Project
+        Project,
+        Resume
     }
     public enum ETMode
     {
@@ -63,6 +64,7 @@ namespace FlexMold.MVVM.Model
         CalibrationSquence02Started,
         CalibrationSquence02Failed,
         CalibrationSquence02Success,
+        RampSequenceCompleted,
         ShapeFormingStarted,
         ShapeFormingCompleted,
         HomePosition
@@ -125,6 +127,7 @@ namespace FlexMold.MVVM.Model
 
     public enum ESlaveStateMachine
     {
+        EC_DEVICE_STATE_OK = 0x00,
         EC_DEVICE_STATE_INIT = 0x01,
         EC_DEVICE_STATE_PREOP = 0x02,
         EC_DEVICE_STATE_BOOTSTRAP = 0x03,
@@ -152,7 +155,8 @@ namespace FlexMold.MVVM.Model
         EC_LINK_STATE_PORT_D = 0x80,
         EC_LINK_STATE_Other_Fail = 0x24,
         ERR_PREOP_INIT_ERR = 0x60,
-        UnAvailable = 0x99
+        UnAvailable = 0x99,
+        EC_DEVICE_STATE_INIT = 0x3C//add to prevent error message undocument link status
     }
 
     public class ST_EcSlaveState : ObservableObject

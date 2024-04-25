@@ -50,7 +50,7 @@
                 <Button
                     Grid.Row="2"
                     Command="{Binding SendLasFileCommand}"
-                    IsEnabled="{Binding _ProjectViewModel.LaserSendButton}">
+                    IsEnabled="{Binding LaserSendButton}">
                     <StackPanel Orientation="Horizontal">
                         <iconPacks:PackIconMaterial Margin="6" Kind="Send" />
                         <TextBlock

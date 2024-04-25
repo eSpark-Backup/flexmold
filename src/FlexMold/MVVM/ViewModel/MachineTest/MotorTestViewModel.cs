@@ -47,9 +47,19 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 OnPropertyChanged();
             }
         }
+        
+        private double _motorCount;
+        public double motorCount
+        {
+            get { return _motorCount; }
+            set
+            {
+                _motorCount = value;
+                OnPropertyChanged();
+            }
+        }
 
-        private double _Position;
-
+        private double _Position; 
         public double Position
         {
             get { return _Position; }
@@ -98,11 +108,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 if (!justread)
                 {
                     MyPLCMotor[SelectedMotorIndex].mMode = (uint)value;
-                    _TwinCathelper
-                  .WriteEthercatDeviceData(
-                  SelectedMotorIndex,
-                  TwinCathelper.DeviceSymbol.mMode,
-                  MyPLCMotor[SelectedMotorIndex].mMode.CastToArray());
+                    _TwinCathelper.WriteEthercatDeviceData(SelectedMotorIndex,TwinCathelper.DeviceSymbol.mMode,MyPLCMotor[SelectedMotorIndex].mMode.CastToArray());
                 }
                 _SelectedMotorModeValue = (ETMode)MyPLCMotor[SelectedMotorIndex].mMode;
                 OnPropertyChanged();

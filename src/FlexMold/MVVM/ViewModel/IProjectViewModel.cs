@@ -14,9 +14,12 @@ namespace FlexMold.MVVM.ViewModel.Project
         IMotorStatusViewmodel MotorStatus { get; }
         Porjects myDataModels { get; set; }
         float[] Position { get; set; }
-        FileInfo SelectedFile { get; set; }
+        ProjectFilePanel SelectedFile { get; set; }
         Model.Project selectedMyDataModel { get; set; }
+        Model.Project rootSelectedMyDataModel { get; set; }
         RelayCommand SendCSVCommand { get; set; }
         RelayCommand StopMotorsCommand { get; set; }
-    }
+        string selectedListRootDir { get; set; }
+    //RelayCommand StopResumeButtonText { get; set; }
+}
 }

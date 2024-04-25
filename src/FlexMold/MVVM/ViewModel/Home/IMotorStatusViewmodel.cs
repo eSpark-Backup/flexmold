@@ -9,7 +9,8 @@ namespace FlexMold.MVVM.ViewModel.Home
     {
         bool CalibrateButtonEnable { get; set; }
         RelayCommand CalibrateCommand { get; set; }
-        IList<double> CalibrationData { get; set; }
+        RelayCommand Calibrate02Command { get; set; }
+        IList<float> CalibrationData { get; set; }
         RelayCommand DebugDetailClickCommand { get; set; }
         uint[] DeviceStatus { get; set; }
         bool IsMotorsIdle { get; set; }

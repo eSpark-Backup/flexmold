@@ -1,5 +1,6 @@
 ﻿using FlexMold.Core;
 using FlexMold.MVVM.Model;
+using FlexMold.MVVM.View;
 using FlexMold.MVVM.View.Setting;
 using FlexMold.MVVM.ViewModel.SplashScreen;
 using FlexMold.Utility;
@@ -13,7 +14,9 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
+//using System.Windows.Forms;
 using TwinCAT.Ads;
 
 namespace FlexMold.MVVM.ViewModel
@@ -22,6 +25,7 @@ namespace FlexMold.MVVM.ViewModel
     {
         public VSInfo SelectedVS { get; set; }
         private bool _RunButtonEnable;
+        private object Prog_o;
         public bool RunButtonEnable
         {
             get { return _RunButtonEnable; }
@@ -111,8 +115,45 @@ namespace FlexMold.MVVM.ViewModel
 
         private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
         {
-            _TwinCathelper.TwinCatDiconnectConnect851();
-            Console.WriteLine();
+            bool isclose = false;
+            try { isclose = ((MaterialDesignThemes.Wpf.DialogHost)(sender)).Identifier.ToString().Contains("SplashDialog"); }catch{ }
+
+            if(isclose)
+                GetPriviledgeUp();
+            else
+                _TwinCathelper.TwinCatDiconnectConnect851();
+            //Console.WriteLine();
+        }
+
+        private void GetPriviledgeUp()
+        {
+            FlexMoldDB.InitializeFlexMoldDB();
+            if (_PriveledgeUpView.LP_ZLaserIPSelect.Text.Length < 1)
+            {
+                FlexMoldDB.IsEditingEnabled = false;
+                MachineSelectMethod(Prog_o as Machine);
+                log.Log(LogLevel.Info, $"Logged In as Normal user!");
+                return;
+            }
+
+            if (FlexMoldDB.checkAdminPriv(_PriveledgeUpView.LP_ZLaserIPSelect.Text))
+            {
+                String dispmsg = "Now you are in Admin mode " + Environment.NewLine
+                                +"Be Carefull when Updating values as it may effect on performance!";
+                MessageBox.Show(dispmsg, "Priveledge Mode Enabled!", MessageBoxButton.OK);
+                log.Log(LogLevel.Info, $"Logged In as Admin!");
+                FlexMoldDB.IsEditingEnabled = true;
+                OnPropertyChanged();
+                //UpdateSettingsDB();
+
+                MachineSelectMethod(Prog_o as Machine);
+            }
+            else
+            {
+                MessageBox.Show("Please try again!", "Incorrect Password",MessageBoxButton.OK);
+                FlexMoldDB.IsEditingEnabled = false;
+            }
+
         }
         private void MachineSelectMethod(Machine _a)
         {
@@ -147,6 +188,7 @@ namespace FlexMold.MVVM.ViewModel
                             log.Log(LogLevel.Error, $"{msg}");
                             MessageBox.Show($"{msg}");
                             OnRequestClose(this, new EventArgs());
+
                         }
                     }
                     break;
@@ -180,6 +222,7 @@ namespace FlexMold.MVVM.ViewModel
                             log.Log(LogLevel.Error, $"{msg}");
                             MessageBox.Show($"{msg}");
                             OnRequestClose(this, new EventArgs());
+
                         }
                     }
 
@@ -233,9 +276,16 @@ namespace FlexMold.MVVM.ViewModel
 
         private void RunMainWindow()
         {
-            OnRequestCollapsed(this, new EventArgs());
-            Application.Current.MainWindow = _mainWindow;
-            _mainWindow.Show();
+            try
+            {
+                OnRequestCollapsed(this, new EventArgs());
+                Application.Current.MainWindow = _mainWindow;
+                _mainWindow.Show();
+            }
+            catch(Exception ee) {
+                log.Log(LogLevel.Error, $"MAIN Application Exception = "+ee.Message);
+                MessageBox.Show(ee.Message, "MAIN Application Exception");
+            }
         }
 
         private bool Validataion()
@@ -316,6 +366,7 @@ namespace FlexMold.MVVM.ViewModel
         /// <exception cref="ApplicationException"></exception>
         public void RunScript()
         {
+            try { 
             ICEnable = false;
             RunButtonEnable = false;
             if (this.SelectedScript != null)
@@ -339,16 +390,23 @@ namespace FlexMold.MVVM.ViewModel
                 _worker = new ScriptBackgroundWorker(/*this._factory,*/ _runningScript, context);
 
                 ProgressStatuses = "Closing Opened Instances of current TwinCAT sln";
-                //Access COM Running Objects Table
-                
+
                 if (!File.Exists(_runningScript.ScriptRootFolder + @"\" + _runningScript.ScriptName + ".sln"))
                 {
                     //throw new ApplicationException("Twincat solution"+ _runningScript.ScriptName + ".sln not found!");
                     MessageBox.Show("Twincat solution" + _runningScript.ScriptName + ".sln not found!","Twincat config error");
                     return;
                 }
-                
+
+                try { 
+                //Access COM Running Objects Table
                 ROTAccess.CloseRunningDTETable(_runningScript.ScriptRootFolder + @"\" + _runningScript.ScriptName + ".sln");
+                }
+                catch (Exception ex)
+                {
+                    var log = LogManager.GetLogger("Machine Selection");
+                    //log.Log(LogLevel.Error, "SplashScreenViewModel>>>" + ex.Message);
+                }
 
                 _worker.ProgressChanged += new ProgressChangedEventHandler(Worker_ProgressChanged);
 
@@ -364,11 +422,20 @@ namespace FlexMold.MVVM.ViewModel
                 _factory.SuppressUI = true;
                 _worker.BeginScriptExecution();
             }
+            }
+            catch (Exception ex)
+            {
+                var log = LogManager.GetLogger("Machine Selection");
+                //log.Log(LogLevel.Error, "SplashScreenViewModel-22222222>>>" + ex.Message);
+            }
+
         }
         public SplashScreenViewModel()
         {
+            try { 
             if (!_TwinCathelper.LoadSetting())
                 Environment.Exit(0);
+
             ICEnable = true;
             log.Log(LogLevel.Info, $"Flexmold application loading");
             RunButtonEnable = false;
@@ -387,7 +454,14 @@ namespace FlexMold.MVVM.ViewModel
             };
             log.Log(LogLevel.Info, $"{MyMachines.Count} Machines Found");
 
-            MachineClickCommand = new RelayCommand(o => MachineSelectMethod(o as Machine));
+            MachineClickCommand = new RelayCommand(async o => {
+                
+                await PriveledgeUpView();
+                Prog_o = o;
+
+                //MachineSelectMethod(o as Machine);
+            
+            });
             RunButtonCommand = new RelayCommand(o =>
             {
                 if (Validataion())
@@ -398,6 +472,43 @@ namespace FlexMold.MVVM.ViewModel
                 log.Log(LogLevel.Info, $"Closing ....");
                 OnRequestClose(this, new EventArgs());
             });
+            }
+            catch (Exception ex)
+            {
+                var log = LogManager.GetLogger("Machine Selection");
+                log.Log(LogLevel.Error, ex.Message);
+            }
+
+        }
+
+
+
+        private PriveledgeUpView _PriveledgeUpView { get { return App.AppHost.Services.GetRequiredService<PriveledgeUpView>(); } }
+
+        private async Task PriveledgeUpView()
+        {
+            Logger log = LogManager.GetLogger("Please enter admin password!");
+            try
+            {
+                //string SelectedZlaserIP = "";
+                //log.Log(LogLevel.Info, $"Current port {SelectedSerialPort.PortName} Baud {SelectedSerialPort.BaudRate}");
+                //log.Log(LogLevel.Info, $"Please Select Port params from available list ");
+                System.Windows.Application.Current.Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    DialogHost.Show(_PriveledgeUpView, "SplashDialog", OpenEventHandler, ClosingEventHandler);
+                }));
+
+                //log.Log(LogLevel.Info, $"Selected laser projector {_PriveledgeUpView.LP_ZLaserIPSelect}");
+            }
+            catch (Exception ex)
+            {
+                log.Log(LogLevel.Error, ex.Message);
+                TNF.ShowError(ex.Message);
+            }
+        }
+        private void OpenEventHandler(object sender, DialogOpenedEventArgs eventArgs)
+        {
+            var src = eventArgs.Source;
         }
     }
 }

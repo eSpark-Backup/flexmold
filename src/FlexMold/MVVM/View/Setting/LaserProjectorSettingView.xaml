@@ -43,18 +43,29 @@
             Grid.Row="3"
             Grid.Column="0"
             Content="Recieved Message" />
+
+        <ComboBox
+            Name="LP_SelectProj"
+            Grid.Row="0"
+            Grid.Column="1" 
+            SelectionChanged="LP_SelectProj_SelectionChanged" Margin="5,5,27,5"/>
         <TextBox
+            Name="txtLP_IP"
             Grid.Row="0"
             Grid.Column="1"
-            Grid.ColumnSpan="2"
-            Text="{Binding LP.IpAddres}" />
-        <mah:NumericUpDown
+            Text="{Binding LP.IpAddres}" Margin="160,2,30,3" Grid.ColumnSpan="2" />
+        <CheckBox x:Name="chkDefip"
+            Grid.Row="0"
+            Grid.Column="2"
+            Checked="CheckBox_Checked"
+            Content=""
+            IsChecked="False"
+            Unchecked="CheckBox_Unchecked" Margin="158,0,-93,0" />
+        <TextBox x:Name="txtLP_Port"
             Grid.Row="1"
             Grid.Column="1"
-            Grid.ColumnSpan="2"
-            Maximum="65535"
-            Minimum="0"
-            Value="{Binding LP.TelnetPort}" />
+            Grid.ColumnSpan="2"            
+            Text ="{Binding LP.TelnetPort}" />
         <TextBox x:Name="txtSendmsg"
             Grid.Row="2"
             Grid.Column="1"
@@ -72,13 +83,13 @@
             Grid.ColumnSpan="3"
             Columns="3">
             <Button Command="{Binding TelnetConnectCommand}" Content="Test Connect" />
-            <Button Command="{Binding TelnetMessageSendCommand}" Content="Send Message" />
-            <Button Content="Save Setting" />
+            <Button Command="{Binding TelnetMessageSendCommand}" Content="Send Message" Click="Button_Click"/>
+            <Button Command="{Binding SaveCommand}" Content="Save Setting" />
             <Button Command="{Binding TelnetDisConnectCommand}" Content="Disconnect" />
             <Button Command="{Binding ProjectionOnCommand}" Content="Projection On" />
             <Button Command="{Binding ProjectionOffCommand}" Content="Projection Off" />
             <Button Command="{Binding CallibrateProjectorCommand}" Content="Calibrate Projector" />
-            <Button Command="{Binding TelnetDisConnectCommand}" Content="Launch LPM" />
+            <Button Command="{Binding LaunchLMPCommand}" Content="Launch LPM" />
         </UniformGrid>
     </Grid>
 </UserControl>

@@ -23,33 +23,52 @@
     <Border Style="{StaticResource panelMenuBorder}">
         <Grid RenderOptions.ClearTypeHint="Enabled" TextOptions.TextFormattingMode="Display">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250" />
+                <ColumnDefinition Width="220" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
+                <RowDefinition Height="600" />
             </Grid.RowDefinitions>
-            <GroupBox
-                Grid.Column="0"
-                Height="{Binding Path=ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UIElement}}"
-                Margin="8,0,0,0"
-                Header="Projects Selection">
+
+            <GroupBox Grid.Column="0" Margin="0,0,0,0" Header="Project List">
+                <ListView Name="ProjectsListView" ItemsSource="{Binding projectsList}" Height="200" SelectionChanged="ProjectsListView_SelectionChanged" VerticalAlignment="Top" FontSize="22">
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="1"/>
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Path=Name}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </GroupBox>
+
+            <GroupBox Grid.Column="1"
+                Height="{Binding Path=ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UIElement}}" Header="Panels Selection"
+                      >
+
                 <DockPanel>
-                    <Button
+                    <Button Width="250" HorizontalAlignment="Left"
                         Name="btProjectBrowse"
-                        Command="{Binding BrowseProjectCommand}"
-                        DockPanel.Dock="Top">
+                        Command="{Binding BrowseProjectCommand}"                       
+                        MaxWidth="250"  DockPanel.Dock="Top" Margin="10,0,0,0">
                         <StackPanel Orientation="Horizontal">
                             <iconPacks:PackIconMaterial Margin="6" Kind="Folder" />
                             <TextBlock VerticalAlignment="Center" Text="Browse Project" />
                         </StackPanel>
                     </Button>
-                    <projectview:ProjectGridView />
+
+                    <projectview:ProjectGridView   MaxWidth="250" Width="245" HorizontalAlignment="Left" Margin="10,0,0,0"/>
                 </DockPanel>
             </GroupBox>
+
             <Grid Grid.Column="1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="250" />
+                    <ColumnDefinition Width="300" />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
@@ -57,88 +76,45 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <GroupBox
-                    Grid.RowSpan="2"
-                    Grid.Column="0"
-                    VerticalAlignment="Top"
-                    Header="Available Files(Selected Panel)">
-                    <DataGrid
-                        Height="320"
-                        Margin="5"
-                        AutoGenerateColumns="True"
-                        CanUserAddRows="False"
-                        IsReadOnly="True"
-                        ItemsSource="{Binding selectedMyDataModel.LaserFile}"
-                        ScrollViewer.CanContentScroll="True"
-                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                        ScrollViewer.VerticalScrollBarVisibility="Auto"
-                        SelectedItem="{Binding Path=SelectedFile}"
-                        SelectionMode="Single">
-                        <!--<DataGrid.Columns>
-                            <DataGridTextColumn Binding="{Binding Name}" Header="File" />
-                            <DataGridTextColumn Binding="{Binding Length}" Header="Size(b)" />
-                            <DataGridTextColumn Binding="{Binding LastWriteTime}" Header="Last Modified" />
-                        </DataGrid.Columns>-->
-                    </DataGrid>
-                </GroupBox>
-                <GroupBox
-                    Grid.Row="0"
-                    Grid.Column="1"
-                    Margin="0,0,8,0"
-                    Header="Motor Sensor Chart Info">
-                    <UniformGrid Rows="4">
-                        <TextBox />
-                        <TextBox Text="Motor Max Travel" />
-                        <TextBox Text="Travel Time : 1min 20sec" />
-                        <Button>
-                            <StackPanel Orientation="Horizontal">
-                                <iconPacks:PackIconMaterial Margin="6" Kind="Clock" />
-                                <TextBlock
-                                    VerticalAlignment="Center"
-                                    Text="Set Time"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-                        </Button>
-                    </UniformGrid>
-                </GroupBox>
-                <GroupBox
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Margin="0,0,8,0"
-                    Header="Motor Controls">
-                    <UniformGrid Columns="2">
-                        <Button Command="{Binding SendCSVCommand}" IsEnabled="{Binding CSVWriteButton}">
+                <GroupBox Grid.Row="0" Grid.Column="1" Margin="-30,0,0,40" Header="">
+                    <UniformGrid Rows="8" Height="413" Margin="0,0,0,100">
+                        <TextBox Text="{Binding motorMaxTravel}" Margin="0,0,0,0" Height="30"/>
+                        <TextBox Text="{Binding travelTime}" Margin="0,-30,0,0" Height="30"/>
+
+                        <ToggleButton x:Name = "ShapeHomeButtonText" Checked = "HandleShape" Unchecked = "HandleHome" Command="{Binding ShapeHomCommand}" IsEnabled="{Binding IsHomeEnabled}" Margin="0,-30,0,0" Height="50">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconMaterial Margin="6" Kind="Send" />
-                                <TextBlock
-                                    VerticalAlignment="Center"
-                                    Text="Write CSV"
-                                    TextWrapping="Wrap" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding toggleShapeHomeButtonText}" />
                             </StackPanel>
-                        </Button>
-                        <Button Content="Shape A" />
-                        <Button Content="Shape B" />
-                        <Button Command="{Binding StopMotorsCommand}">
+                        </ToggleButton>
+                        <ToggleButton Command="{Binding SendLasFileCommand}" IsEnabled="{Binding LaserSendButton}" Margin="0,-20,0,0" Height="50">
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Margin="6" Kind="QrcodeScan" />
+                                <TextBlock VerticalAlignment="Center" Text="Laser On" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </ToggleButton>
+                        <ProgressBar Name="pgProcesStatus" Minimum="0" Maximum="100" Value="{Binding pgProcesStatusVal}" Margin="0,-10,0,0" Height="50"/>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" Text="{Binding ElementName=pgProcesStatus, Path=Value, StringFormat={}{0:0}%}" Height="60" Margin="0,-40,0,0" Width="50" Foreground="Black">
+                            <TextBlock.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform ScaleX="5"/>
+                                    <SkewTransform/>
+                                    <RotateTransform Angle="0"/>
+                                    <TranslateTransform/>
+                                </TransformGroup>
+                            </TextBlock.RenderTransform></TextBlock>
+                        <ToggleButton x:Name = "StopResumeButtonText" Checked = "HandleStop" Unchecked = "HandleResume" Command="{Binding StopMotorsCommand}" IsEnabled="{Binding IsStopEnable}" Margin="0,-100,0,0" Height="50">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconMaterial Margin="6" Kind="StopCircle" />
-                                <TextBlock VerticalAlignment="Center" Text="Stop" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding toggleStopResumeButtonText}" />
                             </StackPanel>
-                        </Button>
-                        <Button Command="{Binding HomeMotorsCommand}" IsEnabled="{Binding MotorStatus.IsMotorsIdle}">
-                            <StackPanel Orientation="Horizontal">
-                                <iconPacks:PackIconMaterial Margin="6" Kind="Home" />
-                                <TextBlock
-                                    VerticalAlignment="Center"
-                                    Text="Home"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-                        </Button>
+                        </ToggleButton>
+
                     </UniformGrid>
+
                 </GroupBox>
-                <projectview:LaserProjectorView
-                    Grid.Row="2"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="2" />
+
+                <!--<projectview:LaserProjectorView Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" />-->
             </Grid>
         </Grid>
     </Border>

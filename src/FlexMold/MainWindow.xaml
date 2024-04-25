@@ -81,7 +81,7 @@
 
     <mah:MetroWindow.LeftWindowCommands>
         <mah:WindowCommands>
-            <Button ToolTip="MahApps.Metro on GitHub">
+            <Button ToolTip="FlexMold by eSpark">
                 <iconPacks:PackIconMaterial
                     Width="22"
                     Height="22"
@@ -120,12 +120,12 @@
                         <View:SettingView />
                     </ScrollViewer>
                 </TabItem>
-                <TabItem Header="Projects">
+                <TabItem Header="Machine Test">
                     <ScrollViewer
                         Margin="2"
                         HorizontalScrollBarVisibility="Auto"
                         VerticalScrollBarVisibility="Auto">
-                        <View:ProjectView />
+                        <View:MachineTestView />
                     </ScrollViewer>
                 </TabItem>
                 <TabItem Header="Accessories">
@@ -136,12 +136,12 @@
                         <View:AccessoryView />
                     </ScrollViewer>
                 </TabItem>
-                <TabItem Header="Machine Test">
+                <TabItem Header="Projects">
                     <ScrollViewer
                         Margin="2"
                         HorizontalScrollBarVisibility="Auto"
                         VerticalScrollBarVisibility="Auto">
-                        <View:MachineTestView />
+                        <View:ProjectView />
                     </ScrollViewer>
                 </TabItem>
             </mah:MetroAnimatedSingleRowTabControl>

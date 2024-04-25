@@ -1,4 +1,4 @@
-using FlexMold.MVVM.Model;
+﻿using FlexMold.MVVM.Model;
 using FlexMold.MVVM.ViewModel;
 using FlexMold.Utility;
 using MahApps.Metro.Controls;
@@ -6,6 +6,7 @@ using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Media;
@@ -28,6 +29,7 @@ namespace FlexMold
 
         public MainWindow(ITwinCathelper twinCathelper)
         {
+            try { 
             _TwinCathelper = twinCathelper;
             InitializeComponent();
             Version v = GetRunningVersion();
@@ -54,6 +56,13 @@ namespace FlexMold
             log.Log(LogLevel.Info, $"Application Loaded Sucessfully.....");
             log.Log(LogLevel.Info, $"Selected Machine Type : {_SplashScreenViewModel.SelectedMachine.MachineType} " +
                 $"Name : {_SplashScreenViewModel.SelectedMachine.Name} ID : {_SplashScreenViewModel.SelectedMachine.ID}");
+            }
+            catch (Exception ex)
+            {
+                var log = LogManager.GetLogger("Main");
+                log.Log(LogLevel.Error, ex.Message);
+            }
+
         }
         private static Version GetRunningVersion()
         {
@@ -69,34 +78,65 @@ namespace FlexMold
 
         private void Session_ConnectionStateChanged(object sender, EventArgs e)
         {
+            try{            
             System.Windows.Application.Current.Dispatcher.BeginInvoke((Action)(() =>
             {
                 TwinCATSystemUpdate();
             }));
+            }
+            catch (Exception ex)
+            {
+                var log = LogManager.GetLogger("Main");
+                log.Log(LogLevel.Error, "MainWindow-Action1"+ex.Message);
+            }
         }
 
         private void Connection_AdsStateChanged(object sender, EventArgs e)
         {
+
+            try{
+                System.Windows.Application.Current.Dispatcher.BeginInvoke((Action)(() =>
+            {
+                TwinCATSystemUpdate();
+            }));
+        }
+            catch (Exception ex)
+            {
+                var log = LogManager.GetLogger("Main");
+        log.Log(LogLevel.Error, "MainWindow-Action1"+ex.Message);
+            }
+}
+
+private void Connection_RouterStateChanged(object sender, EventArgs e)
+        {
+            try { 
             System.Windows.Application.Current.Dispatcher.BeginInvoke((Action)(() =>
             {
                 TwinCATSystemUpdate();
             }));
         }
+            catch (Exception ex)
+            {
+                var log = LogManager.GetLogger("Main");
+        log.Log(LogLevel.Error, "MainWindow-Action1"+ex.Message);
+            }
 
-        private void Connection_RouterStateChanged(object sender, EventArgs e)
+}
+
+private void Connection_ConnectionStatusChanged(object sender, EventArgs e)
         {
+            try { 
             System.Windows.Application.Current.Dispatcher.BeginInvoke((Action)(() =>
             {
                 TwinCATSystemUpdate();
             }));
-        }
-
-        private void Connection_ConnectionStatusChanged(object sender, EventArgs e)
-        {
-            System.Windows.Application.Current.Dispatcher.BeginInvoke((Action)(() =>
+            }
+            catch (Exception ex)
             {
-                TwinCATSystemUpdate();
-            }));
+                var log = LogManager.GetLogger("Main");
+                log.Log(LogLevel.Error, "MainWindow-Action1" + ex.Message);
+            }
+
         }
 
         private void TwinCATSystemUpdate()
@@ -183,16 +223,44 @@ namespace FlexMold
 
         private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
         {
-            Console.WriteLine();
+            var log = LogManager.GetLogger("Main");
+            log.Log(LogLevel.Error, "MainWindow-ClosingHandler");
+
         }
 
         private void MetroWindow_Closing(object sender, CancelEventArgs e)
         {
-            if (_TwinCathelper.Client != null)
+            try{
+                if (_TwinCathelper.Client != null)
             {
                 _TwinCathelper.Client.Close();
             }
+
+                //Save DataBase values on exit
+                UpdateSettingsDB();
+
             Environment.Exit(0);
+            }
+            catch (Exception ex)
+            {
+                var log = LogManager.GetLogger("Main");
+                log.Log(LogLevel.Error, "MainWindow-MetroClosing" + ex.Message);
+            }
+
         }
+
+        private void UpdateSettingsDB()
+        {
+            Dictionary<string, string> dct = new Dictionary<string, string>();
+            //dct.Add("Size", machineSize.ToString());
+            //dct.Add("MinRadius", machineRadius.ToString());
+            //dct.Add("MotorCount", motorCount.ToString());
+            dct.Add("PartsProduced", CSVHelper.PartsProduced.ToString());
+            dct.Add("TimeInOperation", CSVHelper.TotalNoHrs.ToString());
+            dct.Add("LastSystemStatus", "0");//System status 0=ProperShutDown
+            FlexMoldDB.UpdateData("FM_MachineSetting", null, dct);
+        }
+
+
     }
 }

@@ -201,6 +201,7 @@ namespace FlexMold.Utility
             RegisterNotification($"MAIN.{TCSymbols.mPosition}");
             RegisterNotification($"MAIN.{TCSymbols.MotorDiagnostic}");
             RegisterNotification($"MAIN.{TCSymbols.DeviceStatus}");
+            RegisterNotification($"MAIN.{TCSymbols.mDiag3}");
             Client.AdsNotification += Client_AdsNotification;
         }
         private void Client_AdsNotification(object sender, AdsNotificationEventArgs e)
@@ -235,15 +236,45 @@ namespace FlexMold.Utility
                         Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStatuses.DeviceStatus, 0, e.Data.Length);                        
                         TMotor_DeviceStatusChanged?.Invoke(null, e);
                         
+                        //try
+                        //{
+                        //    if (((EDeviceStatus)int.Parse(String.Join(",", PLCMotorsStatuses.DeviceStatus))).ToString() == "CalibrationSquence02Success")
+                        //    {
+                        //        CalibrateSeq02_HomeUp();
+                        //    }
+                        //}
+                        //catch { }
+                        try { _log.Log(LogLevel.Info, $"DeviceStatus Updated : {(EDeviceStatus)int.Parse(String.Join(",", PLCMotorsStatuses.DeviceStatus))}"); } catch { }
+                        break;
+                    case TCSymbols.mDiag3:
+                        _log.Log(LogLevel.Trace, $"Readed {TCSymbols.mDiag3} : {JsonSerializer.Serialize(e.Data.ToArray())}");
+
+                        Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStatuses.mDiag3, 0, e.Data.Length);
+                        TMotor_mDiag3Changed?.Invoke(null, e);
+                        try { _log.Log(LogLevel.Info, $"mDiag3 Updated : {(EDeviceStatus)int.Parse(String.Join(",", PLCMotorsStatuses.mDiag3))}"); } catch { }
+
                         try
                         {
-                            if (((EDeviceStatus)int.Parse(String.Join(",", PLCMotorsStatuses.DeviceStatus))).ToString() == "CalibrationSquence02Success")
+
+                            String FirmwareNotMatched = "";
+                            for (uint i = 0; i < DeviceCount; i++)
                             {
-                                CalibrateSeq02_HomeUp();
+                                if (PLCMotorsStatuses.mDiag3[i] != 1713969130)//0x662917EA (1713969130)
+                                    FirmwareNotMatched += "Motor" + (i + 1) + ",";
                             }
+
+                            if (FirmwareNotMatched.Length > 0)
+                            {
+                                MessageBox.Show("Please update the firmware versions of the following motor(s)!" + Environment.NewLine + FirmwareNotMatched, "Wrong firmware found!", MessageBoxButton.OK, MessageBoxImage.Error);
+                                Client.Close();
+                                return;
+                            }
+
                         }
                         catch { }
-                        try { _log.Log(LogLevel.Info, $"DeviceStatus Updated : {(EDeviceStatus)int.Parse(String.Join(",", PLCMotorsStatuses.DeviceStatus))}"); } catch { }
+
+
+
                         break;
                     default:
                         break;
@@ -257,37 +288,37 @@ namespace FlexMold.Utility
             TMotor_PositionChanged?.Invoke(null, e);
         }
 
-        void CalibrateSeq02_HomeUp()
-        {
-            try
-            {
-                Thread.Sleep(200);
+        //void CalibrateSeq02_HomeUp()
+        //{
+        //    try
+        //    {
+        //        Thread.Sleep(200);
 
-                for (int i = 0; i < DeviceCount; i++)
-                {
-                    PLCMotors[i].mDisplacement = 0.200F;
-                    PLCMotors[i].mDirection = false;
-                    PLCMotors[i].mRampDelay = CSVHelper.MotorRampDelayValue;
-                    PLCMotors[i].mTime = 6.3334F;
-                    PLCMotors[i].mMode = (int)EMode.Project;
+        //        for (int i = 0; i < DeviceCount; i++)
+        //        {
+        //            PLCMotors[i].mDisplacement = 0.200F;
+        //            PLCMotors[i].mDirection = false;
+        //            PLCMotors[i].mRampDelay = CSVHelper.MotorRampDelayValue;
+        //            PLCMotors[i].mTime = 6.3334F;
+        //            PLCMotors[i].mMode = (int)EMode.Project;
 
-                    //log.Log(LogLevel.Info, "CalibrateHard-WriteCSVData loop1:" + i.ToString() + " : " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + _TwinCathelper.PLCMotors[i].mDirection.ToString()
-                    //+ "  >> RampDlay: " + CSVHelper.MotorRampDelayValue.ToString()
-                    //+ "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime.ToString()
-                    //+ "  >> mMode: " + EMode.Project.ToString());
-                }
+        //            //log.Log(LogLevel.Info, "CalibrateHard-WriteCSVData loop1:" + i.ToString() + " : " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + _TwinCathelper.PLCMotors[i].mDirection.ToString()
+        //            //+ "  >> RampDlay: " + CSVHelper.MotorRampDelayValue.ToString()
+        //            //+ "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime.ToString()
+        //            //+ "  >> mMode: " + EMode.Project.ToString());
+        //        }
 
-                WriteEthercatDeviceData();
-                _log.Log(LogLevel.Info, $"{DeviceCount} CalibrateHard value(s) has been written sucessfully");
+        //        WriteEthercatDeviceData();
+        //        _log.Log(LogLevel.Info, $"{DeviceCount} CalibrateHard value(s) has been written sucessfully");
 
-                Thread.Sleep(200);
-                uint zero = 0;
-                for (uint i = 0; i < DeviceCount; i++)
-                    WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
-                _log.Log(LogLevel.Info, $"{DeviceCount} zero value(s) has been written sucessfully");
-            }
-            catch (Exception ee){ _log.Log(LogLevel.Info, "CalibrateSeq02_HomeUp>>>>"+ ee.Message); }
-        }
+        //        Thread.Sleep(200);
+        //        uint zero = 0;
+        //        for (uint i = 0; i < DeviceCount; i++)
+        //            WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
+        //        _log.Log(LogLevel.Info, $"{DeviceCount} zero value(s) has been written sucessfully");
+        //    }
+        //    catch (Exception ee){ _log.Log(LogLevel.Info, "CalibrateSeq02_HomeUp>>>>"+ ee.Message); }
+        //}
 
         private void Session_ConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
         {

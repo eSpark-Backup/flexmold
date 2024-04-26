@@ -36,19 +36,12 @@
             Command="{Binding GetHomingCommand}"  />
         <Button
             Grid.Row="2"
-            Grid.Column="1"
+            Grid.Column="2"
             Content="Update"            
             MinHeight="100"
             MaxWidth="150"
             MaxHeight="100"            
             Command="{Binding UpdateHomingCommand}" />
-        <Button            
-            Grid.Row="2"
-            Grid.Column="3"
-            Content="Home Calibrate" 
-            MaxWidth="150"
-            MaxHeight="100"
-            MinHeight="100"            
-            Command="{Binding HardCalibrCommand}"  />
+        
     </Grid>
 </UserControl>

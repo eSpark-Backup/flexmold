@@ -59,15 +59,15 @@ namespace FlexMold.MVVM.Model
     {
         None = 0,
         CalibrationSquence01Started = 1,
-        CalibrationSquence01Failed,
-        CalibrationSquence01Success,
-        CalibrationSquence02Started,
-        CalibrationSquence02Failed,
-        CalibrationSquence02Success,
-        RampSequenceCompleted,
-        ShapeFormingStarted,
-        ShapeFormingCompleted,
-        HomePosition
+        CalibrationSquence01Failed,//2
+        CalibrationSquence01Success,//3
+        CalibrationSquence02Started,//4
+        CalibrationSquence02Failed,//5
+        CalibrationSquence02Success,//6
+        RampSequenceCompleted,//7
+        ShapeFormingStarted,//8
+        ShapeFormingCompleted,//9
+        HomePosition//10
     }
     public static class TCVarName
     {

@@ -54,6 +54,7 @@ namespace FlexMold.Utility
         public  event EventHandler TMotor_PositionChanged;
         public  event EventHandler TMotor_ModeChanged;
         public  event EventHandler TMotor_MotorDiagnosticChanged;
+        public event EventHandler TMotor_mDiag3Changed;
         public  event EventHandler TMotor_TemperatureChanged;
         public  event EventHandler TMotor_DeviceStatusChanged;
         public  event EventHandler TSlave_Link_Status_Changed;

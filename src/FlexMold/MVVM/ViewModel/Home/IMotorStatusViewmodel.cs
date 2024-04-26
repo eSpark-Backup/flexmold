@@ -16,6 +16,7 @@ namespace FlexMold.MVVM.ViewModel.Home
         bool IsMotorsIdle { get; set; }
         uint[] MotorDiagnistics { get; set; }
         float[] mPosition { get; set; }
+        uint[] mDiag3 { get; set; }
         ObservableCollection<MotorStatusControl> MyMotors { get; set; }
         RelayCommand OnLoadedCommand { get; set; }
         RelayCommand OnUnLoadedCommand { get; set; }

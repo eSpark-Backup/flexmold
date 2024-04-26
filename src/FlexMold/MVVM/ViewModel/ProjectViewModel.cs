@@ -356,6 +356,12 @@ namespace FlexMold.MVVM.ViewModel.Project
                     //FileInfo SelectedFile_finf = new FileInfo(SelectedFile.FileFullName);
                     Regex reg = new Regex(@".csv$");
                     DirectoryInfo di = new DirectoryInfo(_selectedFile.FileFullName.Remove(_selectedFile.FileFullName.LastIndexOf("\\")));
+                    if (!Directory.Exists(di.FullName))
+                    {
+                        MessageBox.Show("Please select project first.", "No project/panel selected!", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                        return;
+                    }
+
                     var laserFilesPath = di.GetFiles("*.csv", SearchOption.AllDirectories)
                              .Where(path => reg.IsMatch(path.FullName))
                              .ToList();
@@ -465,7 +471,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 progressbar_timespent = 0;
                 TravelTimeUpdate = false;
 
-                LastEventPressed = 'W';// H=Home R=Resume S=Stop W= WriteCSV O=Initial F=ForceResume
+                LastEventPressed = 'W';// H=Home R=Resume S=Stop W= WriteCSV O=Initial F=ForceResume C=Calibrate
             }
             catch(Exception ee)  { log.Log(LogLevel.Info, "WriteCSVData>>>>" + ee.Message +"---- "+ee.StackTrace.ToLower()); }
         }
@@ -904,7 +910,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     float newResumeLoc = 0.00F;
                     foreach (string flt in offset_resume)
                     {
-                        newResumeLoc = data_resume[i] + Math.Abs(float.Parse(flt, vCulture));
+                        newResumeLoc = data_resume[i]; //+ Math.Abs(float.Parse(flt, vCulture));
                         i++;
                         newHomingOffset += newResumeLoc.ToString(CultureInfo.InvariantCulture).Trim() + "~";
                     }
@@ -1204,7 +1210,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             
             //IsPsitionDataProcessing = true;
             try { LastPositionData = MotorStatus.mPosition.Max(); } catch { LastPositionData = 0; }
-            try { progressbar_FinalVal = (int)(_TwinCathelper.PLCMotors.Max().mDisplacement); } catch (Exception ep) { try { log.Log(LogLevel.Info, "ResumeProcess_WriteCSVData222>>>>progressbar_FinalVal" + ep.Message); progressbar_FinalVal = (int)data_resumeFlt.Max(); } catch { progressbar_FinalVal = 100; } }
+            try { progressbar_FinalVal = ((int)(_TwinCathelper.PLCMotors.Max().mDisplacement)) + (int)LastPositionData; } catch (Exception ep) { try { log.Log(LogLevel.Info, "ResumeProcess_WriteCSVData222>>>>progressbar_FinalVal" + ep.Message); progressbar_FinalVal = (int)data_resumeFlt.Max(); } catch { progressbar_FinalVal = 100; } }
             progressbar_timespent = 0;
             TravelTimeUpdate = false;
 
@@ -1500,7 +1506,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 {
                     projectfolder = _selectedListRootDir;//CSVHelper.prjFolderLoc+ 
 
-                    try { if (projectfolder == null) CSVHelper.prjFolderLoc = Environment.CurrentDirectory; } catch {  }
+                    try { if (projectfolder == null) projectfolder = CSVHelper.prjFolderLoc; } catch {  }
 
                 }
                 catch { }
@@ -1885,40 +1891,43 @@ namespace FlexMold.MVVM.ViewModel.Project
 
         private bool ConfirmMotorsAreFine()
         {
-            string Max_mm = CSVHelper.Max_mm.ToString();//ConfigurationManager.AppSettings["Max_mm"].ToString();
-
-            for (int i = 0; i < DeviceCount; i++)
+            try
             {
-                if (MotorStatus.mPosition != null)
+                string Max_mm = CSVHelper.Max_mm.ToString();//ConfigurationManager.AppSettings["Max_mm"].ToString();
+
+                for (int i = 0; i < DeviceCount; i++)
                 {
-                    if (((int)MotorStatus.mPosition[i] > int.Parse(Max_mm)) || ((int)MotorStatus.mPosition[i] < int.Parse("-" + Max_mm)))
+                    if (MotorStatus.mPosition != null)
+                    {
+                        if (((int)MotorStatus.mPosition[i] > int.Parse(Max_mm)) || ((int)MotorStatus.mPosition[i] < int.Parse("-" + Max_mm)))
+                        {
+                            log.Log(LogLevel.Error, $"Motor no:" + i + " has invalid position!");
+                            return false;
+                        }
+                    }
+                    else if (((int)_TwinCathelper.PLCMotorsStatuses.mPostion[i] > int.Parse(Max_mm)) || ((int)_TwinCathelper.PLCMotorsStatuses.mPostion[i] < int.Parse("-" + Max_mm)))
                     {
                         log.Log(LogLevel.Error, $"Motor no:" + i + " has invalid position!");
                         return false;
                     }
+
                 }
-                else if (((int)_TwinCathelper.PLCMotorsStatuses.mPostion[i] > int.Parse(Max_mm)) || ((int)_TwinCathelper.PLCMotorsStatuses.mPostion[i] < int.Parse("-" + Max_mm)))
+
+                if (!CSVHelper.MachineEnabled && !DoMachineUserCanceled)
                 {
-                    log.Log(LogLevel.Error, $"Motor no:" + i + " has invalid position!");
+                    log.Log(LogLevel.Error, $"Machine status disconnected! ");
+                    DialogResult dr = MessageBox.Show("Machine link InActive, Please check connection!", "Machine not connected", MessageBoxButtons.RetryCancel);
+
+                    if (dr == DialogResult.Cancel)
+                    {
+                        DoMachineUserCanceled = true;
+                        return true;
+                    }
+
                     return false;
                 }
-
             }
-
-            if (!CSVHelper.MachineEnabled && !DoMachineUserCanceled)
-            {
-                log.Log(LogLevel.Error, $"Machine status disconnected! ");
-                DialogResult dr = MessageBox.Show("Machine link InActive, Please check connection!", "Machine not connected", MessageBoxButtons.RetryCancel);
-
-                if (dr == DialogResult.Cancel)
-                {
-                    DoMachineUserCanceled = true;
-                    return true;
-                }
-
-                return false;
-            }
-
+            catch(Exception ee) { log.Log(LogLevel.Error, $"MotorCount exception= "+ee.Message); return false; }
             return true;
         }
 
@@ -2649,6 +2658,7 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                     UpdateSettingsDB(); // set the Application status to open ==1
 
+                    BrowseProjectFiles();
                 }
                 catch { }
 
@@ -2732,7 +2742,8 @@ namespace FlexMold.MVVM.ViewModel.Project
                 StopMotorsCommand = new RelayCommand(o =>
                 {
                     if (toggleStopResumeButtonText == "Stop")
-                    {                        
+                    {
+                        LastEventPressed = 'S';
                         if (MachineTotalTimeSW.IsRunning)
                         {
                             CSVHelper.TotalNoHrs += (uint)(MachineTotalTimeSW.ElapsedMilliseconds / 1000);
@@ -2765,6 +2776,13 @@ namespace FlexMold.MVVM.ViewModel.Project
                     else
                     {
                         log.Log(LogLevel.Warn, $"Resuming Motors");
+
+
+                        if (!CSVHelper.MachineEnabled)
+                        {
+                            MessageBox.Show("Please Power ON the machine before resuming!", "Machine state is off", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
 
                         MachineTotalTimeSW.Start();
                         IsRampCompleted = false;
@@ -2840,11 +2858,11 @@ namespace FlexMold.MVVM.ViewModel.Project
                 //    IsStopEnable = false;
                 //});
 
-                ForceResumeCommand = new RelayCommand(o =>
-                {
-                    LastEventPressed = 'F';
+                //ForceResumeCommand = new RelayCommand(o =>
+                //{
+                //    LastEventPressed = 'F';
 
-                });
+                //});
 
                 SendLasFileCommand = new RelayCommand(o => {
                     FileInfo SelectedFile_finf = new FileInfo(SelectedFile.FileFullName);

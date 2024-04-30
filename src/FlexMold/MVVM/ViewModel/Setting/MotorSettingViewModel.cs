@@ -269,7 +269,7 @@ namespace FlexMold.MVVM.ViewModel.Setting
                             //txtcalibrSeq02 = dr["CalibrSeq02"].ToString();
                             txtdefaultTimeSec = int.Parse(dr["DefaultTimeSec"].ToString());
                             txtmaxMotorMove = dr["MaxMotorMove"].ToString();                            
-                            try { CSVHelper.NegativeoffsetResume = dr["NegativeOffset"].ToString(); } catch { CSVHelper.NegativeoffsetResume = ""; }
+                            try { CSVHelper.NegativeoffsetResume = dr["NegativeOffset"].ToString(); CSVHelper.SetNegativeoffsetResumeFlt(); } catch { CSVHelper.NegativeoffsetResume = ""; }
                             try { CSVHelper.LastPositionValues = dr["LastPositionValues"].ToString(); } catch { CSVHelper.NegativeoffsetResume = ""; }
 
                             break;

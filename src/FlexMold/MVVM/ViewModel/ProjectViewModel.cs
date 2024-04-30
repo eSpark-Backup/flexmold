@@ -40,16 +40,16 @@ namespace FlexMold.MVVM.ViewModel.Project
         private string _toggleShapeHomeButtonText = "Home";
         private int LastProgressval = 0;
         private int progressActonCounter = 0;
-        private int UpdateProgressStatusSeconds = 5;
+        //private int UpdateProgressStatusSeconds = 5;
         private int intSpecifiedSecs = 60;
         private float LastmaxVal = 0.00F;
-
+        private bool Timer_ElapsedBusy = false;
         public static DispatcherTimer MotorsCheckTimer = new DispatcherTimer();
         public static DispatcherTimer StallErrMotorsCheckTimer = new DispatcherTimer();
         public string selectedCSV = "";        
         public static bool IsRampCompleted = true;
 
-        private DispatcherTimer positionProcessCompleted_Timer = new DispatcherTimer();
+        public static DispatcherTimer positionProcessCompleted_Timer = new DispatcherTimer();
         //private bool IsPsitionDataProcessing = false;
         private bool DoMachineUserCanceled = false;
         private float LastPositionData = 0.00F;
@@ -286,6 +286,9 @@ namespace FlexMold.MVVM.ViewModel.Project
             get { return _selectedFile; }
             set
             {
+                if (value == null)
+                    return;
+
                 _selectedFile = value;
                 CSVWriteButton = false;
                 //toggleShapeHomeButtonText = "Home";
@@ -293,9 +296,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 IsForceResumeValid = false;
                 LaserSendButton = false;
 
-                if(!positionProcessCompleted_Timer.IsEnabled)
-                    positionProcessCompleted_Timer.Start();
-
+                updateHomeButtonStatus();
 
                 if (value != null)
                 {
@@ -370,6 +371,9 @@ namespace FlexMold.MVVM.ViewModel.Project
                     //If there is CSV found
                     if (laserFilesPath.Count() == 1)
                     {
+                        if (selectedCSV != laserFilesPath[0].FullName)
+                            CSVHelper.IsNewPanelSelected = true;
+
                         selectedCSV = laserFilesPath[0].FullName;
                         CSVWriteButton = true;
                         OnPropertyChanged();
@@ -451,7 +455,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             if (data.Count != null)
                 LastmaxVal = data.Max();
             else
-                LastmaxVal = _TwinCathelper.PLCMotorsStatuses.mPostion.Max();
+                LastmaxVal = _TwinCathelper.PLCMotors.Max().mDisplacement;
 
             try
             {
@@ -559,11 +563,14 @@ namespace FlexMold.MVVM.ViewModel.Project
             }
             catch (Exception ee) { log.Log(LogLevel.Error, $"Error Saving CSV/Motors data! " + ee.Message); return false; }
 
-            LastEventPressed = 'S';// H=Home R=Resume S=Stop W= WriteCSV O=Initial
+            if (LastEventPressed != 'R' && LastEventPressed != 'D')
+                LastEventPressed = 'S';// H=Home R=Resume S=Stop W= WriteCSV O=Initial
             MotorStatus.IsMotorsIdle = true;
 
             toggleStopResumeButtonText = "Resume";
             OnPropertyChanged();
+
+            updateHomeButtonStatus();
 
             return true;
         }
@@ -672,8 +679,9 @@ namespace FlexMold.MVVM.ViewModel.Project
                         newHomingOffset += flt.ToString(CultureInfo.InvariantCulture).Trim() + "~";
 
                     CSVHelper.NegativeoffsetResume = newHomingOffset.Substring(0, newHomingOffset.Length - 1);
+                    CSVHelper.SetNegativeoffsetResumeFlt();
 
-                    try { CSVHelper.offsetRes_MotorSettingViewModel.UpdateMotorSettingsDB(); } catch { }
+                try { CSVHelper.offsetRes_MotorSettingViewModel.UpdateMotorSettingsDB(); } catch { }
 
                 
             }
@@ -687,6 +695,7 @@ namespace FlexMold.MVVM.ViewModel.Project
 
         private bool StopProcess_WriteCSVData()
         {
+
             List<float> NegativeoffsetResumeProj = new List<float>();
             String CSVOffset_contents = CSVHelper.NegativeoffsetResume.ToString(CultureInfo.InvariantCulture);
             String[] offset_resume = CSVOffset_contents.Split('~');
@@ -698,17 +707,21 @@ namespace FlexMold.MVVM.ViewModel.Project
 
 
             if (!ConfirmMotorsAreFine())
-                return false;            
+            {
+                updateHomeButtonStatus(); return false;
+            }
 
             if (SelectedFile == null)
             {
                 log.Log(LogLevel.Error, "CSV data or Position is Null!");
+                updateHomeButtonStatus();
                 return false;
             }
 
             if (selectedCSV == null || selectedCSV.Length < 1)
             {
                 log.Log(LogLevel.Error, "CSV data or Position is Null!");
+                updateHomeButtonStatus();
                 return false;
             }
 
@@ -719,6 +732,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             if (csvdata == null || csvdata.Count < 1)
             {
                 log.Log(LogLevel.Error, "CSV is not Readable!");
+                updateHomeButtonStatus();
                 return false;
             }
 
@@ -755,6 +769,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     if (round3digs > float.Parse(CSVHelper.Max_mm.ToString(), vCulture))
                     {
                         log.Log(LogLevel.Error, "StopProc>>Calculated Value mm Exceeded! at " + i + " " + round3digs.ToString());
+                        updateHomeButtonStatus();
                         return false;
                     }
                 }
@@ -787,7 +802,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     log.Log(LogLevel.Info, $"Saving CSV/Motors data for Resume Process, Completed!");
                 //}
             }
-            catch(Exception ee) { log.Log(LogLevel.Error, $"Error Saving CSV/Motors data! "+ee.Message); return false; }
+            catch(Exception ee) { log.Log(LogLevel.Error, $"Error Saving CSV/Motors data! "+ee.Message); updateHomeButtonStatus(); return false; }
 
             //if (LastEventPressed == 'N')//-ivePositionData     On Resuming After PowerCutoff it will Home to CSV location of HOME and Position will be 0s
             //{ //File.Delete(SelectedFile + ".Resume"); //Added for On Power Restart it automatically reads resume
@@ -895,6 +910,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                         newHomingOffset += flt.ToString(CultureInfo.InvariantCulture).Trim() + "~";
 
                     CSVHelper.NegativeoffsetResume = newHomingOffset.Substring(0, newHomingOffset.Length - 1);
+                    CSVHelper.SetNegativeoffsetResumeFlt();
 
                     try { CSVHelper.offsetRes_MotorSettingViewModel.UpdateMotorSettingsDB(); } catch { }
                 }
@@ -914,7 +930,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                         i++;
                         newHomingOffset += newResumeLoc.ToString(CultureInfo.InvariantCulture).Trim() + "~";
                     }
-                    CSVMotors_contents = newHomingOffset;
+                    CSVMotors_contents = newHomingOffset.Substring(0, newHomingOffset.Length - 1); ;
                     using (StreamWriter writer = new StreamWriter(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\Resume" + selectedListRootDir.Substring(selectedListRootDir.LastIndexOf(@"\")) + "-" + SelectedFile_finf.Name + ".Resume", false, Encoding.UTF8))
                     {
                         writer.Write(CSVMotors_contents);
@@ -924,7 +940,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     log.Log(LogLevel.Info, $"Saving Stall CSV/Motors data for Resume Process, Completed!");
                     //}
                 }
-                catch (Exception ee) { log.Log(LogLevel.Error, $"Error Saving CSV/Motors data! " + ee.Message); return false; }
+                catch (Exception ee) { log.Log(LogLevel.Error, $"Error Saving CSV/Motors data! " + ee.Message); updateHomeButtonStatus(); return false; }
 
                 //String CSVMotors_contents2 = "";// string.Join(",", NegativeoffsetResume);
                 //try
@@ -955,12 +971,14 @@ namespace FlexMold.MVVM.ViewModel.Project
                 //catch (Exception ee) { log.Log(LogLevel.Error, $"Error Saving CSV/Motors data for HOME Adjustment! " + ee.Message); return false; }
             }
 
-
-            LastEventPressed = 'S';// H=Home R=Resume S=Stop W= WriteCSV O=Initial
+            if (LastEventPressed != 'R' && LastEventPressed != 'D')
+                LastEventPressed = 'S';// H=Home R=Resume S=Stop W= WriteCSV O=Initial
             MotorStatus.IsMotorsIdle = true;
 
             toggleStopResumeButtonText = "Resume";
             OnPropertyChanged();
+
+            updateHomeButtonStatus();
 
             return true;
         }
@@ -968,7 +986,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         private void ResumeProcess_WriteCSVData()
         {
             if (!ConfirmMotorsAreFine())
-                return;
+            { updateHomeButtonStatus(); return; }
 
             FileInfo finf;
             String CSVMotors_contents = null;
@@ -1005,21 +1023,22 @@ namespace FlexMold.MVVM.ViewModel.Project
                     return;
                 }
 
-                
+
 
                 finf = SelectedFile_finf;
                 //resumeStr = File.ReadAllLines(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\Resume" + selectedListRootDir.Substring(selectedListRootDir.LastIndexOf(@"\"))+"-"+finf.Name + ".Resume",Encoding.UTF8);
                 CSVMotors_contents = File.ReadAllText(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\Resume" + selectedListRootDir.Substring(selectedListRootDir.LastIndexOf(@"\")) + "-" + finf.Name + ".Resume", Encoding.UTF8);//resumeStr[0].ToString(CultureInfo.InvariantCulture);
-                log.Log(LogLevel.Info, ""+ CSVMotors_contents);
+                log.Log(LogLevel.Info, "" + CSVMotors_contents);
                 //try { File.Delete(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\Resume" + selectedListRootDir.Substring(selectedListRootDir.LastIndexOf(@"\")) + "-" + SelectedFile_finf.Name + ".Resume"); } catch { }
                 //stArr = CSVMotors_contents.Split(Envi ronment.NewLine);
             }
-            catch(Exception ee) {
+            catch (Exception ee)
+            {
                 log.Log(LogLevel.Error, "No Resume file found or Resume file corrupted!");
                 return;
             }
 
-            
+
 
             ////if (File.Exists(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\" + "ManualStopped" + data_resume.Count().ToString()+ ".offset"))
             //if(CSVHelper.NegativeoffsetResume.Length>0)
@@ -1077,16 +1096,16 @@ namespace FlexMold.MVVM.ViewModel.Project
 
             if (CSVHelper.MotorTime < 1)
             {
-                    //RecommendedMaxDisplacement(NegativeoffsetResumeProj);
-                    LoadCSVValues();
+                //RecommendedMaxDisplacement(NegativeoffsetResumeProj);
+                LoadCSVValues();
 
                 int CSV_RecommendedRPM = (int)CSVHelper.RecommendedRPM;//int.Parse(ConfigurationManager.AppSettings["CSV_RecommendedRPM"].ToString());
                 RecommendedRPM(CSV_RecommendedRPM, CSVHelper.MaxRPM);//CSVHelper.MotorTime
                 //_TwinCathelper.PLCMotors[i].mTime = CSVHelper.MotorTime;//float.Parse(ConfigurationManager.AppSettings["DefaultRampTime"].ToString());s               
             }
-            
+
             string[] data_resume = CSVMotors_contents.Split('~');
-            log.Log(LogLevel.Info, "Resuming111>>> "+ data_resume.Length+" >>"+ data_resume[0]);
+            log.Log(LogLevel.Info, "Resuming111>>> " + data_resume.Length + " >>" + data_resume[0]);
 
             var list = new List<float>(data_resume.Length);
             List<float> data_resumeFlt = new List<float>(DeviceCount);
@@ -1141,7 +1160,7 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                     log.Log(LogLevel.Error, "Resuming Calculation Error! ");
                 }
-                
+
                 //log.Log(LogLevel.Info, "Resuming12233399996666>>> ");
                 try
                 {
@@ -1164,7 +1183,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     calc_displacement = 0.00F;
 
                 }
-                catch(Exception ee) { log.Log(LogLevel.Info, "Resuming122333zzzzz>>> "+ee.Message); }
+                catch (Exception ee) { log.Log(LogLevel.Info, "Resuming122333zzzzz>>> " + ee.Message); }
             }
 
             try
@@ -1182,16 +1201,10 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                 }
             }
-            catch(Exception ex) { log.Log(LogLevel.Error, "ResumeProcessTime111>>>>> "+ex.Message); 
+            catch (Exception ex)
+            {
+                log.Log(LogLevel.Error, "ResumeProcessTime111>>>>> " + ex.Message);
             }
-                try
-                {
-                if (MotorStatus.mPosition != null)
-                    LastmaxVal = MotorStatus.mPosition.Max();
-                else
-                    LastmaxVal = _TwinCathelper.PLCMotorsStatuses.mPostion.Max();
-            }
-            catch { }
 
             try
             {
@@ -1205,12 +1218,13 @@ namespace FlexMold.MVVM.ViewModel.Project
                 log.Log(LogLevel.Info, $"{data_resume.Length} zero value(s) has been written sucessfully");
 
             }
-            catch(Exception ep) { log.Log(LogLevel.Info, "ResumeProcess_WriteCSVData111>>>>"+ep.Message); }
+            catch (Exception ep) { log.Log(LogLevel.Info, "ResumeProcess_WriteCSVData111>>>>" + ep.Message); }
 
-            
+
             //IsPsitionDataProcessing = true;
             try { LastPositionData = MotorStatus.mPosition.Max(); } catch { LastPositionData = 0; }
-            try { progressbar_FinalVal = ((int)(_TwinCathelper.PLCMotors.Max().mDisplacement)) + (int)LastPositionData; } catch (Exception ep) { try { log.Log(LogLevel.Info, "ResumeProcess_WriteCSVData222>>>>progressbar_FinalVal" + ep.Message); progressbar_FinalVal = (int)data_resumeFlt.Max(); } catch { progressbar_FinalVal = 100; } }
+            //try { progressbar_FinalVal = Math.Abs((int)(_TwinCathelper.PLCMotors.Max().mDisplacement)) + (int)LastPositionData; } catch (Exception ep) { try { log.Log(LogLevel.Info, "ResumeProcess_WriteCSVData222>>>>progressbar_FinalVal" + ep.Message); progressbar_FinalVal = (int)data_resumeFlt.Max(); } catch { progressbar_FinalVal = 100; } }
+            try { progressbar_FinalVal = Math.Abs((int)(_TwinCathelper.PLCMotors.Max().mDisplacement + LastPositionData + Math.Abs(CSVHelper.NegativeoffsetResumeFlt.Max()))); } catch (Exception ep) { try { log.Log(LogLevel.Info, "ResumeProcess_WriteCSVData222>>>>progressbar_FinalVal" + ep.Message); progressbar_FinalVal = (int)data_resumeFlt.Max(); } catch { progressbar_FinalVal = 100; } }
             progressbar_timespent = 0;
             TravelTimeUpdate = false;
 
@@ -1218,8 +1232,8 @@ namespace FlexMold.MVVM.ViewModel.Project
 
             string RemoveResumeAfterProcess = ConfigurationManager.AppSettings["RemoveResumeAfterProcess"].ToString();
 
-            if (RemoveResumeAfterProcess=="1" && File.Exists(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\Resume" + selectedListRootDir.Substring(selectedListRootDir.LastIndexOf(@"\")) + "-" + SelectedFile_finf.Name + ".Resume"))
-            { 
+            if (RemoveResumeAfterProcess == "1" && File.Exists(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\Resume" + selectedListRootDir.Substring(selectedListRootDir.LastIndexOf(@"\")) + "-" + SelectedFile_finf.Name + ".Resume"))
+            {
                 log.Log(LogLevel.Info, $"Deleting Resume File!");
 
                 try { File.Delete(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\Resume" + selectedListRootDir.Substring(selectedListRootDir.LastIndexOf(@"\")) + "-" + SelectedFile_finf.Name + ".Resume"); } catch { }
@@ -1229,6 +1243,16 @@ namespace FlexMold.MVVM.ViewModel.Project
             data_resumeFlt.Clear();
             //LastEventPressed = 'R';// H=Home R=Resume S=Stop W= WriteCSV O=Initial
 
+            try
+            {
+                //if (MotorStatus.mPosition != null)
+                //    LastmaxVal = MotorStatus.mPosition.Max();
+                //else
+                    LastmaxVal = _TwinCathelper.PLCMotors.Max().mDisplacement;
+            }
+            catch (Exception ep) { try { log.Log(LogLevel.Info, "ResumeProcess_WriteCSVData222>>>>progressbar_FinalVal" + ep.Message); LastmaxVal = (int)data_resumeFlt.Max(); } catch { LastmaxVal = 100; } }
+        
+        
         }
 
         private float stringToFloatCult(string numInFloat) {
@@ -1614,6 +1638,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             {
                 log.Log(LogLevel.Error, ex.Message);
             }
+            CSVHelper.IsNewProjSelected = false;
         }
 
 
@@ -2007,8 +2032,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             //        return;            
             //}
 
-            try { progressbar_timespent = 0; TravelTimeUpdate = false; progressbar_FinalVal = int.Parse(Math.Ceiling(MotorStatus.mPosition.Max()).ToString()); }//_TwinCathelper.PLCMotors[0].mDisplacement;
-            catch { }
+
 
             String HomingOffsetDataCommand = "";
             float LastChangedVal = 0.00F;
@@ -2094,14 +2118,6 @@ namespace FlexMold.MVVM.ViewModel.Project
                 LastEventPressed = 'N';//-ivePositionData
 
             MotorStatus.IsMotorsIdle = false;
-            try
-            {
-                if (MotorStatus.mPosition != null)
-                    LastmaxVal = MotorStatus.mPosition.Max();
-                else
-                    LastmaxVal = _TwinCathelper.PLCMotorsStatuses.mPostion.Max();
-            }
-            catch { }
 
             try
             {
@@ -2129,8 +2145,20 @@ namespace FlexMold.MVVM.ViewModel.Project
                     LastEventPressed = 'H';// H=Home R=Resume S=Stop W= WriteCSV O=Initial
 
             }
-            catch(Exception ep) { log.Log(LogLevel.Info, "HomeTrigger()>>>>"+ep.Message); }
+            catch (Exception ep) { log.Log(LogLevel.Info, "HomeTrigger()>>>>"+ep.Message); }
 
+            try { progressbar_timespent = 0; TravelTimeUpdate = false; progressbar_FinalVal = (int)(Math.Abs(_TwinCathelper.PLCMotors.Max().mDisplacement)); }//_TwinCathelper.PLCMotors[0].mDisplacement;
+            catch { }
+
+            try
+            {
+                if(CSVHelper.NegativeoffsetResume.Length>1)
+                    LastmaxVal = (int)(Math.Abs(_TwinCathelper.PLCMotors.Min().mDisplacement));
+                else
+                    LastmaxVal = MotorStatus.mPosition.Max();
+                    
+            }
+            catch { }
         }
 
         private string ConvertSectoDay(uint n)
@@ -2161,8 +2189,8 @@ namespace FlexMold.MVVM.ViewModel.Project
             {
                 progressActonCounter++;                
 
-                if (progressActonCounter > UpdateProgressStatusSeconds)
-                {
+                //if (progressActonCounter > UpdateProgressStatusSeconds)
+                //{
                     float chkdiff1 = 0.00F;
                     float[] fltmPos = new float[DeviceCount];
 
@@ -2236,7 +2264,7 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                     progressActonCounter = 0;
 
-                }
+                //}
             }
             catch { }
 
@@ -2250,21 +2278,33 @@ namespace FlexMold.MVVM.ViewModel.Project
                     return;
 
                 CSVHelper.InPositionProcess_Elapsed = true;
-
-                updateHomeButtonStatus();
+                
                 try
                 {
-                    if (CSVHelper.IsNewProjSelected)
+                    if (CSVHelper.IsNewPanelSelected)
                     {
+                        updateHomeButtonStatus();
+
+                        CSVHelper.IsNewPanelSelected = false;
+                    }
+
+                    if (CSVHelper.IsNewProjSelected)
                         BrowseProjectFiles();
 
-                        CSVHelper.IsNewProjSelected = false;
+
+                    if(CSVHelper.UpdateHomeCSVStatus)
+                    {
+                        updateHomeButtonStatus();
+                        CSVHelper.UpdateHomeCSVStatus = false;
                     }
-                } catch { }
+
+
+                }
+                catch { }
 
                 if (IsRampCompleted)
                 {
-                    IsHomeEnabled = true;
+                    //IsHomeEnabled = true;
 
                     //pgProcesStatusVal = 100;
                     if (pgProcesStatusVal >= 99)
@@ -2277,17 +2317,37 @@ namespace FlexMold.MVVM.ViewModel.Project
                             TravelTimeUpdate = true;
                             CSVHelper.TotalNoHrs += (uint)(MachineTotalTimeSW.ElapsedMilliseconds / 1000);
                             travelTime = ConvertSectoDay(CSVHelper.TotalNoHrs);
-                            MachineTotalTimeSW.Stop();
                             MachineTotalTimeSW.Reset();
+                            MachineTotalTimeSW.Stop();
 
                         }
                         LastProgressval = pgProcesStatusVal;
                     }
                     //positionProcessCompleted_Timer.Stop();
-                    try { if (progressbar_FinalVal < 1) pgProcesStatusVal = 0; else pgProcesStatusVal = (int)Math.Ceiling(Math.Abs((MotorStatus.mPosition.Max() / progressbar_FinalVal)) * 100); } catch { }
+                    try { if (progressbar_FinalVal < 1) pgProcesStatusVal = 0; else pgProcesStatusVal = (int)Math.Ceiling(Math.Abs((MotorStatus.mPosition.Max()+ Math.Abs(CSVHelper.NegativeoffsetResumeFlt.Max()) / progressbar_FinalVal)) * 100); } catch { }
                 }
                 else {
-                    if (progressbar_FinalVal < 1) pgProcesStatusVal = 0; else pgProcesStatusVal = (int)Math.Ceiling(Math.Abs(MotorStatus.mPosition.Max() / progressbar_FinalVal) * 100); LastProgressval = 0;
+                    //if (progressbar_FinalVal < 1) pgProcesStatusVal = 0; else pgProcesStatusVal = (int)Math.Ceiling(Math.Abs(MotorStatus.mPosition.Max() / progressbar_FinalVal) * 100); LastProgressval = 0;
+
+                    try
+                    {
+                        //pgProcesStatusVal = (int)LastmaxVal - (int)(Math.Abs(MotorStatus.mPosition.Max() / progressbar_FinalVal) * 100);//LastmaxVal=MaxDistance to cover - current position
+                        float posDiff = 0;
+
+                        if (CSVHelper.NegativeoffsetResume.Length > 1)
+                        {
+                            float chkNegPositions = MotorStatus.mPosition.Max();
+                            if (chkNegPositions < -1)
+                                posDiff = Math.Abs(CSVHelper.NegativeoffsetResumeFlt.Min()) - Math.Abs(MotorStatus.mPosition.Min());
+                            else
+                                posDiff = Math.Abs(CSVHelper.NegativeoffsetResumeFlt.Min()) - Math.Abs(MotorStatus.mPosition.Max());
+                        }
+                        else
+                        { posDiff = MotorStatus.mPosition.Max(); }
+
+                        pgProcesStatusVal = (int)(Math.Abs(posDiff / progressbar_FinalVal) * 100);//LastmaxVal=MaxDistance to cover - current position
+                    }
+                    catch { }
 
                     try
                     {
@@ -2348,8 +2408,8 @@ namespace FlexMold.MVVM.ViewModel.Project
         {
             if (!ConfirmMotorsAreFine())
                 return;
-
-            LastEventPressed = 'S';//Manual Stopped is pressed Here position goes "0"
+            if (LastEventPressed != 'R' && LastEventPressed != 'D')
+                LastEventPressed = 'S';//Manual Stopped is pressed Here position goes "0"
             StallStopProcess_WriteCSVData();
             StallErrMotorsCheckTimer.Stop();
             IsRampCompleted = false;
@@ -2359,17 +2419,22 @@ namespace FlexMold.MVVM.ViewModel.Project
 
         private void Timer_Elapsed(object sender, EventArgs e)
         {
+            if (Timer_ElapsedBusy)
+                return;
+
+            Timer_ElapsedBusy = true;
             if (!ConfirmMotorsAreFine())
                 return;
 
-            LastEventPressed = 'N';//Manual Stopped is pressed Here position goes "0"
+            //LastEventPressed = 'N';//Manual Stopped is pressed Here position goes "0"
             
-            TimeSpan lastStopSecs = DateTime.Now - CSVHelper.LastStopTime;
+            //TimeSpan lastStopSecs = DateTime.Now - CSVHelper.LastStopTime;
 
-            if(Math.Abs(lastStopSecs.TotalSeconds) > intSpecifiedSecs)
+            //if(Math.Abs(lastStopSecs.TotalSeconds) > intSpecifiedSecs)
                 StopProcess_WriteCSVData();
 
-                MotorsCheckTimer.Stop();            
+                MotorsCheckTimer.Stop();
+            Timer_ElapsedBusy = false;
         }
 
         //public LaserProjector MyLaserPorjector { get; set; }
@@ -2614,6 +2679,38 @@ namespace FlexMold.MVVM.ViewModel.Project
             }
         }
 
+        private void checkFirmware() {
+
+            try
+            {
+
+                String FirmwareNotMatched = "";
+                for (uint i = 0; i < DeviceCount; i++)  
+                {
+                    if (CSVHelper.MotorsStatusGlobal[0] == "Healthy" && _TwinCathelper.PLCMotorsStatuses.mDiag3[i] != 1713969130)//0x662917EA (1713969130)
+                        FirmwareNotMatched += "Motor" + (i + 1) + ",";
+                }
+
+                if (!CSVHelper.MachineEnabled)
+                {
+                    MessageBox.Show("Please Power ON the machine before resuming!", "Machine state is off", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (FirmwareNotMatched.Length > 0)
+                {
+                    MessageBox.Show("Please update the firmware/machine versions of the following motor(s)!" + Environment.NewLine + FirmwareNotMatched, "Wrong firmware/Machine found!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    //MessageBox.Show("Please close the application and update the firmware!" + Environment.NewLine + FirmwareNotMatched, "Wrong firmware found!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CSVHelper.wrongFirmwareFound = true;
+                    //Client.Close();
+                    return;
+                }
+
+            }
+            catch { }
+        
+        }
+
 
         public ProjectViewModel(ITwinCathelper twinCathelper)
         {
@@ -2659,6 +2756,8 @@ namespace FlexMold.MVVM.ViewModel.Project
                     UpdateSettingsDB(); // set the Application status to open ==1
 
                     BrowseProjectFiles();
+
+                    checkFirmware();
                 }
                 catch { }
 
@@ -2716,12 +2815,6 @@ namespace FlexMold.MVVM.ViewModel.Project
                 //Fill project folder list
                 FileProjectList();
 
-                if (MotorStatus.mPosition != null)
-                    LastmaxVal = MotorStatus.mPosition.Max();
-                else
-                    LastmaxVal = _TwinCathelper.PLCMotorsStatuses.mPostion.Max();
-
-
                 BrowseProjectCommand = new RelayCommand(o =>
                 {
                     try
@@ -2730,6 +2823,12 @@ namespace FlexMold.MVVM.ViewModel.Project
                         OnPropertyChanged();
                         UserStop = false;
                         //EventStopToggle = false;
+
+                        if (!CSVHelper.MachineEnabled)
+                        {
+                            MessageBox.Show("Please Power ON the machine before resuming!", "Machine state is off", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
                     }
                     catch (Exception ee)
                     { }
@@ -2743,7 +2842,17 @@ namespace FlexMold.MVVM.ViewModel.Project
                 {
                     if (toggleStopResumeButtonText == "Stop")
                     {
-                        LastEventPressed = 'S';
+
+                        if (!CSVHelper.MachineEnabled)
+                        {
+                            MessageBox.Show("Please Power ON the machine before resuming!", "Machine state is off", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
+
+                        if (LastEventPressed == 'H')
+                        { log.Log(LogLevel.Warn, $"Manual Stop not allowed while Homing!"); return; }
+
+                            LastEventPressed = 'S';
                         if (MachineTotalTimeSW.IsRunning)
                         {
                             CSVHelper.TotalNoHrs += (uint)(MachineTotalTimeSW.ElapsedMilliseconds / 1000);
@@ -2802,6 +2911,12 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                 ShapeHomCommand = new RelayCommand(async o =>
                 {
+                    if (!CSVHelper.MachineEnabled)
+                    {
+                        MessageBox.Show("Please Power ON the machine before resuming!", "Machine state is off", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+
                     IsHomeEnabled = false;
 
                     if (toggleShapeHomeButtonText == "Home")
@@ -2868,6 +2983,12 @@ namespace FlexMold.MVVM.ViewModel.Project
                     FileInfo SelectedFile_finf = new FileInfo(SelectedFile.FileFullName);
                     _ = sendLasFileAsync(SelectedFile_finf); });
 
+                if (!CSVHelper.MachineEnabled)
+                {
+                    MessageBox.Show("Please Power ON the machine before resuming!", "Machine state is off", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 if (MyPorjector == null)
                 {
                     try
@@ -2931,8 +3052,13 @@ namespace FlexMold.MVVM.ViewModel.Project
                 
                 try { motorMaxTravel = "Max Travel: " + MotorStatus.mPosition.Max() + "mm"; } catch { motorMaxTravel = "Max Travel: 0mm"; }
                 try { travelTime = ConvertSectoDay(CSVHelper.TotalNoHrs); } catch (Exception ex) { string st = ex.Message; travelTime = ConvertSectoDay(1); }
-                
 
+                if (MotorStatus.mPosition != null)
+                    LastmaxVal = MotorStatus.mPosition.Max();
+                else
+                    LastmaxVal = _TwinCathelper.PLCMotorsStatuses.mPostion.Max();
+
+                updateHomeButtonStatus();
             }
             catch (Exception ex)
             {

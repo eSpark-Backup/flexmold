@@ -256,6 +256,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
 
                 }
                 CSVHelper.NegativeoffsetResume = CSVHelper.NegativeoffsetResume.Remove(CSVHelper.NegativeoffsetResume.Length - 1);
+                CSVHelper.SetNegativeoffsetResumeFlt();
             }
 
                 log.Log(LogLevel.Info, "Getting Homming data ended!");
@@ -306,8 +307,9 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
 
 
                     CSVHelper.NegativeoffsetResume = newCsvHomeData.Substring(0, newCsvHomeData.Length - 1);
+                    CSVHelper.SetNegativeoffsetResumeFlt();
 
-                   
+
                     try { CSVHelper.offsetRes_MotorSettingViewModel.UpdateMotorSettingsDB(); } catch { }
 
                     log.Log(LogLevel.Info, "Successfully updated homing data!" + errmsg);
@@ -367,11 +369,12 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
 
             for (int i = 0; i < DeviceCount; i++)
             {
-                _TwinCathelper.PLCMotors[i].mDisplacement = 0.200F;
-                _TwinCathelper.PLCMotors[i].mDirection = false;
-                _TwinCathelper.PLCMotors[i].mRampDelay = CSVHelper.MotorRampDelayValue;
-                _TwinCathelper.PLCMotors[i].mTime = 6.3334F;
-                _TwinCathelper.PLCMotors[i].mMode = (int)EMode.Project;
+                //_TwinCathelper.PLCMotors[i].mDisplacement = 0.200F;
+                //_TwinCathelper.PLCMotors[i].mDirection = false;
+                //_TwinCathelper.PLCMotors[i].mRampDelay = CSVHelper.MotorRampDelayValue;
+                //_TwinCathelper.PLCMotors[i].mTime = 6.3334F;
+                //_TwinCathelper.PLCMotors[i].mMode = (int)EMode.Project;
+                _TwinCathelper.PLCMotors[i].mMode = (int)EMode.Resume;
 
                 log.Log(LogLevel.Info, "CalibrateHard-WriteCSVData loop1:" + i.ToString() + " : " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + _TwinCathelper.PLCMotors[i].mDirection.ToString()
                 + "  >> RampDlay: " + CSVHelper.MotorRampDelayValue.ToString()
@@ -379,7 +382,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 + "  >> mMode: " + EMode.Project.ToString());
             }
 
-            _TwinCathelper.WriteEthercatDeviceData();
+            _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mMode);
             log.Log(LogLevel.Info, $"{DeviceCount} CalibrateHard value(s) has been written sucessfully");
 
             Thread.Sleep(200);

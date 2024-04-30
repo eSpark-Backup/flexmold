@@ -45,7 +45,10 @@ namespace FlexMold.MVVM.View
         {
             CSVHelper.IsNewProjSelected = true;
             _ProjectViewModel.selectedListRootDir = ((ListView)sender).SelectedValue.ToString();
-            
+
+            if (!ProjectViewModel.positionProcessCompleted_Timer.IsEnabled)
+                    ProjectViewModel.positionProcessCompleted_Timer.Start();
+
         }
     }
 }

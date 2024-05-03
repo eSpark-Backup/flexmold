@@ -50,13 +50,13 @@
             MaxHeight="100"
             MaxWidth="150"
             Command="{Binding CalibrateCommand}"
-            Content="Calibrate Seq01"
+            Content="Hard Calibrate"
             IsEnabled="{Binding CalibrateButtonEnable}" />
         <Button
             MaxHeight="100"
             MaxWidth="150"
             Command="{Binding Calibrate02Command}"
-            Content="Calibrate Seq02"
+            Content="Home Calibrate"
             IsEnabled="{Binding CalibrateButtonEnable}" />
     </UniformGrid>
 </UserControl>

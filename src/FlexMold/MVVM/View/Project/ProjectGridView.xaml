@@ -96,8 +96,9 @@
                 <!--  Style for groups under the top level.  -->
             </DataGrid.GroupStyle>
             <DataGrid.ColumnHeaderStyle>
-                <Style BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader}" TargetType="DataGridColumnHeader">
+                <Style BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader}" TargetType="DataGridColumnHeader">                    
                     <Setter Property="Height" Value="5" />
+                    <Setter Property="Width" Value="500" />
                     <Setter Property="FontSize" Value="10" />
                     <Style.Triggers>
                         <Trigger Property="IsMouseOver" Value="True" />
@@ -105,9 +106,7 @@
                 </Style>
             </DataGrid.ColumnHeaderStyle>
             <DataGrid.Columns>
-                <DataGridTextColumn
-                    Binding="{Binding ProjectName}"
-                    Header="Available Panels" />
+                <DataGridTextColumn Binding="{Binding ProjectName}" Header="Available Panels" />                
             </DataGrid.Columns>
             <DataGrid.RowStyle>
                 <Style BasedOn="{StaticResource MahApps.Styles.DataGridRow}" TargetType="{x:Type DataGridRow}">
@@ -119,13 +118,18 @@
                                 <Condition Binding="{Binding Path=IsMouseOver, RelativeSource={RelativeSource Self}}" Value="true" />
                             </MultiDataTrigger.Conditions>
                             <Setter Property="Background" Value="#FF53DEF5" />
+                            
                         </MultiDataTrigger>
+                        <Trigger Property="IsSelected" Value="True" >
+                            <Setter Property="Background" Value="Green"/>
+                        </Trigger>
                     </Style.Triggers>
                 </Style>
             </DataGrid.RowStyle>
             <DataGrid.Style>
                 <Style BasedOn="{StaticResource MahApps.Styles.DataGrid}" TargetType="{x:Type DataGrid}">
                     <Setter Property="AlternatingRowBackground" Value="{DynamicResource MahApps.Brushes.Gray9}" />
+                    
                 </Style>
             </DataGrid.Style>
         </DataGrid>

@@ -469,11 +469,11 @@ namespace FlexMold.MVVM.ViewModel.Project
                 log.Log(LogLevel.Info, $"{DeviceCount} zero value(s) has been written sucessfully");
 
                 //IsPsitionDataProcessing = true;
-                try { LastPositionData = MotorStatus.mPosition.Max(); } catch { LastPositionData = 0; }
-
-                try { progressbar_FinalVal = Math.Abs((int)(_TwinCathelper.PLCMotors.Max().mDisplacement)); } catch { }
+                try { LastPositionData = MotorStatus.mPosition[0]; } catch { LastPositionData = 0; }                
+                try { progressbar_FinalVal = Math.Abs((int)(_TwinCathelper.PLCMotors[0].mDisplacement)); } catch { }// + Math.Abs((int)CSVHelper.NegativeoffsetResumeFlt.Min())
                 progressbar_timespent = 0;
                 TravelTimeUpdate = false;
+                IsRampCompleted = false;
 
                 LastEventPressed = 'W';// H=Home R=Resume S=Stop W= WriteCSV O=Initial F=ForceResume C=Calibrate
             }
@@ -1222,11 +1222,16 @@ namespace FlexMold.MVVM.ViewModel.Project
 
 
             //IsPsitionDataProcessing = true;
-            try { LastPositionData = MotorStatus.mPosition.Max(); } catch { LastPositionData = 0; }
-            //try { progressbar_FinalVal = Math.Abs((int)(_TwinCathelper.PLCMotors.Max().mDisplacement)) + (int)LastPositionData; } catch (Exception ep) { try { log.Log(LogLevel.Info, "ResumeProcess_WriteCSVData222>>>>progressbar_FinalVal" + ep.Message); progressbar_FinalVal = (int)data_resumeFlt.Max(); } catch { progressbar_FinalVal = 100; } }
-            try { progressbar_FinalVal = Math.Abs((int)(_TwinCathelper.PLCMotors.Max().mDisplacement + LastPositionData + Math.Abs(CSVHelper.NegativeoffsetResumeFlt.Max()))); } catch (Exception ep) { try { log.Log(LogLevel.Info, "ResumeProcess_WriteCSVData222>>>>progressbar_FinalVal" + ep.Message); progressbar_FinalVal = (int)data_resumeFlt.Max(); } catch { progressbar_FinalVal = 100; } }
+            try { LastPositionData = MotorStatus.mPosition[0]; } catch { LastPositionData = 0; }
+            try { 
+                //progressbar_FinalVal = Math.Abs((int)(_TwinCathelper.PLCMotors.Max().mDisplacement + LastPositionData + Math.Abs(CSVHelper.NegativeoffsetResumeFlt.Max()))); } catch (Exception ep) { 
+                progressbar_FinalVal = Math.Abs((int)(_TwinCathelper.PLCMotors[0].mDisplacement //+ LastPositionData
+                    )); } catch (Exception ep) { 
+                try { log.Log(LogLevel.Info, "ResumeProcess_WriteCSVData222>>>>progressbar_FinalVal" + ep.Message); 
+                    progressbar_FinalVal = (int)data_resumeFlt[0]; } catch { progressbar_FinalVal = 100; } }
             progressbar_timespent = 0;
             TravelTimeUpdate = false;
+            IsRampCompleted = false;
 
             //log.Log(LogLevel.Info, $"Resuming CSV/Motors Process, Completed!");
 
@@ -1251,8 +1256,8 @@ namespace FlexMold.MVVM.ViewModel.Project
                     LastmaxVal = _TwinCathelper.PLCMotors.Max().mDisplacement;
             }
             catch (Exception ep) { try { log.Log(LogLevel.Info, "ResumeProcess_WriteCSVData222>>>>progressbar_FinalVal" + ep.Message); LastmaxVal = (int)data_resumeFlt.Max(); } catch { LastmaxVal = 100; } }
-        
-        
+
+            IsRampCompleted = false;
         }
 
         private float stringToFloatCult(string numInFloat) {
@@ -2131,7 +2136,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 log.Log(LogLevel.Info, $"{DeviceCount} zero value(s) has been written sucessfully");
 
                 //IsPsitionDataProcessing = true;
-                try { LastPositionData = MotorStatus.mPosition.Max(); } catch { LastPositionData = 0; }
+                try { LastPositionData = MotorStatus.mPosition[0]; } catch { LastPositionData = 0; }
 
                 UserStop = false;
                 //EventStopToggle = false;
@@ -2147,8 +2152,9 @@ namespace FlexMold.MVVM.ViewModel.Project
             }
             catch (Exception ep) { log.Log(LogLevel.Info, "HomeTrigger()>>>>"+ep.Message); }
 
-            try { progressbar_timespent = 0; TravelTimeUpdate = false; progressbar_FinalVal = (int)(Math.Abs(_TwinCathelper.PLCMotors.Max().mDisplacement)); }//_TwinCathelper.PLCMotors[0].mDisplacement;
+            try { progressbar_timespent = 0; TravelTimeUpdate = false; progressbar_FinalVal = (int)(Math.Abs(_TwinCathelper.PLCMotors[0].mDisplacement)); }//_TwinCathelper.PLCMotors[0].mDisplacement;
             catch { }
+            IsRampCompleted = false;
 
             try
             {
@@ -2302,8 +2308,11 @@ namespace FlexMold.MVVM.ViewModel.Project
                 }
                 catch { }
 
+                float posDiff = 0;
+
                 if (IsRampCompleted)
                 {
+                    
                     //IsHomeEnabled = true;
 
                     //pgProcesStatusVal = 100;
@@ -2321,10 +2330,32 @@ namespace FlexMold.MVVM.ViewModel.Project
                             MachineTotalTimeSW.Stop();
 
                         }
+
+                        if (LastEventPressed == 'H')
+                        {
+                            if (CSVHelper.NegativeoffsetResumeFlt[0] < 0)//if negHomingdata exist
+                                if (MotorStatus.mPosition[0] > 0)
+                                {
+                                    posDiff = Math.Abs(CSVHelper.NegativeoffsetResumeFlt[0]) + Math.Abs(MotorStatus.mPosition[0]);
+
+                                }
+                                else
+                                {
+                                    posDiff = Math.Abs(CSVHelper.NegativeoffsetResumeFlt[0]) - Math.Abs(MotorStatus.mPosition[0]);                                    
+                                }
+                            pgProcesStatusVal = (int)(Math.Abs(posDiff / (progressbar_FinalVal)) * 100);//LastmaxVal=MaxDistance to cover - current position
+                        }
+                        else
+                            pgProcesStatusVal = (int)(Math.Abs((posDiff + Math.Abs(CSVHelper.NegativeoffsetResumeFlt[0])) / (progressbar_FinalVal + Math.Abs(CSVHelper.NegativeoffsetResumeFlt[0]) + LastPositionData)) * 100);//LastmaxVal=MaxDistance to cover - current position
+
                         LastProgressval = pgProcesStatusVal;
+
+                        
                     }
                     //positionProcessCompleted_Timer.Stop();
-                    try { if (progressbar_FinalVal < 1) pgProcesStatusVal = 0; else pgProcesStatusVal = (int)Math.Ceiling(Math.Abs((MotorStatus.mPosition.Max()+ Math.Abs(CSVHelper.NegativeoffsetResumeFlt.Max()) / progressbar_FinalVal)) * 100); } catch { }
+                    try { //if (progressbar_FinalVal < 1) pgProcesStatusVal = 0;  else 
+                            pgProcesStatusVal = (int)Math.Abs(Math.Abs((MotorStatus.mPosition.Max()+ Math.Abs(CSVHelper.NegativeoffsetResumeFlt.Min())) / progressbar_FinalVal) * 100); IsRampCompleted = false;
+                    } catch { }
                 }
                 else {
                     //if (progressbar_FinalVal < 1) pgProcesStatusVal = 0; else pgProcesStatusVal = (int)Math.Ceiling(Math.Abs(MotorStatus.mPosition.Max() / progressbar_FinalVal) * 100); LastProgressval = 0;
@@ -2332,20 +2363,43 @@ namespace FlexMold.MVVM.ViewModel.Project
                     try
                     {
                         //pgProcesStatusVal = (int)LastmaxVal - (int)(Math.Abs(MotorStatus.mPosition.Max() / progressbar_FinalVal) * 100);//LastmaxVal=MaxDistance to cover - current position
-                        float posDiff = 0;
+                        
 
                         if (CSVHelper.NegativeoffsetResume.Length > 1)
                         {
-                            float chkNegPositions = MotorStatus.mPosition.Max();
-                            if (chkNegPositions < -1)
-                                posDiff = Math.Abs(CSVHelper.NegativeoffsetResumeFlt.Min()) - Math.Abs(MotorStatus.mPosition.Min());
-                            else
-                                posDiff = Math.Abs(CSVHelper.NegativeoffsetResumeFlt.Min()) - Math.Abs(MotorStatus.mPosition.Max());
+                            //progressbar_FinalVal >>>> Distance to cover
+                            //MotorStatus.mPosition >>>> current distance position
+
+                            float chkNegPositions = MotorStatus.mPosition[0];
+                            //if (chkNegPositions < -1)
+                            //    posDiff = Math.Abs(CSVHelper.NegativeoffsetResumeFlt.Min()) - Math.Abs(MotorStatus.mPosition.Min());
+                            //else
+                            //    posDiff = Math.Abs(CSVHelper.NegativeoffsetResumeFlt.Min()) + Math.Abs(MotorStatus.mPosition.Max());
+
+                            posDiff = MotorStatus.mPosition[0];
+
+
                         }
                         else
-                        { posDiff = MotorStatus.mPosition.Max(); }
+                        { posDiff = MotorStatus.mPosition[0]; }
+                        if (LastEventPressed == 'H')
+                        {
+                            if (CSVHelper.NegativeoffsetResumeFlt[0] < 0)//if negHomingdata exist
+                                if (MotorStatus.mPosition[0] > 0)
+                                { posDiff = Math.Abs(CSVHelper.NegativeoffsetResumeFlt[0]) + Math.Abs(MotorStatus.mPosition[0]);
+                                    
+                                }
+                                else
+                                {
+                                    posDiff = Math.Abs(CSVHelper.NegativeoffsetResumeFlt[0]) - Math.Abs(MotorStatus.mPosition[0]);
+                                    //pgProcesStatusVal = (int)(Math.Abs((posDiff ) / (progressbar_FinalVal + Math.Abs(CSVHelper.NegativeoffsetResumeFlt[0]) + LastPositionData)) * 100);//LastmaxVal=MaxDistance to cover - current position
+                                }
+                            pgProcesStatusVal = (int)(Math.Abs(posDiff / (progressbar_FinalVal)) * 100);//LastmaxVal=MaxDistance to cover - current position
 
-                        pgProcesStatusVal = (int)(Math.Abs(posDiff / progressbar_FinalVal) * 100);//LastmaxVal=MaxDistance to cover - current position
+
+                        }
+                        else
+                            pgProcesStatusVal = (int)(Math.Abs((posDiff + Math.Abs(CSVHelper.NegativeoffsetResumeFlt[0])) / (progressbar_FinalVal + Math.Abs(CSVHelper.NegativeoffsetResumeFlt[0]) + LastPositionData)) * 100);//LastmaxVal=MaxDistance to cover - current position
                     }
                     catch { }
 

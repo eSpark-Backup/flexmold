@@ -184,6 +184,19 @@ namespace FlexMold.MVVM.ViewModel.Home
             var array = new uint[DeviceCount];
             try
             {
+                if (!CSVHelper.MachineEnabled)
+                {
+                    MessageBox.Show("Please Power ON the machine before resuming!", "Machine state is off", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+            }
+            catch (Exception ee)
+            { }
+
+
+
+            try
+            {
                 Array.Copy(_TwinCathelper.PLCMotorsStatuses.DeviceStatus, array, array.Length);
                 DeviceStatus = array;
 
@@ -317,6 +330,17 @@ namespace FlexMold.MVVM.ViewModel.Home
                 try
                 {
                     //CalibrateSeq02_HomeUp();
+                    try
+                    {
+                        if (!CSVHelper.MachineEnabled)
+                        {
+                            MessageBox.Show("Please Power ON the machine before resuming!", "Machine state is off", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                        }
+                    }
+                    catch (Exception ee)
+                    { }
+
 
                     FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'C';
 
@@ -426,7 +450,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     log.Log(LogLevel.Info, ">>>CalibrationSquence01Failed");
                     break;
                 case (int)EDeviceStatus.CalibrationSquence01Success:
-                    _tmgs = SetUI(i, swe, Brushes.LightBlue);
+                    _tmgs = SetUI(i, swe, Brushes.Green);
                     TNF.ShowSuccess(_tmgs);
                     log.Log(LogLevel.Info, _tmgs);
                     UpdateHomingProcess();
@@ -463,7 +487,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     //CalibrateButtonEnable = false;
                     break;
                 case (int)EDeviceStatus.CalibrationSquence02Success:
-                    _tmgs = SetUI(i, swe, Brushes.Blue);
+                    _tmgs = SetUI(i, swe, Brushes.Green);
                     TNF.ShowSuccess(_tmgs);
                     log.Log(LogLevel.Info, _tmgs);
                     //try { HardCalibrateProcess(); } catch { }
@@ -490,7 +514,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     //CalibrateButtonEnable = false;
                     break;
                 default:
-                    _tmgs = SetUI(i, swe, Brushes.Red);
+                    _tmgs = SetUI(i, swe, Brushes.Blue);
                     TNF.ShowError(_tmgs);
                     log.Log(LogLevel.Error, "! Undocumented Status !" + _tmgs);
                     //CalibrateButtonEnable = false;
@@ -509,6 +533,7 @@ namespace FlexMold.MVVM.ViewModel.Home
 
             if (sw.ToString().ToLower().Contains("stepper_driver_failed") || sw.ToString().ToLower().Contains("stall") || sw.ToString().ToLower().Contains("ec_link_state_not_present"))
             {
+                CSVHelper.MotorsStatusGlobal[i] = sw.ToString();
                 if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'C')
                 {
                     //FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start();
@@ -619,7 +644,7 @@ namespace FlexMold.MVVM.ViewModel.Home
 
                     CSVHelper.MotorsStatusGlobal[i] = "Healthy";
                     HomeMotorStatus = true;
-
+                    CSVHelper.MotorsStatusGlobal[i] = sw.ToString();
                     TNF.ShowSuccess(_tmgs);
                     log.Log(LogLevel.Info, _tmgs);
                     break;
@@ -638,7 +663,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     CSVHelper.MotorsStatusGlobal[i] = "Stepper_Driver_Failed";
                     TNF.ShowError(_tmgs);
                     log.Log(LogLevel.Error, _tmgs);
-
+                    CSVHelper.MotorsStatusGlobal[i] = sw.ToString();
 
                     if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'C' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'N')
                     {
@@ -667,7 +692,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                         _TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data2.CastToArray());
                     log.Log(LogLevel.Warn, $"{EMode.Abort}");
                     //}
-
+                    CSVHelper.MotorsStatusGlobal[i] = sw.ToString();
                     if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'W' || FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'R')
                         FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start();
 
@@ -694,9 +719,10 @@ namespace FlexMold.MVVM.ViewModel.Home
                     //{
                     break;
                 default:
-                    _tmgs = SetUI(i, sw, Brushes.Red);
+                    _tmgs = SetUI(i, sw, Brushes.Blue);
                     CSVHelper.MotorsStatusGlobal[i] = "Debug";
                     TNF.ShowError(_tmgs);
+                    CSVHelper.MotorsStatusGlobal[i] = sw.ToString();
                     log.Log(LogLevel.Error, "! Undocumented Status !" + _tmgs);
                     break;
             }
@@ -956,7 +982,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                 MyMotors = new ObservableCollection<MotorStatusControl>() { };
                 for (int j = 0; j < DeviceCount; j++)
                 {
-                    MyMotors.Add(new MotorStatusControl() { MotorID = j, FillColor = Brushes.Red, ToolTip = "", StrokeColor = Brushes.White });
+                    MyMotors.Add(new MotorStatusControl() { MotorID = j, FillColor = Brushes.Green, ToolTip = "", StrokeColor = Brushes.White });
                 }
                 _TwinCathelper.TMotor_MotorDiagnosticChanged += Motor_MotorDiagnosticChanged;
                 _TwinCathelper.TMotor_DeviceStatusChanged += Motor_DeviceStatusChanged;
@@ -977,8 +1003,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                 Array.Fill<uint>(validSeq01Val, (int)EDeviceStatus.CalibrationSquence01Success);
                 Array.Fill<uint>(validSeq02Val, (int)EDeviceStatus.CalibrationSquence02Success);
                 Array.Fill<uint>(validRampSeqVal, (int)EDeviceStatus.RampSequenceCompleted);
+                Array.Fill<uint>(validForHome, (int)EDeviceStatus.HomePosition);
                 Array.Fill<uint>(healthyMotorDiag, (int)EmotorDiagnostic.Healthy);
-                Array.Fill<uint>(validForHome, (int)EDeviceStatus.None);
 
                 HomeVacuumStatus = false;
                 HomeMachineStatus = true;

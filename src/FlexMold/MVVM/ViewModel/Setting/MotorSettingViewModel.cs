@@ -198,7 +198,8 @@ namespace FlexMold.MVVM.ViewModel.Setting
 
         public MotorSettingViewModel()
         {
-            CSVHelper.offsetRes_MotorSettingViewModel = this;            
+            CSVHelper.offsetRes_MotorSettingViewModel = this;
+            RampUpDown = true;
         }
 
     public MotorSettingViewModel(ITwinCathelper twinCathelper)

@@ -108,6 +108,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                 $" Link State : {sw}\n" +
                 $" State Machine : {ds}\n";
             MySlaves[i].StrokeColor = br;
+            CSVHelper.MotorsStatusGlobal[i] = sw.ToString();
             var _tmg = $"{MySlaves[i].SlaveName} --> Link State {MySlaves[i].Slave_Link_State}";
             return _tmg;
         }
@@ -118,7 +119,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                 $"Box_{i} \n" +
                 $" Link State : {ds}\n" +
                 $" State Machine : {sw}\n";
-            MySlaves[i].FillColor = br;
+            MySlaves[i].FillColor = br;            
             var _tmg = $"{MySlaves[i].SlaveName} --> State Machine {MySlaves[i].Slave_State_Machine}";
             return _tmg;
         }
@@ -202,7 +203,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                 {
                     case ESlaveStateMachine.EC_DEVICE_STATE_OP:
                         var _tmg = SetUI(index, MySlaves[index].Slave_State_Machine, Brushes.Green);
-
+                        CSVHelper.MotorsStatusGlobal[index] = "Healthy";
                         CSVHelper.MachineEnabled = true;
                         HomeMachineStatus = true;
 
@@ -220,6 +221,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     case ESlaveStateMachine.EC_DEVICE_STATE_DISABLED:
                         _tmg = SetUI(index, MySlaves[index].Slave_State_Machine, Brushes.Red);
                         TNF.ShowError(_tmg);
+                        CSVHelper.MotorsStatusGlobal[index] = MySlaves[index].Slave_State_Machine.ToString();
                         log.Log(LogLevel.Error, _tmg);
                         break;
                     default:

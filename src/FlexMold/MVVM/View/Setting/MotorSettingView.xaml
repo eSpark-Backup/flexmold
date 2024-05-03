@@ -42,14 +42,14 @@
             Grid.Row="2"
             Grid.Column="0"
             Content="RPM Assume :" Margin="5,5,0,5" Width="153" />-->
-        <Label
+        <!--<Label
             Grid.Row="3"
-            Content="Acceleration : " Margin="5,5,0,5" Width="185" Grid.ColumnSpan="2" />
+            Content="Acceleration : " Margin="5,5,0,5" Width="185" Grid.ColumnSpan="2" />-->
         <Label
-            Grid.Row="4"
+            Grid.Row="2" Grid.Column="0"
             Content="Motor time(s) : " Margin="5,5,0,5" Width="185" Grid.ColumnSpan="2" />
         <Label
-            Grid.Row="5"
+            Grid.Row="3" Grid.Column="0"
             Content="Max Move(mm) : " Margin="5,5,0,5" Width="185" Grid.ColumnSpan="2" />
         <TextBox
             Grid.Row="0"
@@ -63,10 +63,10 @@
             Grid.Row="2"
             Grid.Column="1"
             Text="{Binding txtrpmAssume}" Margin="5,5,5,5" IsEnabled="{Binding editingEnable}"/>-->
-        <ComboBox Grid.Row="3" Grid.Column="1" SelectedValue="{Binding RampUpDown}" SelectedValuePath="Tag" IsEnabled="{Binding editingEnable}">
+        <!--<ComboBox Grid.Row="3" Grid.Column="1" SelectedValue="{Binding RampUpDown}" SelectedValuePath="Tag" IsEnabled="{Binding editingEnable}">
             <ComboBoxItem Tag="False">Up</ComboBoxItem>
             <ComboBoxItem Tag="True">Down</ComboBoxItem>
-        </ComboBox>
+        </ComboBox>-->
         <!--<TextBox
             Grid.Row="3"
             Grid.Column="1"
@@ -75,7 +75,7 @@
             Grid.Row="4"
             Grid.Column="1"
             Text="{Binding txtdefaultTimeSec}" Margin="5,5,5,5" IsEnabled="{Binding editingEnable}"/>-->
-        <ComboBox Grid.Row="4" Grid.Column="1" SelectedValuePath="Tag" SelectedValue="{Binding txtdefaultTimeSec}" IsEnabled="{Binding editingEnable}">
+        <ComboBox Grid.Row="2" Grid.Column="1" SelectedValuePath="Tag" SelectedValue="{Binding txtdefaultTimeSec}" IsEnabled="{Binding editingEnable}">
             <ComboBoxItem Tag="1">1</ComboBoxItem>
             <ComboBoxItem Tag="2">2</ComboBoxItem>
             <ComboBoxItem Tag="3">3</ComboBoxItem>
@@ -84,7 +84,7 @@
         </ComboBox>
 
         <TextBox
-            Grid.Row="5"
+            Grid.Row="3"
             Grid.Column="1"
             Text="{Binding txtmaxMotorMove}" Margin="5,5,5,5" IsEnabled="{Binding editingEnable}"/>
         <Button

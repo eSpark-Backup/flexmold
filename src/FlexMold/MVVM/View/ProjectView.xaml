@@ -23,15 +23,15 @@
     <Border Style="{StaticResource panelMenuBorder}">
         <Grid RenderOptions.ClearTypeHint="Enabled" TextOptions.TextFormattingMode="Display">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="220" />
+                <ColumnDefinition Width="300" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="600" />
             </Grid.RowDefinitions>
 
-            <GroupBox Grid.Column="0" Margin="0,0,0,0" Header="Project List">
-                <ListView Name="ProjectsListView" ItemsSource="{Binding projectsList}" Height="200" SelectionChanged="ProjectsListView_SelectionChanged" VerticalAlignment="Top" FontSize="22">
+            <GroupBox Grid.Column="0" Margin="0,0,0,0" Header="Project List"  Width="400">
+                <ListView Name="ProjectsListView" ItemsSource="{Binding projectsList}" Height="Auto" SelectionChanged="ProjectsListView_SelectionChanged" VerticalAlignment="Top" FontSize="22">
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
                             <UniformGrid Columns="1"/>
@@ -52,7 +52,7 @@
                       >
 
                 <DockPanel>
-                    <Button Width="250" HorizontalAlignment="Left"
+                    <!--<Button Width="250" HorizontalAlignment="Left"
                         Name="btProjectBrowse"
                         Command="{Binding BrowseProjectCommand}"                       
                         MaxWidth="250"  DockPanel.Dock="Top" Margin="10,0,0,0">
@@ -60,7 +60,7 @@
                             <iconPacks:PackIconMaterial Margin="6" Kind="Folder" />
                             <TextBlock VerticalAlignment="Center" Text="Browse Project" />
                         </StackPanel>
-                    </Button>
+                    </Button>-->
 
                     <projectview:ProjectGridView   MaxWidth="250" Width="245" HorizontalAlignment="Left" Margin="10,0,0,0"/>
                 </DockPanel>
@@ -68,7 +68,7 @@
 
             <Grid Grid.Column="1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="300" />
+                    <ColumnDefinition Width="300"/>
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
@@ -81,29 +81,31 @@
                         <TextBox Text="{Binding motorMaxTravel}" Margin="0,0,0,0" Height="30"/>
                         <TextBox Text="{Binding travelTime}" Margin="0,-30,0,0" Height="30"/>
 
-                        <ToggleButton x:Name = "ShapeHomeButtonText" Checked = "HandleShape" Unchecked = "HandleHome" Command="{Binding ShapeHomCommand}" IsEnabled="{Binding IsHomeEnabled}" Margin="0,-30,0,0" Height="50">
+                        <ToggleButton x:Name = "ShapeHomeButtonText" Checked = "HandleShape" Unchecked = "HandleHome" Command="{Binding ShapeHomCommand}" IsEnabled="{Binding IsHomeEnabled}" Margin="0,-9,0,1" Height="60">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconMaterial Margin="6" Kind="Send" />
                                 <TextBlock VerticalAlignment="Center" Text="{Binding toggleShapeHomeButtonText}" />
                             </StackPanel>
                         </ToggleButton>
-                        <ToggleButton Command="{Binding SendLasFileCommand}" IsEnabled="{Binding LaserSendButton}" Margin="0,-20,0,0" Height="50">
+                        <ToggleButton Command="{Binding SendLasFileCommand}" IsEnabled="{Binding LaserSendButton}" Margin="0,3,0,-12" Height="60">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconMaterial Margin="6" Kind="QrcodeScan" />
                                 <TextBlock VerticalAlignment="Center" Text="Laser On" TextWrapping="Wrap" />
                             </StackPanel>
                         </ToggleButton>
-                        <ProgressBar Name="pgProcesStatus" Minimum="0" Maximum="100" Value="{Binding pgProcesStatusVal}" Margin="0,-10,0,0" Height="50"/>
-                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" Text="{Binding ElementName=pgProcesStatus, Path=Value, StringFormat={}{0:0}%}" Height="60" Margin="0,-40,0,0" Width="50" Foreground="Black">
+                        <ProgressBar Name="pgProcesStatus" Minimum="0" Maximum="100" Value="{Binding pgProcesStatusVal}" Margin="0,14,0,-12" Height="60"/>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" 
+                                   FontFamily="Segoe UI" FontSize="22" FontStretch="SemiExpanded" FontWeight="Normal" FontStyle="Normal"                                     
+                                   Text="{Binding ElementName=pgProcesStatus, Path=Value, StringFormat={}{0:0}%}" Height="50" Margin="50,-30,0,0" Width="80" Foreground="Black">
                             <TextBlock.RenderTransform>
                                 <TransformGroup>
-                                    <ScaleTransform ScaleX="5"/>
+                                    
                                     <SkewTransform/>
                                     <RotateTransform Angle="0"/>
                                     <TranslateTransform/>
                                 </TransformGroup>
                             </TextBlock.RenderTransform></TextBlock>
-                        <ToggleButton x:Name = "StopResumeButtonText" Checked = "HandleStop" Unchecked = "HandleResume" Command="{Binding StopMotorsCommand}" IsEnabled="{Binding IsStopEnable}" Margin="0,-100,0,0" Height="50">
+                        <ToggleButton x:Name = "StopResumeButtonText" Checked = "HandleStop" Unchecked = "HandleResume" Command="{Binding StopMotorsCommand}" IsEnabled="{Binding IsStopEnable}" Margin="0,-35,0,26" Height="60">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconMaterial Margin="6" Kind="StopCircle" />
                                 <TextBlock VerticalAlignment="Center" Text="{Binding toggleStopResumeButtonText}" />

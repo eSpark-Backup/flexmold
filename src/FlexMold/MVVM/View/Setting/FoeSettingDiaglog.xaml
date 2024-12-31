@@ -1,0 +1,139 @@
+﻿<UserControl
+    x:Class="FlexMold.MVVM.View.Setting.FoeSettingDiaglog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:core="clr-namespace:FlexMold.Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+    xmlns:local="clr-namespace:FlexMold.MVVM.View.Setting"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
+    Width="400"
+    mc:Ignorable="d">
+    <Border Style="{StaticResource panelMenuBorder}">
+        <Grid>
+            <Grid.Resources />
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Label
+                Grid.Row="0"
+                Grid.Column="0"
+                Content="File Path" />
+            <Label
+                Grid.Row="1"
+                Grid.Column="0"
+                Content="Password" />
+            <TextBox
+                Grid.Row="0"
+                Grid.Column="1"
+                Margin="4"
+                MaxLength="12">
+                <TextBox.Text>
+                    <Binding Path="MyFoe.Foe_sPathName">
+                        <Binding.ValidationRules>
+                            <core:NotEmptyValidationRule ValidatesOnTargetUpdated="True" />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+            <Button
+                Grid.Row="0"
+                Grid.Column="2"
+                Width="25"
+                HorizontalAlignment="Right"
+                Command="{Binding BrowseFirmwareCommand}"
+                Content=".." />
+            <TextBox
+                Name="pbox_pwd"
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="2"
+                mah:TextBoxHelper.ClearTextButton="True">
+                <TextBox.Text>
+                    <Binding Path="MyFoe.Foe_dwPass">
+                        <Binding.ValidationRules>
+                            <core:NotEmptyValidationRule ValidatesOnTargetUpdated="True" />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+            <UniformGrid
+                Grid.Row="2"
+                Grid.ColumnSpan="3"
+                Rows="1">
+                <Button
+                    Command="{Binding UpdateFirmwareCommand}"
+                    IsDefault="True"
+                    IsEnabled="{Binding BT_FirmwareEnable}">
+                    <Button.CommandParameter>
+                        <system:Boolean>True</system:Boolean>
+                    </Button.CommandParameter>
+                    <StackPanel Orientation="Horizontal">
+                        <iconPacks:PackIconMaterial Margin="6" Kind="ContentSave" />
+                        <TextBlock VerticalAlignment="Center" Text="Update Firmware" />
+                    </StackPanel>
+                </Button>
+                <Button
+                    Command="{x:Static wpf:DialogHost.CloseDialogCommand}"
+                    IsCancel="True"
+                    IsEnabled="{Binding BT_FirmwareEnable}">
+                    <Button.CommandParameter>
+                        <system:Boolean>False</system:Boolean>
+                    </Button.CommandParameter>
+                    <StackPanel Orientation="Horizontal">
+                        <iconPacks:PackIconMaterial Margin="6" Kind="Cancel" />
+                        <TextBlock VerticalAlignment="Center" Text="Close" />
+                    </StackPanel>
+                </Button>
+            </UniformGrid>
+            <Grid Grid.Row="3" Grid.ColumnSpan="3">
+                <mah:MetroProgressBar Value="{Binding MyFoe.Foe_nPercent}" />
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontSize="16"
+                    Text="{Binding DeviceStatusIndex}"
+                    TextAlignment="Center" />
+            </Grid>
+            <StackPanel
+                Grid.Row="4"
+                Grid.ColumnSpan="3"
+                HorizontalAlignment="Center"
+                Orientation="Horizontal">
+                <StackPanel Orientation="Vertical">
+                    <iconPacks:PackIconMaterial
+                        Width="40"
+                        Height="40"
+                        HorizontalAlignment="Center"
+                        Foreground="{Binding MyFoe.BusyForeground}"
+                        Kind="ClockAlert"
+                        ToolTip="Busy Indicator" />
+                    <Label Content="FOE Busy" FontSize="8" />
+                </StackPanel>
+                <StackPanel Orientation="Vertical">
+                    <iconPacks:PackIconMaterial
+                        Width="40"
+                        Height="40"
+                        HorizontalAlignment="Center"
+                        Foreground="{Binding MyFoe.ErrorForeground}"
+                        Kind="AlarmLightOutline"
+                        ToolTip="Error Indicator" />
+                    <Label Content="FOE Error" FontSize="8" />
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

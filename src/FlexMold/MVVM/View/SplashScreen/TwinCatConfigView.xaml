@@ -1,0 +1,40 @@
+﻿<UserControl
+    x:Class="FlexMold.MVVM.View.Setting.TwinCatConfigView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+    xmlns:local="clr-namespace:FlexMold.MVVM.View.Setting"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:splashscreen="clr-namespace:FlexMold.MVVM.ViewModel.SplashScreen"
+    xmlns:splashscreenV="clr-namespace:FlexMold.MVVM.View.SplashScreen"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
+    d:DataContext="{d:DesignInstance Type=splashscreen:TwinCatConfigViewModel}"
+    mc:Ignorable="d">
+    <Border Style="{StaticResource panelMenuBorder}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" ItemsSource="{Binding TabList}" />
+            <Button
+                Grid.Row="1"
+                Margin="10"
+                AutomationProperties.AutomationId="Close"
+                Command="{x:Static wpf:DialogHost.CloseDialogCommand}"
+                IsCancel="True"
+                IsEnabled="{Binding CanClose}">
+                <Button.CommandParameter>
+                    <system:Boolean>False</system:Boolean>
+                </Button.CommandParameter>
+                <StackPanel Orientation="Horizontal">
+                    <iconPacks:PackIconMaterial Margin="6" Kind="Cancel" />
+                    <TextBlock VerticalAlignment="Center" Text="Close" />
+                </StackPanel>
+            </Button>
+        </Grid>
+    </Border>
+</UserControl>

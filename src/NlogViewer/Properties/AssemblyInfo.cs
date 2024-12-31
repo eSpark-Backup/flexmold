@@ -10,8 +10,8 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("ZSoft")]
 [assembly: AssemblyProduct("NlogViewer")]
-[assembly: AssemblyCopyright("Copyright © ZSoft 2013")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCopyright("Copyright©ZSoft2024®eSpark")]
+[assembly: AssemblyTrademark("®eSpark")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible

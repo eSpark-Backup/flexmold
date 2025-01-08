@@ -26,8 +26,8 @@ namespace FlexMold.MVVM.View.Home
         private void Timer_Elapsed(object sender, EventArgs e)
         {
             TSWHomeVacuumStatus.IsOn = false;
-            try { if (CSVHelper.MachineEnabled) TSWHomeMachineStatus.IsOn = true; else TSWHomeMachineStatus.IsOn = false; } catch { }
-            try { if (CSVHelper.MotorsStatusGlobal[0] == "Healthy") TSWHomeMotorStatus.IsOn = true; else TSWHomeMotorStatus.IsOn = false; } catch { }            
+            try { if (CSVHelper.MachineEnabled) { TSWHomeMachineStatus.IsOn = true; TSWHomeMotorStatus.IsOn = true; } else { TSWHomeMachineStatus.IsOn = false; TSWHomeMotorStatus.IsOn = false; } } catch { }
+            //try { if (CSVHelper.MotorsStatusGlobal[0] == "Healthy") TSWHomeMotorStatus.IsOn = true; else TSWHomeMotorStatus.IsOn = false; } catch { }            
             TSWHomeHeaterStatus.IsOn = false;
             try { if (CSVHelper.MachineEnabled) TSWHomePowerStatus.IsOn = true; else TSWHomePowerStatus.IsOn = false; } catch { }            
             try { if (CSVHelper.LaserEnabled) TSWHomeLaserStatus.IsOn = true; else TSWHomeLaserStatus.IsOn = false; } catch { }

@@ -143,7 +143,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     int i = 1;
                     string errmsg = "";
                     //foreach (string negHomin in offset_resume)
-                    for (int j = 0; j < DeviceCount; j++)//-10,849304
+                    for (int j = 0; j < _TwinCathelper.PLCMotors.Count(); j++)//-10,849304
                     {                        
                         HomingOffsetDataCommand += "Motor "+j +":="+float.Parse(offset_resume[j])+Environment.NewLine;
 
@@ -224,7 +224,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     int i = 1;
                     HomingOffsetDataCommand = "";
 
-                    for (int j = 0; j < DeviceCount; j++)
+                    for (int j = 0; j < _TwinCathelper.PLCMotors.Count(); j++)
                     {
                         try
                         {
@@ -243,7 +243,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             else
             {
                 int i = 1;
-                for (int j = 0; j < DeviceCount; j++)
+                for (int j = 0; j < _TwinCathelper.PLCMotors.Count(); j++)
                 {
                     try
                     {
@@ -277,7 +277,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     int i = 1;
                     //log.Log(LogLevel.Info, "chkMotorInput11 chkMotorInput>>>>" + DeviceCount.ToString()+"---"+ newHomingArr[0]);
                     //foreach (String st in newHomingArr)
-                    for (int j = 0; j < DeviceCount; j++)
+                    for (int j = 0; j < _TwinCathelper.PLCMotors.Count(); j++)
                     {
                         try
                         {
@@ -367,7 +367,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
 
         void CalibrateSeq02_HomeUp() {
 
-            for (int i = 0; i < DeviceCount; i++)
+            for (int i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
             {
                 //_TwinCathelper.PLCMotors[i].mDisplacement = 0.200F;
                 //_TwinCathelper.PLCMotors[i].mDirection = false;
@@ -383,19 +383,19 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             }
 
             _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mMode);
-            log.Log(LogLevel.Info, $"{DeviceCount} CalibrateHard value(s) has been written sucessfully");
+            log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} CalibrateHard value(s) has been written sucessfully");
 
             Thread.Sleep(200);
             uint zero = 0;
-            for (uint i = 0; i < DeviceCount; i++)
+            for (uint i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
                 _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
-            log.Log(LogLevel.Info, $"{DeviceCount} zero value(s) has been written sucessfully");
+            log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} zero value(s) has been written sucessfully");
 
         }
         void CalibrateSeq02_HomeDown()
         {
 
-            for (int i = 0; i < DeviceCount; i++)
+            for (int i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
             {
                 _TwinCathelper.PLCMotors[i].mDisplacement = 0.200F;
                 _TwinCathelper.PLCMotors[i].mDirection = true;
@@ -410,13 +410,13 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             }
 
             _TwinCathelper.WriteEthercatDeviceData();
-            log.Log(LogLevel.Info, $"{DeviceCount} CalibrateHard value(s) has been written sucessfully");
+            log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} CalibrateHard value(s) has been written sucessfully");
 
             Thread.Sleep(200);
             uint zero = 0;
-            for (uint i = 0; i < DeviceCount; i++)
+            for (uint i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
                 _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
-            log.Log(LogLevel.Info, $"{DeviceCount} zero value(s) has been written sucessfully");
+            log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} zero value(s) has been written sucessfully");
 
         }
 
@@ -473,16 +473,19 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             log.Log(LogLevel.Info, $"Starting Calibration Seq01 process");
             try
             {
-                if (File.Exists(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\Calibration\\" + DeviceCount + ".calibrate"))
+                if (File.Exists(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\Calibration\\" + _TwinCathelper.PLCMotors.Count() + ".calibrate"))
                 {
-                    FileInfo finf = new FileInfo(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\Calibration\\" + DeviceCount + ".calibrate");
+                    FileInfo finf = new FileInfo(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\Calibration\\" + _TwinCathelper.PLCMotors.Count() + ".calibrate");
                     CalibrationData = CSVHelper.ReadCalibrate_DoubleData(finf);
 
                     //try{log.Log(LogLevel.Info, "CalibrationData>>>" + CalibrationData.Count); } catch { log.Log(LogLevel.Info, "CalibrationData>>>DataError"); }
 
                     if (ValidateCSVData())
                     {
-                        for (int i = 0; i < DeviceCount; i++)
+                        if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
+                        CSVHelper.ST_timer.Stop(); CSVHelper.ST_timer.Reset();
+
+                        for (int i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
                             _TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationSeq01Request;
                         _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mMode);
                         log.Log(LogLevel.Warn, $"Calibration Seq01 Request Sent. Please wait...");
@@ -501,7 +504,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 }
                 else
                 {
-                    MessageBox.Show("Please copy " + DeviceCount + ".calibrate to Appdata folder,", "No Calibration file found!", MessageBoxButton.OK);
+                    MessageBox.Show("Please copy " + _TwinCathelper.PLCMotors.Count() + ".calibrate to Appdata folder,", "No Calibration file found!", MessageBoxButton.OK);
                     //CalibrateButtonEnable = true;
                 }
             }

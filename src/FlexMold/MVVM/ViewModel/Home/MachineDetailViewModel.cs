@@ -108,6 +108,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                 $" Link State : {sw}\n" +
                 $" State Machine : {ds}\n";
             MySlaves[i].StrokeColor = br;
+            if(CSVHelper.MotorsStatusGlobal==null || CSVHelper.MotorsStatusGlobal.Length<1)
+                CSVHelper.MotorsStatusGlobal = new String[TwinCathelper.DeviceCount];
             CSVHelper.MotorsStatusGlobal[i] = sw.ToString();
             var _tmg = $"{MySlaves[i].SlaveName} --> Link State {MySlaves[i].Slave_Link_State}";
             return _tmg;
@@ -201,6 +203,7 @@ namespace FlexMold.MVVM.ViewModel.Home
 
                 switch (MySlaves[index].Slave_State_Machine)
                 {
+                    case ESlaveStateMachine.EC_DEVICE_STATE_OK:
                     case ESlaveStateMachine.EC_DEVICE_STATE_OP:
                         var _tmg = SetUI(index, MySlaves[index].Slave_State_Machine, Brushes.Green);
                         CSVHelper.MotorsStatusGlobal[index] = "Healthy";
@@ -210,7 +213,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                         TNF.ShowSuccess(_tmg);
                         log.Log(LogLevel.Info, _tmg);
                         break;
-                    case ESlaveStateMachine.EC_DEVICE_STATE_OK:
+                    
                     case ESlaveStateMachine.EC_DEVICE_STATE_INIT:
                     case ESlaveStateMachine.EC_DEVICE_STATE_PREOP:
                     case ESlaveStateMachine.EC_DEVICE_STATE_BOOTSTRAP:

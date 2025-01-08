@@ -117,7 +117,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         public void ReadSelectedMotors()
         {
 
-            if (!CSVHelper.MachineEnabled || !DoMachineUserCanceled)
+            if (!CSVHelper.MachineEnabled && !DoMachineUserCanceled)//when both are false
             {
                 log.Log(LogLevel.Error, $"Machine status disconnected! ");
                 DialogResult dr = MessageBox.Show("Machine link InActive, Please check connection!", "Machine not connected", MessageBoxButtons.RetryCancel);

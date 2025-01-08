@@ -238,6 +238,20 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             if (!justread)
             {
                 MyPLCMotor[SelectedMotorIndex].mDisplacement = (float)SelectedMotorDisplacementValue;
+
+                CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 5.00F;
+                if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
+                CSVHelper.ST_timer.Restart();
+
+                log.Log(LogLevel.Warn, "MotorTestView > SendDisplacement Box:" + SelectedMotorIndex.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[SelectedMotorIndex] + " > " + MyPLCMotor[SelectedMotorIndex].mDisplacement.ToString() + "  >> Direction: " + (MyPLCMotor[SelectedMotorIndex].mDirection ? "Down" : "Up")
+                        + "  >> RampDlay: " + MyPLCMotor[SelectedMotorIndex].mRampDelay
+                        + "  >> mRPM: " + MyPLCMotor[SelectedMotorIndex].mRPM
+                        + "  >> MotorTime: " + MyPLCMotor[SelectedMotorIndex].mTime
+                        + "  >> mMode: " + EMode.Project.ToString());
+
+                if (MyPLCMotor[SelectedMotorIndex].mTime < 1.0F)
+                    log.Log(LogLevel.Error, "MotorTestSpeed: Invalid MotorTime/too Small > " + MyPLCMotor[SelectedMotorIndex].mTime);
+
                 _TwinCathelper.WriteEthercatDeviceData(
                     SelectedMotorIndex,
                     TwinCathelper.DeviceSymbol.mDisplacement,
@@ -268,6 +282,9 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     TwinCathelper.DeviceSymbol.mTime,
                     MyPLCMotor[SelectedMotorIndex].mTime.CastToArray());
                 log.Log(LogLevel.Info, "Motor Time Value Has Been Written");
+
+                if (MyPLCMotor[SelectedMotorIndex].mTime < 1.0F)
+                    log.Log(LogLevel.Error, "MotorTestTime: Invalid MotorTime/too Small > " + MyPLCMotor[SelectedMotorIndex].mTime);
 
             }
             else
@@ -300,7 +317,27 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 {
                     MyPLCMotor[i].mDisplacement = (float)SelectedMotorDisplacementValue;
                     MyPLCMotor[i].mRPM = (float)SelectedMotorRPM;
+                    MyPLCMotor[i].mDirection = _SelectedMotorDirValue == 0 ? false : true; ;//CSVHelper.MotorDirValue == 0 ? "Clockwise" : "Anti-Clockwise";
+                    //log.Log(LogLevel.Warn, "Position > WriteCSVData Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
+                    //+ "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
+                    //+ "  >> mRPM: " + _TwinCathelper.PLCMotors[i].mRPM
+                    //+ "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
+                    //+ "  >> mMode: " + EMode.Project.ToString());
+
+                    log.Log(LogLevel.Warn, "MotorTestVuew > SendAll Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + MyPLCMotor[i].mDisplacement.ToString() + "  >> Direction: " + (MyPLCMotor[i].mDirection ? "Down" : "Up")
+                    + "  >> RampDlay: " + MyPLCMotor[i].mRampDelay
+                    + "  >> mRPM: " + MyPLCMotor[i].mRPM
+                    + "  >> MotorTime: " + MyPLCMotor[i].mTime
+                    + "  >> mMode: " + EMode.Project.ToString());                    
                 }
+                if (MyPLCMotor.Max().mTime < 1.0F)
+                    log.Log(LogLevel.Error, "MotorTestAll: Invalid MotorTime/too Small > " + MyPLCMotor.Max().mTime);
+
+                CSVHelper.CompletingTime = MyPLCMotor.Max().mTime + 5.00F;
+
+                if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
+                CSVHelper.ST_timer.Restart();
+
                 _TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mDisplacement);
                 log.Log(LogLevel.Info, "All Motors Displacement Value Has Been Written");
                 _TwinCathelper.WriteEthercatDeviceData(TwinCathelper.DeviceSymbol.mRPM);

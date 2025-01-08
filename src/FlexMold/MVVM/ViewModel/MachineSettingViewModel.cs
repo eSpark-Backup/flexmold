@@ -178,7 +178,7 @@ namespace FlexMold.MVVM.ViewModel
             Dictionary<string, string> dct = new Dictionary<string, string>();
             dct.Add("Size", machineSize.ToString());
             dct.Add("MinRadius", machineRadius.ToString());
-            dct.Add("MotorCount", motorCount.ToString());
+            dct.Add("MotorCount", TwinCathelper.DeviceCount.ToString());//motorCount.ToString());
             dct.Add("PartsProduced", machinePartsProduced.ToString());
             dct.Add("TimeInOperation", machineOperatedTime.ToString());
             dct.Add("AdsStateTimeout", AdsStateTimeout.ToString());
@@ -224,7 +224,7 @@ namespace FlexMold.MVVM.ViewModel
                         {
                             machineSize = dr["Size"].ToString();
                             machineRadius = dr["MinRadius"].ToString();
-                            motorCount = dr["MotorCount"].ToString();
+                            motorCount = TwinCathelper.DeviceCount.ToString();//dr["MotorCount"].ToString();
                             machinePartsProduced = dr["PartsProduced"].ToString();
                             machineOperatedTime = dr["TimeInOperation"].ToString();
                         AdsStateTimeout = dr["AdsStateTimeout"].ToString();

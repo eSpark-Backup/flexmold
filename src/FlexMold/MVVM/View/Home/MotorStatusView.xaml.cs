@@ -8,9 +8,9 @@ namespace FlexMold.MVVM.View.Home
     /// </summary>
     public partial class MotorStatusView : UserControl
     {
-        public MotorStatusView(IMotorStatusViewmodel motorStatusViewmodel)
+        public MotorStatusView(IMotorStatusViewModel motorStatusViewModel)
         {
-            DataContext = motorStatusViewmodel;
+            DataContext = motorStatusViewModel;
             InitializeComponent();
         }
     }

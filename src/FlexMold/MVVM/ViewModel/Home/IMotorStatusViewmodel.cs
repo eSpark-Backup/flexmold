@@ -5,11 +5,12 @@ using System.Collections.ObjectModel;
 
 namespace FlexMold.MVVM.ViewModel.Home
 {
-    public interface IMotorStatusViewmodel
+    public interface IMotorStatusViewModel
     {
         bool CalibrateButtonEnable { get; set; }
         RelayCommand CalibrateCommand { get; set; }
         RelayCommand Calibrate02Command { get; set; }
+        RelayCommand CompleteCalibrateCommand { get; set; }
         IList<float> CalibrationData { get; set; }
         RelayCommand DebugDetailClickCommand { get; set; }
         uint[] DeviceStatus { get; set; }

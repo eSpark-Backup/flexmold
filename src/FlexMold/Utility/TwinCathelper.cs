@@ -22,6 +22,10 @@ namespace FlexMold.Utility
     public partial class TwinCathelper : ITwinCathelper
     {
         private bool machineEmergencyDisconnected = false;
+        private bool errorDirectlyCalledByTwincat = false;
+        public bool DoMachineUserCanceled = false;
+        public DispatcherTimer dispatcherTimer = new DispatcherTimer();
+
         public void SetMachineStatusTimer()
         {
             ValidStateMachines = new ESlaveStateMachine[DeviceCount];
@@ -34,9 +38,9 @@ namespace FlexMold.Utility
             Array.Fill(ValidElinkStates, ESlaveLink.EC_LINK_STATE_OK);
             Array.Fill(defaultElinkStates, ESlaveLink.UnAvailable);
 
-            var dispatcherTimer = new DispatcherTimer();
+            
             dispatcherTimer.Tick += new EventHandler(Timer_Elapsed);
-            dispatcherTimer.Interval = new TimeSpan(0, 0, 3);
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
             dispatcherTimer.Start();
         }
         private void Timer_Elapsed(object sender, EventArgs e)
@@ -47,6 +51,44 @@ namespace FlexMold.Utility
         {
             try
             {
+                try
+                {
+                    if (!CSVHelper.MachineEnabled && !DoMachineUserCanceled)
+                    {
+                        dispatcherTimer.Stop();
+                        _log.Log(LogLevel.Error, $"Machine status disconnected! ");
+                        MessageBoxResult dr = MessageBox.Show("Machine link InActive, Please check connection!", "Machine not connected", MessageBoxButton.OKCancel);
+
+                        if (dr == MessageBoxResult.Cancel)
+                        {
+                            DoMachineUserCanceled = true;
+                            dispatcherTimer.Start();
+                            return;
+                        }
+                        if(!dispatcherTimer.IsEnabled)
+                            dispatcherTimer.Start();
+
+                        return;
+                    }
+                }
+                catch { }
+                //InitializeNotifications();
+                if (CSVHelper.wrongFirmwareFound)
+                { 
+
+                    //log.Log(LogLevel.Warn, $"Stopping Motors");
+                    _log.Log(LogLevel.Warn, "Wrong firmware found and closing application!");
+                    Client.Close();
+
+                    var data = (int)EMode.Abort;
+                    for (uint j = 0; j < DeviceCount; j++)
+                        WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray());
+                    
+                    Environment.Exit(0);
+
+                    return;
+                }
+
                 _log.Log(LogLevel.Trace, $"Writing {TCSymbols.ECAbExecute} : 1");
 
                 var pp = MySymbols.Where(a => a.InstancePath == $"MAIN.{TCSymbols.ECAbExecute}").FirstOrDefault().TryWriteValue(1, 200);
@@ -64,7 +106,7 @@ namespace FlexMold.Utility
                     var evenIndexesValues = deviceandlinkstatusbytes.Where((value, index) => index % 2 == 0);
                     Slave_StateMachine_Status = evenIndexesValues.Select(b => (ESlaveStateMachine)Enum.ToObject(typeof(ESlaveStateMachine), b)).ToArray();
 
-                    if (Slave_Link_Status[0].ToString().Contains("EC_LINK_STATE_NOT_PRESENT"))
+                if (Slave_Link_Status[0].ToString().Contains("EC_LINK_STATE_NOT_PRESENT"))
                     {
                         if (!machineEmergencyDisconnected)//if false
                         {
@@ -75,18 +117,39 @@ namespace FlexMold.Utility
                             //{
                             //    _log.Log(LogLevel.Info, "Starting timer for Stop/Resume!");
 
-                            if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'N')
-                            {
-                                FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'N';
-                                FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start(); }
+                            var data = (int)EMode.Abort;
+                            for (uint j = 0; j < DeviceCount; j++)
+                                WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray());
+
+                            if (!CSVHelper.NoLinkHappened)
+                                errorDirectlyCalledByTwincat = true;// some times this loop is called directly
+
+                            CSVHelper.NoLinkHappened = false;
+                            //if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'N' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'D' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'C')
+                            //{
+                            //    FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'N';
+                            //    FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start();
                             //}
                         }
 
                     }
                     //2024-02-12 14:25:11.9061|INFO|Machine Link Status|FlexMold.MVVM.ViewModel.Home.MachineDetailViewModel.DispLinkStatus|Box_16 --> Link State EC_LINK_STATE_OK
-                    else if (Slave_Link_Status[0].ToString().Contains("EC_LINK_STATE_OK") || Slave_Link_Status[0].ToString().Contains("EC_DEVICE_STATE_INIT"))//&& machineEmergencyDisconnected
+                    else if (Slave_Link_Status[0].ToString().Contains("EC_LINK_STATE_OK") || Slave_Link_Status[0].ToString().Contains("EC_DEVICE_STATE_INIT") || Slave_Link_Status[0].ToString().Contains("EC_DEVICE_STATE_OP"))//&& machineEmergencyDisconnected
                     {
+                        if (machineEmergencyDisconnected)
+                        {
+                            if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && errorDirectlyCalledByTwincat)
+                            {
+                                FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'N';
+                                FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start();
+                                errorDirectlyCalledByTwincat = false;                                
+                            }
+
+                        }
+
                         machineEmergencyDisconnected = false;
+
+
                         //FlexMold.MVVM.ViewModel.Project.ProjectViewModel.EventStopToggle = true;                        
                     }
                 }
@@ -103,12 +166,18 @@ namespace FlexMold.Utility
             {
                 _log.Log(LogLevel.Error, ex.Message);
 
+                _log.Log(LogLevel.Info, "Twincat exception Stopped");
+                var data = (int)EMode.Abort;
+                for (uint j = 0; j < DeviceCount; j++)
+                    WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray());
 
                 //if (!machineEmergencyDisconnected)
                 //{
                 //    machineEmergencyDisconnected = true;
                 //    FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start();
                 //}
+
+                CSVHelper.MachineEnabled = false;
             }
         }
         public ESlaveLink[] Slave_Link_Status
@@ -235,7 +304,7 @@ namespace FlexMold.Utility
                         _log.Log(LogLevel.Trace, $"Readed {TCSymbols.DeviceStatus} : {JsonSerializer.Serialize(e.Data.ToArray())}");
                         Buffer.BlockCopy(e.Data.ToArray(), 0, PLCMotorsStatuses.DeviceStatus, 0, e.Data.Length);                        
                         TMotor_DeviceStatusChanged?.Invoke(null, e);
-                        
+                         
                         //try
                         //{
                         //    if (((EDeviceStatus)int.Parse(String.Join(",", PLCMotorsStatuses.DeviceStatus))).ToString() == "CalibrationSquence02Success")
@@ -253,25 +322,25 @@ namespace FlexMold.Utility
                         TMotor_mDiag3Changed?.Invoke(null, e);
                         try { _log.Log(LogLevel.Info, $"mDiag3 Updated : {(EDeviceStatus)int.Parse(String.Join(",", PLCMotorsStatuses.mDiag3))}"); } catch { }
 
-                        try
-                        {
+                        //try
+                        //{
 
-                            String FirmwareNotMatched = "";
-                            for (uint i = 0; i < DeviceCount; i++)
-                            {
-                                if (PLCMotorsStatuses.mDiag3[i] != 1713969130)//0x662917EA (1713969130)
-                                    FirmwareNotMatched += "Motor" + (i + 1) + ",";
-                            }
+                        //    String FirmwareNotMatched = "";
+                        //    for (uint i = 0; i < DeviceCount; i++)
+                        //    {
+                        //        if (CSVHelper.MotorsStatusGlobal[0] == "Healthy" && PLCMotorsStatuses.mDiag3[i] != 1713969130)//0x662917EA (1713969130)
+                        //            FirmwareNotMatched += "Motor" + (i + 1) + ",";
+                        //    }
 
-                            if (FirmwareNotMatched.Length > 0)
-                            {
-                                MessageBox.Show("Please update the firmware versions of the following motor(s)!" + Environment.NewLine + FirmwareNotMatched, "Wrong firmware found!", MessageBoxButton.OK, MessageBoxImage.Error);
-                                Client.Close();
-                                return;
-                            }
+                        //    if (!CSVHelper.MachineEnabled || FirmwareNotMatched.Length > 0)
+                        //    {
+                        //        MessageBox.Show("Please update the firmware versions of the following motor(s)!" + Environment.NewLine + FirmwareNotMatched, "Wrong firmware found!", MessageBoxButton.OK, MessageBoxImage.Error);
+                        //        Client.Close();
+                        //        return;
+                        //    }
 
-                        }
-                        catch { }
+                        //}
+                        //catch { }
 
 
 
@@ -326,6 +395,9 @@ namespace FlexMold.Utility
             MyConnectionStateNew = e.NewState;
             MyConnectionStateChangedReason = e.Reason;
             _log.Log(LogLevel.Info, $"Session Connection Status : {MyConnectionStateNew}");
+            
+            CSVHelper.MachineEnabled = MyConnectionStateNew == ConnectionState.Connected ? true : false;
+
             TSession_ConnectionStateChanged?.Invoke(null, e);
         }
         private void Connection_ConnectionStatusChanged(object sender, ConnectionStateChangedEventArgs e)

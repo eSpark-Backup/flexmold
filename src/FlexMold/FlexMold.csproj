@@ -45,6 +45,7 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
+		<Folder Include="bin\" />
 		<Folder Include="MVVM\ViewModel\Accessory\" />
 		<Folder Include="MVVM\View\Diaglog\" />
 	</ItemGroup>
@@ -78,21 +79,21 @@
 		<PackageReference Include="ToastNotifications.Messages" Version="2.5.1" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\Flexmold_libs\NlogViewer\NlogViewer.csproj" />
-	  <ProjectReference Include="..\Flexmold_libs\ScriptingTestContainerBase\ScriptingTestContainerBase.csproj" />
+	  <ProjectReference Include="..\NlogViewer\NlogViewer.csproj" />
+	  <ProjectReference Include="..\ScriptingTestContainerBase\ScriptingTestContainerBase.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 	  <Reference Include="envdte">
 	    <HintPath>..\..\flexmold-zlaserByMASB-OriginalLastRelease\src\FlexMold\bin\Debug\net6.0-windows\envdte.dll</HintPath>
 	  </Reference>
 	  <Reference Include="System.Data.SQLite">
-	    <HintPath>..\simple_crud\Simple CRUD\bin\x86\Debug\System.Data.SQLite.dll</HintPath>
+	    <HintPath>..\..\..\flexmold-zlaserByMASB - 4PointsUpdated\bin\x86\Debug\net6.0-windows\System.Data.SQLite.dll</HintPath>
 	  </Reference>
 	  <Reference Include="System.Data.SQLite.EF6">
-	    <HintPath>..\simple_crud\Simple CRUD\bin\x86\Debug\System.Data.SQLite.EF6.dll</HintPath>
+	    <HintPath>..\..\..\flexmold-zlaserByMASB - 4PointsUpdated\bin\x86\Debug\net6.0-windows\System.Data.SQLite.EF6.dll</HintPath>
 	  </Reference>
 	  <Reference Include="System.Data.SQLite.Linq">
-	    <HintPath>..\simple_crud\Simple CRUD\bin\x86\Debug\System.Data.SQLite.Linq.dll</HintPath>
+	    <HintPath>..\..\..\flexmold-zlaserByMASB - 4PointsUpdated\bin\x86\Debug\net6.0-windows\System.Data.SQLite.Linq.dll</HintPath>
 	  </Reference>
 	</ItemGroup>
 	<ItemGroup>

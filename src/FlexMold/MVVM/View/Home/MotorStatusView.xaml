@@ -11,7 +11,7 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <UniformGrid Rows="3">
+    <UniformGrid Rows="4">
         <ItemsControl x:Name="MyItems" ItemsSource="{Binding MyMotors}" Grid.Row="0" MinHeight="80" MinWidth="80">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -49,6 +49,12 @@
         <Button
             MaxHeight="100"
             MaxWidth="150"
+            Command="{Binding CompleteCalibrateCommand}"
+            Content="Calibrate"
+            IsEnabled="{Binding CalibrateButtonEnable}" />
+        <!--<Button
+            MaxHeight="100"
+            MaxWidth="150"
             Command="{Binding CalibrateCommand}"
             Content="Hard Calibrate"
             IsEnabled="{Binding CalibrateButtonEnable}" />
@@ -57,6 +63,6 @@
             MaxWidth="150"
             Command="{Binding Calibrate02Command}"
             Content="Home Calibrate"
-            IsEnabled="{Binding CalibrateButtonEnable}" />
+            IsEnabled="{Binding CalibrateButtonEnable}" />-->
     </UniformGrid>
 </UserControl>

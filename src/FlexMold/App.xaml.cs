@@ -51,15 +51,16 @@ namespace FlexMold
 
                 services.AddSingleton<IHomeViewModel, HomeViewModel>();                
                 services.AddSingleton<IMachineDetailViewModel, MachineDetailViewModel>();
-                services.AddSingleton<IMotorStatusViewmodel, MotorStatusViewmodel>();
+                services.AddSingleton<IMotorStatusViewModel, MotorStatusViewModel>();
+                services.AddSingleton<IEmergencyStatusViewModel, EmergencyStatusViewModel>();
                 services.AddSingleton<IMachineSettingViewModel, MachineSettingViewModel>();
                 services.AddSingleton<MachineDetailView>();
                 services.AddSingleton<MotorStatusView>();
+                services.AddSingleton<EmergencyStatusView>();
                 services.AddSingleton<VisualDisplayView>();
                 services.AddSingleton<VaccumStatusView>();
                 services.AddSingleton<HeaterStatusView>();
-                services.AddSingleton<PowerStatusView>();
-                services.AddSingleton<EmergencyStatusView>();
+                services.AddSingleton<PowerStatusView>();                
                 services.AddSingleton<LaserStatusView>();
 
                 services.AddSingleton<MotorTest>();
@@ -108,8 +109,12 @@ namespace FlexMold
             Process[] listOfProcs = Process.GetProcessesByName(currentRunningProcess.ProcessName);
             foreach (Process proc in listOfProcs)
             {
-                if ((proc.MainModule.FileName == currentRunningProcess.MainModule.FileName) && (proc.Id != currentRunningProcess.Id))
-                    return true;
+                try
+                {
+                    if ((proc.MainModule.FileName == currentRunningProcess.MainModule.FileName) && (proc.Id != currentRunningProcess.Id))
+                        return true;
+                }
+                catch { }
             }
             return false;
         }
@@ -119,7 +124,7 @@ namespace FlexMold
 
             if (AnotherInstanceExists())
             {
-                //MessageBox.Show("You Can Not Run More Than One Instance Of This Application.", "Application already running!", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show("Please close the application running in background first!", "Application already running!", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 this.OnExit(null);
                 return;
             }

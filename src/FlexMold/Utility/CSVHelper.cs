@@ -4,6 +4,7 @@ using NLog;
 using Sylvan.Data.Csv;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -23,13 +24,16 @@ namespace FlexMold.Utility
         public static uint TotalNoHrs = 0;
         public static int PartsProduced = 0;
         public static uint LastSystemStatus = 0;
-        
+        public static string LastSelectedCSV = "";
+        public static float CompletingTime = 0.00F;
+        public static Stopwatch ST_timer = new Stopwatch();
         //public static int RPMAssume = 0;
         //public static int CalibrationSeq02Delay = 0;
 
         public static int AdsStateTimeout = 6;
         public static string prjFolderLoc = Environment.CurrentDirectory;
         public static string NegativeoffsetResume = "";
+        public static List<float> NegativeoffsetResumeFlt = null;
         public static string LastPositionValues = "";
         public static MVVM.ViewModel.Setting.MotorSettingViewModel offsetRes_MotorSettingViewModel=null;
 
@@ -40,10 +44,15 @@ namespace FlexMold.Utility
         public static StatusBaseViewModel _statusBaseViewModel;
         public static String[] MotorsStatusGlobal = new String[TwinCathelper.DeviceCount];
         public static bool MachineEnabled = true;
+        public static bool wrongFirmwareFound = false;
+        public static bool UpdateHomeCSVStatus = false;
         public static bool LaserEnabled = false;
         public static bool IsLastEventCalibr = false;
+        public static bool IsNewPanelSelected = false;
         public static bool IsNewProjSelected = false;
         public static bool InPositionProcess_Elapsed = false;
+        public static bool NoLinkHappened = false;
+        public static bool CalibrationCompleted = false;
         //public static bool StopAlreadyCalled = false;
         public static DateTime LastStopTime = DateTime.Now;
 
@@ -53,6 +62,22 @@ namespace FlexMold.Utility
         //public string WorkGroup { get; set; }
         //public string DataFolderName { get; set; }
         //public string PlotFolderName { get; set; }
+
+
+        public static void SetNegativeoffsetResumeFlt()
+        {
+            try
+            {
+                List<float> NegativeoffsetResumeProj = new List<float>();
+                String CSVOffset_contents = NegativeoffsetResume.ToString(CultureInfo.InvariantCulture);
+                String[] offset_resume = CSVOffset_contents.Split('~');
+                NegativeoffsetResumeFlt = new List<float>(TwinCathelper.DeviceCount);
+
+                for (int i = 0; i < TwinCathelper.DeviceCount; i++)
+                    NegativeoffsetResumeFlt.Add(float.Parse(offset_resume[i]));
+            }
+            catch { }
+        }
 
         public static List<float> ReadCSV_DoubleData(FileInfo filename)
         {

@@ -34,7 +34,7 @@ namespace FlexMold.MVVM.ViewModel
             PowerOnOffView powerOnOffView,
             //RenumberingView renumberingView,
             PositionView positionView,
-            ResetView resetView)
+            EmergencyStatusView EmergencyStatusView)
         {
             CurrentView = motorTest;
 
@@ -43,7 +43,7 @@ namespace FlexMold.MVVM.ViewModel
             PowerOnOffCommand = new RelayCommand(o => { CurrentView = powerOnOffView; });
             //RenumberingCommand = new RelayCommand(o => { CurrentView = renumberingView; });
             PositionCommand = new RelayCommand(o => { CurrentView = positionView; });
-            ResetCommand = new RelayCommand(o => { CurrentView = resetView; });
+            ResetCommand = new RelayCommand(o => { CurrentView = EmergencyStatusView; });
         }
     }
 }

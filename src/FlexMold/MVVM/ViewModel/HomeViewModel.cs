@@ -38,7 +38,7 @@ namespace FlexMold.MVVM.ViewModel
             VaccumStatusView vaccumStatusView,
             HeaterStatusView heaterStatusView,
             PowerStatusView powerStatusView,
-            EmergencyStatusView emergencyStatusView,
+            //EmergencyStatusView emergencyStatusView,
             LaserStatusView laserStatusView
             )
         {
@@ -52,7 +52,7 @@ namespace FlexMold.MVVM.ViewModel
             HomingStatusCommand = new RelayCommand(o => { CurrentView = homingStatusView; });
             HeaterStatusCommand = new RelayCommand(o => { CurrentView = heaterStatusView; });
             PowerStatusCommand = new RelayCommand(o => { CurrentView = powerStatusView; });
-            EmergencyStatusCommand = new RelayCommand(o => { CurrentView = emergencyStatusView; });
+            //EmergencyStatusCommand = new RelayCommand(o => { CurrentView = emergencyStatusView; });
             LaserStatusCommand = new RelayCommand(o => { CurrentView = laserStatusView; });
         }
     }

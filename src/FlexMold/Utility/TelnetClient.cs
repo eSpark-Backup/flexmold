@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace FlexMold.Utility
 {
@@ -146,6 +147,12 @@ namespace FlexMold.Utility
         {
             try
             {
+                if (!CSVHelper.MachineEnabled)
+                {
+                    MessageBox.Show("Please Power ON the machine before resuming!", "Machine state is off", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
                 // Wait for any previous send commands to finish and release the semaphore
                 // This throttles our commands
                 await _sendRateLimit.WaitAsync(_internalCancellation.Token);

@@ -728,9 +728,12 @@ namespace FlexMold.MVVM.ViewModel.Home
                     }
                 }
 
-                if (CSVHelper.ST_timer != null && CSVHelper.ST_timer.IsRunning)
+                CSVHelper.CompletingTime_count += 1;
+
+                if (CSVHelper.ST_timer != null && CSVHelper.ST_timer.IsRunning && CSVHelper.CompletingTime_count>3)
                     if ((CSVHelper.ST_timer.ElapsedMilliseconds / 1000) > CSVHelper.CompletingTime)
                     {
+                        CSVHelper.CompletingTime_count = 0;
                         log.Log(LogLevel.Error, "*** Motors Malfunctioning, Please Turnoff Machine!");
 
                         //log.Log(LogLevel.Warn, $"Stopping Motors");
@@ -738,20 +741,25 @@ namespace FlexMold.MVVM.ViewModel.Home
                         //for (uint j = 0; j < DeviceCount; j++)
                         //    _TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray());
                         //log.Log(LogLevel.Warn, $"{EMode.Abort}");
-                        stoppingMotors();
 
-                        MessageBox.Show("*** Motors Malfunctioning, Please Turnoff Machine!", "Error on Machine/Motors!", MessageBoxButton.OK, MessageBoxImage.Error);
                         CSVHelper.ST_timer.Stop();
                         CSVHelper.ST_timer.Reset();
-
-                        if (hlist != null && hlist.Count>0)
+                        //Application.Current.MainWindow.Hide();
+                        //if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'W' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'R')
                         {
-                            string ss = "";
-                            foreach (int k in hlist.Keys)
-                                ss += k + ", ";
+                            stoppingMotors();
+                            MessageBox.Show("*** Please calibrate machine first!", "Motors Malfunctioning Error!", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                            //Application.Current.MainWindow.Show();
+
+                            if (hlist != null && hlist.Count > 0)
+                            {
+                                string ss = "";
+                                foreach (int k in hlist.Keys)
+                                    ss += k + ", ";
 
                                 log.Log(LogLevel.Error, " MismatchedIndexes at > " + ss);
-                            
+
+                            }
                         }
                     }
                 if (hlist != null && hlist.Count > 0)
@@ -1004,7 +1012,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     MessageBox.Show("Time is out of bound! Max is 15Mins. But counted is " + (MotorTime / 60) + " Mins", "Warning! Time is out of bound!", MessageBoxButton.OK);
             }
             catch (Exception ex) { log.Log(LogLevel.Info, "GetRecommendedRPM>>>>" + ex.Message); }
-            CSVHelper.CompletingTime = MotorTime + 5.00F;
+            CSVHelper.CompletingTime = MotorTime + 3.00F;
             return MotorTime;
         }
 

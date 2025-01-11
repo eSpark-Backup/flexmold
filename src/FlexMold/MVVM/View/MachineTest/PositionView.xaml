@@ -37,7 +37,8 @@
             Grid.Row="0"
             Grid.Column="2"
             Maximum="65535"
-            Minimum="0" />
+            Minimum="0" 
+            Value="{Binding NumMotorFromProp}"/>
         <Label
             Grid.Row="0"
             Grid.Column="3"
@@ -46,52 +47,37 @@
             Grid.Row="0"
             Grid.Column="4"
             Maximum="65535"
-            Minimum="0" />
-
-        <Button
-            Grid.Row="1"
-            Grid.Column="1"
-            Grid.ColumnSpan="2"
-            Content="Add" />
+            Minimum="0" Value="{Binding NumMotorToProp}"/>
         <Button
             Grid.Row="1"
             Grid.Column="3"
             Grid.ColumnSpan="2"
-            Content="Remove" />
-        <Label
-            Grid.Row="2"
-            Grid.ColumnSpan="2"
-            Content="Change Position :" />
-        <mah:NumericUpDown
-            Grid.Row="2"
-            Grid.Column="2"
-            Maximum="65535"
-            Minimum="0" />
-        <Button
+            Content="Browse" 
+            Name="BrowseButton"
+            Click="BrowseButton_Click"
+            Command="{Binding GetFileBrowse}" />
+        <RadioButton 
             Grid.Row="2"
             Grid.Column="3"
-            Content="UP" />
-        <Button
+            GroupName="MoveDirection"
+            Content="UP" Command="{Binding doMoveUp}"/>
+        <RadioButton 
             Grid.Row="2"
             Grid.Column="4"
-            Content="Down" />
-        <Label
-            Grid.Row="3"
-            Grid.ColumnSpan="2"
-            Content="Set Position :" />
+            GroupName="MoveDirection"
+            Content="Down" Command="{Binding doMoveDown}"/>
         <mah:NumericUpDown
             Grid.Row="3"
             Grid.Column="2"
-            Maximum="65535"
-            Minimum="0" />
+            Maximum="1000"
+            Minimum="-1000" 
+            Name="Moveinput"
+            ValueChanged="Moveinput_ValueChanged"
+            Value="{Binding Moveinmm}"/>
         <Button
             Grid.Row="3"
             Grid.Column="3"
             Grid.ColumnSpan="2"
-            Content="Set" />
-        <TextBox
-            Grid.Row="4"
-            Grid.ColumnSpan="5"
-            Text=" Motor Number Added" />
+            Content="Move" Command="{Binding doMoveManually}"/>
     </Grid>
 </UserControl>

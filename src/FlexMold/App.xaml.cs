@@ -93,6 +93,7 @@ namespace FlexMold
                 services.AddSingleton<PriveledgeUpView>();
                 services.AddSingleton<SambaConfigWindow>();
                 services.AddSingleton<SerialPortConfigView>();
+                services.AddSingleton<IPositionViewModel, PositionViewModel>();
             }
             ).Build();
             }

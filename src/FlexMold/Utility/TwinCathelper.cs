@@ -117,19 +117,19 @@ namespace FlexMold.Utility
                             //{
                             //    _log.Log(LogLevel.Info, "Starting timer for Stop/Resume!");
 
-                            var data = (int)EMode.Abort;
-                            for (uint j = 0; j < DeviceCount; j++)
-                                WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray());
+                            //var data = (int)EMode.Abort;
+                            //for (uint j = 0; j < DeviceCount; j++)
+                            //    WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray());
 
                             if (!CSVHelper.NoLinkHappened)
                                 errorDirectlyCalledByTwincat = true;// some times this loop is called directly
 
                             CSVHelper.NoLinkHappened = false;
-                            //if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'N' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'D' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'C')
-                            //{
-                            //    FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'N';
-                            //    FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start();
-                            //}
+                            if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'N' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'D' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'C')
+                            {
+                                FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'N';
+                                FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start();
+                            }
                         }
 
                     }

@@ -26,6 +26,7 @@ namespace FlexMold.Utility
         public static uint LastSystemStatus = 0;
         public static string LastSelectedCSV = "";
         public static float CompletingTime = 0.00F;
+        public static float CompletingTime_count = 0;
         public static Stopwatch ST_timer = new Stopwatch();
         //public static int RPMAssume = 0;
         //public static int CalibrationSeq02Delay = 0;

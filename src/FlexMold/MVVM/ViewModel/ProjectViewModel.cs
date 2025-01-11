@@ -467,46 +467,49 @@ namespace FlexMold.MVVM.ViewModel.Project
             else
                 LastmaxVal = _TwinCathelper.PLCMotors.Max().mDisplacement;
 
-            try
+            if (GetRecommendedRPM(0) > 1.0F)
             {
-                CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 5.00F;
-                if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
-                CSVHelper.ST_timer.Restart();
-
-                _TwinCathelper.WriteEthercatDeviceData();
-                log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} csv value(s) has been written sucessfully");
-
-                Thread.Sleep(200);
-                uint zero = 0;
-                for (uint i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
-                    _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
-                log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} zero value(s) has been written sucessfully");
-
-
-                string RemoveResumeAfterProcess = ConfigurationManager.AppSettings["RemoveResumeAfterProcess"].ToString();
-
-                FileInfo SelectedFile_finf = new FileInfo(selectedCSV);
-
-                if (RemoveResumeAfterProcess == "1" && File.Exists(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\Resume" + selectedListRootDir.Substring(selectedListRootDir.LastIndexOf(@"\")) + "-" + SelectedFile_finf.Name + ".Resume"))
+                try
                 {
-                    log.Log(LogLevel.Warn, $"Deleting Resume File > "+ SelectedFile_finf);
+                    CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 3.00F;
+                    if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
+                    CSVHelper.ST_timer.Restart();
 
-                    try { File.Delete(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\Resume" + selectedListRootDir.Substring(selectedListRootDir.LastIndexOf(@"\")) + "-" + SelectedFile_finf.Name + ".Resume"); } catch { }
-                    //try { File.Delete(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\" + "ManualStopped" +DeviceCount.ToString()+ ".offset"); } catch { }
-                    MotorStatus.IsMotorsIdle = false;
-                    toggleStopResumeButtonText = "Stop";
-                }                
+                    _TwinCathelper.WriteEthercatDeviceData();
+                    log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} csv value(s) has been written sucessfully");
 
-                //IsPsitionDataProcessing = true;
-                try { LastPositionData = MotorStatus.mPosition[0]; } catch { LastPositionData = 0; }                
-                try { progressbar_FinalVal = Math.Abs((int)(_TwinCathelper.PLCMotors[0].mDisplacement)); } catch { }// + Math.Abs((int)CSVHelper.NegativeoffsetResumeFlt.Min())
-                progressbar_timespent = 0;
-                TravelTimeUpdate = false;
-                IsRampCompleted = false;
+                    Thread.Sleep(200);
+                    uint zero = 0;
+                    for (uint i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
+                        _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
+                    log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} zero value(s) has been written sucessfully");
 
-                LastEventPressed = 'W';// H=Home R=Resume S=Stop W= WriteCSV O=Initial F=ForceResume C=Calibrate
+
+                    string RemoveResumeAfterProcess = ConfigurationManager.AppSettings["RemoveResumeAfterProcess"].ToString();
+
+                    FileInfo SelectedFile_finf = new FileInfo(selectedCSV);
+
+                    if (RemoveResumeAfterProcess == "1" && File.Exists(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\Resume" + selectedListRootDir.Substring(selectedListRootDir.LastIndexOf(@"\")) + "-" + SelectedFile_finf.Name + ".Resume"))
+                    {
+                        log.Log(LogLevel.Warn, $"Deleting Resume File > " + SelectedFile_finf);
+
+                        try { File.Delete(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\Resume" + selectedListRootDir.Substring(selectedListRootDir.LastIndexOf(@"\")) + "-" + SelectedFile_finf.Name + ".Resume"); } catch { }
+                        //try { File.Delete(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\" + "ManualStopped" +DeviceCount.ToString()+ ".offset"); } catch { }
+                        MotorStatus.IsMotorsIdle = false;
+                        toggleStopResumeButtonText = "Stop";
+                    }
+
+                    //IsPsitionDataProcessing = true;
+                    try { LastPositionData = MotorStatus.mPosition[0]; } catch { LastPositionData = 0; }
+                    try { progressbar_FinalVal = Math.Abs((int)(_TwinCathelper.PLCMotors[0].mDisplacement)); } catch { }// + Math.Abs((int)CSVHelper.NegativeoffsetResumeFlt.Min())
+                    progressbar_timespent = 0;
+                    TravelTimeUpdate = false;
+                    IsRampCompleted = false;
+
+                    LastEventPressed = 'W';// H=Home R=Resume S=Stop W= WriteCSV O=Initial F=ForceResume C=Calibrate
+                }
+                catch (Exception ee) { log.Log(LogLevel.Info, "WriteCSVData>>>>" + ee.Message + "---- " + ee.StackTrace.ToLower()); }
             }
-            catch(Exception ee)  { log.Log(LogLevel.Info, "WriteCSVData>>>>" + ee.Message +"---- "+ee.StackTrace.ToLower()); }
         }
 
         private bool StallStopProcess_WriteCSVData()
@@ -1137,15 +1140,18 @@ namespace FlexMold.MVVM.ViewModel.Project
             log.Log(LogLevel.Info, $"Saving CSV/Motors data for Resume Process");
             //string Max_mm = CSVHelper.MaxDisplacement.ToString(); //ConfigurationManager.AppSettings["Max_mm"].ToString();
 
-            if (CSVHelper.MotorTime < 1)
-            {
-                //RecommendedMaxDisplacement(NegativeoffsetResumeProj);
-                LoadCSVValues();
+            //if (CSVHelper.MotorTime < 1)
+            //{
+            //    //RecommendedMaxDisplacement(NegativeoffsetResumeProj);
+            //    LoadCSVValues();
 
-                int CSV_RecommendedRPM = (int)CSVHelper.RecommendedRPM;//int.Parse(ConfigurationManager.AppSettings["CSV_RecommendedRPM"].ToString());
-                RecommendedRPM(CSV_RecommendedRPM, CSVHelper.MaxRPM);//CSVHelper.MotorTime
-                //_TwinCathelper.PLCMotors[i].mTime = CSVHelper.MotorTime;//float.Parse(ConfigurationManager.AppSettings["DefaultRampTime"].ToString());s               
-            }
+            //    int CSV_RecommendedRPM = (int)CSVHelper.RecommendedRPM;//int.Parse(ConfigurationManager.AppSettings["CSV_RecommendedRPM"].ToString());
+            //    RecommendedRPM(CSV_RecommendedRPM, CSVHelper.MaxRPM);//CSVHelper.MotorTime
+            //    //_TwinCathelper.PLCMotors[i].mTime = CSVHelper.MotorTime;//float.Parse(ConfigurationManager.AppSettings["DefaultRampTime"].ToString());s               
+            //}
+
+
+            AbortAllOperations(); // For saftey call stop and then resume
 
             string[] data_resume = CSVMotors_contents.Split('~');
             log.Log(LogLevel.Info, "Resuming111>>> " + data_resume.Length + " >>" + data_resume[0]);
@@ -1265,7 +1271,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     return;
                 }
 
-                CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 5.00F;
+                CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 3.00F;
                 if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
                 CSVHelper.ST_timer.Restart();
 
@@ -1849,6 +1855,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             }
 
             UpdateSettingsDB();
+            AbortAllOperations();
 
             log.Log(LogLevel.Info, $"Selected Direction : {dir}");
             WriteCSVData(csvdata);
@@ -1943,7 +1950,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             if (MotorTime > 900.0F)//Time cant be set more than 15 min.
                 MessageBox.Show("Time is out of bound! Max is 15Mins. But counted is " + (MotorTime / 60) + " Mins", "Warning! Time is out of bound!", MessageBoxButtons.OK);
 
-            CSVHelper.CompletingTime = MotorTime + 5.00F;
+            CSVHelper.CompletingTime = MotorTime + 3.00F;
 
             if (MotorTime < 1.0F)
                 log.Log(LogLevel.Error, "Shaping: Invalid MotorTime/too Small > "+ MotorTime);
@@ -2010,25 +2017,14 @@ namespace FlexMold.MVVM.ViewModel.Project
                         if (((int)MotorStatus.mPosition[i] > int.Parse(Max_mm)) || ((int)MotorStatus.mPosition[i] < int.Parse("-" + Max_mm)))
                         {
                             log.Log(LogLevel.Error, $"Motor no:" + i + " has invalid position!");
-                            String st = "";
-                            var data = (int)EMode.Abort;
-                            for (uint j = 0; j < _TwinCathelper.PLCMotors.Count(); j++)
-                            { _TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray()); st+=MotorStatus.mPosition[j] + ","; }
-
-                            log.Log(LogLevel.Warn, $"Stopping Motors > "+st);
+                            AbortAllOperations();
                             return false;
                         }
                     }
                     else if (((int)_TwinCathelper.PLCMotorsStatuses.mPostion[i] > int.Parse(Max_mm)) || ((int)_TwinCathelper.PLCMotorsStatuses.mPostion[i] < int.Parse("-" + Max_mm)))
                     {
                         log.Log(LogLevel.Error, $"Motor no:" + i + " has invalid position!");
-                        String st = "";
-                        var data = (int)EMode.Abort;
-                        for (uint j = 0; j < _TwinCathelper.PLCMotors.Count(); j++)
-                        { _TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray()); st += MotorStatus.mPosition[j] + ","; }
-
-                        log.Log(LogLevel.Warn, $"Stopping Motors > " + st);
-
+                        AbortAllOperations();
                         return false;
                     }
 
@@ -2129,6 +2125,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             //}
 
 
+            AbortAllOperations();
 
             String HomingOffsetDataCommand = "";
             float LastChangedVal = 0.00F;
@@ -2189,79 +2186,85 @@ namespace FlexMold.MVVM.ViewModel.Project
 
             CSVHelper.MaxDisplacement = Math.Abs(homeDisplacement.Max());//GetRecommendedRPM(Math.Abs(homeDisplacement.Max()));
             calc_displacement = GetRecommendedRPM(Math.Abs(CSVHelper.MaxDisplacement));
-            //reset time for all motors for negativeOffset
-            for (int i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
-            { 
-                _TwinCathelper.PLCMotors[i].mTime = Math.Abs(calc_displacement);
-
-    //            log.Log(LogLevel.Info, "HOME_writeCV:" + i.ToString() + " : " + _TwinCathelper.PLCMotors[i].mDisplacement + "  >> Direction: " + _TwinCathelper.PLCMotors[i].mDirection.ToString()
-    //+ "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay.ToString()
-    //+ "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime.ToString()
-    //+ "  >> mMode: " + (int)EMode.Project);
-
-                log.Log(LogLevel.Warn, "ProjectView > HomeTrigger Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
-    + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
-    + "  >> mRPM: " + _TwinCathelper.PLCMotors[i].mRPM
-    + "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
-    + "  >> mMode: " + EMode.Project.ToString());
-
-            }
-
-
-            if (HomingOffsetDataCommand != null && HomingOffsetDataCommand.Length > 14)
+            if (calc_displacement > 1.0F)
             {
-                DialogResult dr1 = MessageBox.Show("Do you want to continue with following offset data?" + Environment.NewLine + "" + HomingOffsetDataCommand, "Home move confirm required!", MessageBoxButtons.OKCancel);
-                if (dr1 == DialogResult.Cancel)
-                    return;
+                //reset time for all motors for negativeOffset
+                for (int i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
+                {
+                    _TwinCathelper.PLCMotors[i].mTime = Math.Abs(calc_displacement);
+
+                    //            log.Log(LogLevel.Info, "HOME_writeCV:" + i.ToString() + " : " + _TwinCathelper.PLCMotors[i].mDisplacement + "  >> Direction: " + _TwinCathelper.PLCMotors[i].mDirection.ToString()
+                    //+ "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay.ToString()
+                    //+ "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime.ToString()
+                    //+ "  >> mMode: " + (int)EMode.Project);
+
+                    log.Log(LogLevel.Warn, "ProjectView > HomeTrigger Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
+        + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
+        + "  >> mRPM: " + _TwinCathelper.PLCMotors[i].mRPM
+        + "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
+        + "  >> mMode: " + EMode.Project.ToString());
+
+                }
+
+
+                if (HomingOffsetDataCommand != null && HomingOffsetDataCommand.Length > 14)
+                {
+                    DialogResult dr1 = MessageBox.Show("Do you want to continue with following offset data?" + Environment.NewLine + "" + HomingOffsetDataCommand, "Home move confirm required!", MessageBoxButtons.OKCancel);
+                    if (dr1 == DialogResult.Cancel)
+                        return;
+                }
+
+
+                if (LastEventPressed == 'R')//On Resuming After PowerCutoff it will Home to CSV location of HOME and Position will be 0s
+                    LastEventPressed = 'N';//-ivePositionData
+
+                MotorStatus.IsMotorsIdle = false;
+
+                try
+                {
+                    //if ((Math.Abs(CSVHelper.NegativeoffsetResumeFlt[0]) > 1) && CSVHelper.LastSelectedCSV != selectedCSV)//negative offset exist
+                    //{
+                    //    MessageBox.Show("You can not select other shape while HomeOffset exist, Please calibrate first to coutinue!", "Please calibrate first to continue!", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    //    return;
+                    //}                
+
+                    CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 3.00F;
+
+                    if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
+                    CSVHelper.ST_timer.Restart();
+
+                    _TwinCathelper.WriteEthercatDeviceData();
+                    log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} Home value(s) has been written sucessfully");
+
+                    Thread.Sleep(200);
+
+                    for (uint i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
+                        _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
+                    log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} zero value(s) has been written sucessfully");
+
+                    //IsPsitionDataProcessing = true;
+                    try { LastPositionData = MotorStatus.mPosition[0]; } catch { LastPositionData = 0; }
+
+                    UserStop = false;
+                    //EventStopToggle = false;
+
+                    toggleStopResumeButtonText = "Stop";
+                    OnPropertyChanged();
+
+                    if (LastEventPressed == 'N')//-ivePositionData
+                        return;
+                    //else
+                    //    LastEventPressed = 'H';// H=Home R=Resume S=Stop W= WriteCSV O=Initial
+
+                }
+                catch (Exception ep) { log.Log(LogLevel.Info, "HomeTrigger()>>>>" + ep.Message); }
             }
 
+                LastEventPressed = 'H';// H=Home R=Resume S=Stop W= WriteCSV O=Initial
 
-            if (LastEventPressed == 'R')//On Resuming After PowerCutoff it will Home to CSV location of HOME and Position will be 0s
-                LastEventPressed = 'N';//-ivePositionData
-
-            MotorStatus.IsMotorsIdle = false;
-
-            try
-            {
-                //if ((Math.Abs(CSVHelper.NegativeoffsetResumeFlt[0]) > 1) && CSVHelper.LastSelectedCSV != selectedCSV)//negative offset exist
-                //{
-                //    MessageBox.Show("You can not select other shape while HomeOffset exist, Please calibrate first to coutinue!", "Please calibrate first to continue!", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                //    return;
-                //}                
-
-                CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 5.00F;
-
-                if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
-                CSVHelper.ST_timer.Restart();
-
-                _TwinCathelper.WriteEthercatDeviceData();
-                log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} Home value(s) has been written sucessfully");
-
-                Thread.Sleep(200);
-
-                for (uint i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
-                    _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
-                log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} zero value(s) has been written sucessfully");
-
-                //IsPsitionDataProcessing = true;
-                try { LastPositionData = MotorStatus.mPosition[0]; } catch { LastPositionData = 0; }
-
-                UserStop = false;
-                //EventStopToggle = false;
-
-                toggleStopResumeButtonText = "Stop";
-                OnPropertyChanged();
-
-                if (LastEventPressed == 'N')//-ivePositionData
-                    return;
-                else
-                    LastEventPressed = 'H';// H=Home R=Resume S=Stop W= WriteCSV O=Initial
-
-            }
-            catch (Exception ep) { log.Log(LogLevel.Info, "HomeTrigger()>>>>"+ep.Message); }
 
             try { progressbar_timespent = 0; TravelTimeUpdate = false; progressbar_FinalVal = (int)(Math.Abs(_TwinCathelper.PLCMotors[0].mDisplacement)); }//_TwinCathelper.PLCMotors[0].mDisplacement;
-            catch { }
+                catch { }
             IsRampCompleted = false;
 
             try
@@ -2589,11 +2592,12 @@ namespace FlexMold.MVVM.ViewModel.Project
                 return;
 
             //LastEventPressed = 'N';//Manual Stopped is pressed Here position goes "0"
-            
+
             //TimeSpan lastStopSecs = DateTime.Now - CSVHelper.LastStopTime;
 
             //if(Math.Abs(lastStopSecs.TotalSeconds) > intSpecifiedSecs)
-                StopProcess_WriteCSVData();
+            CSVHelper.CompletingTime_count = 0;
+            StopProcess_WriteCSVData();
 
                 MotorsCheckTimer.Stop();
             Timer_ElapsedBusy = false;
@@ -3030,11 +3034,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                         else
                             LastmaxVal = _TwinCathelper.PLCMotorsStatuses.mPostion.Max();
 
-                        String st = "";
-                        var data = (int)EMode.Abort;
-                        for (uint i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
-                        { _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mMode, data.CastToArray()); st += MotorStatus.mPosition[i] + ","; }
-                        log.Log(LogLevel.Warn, $"Stopping Motors > " + st);
+                        AbortAllOperations();
 
                         if (!StopProcess_WriteCSVData())
                             return;
@@ -3292,7 +3292,15 @@ namespace FlexMold.MVVM.ViewModel.Project
             //GetSettings ends here!
         }
 
+        private void AbortAllOperations() {
+            var data = (int)EMode.Abort;
+            String st = "";
+            for (uint j = 0; j < _TwinCathelper.PLCMotors.Count(); j++)
+            { _TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray()); st += MotorStatus.mPosition[j] + ","; }
 
+            log.Log(LogLevel.Warn, $"Stopping Motors > " + st);
+
+        }
 
     }
 }

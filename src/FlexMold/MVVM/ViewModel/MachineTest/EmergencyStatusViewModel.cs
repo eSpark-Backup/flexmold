@@ -813,7 +813,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     MessageBox.Show("Time is out of bound! Max is 15Mins. But counted is " + (MotorTime / 60) + " Mins", "Warning! Time is out of bound!", MessageBoxButton.OK);
             }
             catch (Exception ex) { log.Log(LogLevel.Info, "GetRecommendedRPM>>>>" + ex.Message); }
-            CSVHelper.CompletingTime = MotorTime + 5.00F;
+            CSVHelper.CompletingTime = MotorTime + 3.00F;
             return MotorTime;
         }
 

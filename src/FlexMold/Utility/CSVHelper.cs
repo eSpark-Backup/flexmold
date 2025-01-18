@@ -53,7 +53,7 @@ namespace FlexMold.Utility
         public static bool IsNewProjSelected = false;
         public static bool InPositionProcess_Elapsed = false;
         public static bool NoLinkHappened = false;
-        public static bool CalibrationCompleted = false;
+        //public static bool CalibrationCompleted = false;
         //public static bool StopAlreadyCalled = false;
         public static DateTime LastStopTime = DateTime.Now;
 

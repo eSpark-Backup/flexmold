@@ -33,6 +33,8 @@ namespace FlexMold.MVVM.ViewModel.Home
         public RelayCommand OnLoadedCommand { get; set; }
         public RelayCommand OnUnLoadedCommand { get; set; }
         private Hashtable hlist = new Hashtable();
+        private Hashtable CalibrationCompletedList = new Hashtable();
+        
         private void DisplayError(MotorStatusControl o)
         {
             MessageBox.Show(o.ToolTip);
@@ -139,7 +141,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             }
 
             _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mMode);
-            log.Log(LogLevel.Info, $"{DeviceCount} CalibrateHard value(s) has been written sucessfully");
+            log.Log(LogLevel.Warn, $"{DeviceCount} CalibrateHard value(s) has been written sucessfully");
 
             Thread.Sleep(200);
             uint zero = 0;
@@ -238,7 +240,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                         + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
                         + "  >> mRPM: " + _TwinCathelper.PLCMotors[i].mRPM
                         + "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
-                        + "  >> mMode: " + EMode.Project.ToString());
+                        + "  >> mMode: " + (int)EMode.CalibrationSeq02Request);
 
                 }
                 _TwinCathelper.WriteEthercatDeviceData();
@@ -337,12 +339,19 @@ namespace FlexMold.MVVM.ViewModel.Home
 
                     FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'Z';
 
-                    if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
-                    CSVHelper.ST_timer.Stop(); CSVHelper.ST_timer.Reset();
+                    //if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
+                    //CSVHelper.ST_timer.Stop(); CSVHelper.ST_timer.Reset();
                     
                     CSVHelper.IsLastEventCalibr = false;
                     for (int i = 0; i < DeviceCount; i++)
-                        _TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationSeq01Request;
+                    {
+                        log.Log(LogLevel.Warn, "CompleteCalibrate Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > Until_Stall  >> Direction: Down"
+                               + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
+                               + "  >> mRPM: " + _TwinCathelper.PLCMotors[i].mRPM
+                               + "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
+                               + "  >> mMode: CalibrationSeq01Request");
+
+                        _TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationSeq01Request; }
                     _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mMode);
 
                     Thread.Sleep(200);
@@ -355,6 +364,9 @@ namespace FlexMold.MVVM.ViewModel.Home
                     TNF.ShowSuccess("Calibration Seq01 Requestm Sent. Please wait...");
 
                     CSVHelper.UpdateHomeCSVStatus = true;
+
+                    CSVHelper.ST_timer.Stop();
+                    CSVHelper.ST_timer.Reset();
                 }
                 catch { }
             }
@@ -510,11 +522,18 @@ namespace FlexMold.MVVM.ViewModel.Home
                     //CalibrateButtonEnable = false;
                     if(FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'Z')
                         FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'C';
+                    if(!CalibrationCompletedList.ContainsKey(i))
+                        CalibrationCompletedList.Add(i, i);
+                    log.Log(LogLevel.Warn, "Starting Calibration01 for PCB: "+i);
 
-                    CSVHelper.CalibrationCompleted = false;
+                    //CSVHelper.CalibrationCompleted = false;
                     break;
                 case (int)EDeviceStatus.CalibrationSquence01Failed:
                     _tmgs = SetUI(i, swe, Brushes.Red);
+                    if (CalibrationCompletedList.ContainsKey(i)) 
+                        CalibrationCompletedList.Remove(i);
+                    log.Log(LogLevel.Warn, "Stopping Failed Calibration01 for PCB: " + i);
+
                     TNF.ShowError(_tmgs);
                     log.Log(LogLevel.Error, _tmgs);
                     CalibrateButtonEnable = true;
@@ -522,13 +541,17 @@ namespace FlexMold.MVVM.ViewModel.Home
 
                     if (i >= DeviceCount-1)
                     {
-                        CalibrateSeq02_HomeUp();
-                        CSVHelper.CalibrationCompleted = true;
+                        if(CalibrationCompletedList!=null && CalibrationCompletedList.Count<1)
+                            CalibrateSeq02_HomeUp();
+                        //CSVHelper.CalibrationCompleted = true;
                     }
 
                     break;
                 case (int)EDeviceStatus.CalibrationSquence01Success:
                     _tmgs = SetUI(i, swe, Brushes.Green);
+                    if (CalibrationCompletedList.ContainsKey(i)) CalibrationCompletedList.Remove(i);
+                    log.Log(LogLevel.Warn, "CalibrationSquence01Success for PCB: " + i);
+
                     TNF.ShowSuccess(_tmgs);
                     log.Log(LogLevel.Info, _tmgs);
                     UpdateHomingProcess();
@@ -554,13 +577,15 @@ namespace FlexMold.MVVM.ViewModel.Home
                         //}
 
                         // this condition will only occur when last motor has some update
-                        if ((i >= DeviceCount-1 || CSVHelper.CalibrationCompleted) && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'Z')//CSVHelper.CalibrationCompleted if failed
+                        if ((i >= DeviceCount-1) && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'Z')//CSVHelper.CalibrationCompleted if failed
                         {
-                            log.Log(LogLevel.Info, ">>>Calling completed calibration 02 sequence");
-                            CalibrateSeq02_HomeUp();
-                            Thread.Sleep(1500);
-                            CalibrateSeq02();
-
+                            if (CalibrationCompletedList == null || CalibrationCompletedList.Count < 1)
+                            {
+                                log.Log(LogLevel.Warn, "Starting completed calibration sequence02");
+                                CalibrateSeq02_HomeUp();
+                                Thread.Sleep(1500);
+                                CalibrateSeq02();
+                            }
                         }
 
                     }
@@ -572,6 +597,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     TNF.ShowInformation(_tmgs);
                     log.Log(LogLevel.Info, _tmgs);
                     FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'C';
+                    //CSVHelper.CalibrationCompleted = false;
                     //CalibrateButtonEnable = false;
                     break;
                 case (int)EDeviceStatus.CalibrationSquence02Failed:
@@ -745,7 +771,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                         CSVHelper.ST_timer.Stop();
                         CSVHelper.ST_timer.Reset();
                         //Application.Current.MainWindow.Hide();
-                        //if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'W' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'R')
+
+                        if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'N')//&& FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'R'
                         {
                             stoppingMotors();
                             MessageBox.Show("*** Please calibrate machine first!", "Motors Malfunctioning Error!", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
@@ -757,7 +784,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                                 foreach (int k in hlist.Keys)
                                     ss += k + ", ";
 
-                                log.Log(LogLevel.Error, " MismatchedIndexes at > " + ss);
+                                log.Log(LogLevel.Error, " Errors in PCB > " + ss);
+                                MessageBox.Show("Motors still running after time elapsed Box(s) > " + ss, "Error in setup! ",MessageBoxButton.OK);
 
                             }
                         }

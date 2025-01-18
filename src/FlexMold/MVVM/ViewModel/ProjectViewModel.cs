@@ -461,17 +461,23 @@ namespace FlexMold.MVVM.ViewModel.Project
                     + "  >> mMode: " + EMode.Project.ToString());
             }
 
+            try
+            {
+                if (data.Count != null)
+                    LastmaxVal = data.Max();
+                else
+                    LastmaxVal = _TwinCathelper.PLCMotors.Max().mDisplacement;
+            
+            }
+            catch { log.Log(LogLevel.Warn, $"ProjectViewModel err1 >>> LastmaxVal "+ LastmaxVal); try { LastmaxVal = _TwinCathelper.PLCMotors[0].mDisplacement; } catch { } }
 
-            if (data.Count != null)
-                LastmaxVal = data.Max();
-            else
-                LastmaxVal = _TwinCathelper.PLCMotors.Max().mDisplacement;
+            CSVHelper.MaxDisplacement = LastmaxVal;
 
             if (GetRecommendedRPM(0) > 1.0F)
             {
                 try
                 {
-                    CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 3.00F;
+                    //CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 3.00F;
                     if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
                     CSVHelper.ST_timer.Restart();
 
@@ -735,10 +741,6 @@ namespace FlexMold.MVVM.ViewModel.Project
             String[] offset_resume = CSVOffset_contents.Split('~');
             CSVHelper.LastStopTime = DateTime.Now;
 
-            for (int i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
-                NegativeoffsetResumeProj.Add(float.Parse(offset_resume[i]));
-
-
             if (!ConfirmMotorsAreFine())
             {
                 updateHomeButtonStatus(); return false;
@@ -794,6 +796,13 @@ namespace FlexMold.MVVM.ViewModel.Project
                 return false;
             }
 
+            try
+            {
+                for (int i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
+                    NegativeoffsetResumeProj.Add(float.Parse(offset_resume[i]));
+            }
+            catch { }
+
             //string Max_mm = CSVHelper.MaxDisplacement.ToString();//ConfigurationManager.AppSettings["Max_mm"].ToString();
 
             for (int i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
@@ -803,10 +812,14 @@ namespace FlexMold.MVVM.ViewModel.Project
                 //Resume location preparing
                 //double round3digs = MotorStatus.mPosition[i] + data[i]; //1: -20 + 25=5 ----- 20 +25=
                 double round3digs = 0;
-                if (NegativeoffsetResumeProj[i]!=null && NegativeoffsetResumeProj[i] < 0)
-                    round3digs = (NegativeoffsetResumeProj[i] - MotorStatus.mPosition[i]) + data[i];//1: -20 -- 25 + 25=5 ----- -25 +5=-20
-                else
-                    round3digs = data[i] - MotorStatus.mPosition[i];
+                try
+                {
+                    if (NegativeoffsetResumeProj != null && NegativeoffsetResumeProj.Count > 0 && NegativeoffsetResumeProj[i] != null && NegativeoffsetResumeProj[i] < 0)
+                        round3digs = (NegativeoffsetResumeProj[i] - MotorStatus.mPosition[i]) + data[i];//1: -20 -- 25 + 25=5 ----- -25 +5=-20
+                    else
+                        round3digs = data[i] - MotorStatus.mPosition[i];
+                }
+                catch { }
 
                 data_resume[i] = (float)(Math.Round(round3digs, 3));
 
@@ -1238,6 +1251,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             try
             {
                 CSVHelper.MaxDisplacement = data_resumeFlt.Max();
+
                 float calcTime = GetRecommendedRPM(CSVHelper.MaxDisplacement);
                 for (int i = 0; i < data_resumeFlt.Count; i++)
                 {
@@ -1271,7 +1285,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                     return;
                 }
 
-                CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 3.00F;
+                //CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 3.00F;
                 if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
                 CSVHelper.ST_timer.Restart();
 
@@ -1312,17 +1326,20 @@ namespace FlexMold.MVVM.ViewModel.Project
                 //try { File.Delete(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\" + "ManualStopped" +DeviceCount.ToString()+ ".offset"); } catch { }
                 MotorStatus.IsMotorsIdle = false;
             }
-            data_resumeFlt.Clear();
-            //LastEventPressed = 'R';// H=Home R=Resume S=Stop W= WriteCSV O=Initial
 
             try
             {
                 //if (MotorStatus.mPosition != null)
                 //    LastmaxVal = MotorStatus.mPosition.Max();
                 //else
-                    LastmaxVal = _TwinCathelper.PLCMotors.Max().mDisplacement;
+                //LastmaxVal = _TwinCathelper.PLCMotors.Max().mDisplacement;
+
+                LastmaxVal = (int)data_resumeFlt.Max();
             }
             catch (Exception ep) { try { log.Log(LogLevel.Info, "ResumeProcess_WriteCSVData222>>>>progressbar_FinalVal" + ep.Message); LastmaxVal = (int)data_resumeFlt.Max(); } catch { LastmaxVal = 100; } }
+
+            data_resumeFlt.Clear();
+            //LastEventPressed = 'R';// H=Home R=Resume S=Stop W= WriteCSV O=Initial
 
             IsRampCompleted = false;
         }
@@ -1946,13 +1963,13 @@ namespace FlexMold.MVVM.ViewModel.Project
 
             //Every motor must reach exactly same time ie some will move faster and some will slower --- Client requirement
             float MotorTime = (CSVHelper.MaxDisplacement * 60) / (CSVHelper.RecommendedRPM * 2);
-
+            MotorTime = Math.Abs(MotorTime);
             if (MotorTime > 900.0F)//Time cant be set more than 15 min.
                 MessageBox.Show("Time is out of bound! Max is 15Mins. But counted is " + (MotorTime / 60) + " Mins", "Warning! Time is out of bound!", MessageBoxButtons.OK);
 
             CSVHelper.CompletingTime = MotorTime + 3.00F;
 
-            if (MotorTime < 1.0F)
+            if ((MotorTime-1.0F) < 1.0F)
                 log.Log(LogLevel.Error, "Shaping: Invalid MotorTime/too Small > "+ MotorTime);
 
 
@@ -2228,7 +2245,8 @@ namespace FlexMold.MVVM.ViewModel.Project
                     //    return;
                     //}                
 
-                    CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 3.00F;
+                    //CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 3.00F;
+                    GetRecommendedRPM(0.0f);
 
                     if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
                     CSVHelper.ST_timer.Restart();
@@ -2372,7 +2390,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                         float chkdiff = MotorStatus.mPosition.Max();
 
                         //only in home when diff is > 1
-                        if (chkdiff < 1.0F || chkdiff > -1.0F)
+                        if (chkdiff > 1.0F || chkdiff < -1.0F)
                             toggleShapeHomeButtonText = "Home";
                         else
                             toggleShapeHomeButtonText = "Shape";
@@ -2497,8 +2515,9 @@ namespace FlexMold.MVVM.ViewModel.Project
                         {
                             if (CSVHelper.NegativeoffsetResumeFlt[0] < 0)//if negHomingdata exist
                                 if (MotorStatus.mPosition[0] > 0)
-                                { posDiff = Math.Abs(CSVHelper.NegativeoffsetResumeFlt[0]) + Math.Abs(MotorStatus.mPosition[0]);
-                                    
+                                {
+                                    posDiff = Math.Abs(CSVHelper.NegativeoffsetResumeFlt[0]) + Math.Abs(MotorStatus.mPosition[0]);
+
                                 }
                                 else
                                 {
@@ -2510,7 +2529,12 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                         }
                         else
-                            pgProcesStatusVal = (int)(Math.Abs((posDiff + Math.Abs(CSVHelper.NegativeoffsetResumeFlt[0])) / (progressbar_FinalVal + Math.Abs(CSVHelper.NegativeoffsetResumeFlt[0]) + LastPositionData)) * 100);//LastmaxVal=MaxDistance to cover - current position
+                        {
+                            float negofftemp = 0.00f;
+                            try { negofftemp = CSVHelper.NegativeoffsetResumeFlt[0]; } catch { }
+                            pgProcesStatusVal = (int)(Math.Abs((posDiff + Math.Abs(negofftemp)) / (progressbar_FinalVal + Math.Abs(negofftemp) + LastPositionData)) * 100);//LastmaxVal=MaxDistance to cover - current position
+                        
+                        }
                     }
                     catch { }
 

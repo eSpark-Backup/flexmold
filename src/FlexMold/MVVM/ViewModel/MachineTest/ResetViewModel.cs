@@ -211,7 +211,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         public void GetHomingProcess()
         {
             log.Log(LogLevel.Info, "Getting Homming data started!");
-
+            HomingOffsetDataCommand="";
             try { CSVHelper.offsetRes_MotorSettingViewModel.LoadMotorSettingsDB(); } catch { }
 
             if (CSVHelper.NegativeoffsetResume.Length > 0)//0.0F

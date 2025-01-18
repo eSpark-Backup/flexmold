@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.8.34330.188
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.35325.158
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlexMold", "FlexMold.csproj", "{95F1FB4F-938A-433A-83A3-65F152A2BE50}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScriptingTestContainerBase", "..\ScriptingTestContainerBase\ScriptingTestContainerBase.csproj", "{860B77F9-BBBD-4026-AB6C-E7AC5D1920F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NlogViewer", "..\New\NlogViewer\NlogViewer.csproj", "{FC6E6E58-4005-4C11-9B27-86CA0313965B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NlogViewer", "..\NlogViewer\NlogViewer.csproj", "{7DEB0B08-CC91-4D9C-AF91-C0F2A71F1E96}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScriptingTestContainerBase", "..\New\ScriptingTestContainerBase\ScriptingTestContainerBase.csproj", "{4A8556FD-4D13-43DD-A45F-33432828EEBD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,22 +25,22 @@ Global
 		{95F1FB4F-938A-433A-83A3-65F152A2BE50}.Release|Any CPU.Build.0 = Release|Any CPU
 		{95F1FB4F-938A-433A-83A3-65F152A2BE50}.Release|x86.ActiveCfg = Release|x86
 		{95F1FB4F-938A-433A-83A3-65F152A2BE50}.Release|x86.Build.0 = Release|x86
-		{860B77F9-BBBD-4026-AB6C-E7AC5D1920F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{860B77F9-BBBD-4026-AB6C-E7AC5D1920F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{860B77F9-BBBD-4026-AB6C-E7AC5D1920F1}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{860B77F9-BBBD-4026-AB6C-E7AC5D1920F1}.Debug|x86.Build.0 = Debug|Any CPU
-		{860B77F9-BBBD-4026-AB6C-E7AC5D1920F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{860B77F9-BBBD-4026-AB6C-E7AC5D1920F1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{860B77F9-BBBD-4026-AB6C-E7AC5D1920F1}.Release|x86.ActiveCfg = Release|Any CPU
-		{860B77F9-BBBD-4026-AB6C-E7AC5D1920F1}.Release|x86.Build.0 = Release|Any CPU
-		{7DEB0B08-CC91-4D9C-AF91-C0F2A71F1E96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7DEB0B08-CC91-4D9C-AF91-C0F2A71F1E96}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7DEB0B08-CC91-4D9C-AF91-C0F2A71F1E96}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{7DEB0B08-CC91-4D9C-AF91-C0F2A71F1E96}.Debug|x86.Build.0 = Debug|Any CPU
-		{7DEB0B08-CC91-4D9C-AF91-C0F2A71F1E96}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7DEB0B08-CC91-4D9C-AF91-C0F2A71F1E96}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7DEB0B08-CC91-4D9C-AF91-C0F2A71F1E96}.Release|x86.ActiveCfg = Release|Any CPU
-		{7DEB0B08-CC91-4D9C-AF91-C0F2A71F1E96}.Release|x86.Build.0 = Release|Any CPU
+		{FC6E6E58-4005-4C11-9B27-86CA0313965B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC6E6E58-4005-4C11-9B27-86CA0313965B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC6E6E58-4005-4C11-9B27-86CA0313965B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FC6E6E58-4005-4C11-9B27-86CA0313965B}.Debug|x86.Build.0 = Debug|Any CPU
+		{FC6E6E58-4005-4C11-9B27-86CA0313965B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC6E6E58-4005-4C11-9B27-86CA0313965B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC6E6E58-4005-4C11-9B27-86CA0313965B}.Release|x86.ActiveCfg = Release|Any CPU
+		{FC6E6E58-4005-4C11-9B27-86CA0313965B}.Release|x86.Build.0 = Release|Any CPU
+		{4A8556FD-4D13-43DD-A45F-33432828EEBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A8556FD-4D13-43DD-A45F-33432828EEBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A8556FD-4D13-43DD-A45F-33432828EEBD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4A8556FD-4D13-43DD-A45F-33432828EEBD}.Debug|x86.Build.0 = Debug|Any CPU
+		{4A8556FD-4D13-43DD-A45F-33432828EEBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A8556FD-4D13-43DD-A45F-33432828EEBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A8556FD-4D13-43DD-A45F-33432828EEBD}.Release|x86.ActiveCfg = Release|Any CPU
+		{4A8556FD-4D13-43DD-A45F-33432828EEBD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

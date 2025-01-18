@@ -547,7 +547,9 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 + "  >> mMode: " + EMode.Project.ToString());
             }
 
-            CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 3.00F;
+            GetRecommendedRPM(0);
+
+            //CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 3.00F;
             if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
                 CSVHelper.ST_timer.Restart();
 
@@ -635,17 +637,18 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
 
             //Every motor must reach exactly same time ie some will move faster and some will slower --- Client requirement
             float MotorTime = (CSVHelper.MaxDisplacement * 60) / (CSVHelper.RecommendedRPM * 2);
-
+            
             if (MotorTime > 900.0F)//Time cant be set more than 15 min.
                 MessageBox.Show("Time is out of bound! Max is 15Mins. But counted is " + (MotorTime / 60) + " Mins", "Warning! Time is out of bound!", MessageBoxButton.OK);
-
+            
+            CSVHelper.MotorTime = MotorTime;
+            CSVHelper.CompletingTime = MotorTime + 3.00F;
             return MotorTime;
         }
 
         public void RecommendedRPM(int CSV_RecommendedRPM, float maxRPM)
         {
             CSVHelper.MotorTime = (CSVHelper.MaxDisplacement * 60) / (CSV_RecommendedRPM * 2);
-
             if (CSVHelper.MotorTime > 900F)//Time cant be set more than 15 min.
                 MessageBox.Show("Time is out of bound! Max is 15Mins. But counted is " + (CSVHelper.MotorTime / 60) + " Mins", "Warning! Time is out of bound!", MessageBoxButton.OK);
         }

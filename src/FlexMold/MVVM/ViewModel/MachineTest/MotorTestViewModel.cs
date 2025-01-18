@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Windows;
 using TwinCAT.Ads.TypeSystem;
 
 namespace FlexMold.MVVM.ViewModel.MachineTest
@@ -212,6 +213,24 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             //    _TwinCathelper.Client.AdsNotification -= Client_AdsNotificationMT;
             //}
         }
+
+        public float GetRecommendedRPM()
+        {
+
+            //float MotorTime = (CurrentMaxDisplacement * 60) / (CSVHelper.RecommendedRPM * 2);
+
+            //Every motor must reach exactly same time ie some will move faster and some will slower --- Client requirement
+            float MotorTime = ((float)SelectedMotorDisplacementValue * 60) / ((float)SelectedMotorRPM * 2);
+
+            if (MotorTime > 900.0F)//Time cant be set more than 15 min.
+                MessageBox.Show("Time is out of bound! Max is 15Mins. But counted is " + (MotorTime / 60) + " Mins", "Warning! Time is out of bound!", MessageBoxButton.OK);            
+
+            if (MotorTime < 1.0F)
+                log.Log(LogLevel.Error, "Shaping: Invalid MotorTime/too Small > " + MotorTime);
+
+            CSVHelper.CompletingTime = MotorTime + 3.00F;
+            return MotorTime;
+        }
         private void Client_AdsNotificationMT(object sender, EventArgs e)
         {
             Position = _TwinCathelper.PLCMotorsStatuses.mPostion[SelectedMotorIndex];
@@ -237,19 +256,21 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         {
             if (!justread)
             {
+                GetRecommendedRPM();
+
                 MyPLCMotor[SelectedMotorIndex].mDisplacement = (float)SelectedMotorDisplacementValue;
 
-                CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 3.00F;
+                //CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 3.00F;
                 if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
                 CSVHelper.ST_timer.Restart();
 
                 log.Log(LogLevel.Warn, "MotorTestView > SendDisplacement Box:" + SelectedMotorIndex.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[SelectedMotorIndex] + " > " + MyPLCMotor[SelectedMotorIndex].mDisplacement.ToString() + "  >> Direction: " + (MyPLCMotor[SelectedMotorIndex].mDirection ? "Down" : "Up")
-                        + "  >> RampDlay: " + MyPLCMotor[SelectedMotorIndex].mRampDelay
-                        + "  >> mRPM: " + MyPLCMotor[SelectedMotorIndex].mRPM
-                        + "  >> MotorTime: " + MyPLCMotor[SelectedMotorIndex].mTime
-                        + "  >> mMode: " + EMode.Project.ToString());
+                        + "  >> RampDlay: " + SelectedMotorRampDelayValue
+                        + "  >> mRPM: " + SelectedMotorRPM
+                        + "  >> MotorTime: " + SelectedMotorTimeValue
+                        + "  >> mMode: Motortest");
 
-                if (MyPLCMotor[SelectedMotorIndex].mTime < 1.0F)
+                if (SelectedMotorTimeValue < 1.0)
                     log.Log(LogLevel.Error, "MotorTestSpeed: Invalid MotorTime/too Small > " + MyPLCMotor[SelectedMotorIndex].mTime);
                 else
                 {
@@ -278,8 +299,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         {
             if (!justread)
             {
-                if (MyPLCMotor[SelectedMotorIndex].mTime < 1.0F)
-                    log.Log(LogLevel.Error, "MotorTestTime: Invalid MotorTime/too Small > " + MyPLCMotor[SelectedMotorIndex].mTime);
+                if ((float)SelectedMotorTimeValue < 1.0F)
+                    log.Log(LogLevel.Error, "MotorTestTime: Invalid MotorTime/too Small > " + (float)SelectedMotorTimeValue);
                 else
                 {
                     MyPLCMotor[SelectedMotorIndex].mTime = (float)SelectedMotorTimeValue;
@@ -287,8 +308,9 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                         SelectedMotorIndex,
                         TwinCathelper.DeviceSymbol.mTime,
                         MyPLCMotor[SelectedMotorIndex].mTime.CastToArray());
-                    log.Log(LogLevel.Info, "Motor Time Value Has Been Written");
+                    log.Log(LogLevel.Warn, "Motor Time Value Has Been Written > motor:"+ SelectedMotorIndex +" value:"+ SelectedMotorTimeValue);
 
+                    CSVHelper.CompletingTime = (float)SelectedMotorTimeValue + 3.00F;
                 }
             }
             else
@@ -305,7 +327,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     SelectedMotorIndex,
                     TwinCathelper.DeviceSymbol.mRampDelay,
                     MyPLCMotor[SelectedMotorIndex].mRampDelay.CastToArray());
-                log.Log(LogLevel.Info, "Motor Ramp Delay Value Has Been Written");
+                
+                log.Log(LogLevel.Warn, "Motor Ramp Delay Value Has Been Written > motor:" + SelectedMotorIndex + " value:" + SelectedMotorRampDelayValue);
             }
             else
             {
@@ -322,6 +345,9 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     MyPLCMotor[i].mDisplacement = (float)SelectedMotorDisplacementValue;
                     MyPLCMotor[i].mRPM = (float)SelectedMotorRPM;
                     MyPLCMotor[i].mDirection = _SelectedMotorDirValue == 0 ? false : true; ;//CSVHelper.MotorDirValue == 0 ? "Clockwise" : "Anti-Clockwise";
+                    MyPLCMotor[i].mTime = (float)SelectedMotorTimeValue;
+                    MyPLCMotor[i].mRampDelay = (float)SelectedMotorRampDelayValue;
+
                     //log.Log(LogLevel.Warn, "Position > WriteCSVData Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
                     //+ "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
                     //+ "  >> mRPM: " + _TwinCathelper.PLCMotors[i].mRPM
@@ -334,11 +360,14 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     + "  >> MotorTime: " + MyPLCMotor[i].mTime
                     + "  >> mMode: " + EMode.Project.ToString());                    
                 }
-                if (MyPLCMotor.Max().mTime < 1.0F)
-                    log.Log(LogLevel.Error, "MotorTestAll: Invalid MotorTime/too Small > " + MyPLCMotor.Max().mTime);
+
+                GetRecommendedRPM();
+
+                if (SelectedMotorTimeValue < 1.0)
+                    log.Log(LogLevel.Error, "MotorTestAll: Invalid MotorTime/too Small > " + SelectedMotorTimeValue);
                 else
                 {
-                    CSVHelper.CompletingTime = MyPLCMotor.Max().mTime + 3.00F;
+                    CSVHelper.CompletingTime = (float)SelectedMotorTimeValue + 3.00F;
 
                     if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
                     CSVHelper.ST_timer.Restart();

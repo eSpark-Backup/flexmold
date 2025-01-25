@@ -96,7 +96,7 @@ namespace FlexMold.MVVM.ViewModel
         public List<VSInfo> AvailableVS { get; private set; }
         private FlexMoldMachine1 _FlexMoldMachine1 { get { return App.AppHost.Services.GetRequiredService<FlexMoldMachine1>(); } }
         private TcDeviceScanning _TcDeviceScanning { get { return App.AppHost.Services.GetRequiredService<TcDeviceScanning>(); } }
-        private MainWindow _mainWindow { get { return App.AppHost.Services.GetRequiredService<MainWindow>(); } }
+        public static MainWindow _mainWindow { get { return App.AppHost.Services.GetRequiredService<MainWindow>(); } }
         private ITwinCatConfigViewModel _TwinCatConfigViewModel { get { return App.AppHost.Services.GetRequiredService<ITwinCatConfigViewModel>(); } }
         private ITwinCathelper _TwinCathelper { get { return App.AppHost.Services.GetRequiredService<ITwinCathelper>(); } }
         public event EventHandler OnRequestClose;

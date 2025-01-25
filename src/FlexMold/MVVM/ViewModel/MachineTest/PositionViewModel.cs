@@ -225,11 +225,11 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
 
             });
 
-            Array.Fill<uint>(validSeq01Val, (int)EDeviceStatus.CalibrationSquence01Success);
-            Array.Fill<uint>(validSeq02Val, (int)EDeviceStatus.CalibrationSquence02Success);
-            Array.Fill<uint>(validSeq02Val, (int)EDeviceStatus.RampSequenceCompleted);
-            Array.Fill<uint>(healthyMotorDiag, (int)EmotorDiagnostic.Healthy);
-            Array.Fill<uint>(validForHome, (int)EDeviceStatus.None);
+            //Array.Fill<uint>(validSeq01Val, (int)EDeviceStatus.CalibrationSquence01Success);
+            //Array.Fill<uint>(validSeq02Val, (int)EDeviceStatus.CalibrationSquence02Success);
+            //Array.Fill<uint>(validSeq02Val, (int)EDeviceStatus.RampSequenceCompleted);
+            //Array.Fill<uint>(healthyMotorDiag, (int)EmotorDiagnostic.Healthy);
+            //Array.Fill<uint>(validForHome, (int)EDeviceStatus.None);
 
             try { CSVHelper.offsetRes_MotorSettingViewModel.LoadMotorSettingsDB(); } catch { }
             //try { CSVHelper.offsetRes_MotorSettingViewModel.UpdateMotorSettingsDB(); } catch { }
@@ -523,13 +523,28 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         }
 
 
-        private void WriteCSVData(IList<float> data)
+        private void WriteCSVData(List<float> data)
         {
 
             if (!ConfirmMotorsAreFine())
                 return;
 
-            checkFirmware();
+            checkFirmware();           
+            
+            //String selectedListRootDir = Directory.GetParent(CSVHelper.LastSelectedCSV).FullName;
+            DirectoryInfo selectedListRootDir = new DirectoryInfo(CSVHelper.LastSelectedCSV);
+
+            FileInfo SelectedFile_finf = new FileInfo(CSVHelper.LastSelectedCSV);                        
+            
+            if (File.Exists(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\Resume\\" + selectedListRootDir.Parent.Parent.Name + "-" + SelectedFile_finf.Name + ".Resume"))
+            {
+                log.Log(LogLevel.Warn, $"Deleting Resume File > "+ CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\Resume\\" + selectedListRootDir.Parent.Parent.Name + "-" + SelectedFile_finf.Name + ".Resume");
+
+                try { File.Delete(CSVHelper.GetCurrentDirectoryPath() + "\\AppData\\Resume\\" + selectedListRootDir.Parent.Parent.Name + "-" + SelectedFile_finf.Name + ".Resume"); } catch { }
+            }
+
+            RecommendedMaxDisplacement(data);
+            float calcTime = GetRecommendedRPM();
 
 
             for (int i = NumMotorFromProp; i <= NumMotorToProp; i++)
@@ -537,17 +552,17 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 _TwinCathelper.PLCMotors[i].mDisplacement = (float)data[i];
                 _TwinCathelper.PLCMotors[i].mDirection = bln_MoveUp ? false : true;
                 _TwinCathelper.PLCMotors[i].mRampDelay = CSVHelper.MotorRampDelayValue;
-                _TwinCathelper.PLCMotors[i].mTime = GetRecommendedRPM(data[i]);//CSVHelper.MotorTime;
+                _TwinCathelper.PLCMotors[i].mTime = calcTime;
                 _TwinCathelper.PLCMotors[i].mMode = (int)EMode.Project;
 
                 log.Log(LogLevel.Warn, "Position > WriteCSVData Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + (_TwinCathelper.PLCMotors[i].mDirection ? "Down":"Up")
                 + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
-                + "  >> mRPM: " + _TwinCathelper.PLCMotors[i].mRPM
+                + "  >> mRPM: " + CSVHelper.RecommendedRPM
                 + "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
                 + "  >> mMode: " + EMode.Project.ToString());
             }
 
-            GetRecommendedRPM(0);
+            //GetRecommendedRPM(0);
 
             //CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 3.00F;
             if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
@@ -592,7 +607,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 String FirmwareNotMatched = "";
                 for (uint i = 0; i < DeviceCount; i++)
                 {
-                    if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713969130 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713968323 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)//0x662917EA (1713969130=Wed Apr 24 2024 14:32:10 GMT+0000) CSVHelper.MotorsStatusGlobal[0] == "Healthy" && //1713968323=Wed Apr 24 2024 14:18:43 GMT+0000
+                    //if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713969130 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713968323 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)//0x662917EA (1713969130=Wed Apr 24 2024 14:32:10 GMT+0000) CSVHelper.MotorsStatusGlobal[0] == "Healthy" && //1713968323=Wed Apr 24 2024 14:18:43 GMT+0000
+                    if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1737720238 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)
                         continue;
                     else
                         FirmwareNotMatched += "Motor" + (i + 1) + ",";
@@ -630,19 +646,42 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
 
         }
 
-        public float GetRecommendedRPM(float CurrentMaxDisplacement)
+        public float GetRecommendedRPM()
         {
-
-            //float MotorTime = (CurrentMaxDisplacement * 60) / (CSVHelper.RecommendedRPM * 2);
 
             //Every motor must reach exactly same time ie some will move faster and some will slower --- Client requirement
             float MotorTime = (CSVHelper.MaxDisplacement * 60) / (CSVHelper.RecommendedRPM * 2);
-            
+            MotorTime = Math.Abs(MotorTime);
+
+            float fltDelayval = ((CSVHelper.MotorRampDelayValue * 2) + 2);
+
+            //Never will reach
+            if (MotorTime < 2.0F) log.Log(LogLevel.Warn, "Shaping: Invalid MotorTime/too Small > " + MotorTime);
+
+            if (MotorTime < fltDelayval)
+            {
+                MessageBoxResult msgres = MessageBox.Show("Please adjust MotorRampDelay, Current: " + MotorTime + " But required:" + fltDelayval, "Warning! Incorrect Ramp delay value!", MessageBoxButton.YesNo);
+                if (MessageBoxResult.No == msgres)
+                {
+                    log.Log(LogLevel.Error, "Please adjust MotorRampDelay, Current: " + fltDelayval + " But required: " + MotorTime);
+                    CSVHelper.CompletingTime = MotorTime + 3.00F;
+                    CSVHelper.MotorTime = MotorTime;
+                    return MotorTime;
+                }
+                else MotorTime = fltDelayval;
+
+            }
+
             if (MotorTime > 900.0F)//Time cant be set more than 15 min.
+            {
                 MessageBox.Show("Time is out of bound! Max is 15Mins. But counted is " + (MotorTime / 60) + " Mins", "Warning! Time is out of bound!", MessageBoxButton.OK);
-            
-            CSVHelper.MotorTime = MotorTime;
+                CSVHelper.CompletingTime = 0;
+                CSVHelper.MotorTime = 0;
+                return 0;
+            }
+
             CSVHelper.CompletingTime = MotorTime + 3.00F;
+            CSVHelper.MotorTime = MotorTime;
             return MotorTime;
         }
 

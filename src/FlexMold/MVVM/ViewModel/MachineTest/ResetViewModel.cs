@@ -11,7 +11,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Windows;
 using static FlexMold.Utility.TwinCathelper;
-using FlexMold.Utility;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 

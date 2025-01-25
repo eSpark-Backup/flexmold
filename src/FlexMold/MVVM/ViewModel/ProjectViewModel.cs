@@ -42,7 +42,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         private int progressActonCounter = 0;
         //private int UpdateProgressStatusSeconds = 5;
         private int intSpecifiedSecs = 60;
-        private float LastmaxVal = 0.00F;
+        //private float LastmaxVal = 0.00F;
         private bool Timer_ElapsedBusy = false;
         public static DispatcherTimer MotorsCheckTimer = new DispatcherTimer();
         public static DispatcherTimer StallErrMotorsCheckTimer = new DispatcherTimer();
@@ -208,7 +208,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         //}
 
 
-        private int _pgProcesStatusVal;
+        public static int _pgProcesStatusVal;
 
         public int pgProcesStatusVal
         {
@@ -433,7 +433,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         //    var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
         //    return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
         //}
-        private void WriteCSVData(IList<float> data)
+        private void WriteCSVData(List<float> data)
         {
 
             if (!ConfirmMotorsAreFine())
@@ -442,13 +442,26 @@ namespace FlexMold.MVVM.ViewModel.Project
             checkFirmware();
 
 
+            try
+            {
+                if (data != null && data.Count>0)
+                    CSVHelper.MaxDisplacement = data.Max();
+                else
+                    CSVHelper.MaxDisplacement = _TwinCathelper.PLCMotors.Max().mDisplacement;
+
+                //RecommendedMaxDisplacement(data);
+                GetRecommendedRPM(true);
+            }
+            catch { log.Log(LogLevel.Warn, $"ProjectViewModel > WriteCSVData > MaxDisplacement Error at: " + CSVHelper.MaxDisplacement); try { CSVHelper.MaxDisplacement = _TwinCathelper.PLCMotors[0].mDisplacement; } catch { } }
+
+
             for (int i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
             {
                 _TwinCathelper.PLCMotors[i].mDisplacement = (float)data[i];
                 _TwinCathelper.PLCMotors[i].mDirection = CSVHelper.MotorDirValue == 0 ? false : true;
                 _TwinCathelper.PLCMotors[i].mRampDelay = CSVHelper.MotorRampDelayValue;
-                _TwinCathelper.PLCMotors[i].mTime = GetRecommendedRPM(data[i]);//CSVHelper.MotorTime;
-            _TwinCathelper.PLCMotors[i].mMode = (int)EMode.Project;
+                _TwinCathelper.PLCMotors[i].mTime = CSVHelper.MotorTime;
+                _TwinCathelper.PLCMotors[i].mMode = (int)EMode.Project;
 
                 //log.Log(LogLevel.Info, "WriteCSVData loop1:" + i.ToString() + " : " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + _TwinCathelper.PLCMotors[i].mDirection.ToString()
                 //+ "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
@@ -456,40 +469,31 @@ namespace FlexMold.MVVM.ViewModel.Project
                 //+ "  >> mMode: " + EMode.Project.ToString());
                 log.Log(LogLevel.Warn, "ProjectView > WriteCSVData  Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
                     + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
-                    + "  >> mRPM: " + _TwinCathelper.PLCMotors[i].mRPM
-                    + "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
+                    + "  >> mRPM: " + CSVHelper.RecommendedRPM
+                    + "  >> MotorTime: " + CSVHelper.MotorTime
                     + "  >> mMode: " + EMode.Project.ToString());
             }
 
-            try
-            {
-                if (data.Count != null)
-                    LastmaxVal = data.Max();
-                else
-                    LastmaxVal = _TwinCathelper.PLCMotors.Max().mDisplacement;
-            
-            }
-            catch { log.Log(LogLevel.Warn, $"ProjectViewModel err1 >>> LastmaxVal "+ LastmaxVal); try { LastmaxVal = _TwinCathelper.PLCMotors[0].mDisplacement; } catch { } }
-
-            CSVHelper.MaxDisplacement = LastmaxVal;
-
-            if (GetRecommendedRPM(0) > 1.0F)
+            //CSVHelper.MaxDisplacement = LastmaxVal;
+            //if (GetRecommendedRPM(true) > 1.0F)
+            if (CSVHelper.MotorTime > 1.0F)
             {
                 try
                 {
                     //CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 3.00F;
                     if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
+                    
                     CSVHelper.ST_timer.Restart();
 
-                    _TwinCathelper.WriteEthercatDeviceData();
-                    log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} csv value(s) has been written sucessfully");
+                    //_TwinCathelper.WriteEthercatDeviceData();
+                    //log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} csv value(s) has been written sucessfully");
 
-                    Thread.Sleep(200);
-                    uint zero = 0;
-                    for (uint i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
-                        _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
-                    log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} zero value(s) has been written sucessfully");
-
+                    //Thread.Sleep(200);
+                    //uint zero = 0;
+                    //for (uint i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
+                    //    _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
+                    //log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} zero value(s) has been written sucessfully");
+                    writeDataToMachine("Shape ");
 
                     string RemoveResumeAfterProcess = ConfigurationManager.AppSettings["RemoveResumeAfterProcess"].ToString();
 
@@ -1217,10 +1221,10 @@ namespace FlexMold.MVVM.ViewModel.Project
                         }
                     }
                 }
-                catch
+                catch(Exception ep)
                 {
 
-                    log.Log(LogLevel.Error, "Resuming Calculation Error! ");
+                    log.Log(LogLevel.Warn, "Resuming Calculation Error1: "+ ep.Message);
                 }
 
                 //log.Log(LogLevel.Info, "Resuming12233399996666>>> ");
@@ -1245,17 +1249,18 @@ namespace FlexMold.MVVM.ViewModel.Project
                     calc_displacement = 0.00F;
 
                 }
-                catch (Exception ee) { log.Log(LogLevel.Info, "Resuming122333zzzzz>>> " + ee.Message); }
+                catch (Exception ee) { log.Log(LogLevel.Error, "Resuming Calculation Error2 >>> " + ee.Message); AbortAllOperations();  return; }
             }
 
             try
             {
-                CSVHelper.MaxDisplacement = data_resumeFlt.Max();
+                //CSVHelper.MaxDisplacement = data_resumeFlt.Max();
+                RecommendedMaxDisplacement(data_resumeFlt);
+                float calcTime = GetRecommendedRPM(true);
 
-                float calcTime = GetRecommendedRPM(CSVHelper.MaxDisplacement);
                 for (int i = 0; i < data_resumeFlt.Count; i++)
                 {
-                    _TwinCathelper.PLCMotors[i].mTime = calcTime;
+                    _TwinCathelper.PLCMotors[i].mTime = CSVHelper.MotorTime;
 
                     //                    log.Log(LogLevel.Info, "ResumingMotor_writeCV:" + i.ToString() + " : " + calc_displacement + "  >> Direction: " + _TwinCathelper.PLCMotors[i].mDirection.ToString()
                     //+ "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
@@ -1264,14 +1269,15 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                     log.Log(LogLevel.Warn, "ProjectView > ResumingMotor_writeCV Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
                         + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
-                        + "  >> mRPM: " + _TwinCathelper.PLCMotors[i].mRPM
+                        + "  >> mRPM: " + CSVHelper.RecommendedRPM
                         + "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
                         + "  >> mMode: " + EMode.Project.ToString());
                 }
             }
             catch (Exception ex)
             {
-                log.Log(LogLevel.Error, "ResumeProcessTime111>>>>> " + ex.Message);
+                log.Log(LogLevel.Error, "Resuming Calculation Error3 >>> " + ex.Message);
+                AbortAllOperations(); return;
             }
 
             try
@@ -1289,14 +1295,15 @@ namespace FlexMold.MVVM.ViewModel.Project
                 if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
                 CSVHelper.ST_timer.Restart();
 
-                _TwinCathelper.WriteEthercatDeviceData();
-                log.Log(LogLevel.Info, $"{data_resume.Length} csv value(s) has been written sucessfully");
+                //_TwinCathelper.WriteEthercatDeviceData();
+                //log.Log(LogLevel.Info, $"{data_resume.Length} csv value(s) has been written sucessfully");
 
-                Thread.Sleep(200);
-                uint zero = 0;
-                for (uint i = 0; i < data_resume.Length; i++)
-                    _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
-                log.Log(LogLevel.Info, $"{data_resume.Length} zero value(s) has been written sucessfully");
+                //Thread.Sleep(200);
+                //uint zero = 0;
+                //for (uint i = 0; i < data_resume.Length; i++)
+                //    _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
+                //log.Log(LogLevel.Info, $"{data_resume.Length} zero value(s) has been written sucessfully");
+                writeDataToMachine("Resume ");
 
             }
             catch (Exception ep) { log.Log(LogLevel.Info, "ResumeProcess_WriteCSVData111>>>>" + ep.Message); }
@@ -1327,16 +1334,16 @@ namespace FlexMold.MVVM.ViewModel.Project
                 MotorStatus.IsMotorsIdle = false;
             }
 
-            try
-            {
-                //if (MotorStatus.mPosition != null)
-                //    LastmaxVal = MotorStatus.mPosition.Max();
-                //else
-                //LastmaxVal = _TwinCathelper.PLCMotors.Max().mDisplacement;
+            //try
+            //{
+            //    //if (MotorStatus.mPosition != null)
+            //    //    LastmaxVal = MotorStatus.mPosition.Max();
+            //    //else
+            //    //LastmaxVal = _TwinCathelper.PLCMotors.Max().mDisplacement;
 
-                LastmaxVal = (int)data_resumeFlt.Max();
-            }
-            catch (Exception ep) { try { log.Log(LogLevel.Info, "ResumeProcess_WriteCSVData222>>>>progressbar_FinalVal" + ep.Message); LastmaxVal = (int)data_resumeFlt.Max(); } catch { LastmaxVal = 100; } }
+            //    CSVHelper.MaxDisplacement = (int)data_resumeFlt.Max();
+            //}
+            //catch (Exception ep) { try { log.Log(LogLevel.Info, "ResumeProcess_WriteCSVData222>>>>progressbar_FinalVal" + ep.Message); CSVHelper.MaxDisplacement = (int)data_resumeFlt.Max(); } catch { CSVHelper.MaxDisplacement = 100; } }
 
             data_resumeFlt.Clear();
             //LastEventPressed = 'R';// H=Home R=Resume S=Stop W= WriteCSV O=Initial
@@ -1846,8 +1853,8 @@ namespace FlexMold.MVVM.ViewModel.Project
 
             //_CSVDiaglogViewModel.MaxRPM = _TwinCathelper.AppSettings.MaxRPM;
             //CSVHelper.MaxRPM = float.Parse(ConfigurationManager.AppSettings["CSV_MaxRPM"].ToString());
-            int CSV_RecommendedRPM = (int)CSVHelper.RecommendedRPM;//int.Parse(ConfigurationManager.AppSettings["CSV_RecommendedRPM"].ToString());
-            RecommendedRPM(CSV_RecommendedRPM, CSVHelper.MaxRPM);
+            //int CSV_RecommendedRPM = (int)CSVHelper.RecommendedRPM;//int.Parse(ConfigurationManager.AppSettings["CSV_RecommendedRPM"].ToString());
+            //GetRecommendedRPM(false);
 
 
             //_ = await DialogHost.Show(_CSVDiaglogView, "RootDialog", ClosingEventHandler);
@@ -1882,58 +1889,58 @@ namespace FlexMold.MVVM.ViewModel.Project
         }
 
 
-        private void LoadCSVValues()
-        {
-            FileInfo SelectedFile_finf = new FileInfo(selectedCSV);
+        //private void LoadCSVValues()
+        //{
+        //    FileInfo SelectedFile_finf = new FileInfo(selectedCSV);
 
-            if (SelectedFile_finf != null && SelectedFile_finf.Length > 1)
-            {
-                csvdata = CSVHelper.ReadCSV_DoubleData(SelectedFile_finf);
-                if (csvdata.Count == 0)
-                {
-                    log.Log(LogLevel.Error, $"Please select correct CSV\n" +
-                    $" File doesn't conatain desired data");
-                    TNF.ShowError($"CSV Failed");
-                    return;
-                }
-                if (_TwinCathelper.PLCMotors.Length != csvdata.Count)
-                {
+        //    if (SelectedFile_finf != null && SelectedFile_finf.Length > 1)
+        //    {
+        //        csvdata = CSVHelper.ReadCSV_DoubleData(SelectedFile_finf);
+        //        if (csvdata.Count == 0)
+        //        {
+        //            log.Log(LogLevel.Error, $"Please select correct CSV\n" +
+        //            $" File doesn't conatain desired data");
+        //            TNF.ShowError($"CSV Failed");
+        //            return;
+        //        }
+        //        if (_TwinCathelper.PLCMotors.Length != csvdata.Count)
+        //        {
 
-                    log.Log(LogLevel.Error, $"Please select correct CSV");
-                    log.Log(LogLevel.Error, $"Data and Box counts are not equal");
-                    log.Log(LogLevel.Error, $"Data Count : {csvdata.Count} | Device Count : {_TwinCathelper.PLCMotors.Length}");
-                    TNF.ShowError($"CSV Failed\nDevice Count :{_TwinCathelper.PLCMotors.Length} != Data Count :{csvdata.Count}");
-                    return;
-                }
+        //            log.Log(LogLevel.Error, $"Please select correct CSV");
+        //            log.Log(LogLevel.Error, $"Data and Box counts are not equal");
+        //            log.Log(LogLevel.Error, $"Data Count : {csvdata.Count} | Device Count : {_TwinCathelper.PLCMotors.Length}");
+        //            TNF.ShowError($"CSV Failed\nDevice Count :{_TwinCathelper.PLCMotors.Length} != Data Count :{csvdata.Count}");
+        //            return;
+        //        }
 
-                //if(!MotorsCheckTimer.IsEnabled)
-                //    MotorsCheckTimer.Start();
+        //        //if(!MotorsCheckTimer.IsEnabled)
+        //        //    MotorsCheckTimer.Start();
 
-                //CSVHelper.MaxDisplacement = (float)csvdata.Max();
-                RecommendedMaxDisplacement(csvdata);
-                //_CSVDiaglogViewModel.MaxRPM = _TwinCathelper.AppSettings.MaxRPM;
-                //CSVHelper.MaxRPM = float.Parse(ConfigurationManager.AppSettings["CSV_MaxRPM"].ToString());
-                int CSV_RecommendedRPM = (int)CSVHelper.RecommendedRPM;//int.Parse(ConfigurationManager.AppSettings["CSV_RecommendedRPM"].ToString());
-                RecommendedRPM(CSV_RecommendedRPM, CSVHelper.MaxRPM);
+        //        //CSVHelper.MaxDisplacement = (float)csvdata.Max();
+        //        RecommendedMaxDisplacement(csvdata);
+        //        //_CSVDiaglogViewModel.MaxRPM = _TwinCathelper.AppSettings.MaxRPM;
+        //        //CSVHelper.MaxRPM = float.Parse(ConfigurationManager.AppSettings["CSV_MaxRPM"].ToString());
+        //        //int CSV_RecommendedRPM = (int)CSVHelper.RecommendedRPM;//int.Parse(ConfigurationManager.AppSettings["CSV_RecommendedRPM"].ToString());
+        //        GetRecommendedRPM(true);
 
 
-                //_ = await DialogHost.Show(_CSVDiaglogView, "RootDialog", ClosingEventHandler);
-                //MotorDirValue = _CSVDiaglogViewModel.MotorDirPValue;
-                //CSVHelper.MotorDirValue = int.Parse(ConfigurationManager.AppSettings["CSV_MotorDirValue"].ToString());
+        //        //_ = await DialogHost.Show(_CSVDiaglogView, "RootDialog", ClosingEventHandler);
+        //        //MotorDirValue = _CSVDiaglogViewModel.MotorDirPValue;
+        //        //CSVHelper.MotorDirValue = int.Parse(ConfigurationManager.AppSettings["CSV_MotorDirValue"].ToString());
 
-                //MotorRampDelayValue = _CSVDiaglogViewModel.MotorRampDelayValue;
-                //CSVHelper.MotorRampDelayValue = float.Parse(ConfigurationManager.AppSettings["CSV_DefaultTimeSec"].ToString());//CSV_DefaultTimeSec=5
-                                                                                                                               //CSVHelper.MotorRampDelayValue = MotorRampDelayValue;
+        //        //MotorRampDelayValue = _CSVDiaglogViewModel.MotorRampDelayValue;
+        //        //CSVHelper.MotorRampDelayValue = float.Parse(ConfigurationManager.AppSettings["CSV_DefaultTimeSec"].ToString());//CSV_DefaultTimeSec=5
+        //                                                                                                                       //CSVHelper.MotorRampDelayValue = MotorRampDelayValue;
 
-                //MotorTime = _CSVDiaglogViewModel.MotorTime;
-                //MotorTime = float.Parse(ConfigurationManager.AppSettings["CSV_DefaultTime"].ToString());//CSV_DefaultTime=33
+        //        //MotorTime = _CSVDiaglogViewModel.MotorTime;
+        //        //MotorTime = float.Parse(ConfigurationManager.AppSettings["CSV_DefaultTime"].ToString());//CSV_DefaultTime=33
 
-                string dir = CSVHelper.MotorDirValue == 0 ? "Clockwise" : "Anti-Clockwise";
-                log.Log(LogLevel.Info, $"Selected Direction : {dir}");
-            }
-            else
-            { MessageBox.Show("Warning! Please load CSV first!", "Warning! No displacement data found!", MessageBoxButtons.OK); }
-        }
+        //        string dir = CSVHelper.MotorDirValue == 0 ? "Clockwise" : "Anti-Clockwise";
+        //        log.Log(LogLevel.Info, $"Selected Direction : {dir}");
+        //    }
+        //    else
+        //    { MessageBox.Show("Warning! Please load CSV first!", "Warning! No displacement data found!", MessageBoxButtons.OK); }
+        //}
 
 
         public void RecommendedMaxDisplacement(List<float> negdis)
@@ -1956,7 +1963,7 @@ namespace FlexMold.MVVM.ViewModel.Project
 
         }
 
-        public float GetRecommendedRPM(float CurrentMaxDisplacement)
+        public float GetRecommendedRPM(bool SetCompletingTime)
         {
 
             //float MotorTime = (CurrentMaxDisplacement * 60) / (CSVHelper.RecommendedRPM * 2);
@@ -1964,61 +1971,83 @@ namespace FlexMold.MVVM.ViewModel.Project
             //Every motor must reach exactly same time ie some will move faster and some will slower --- Client requirement
             float MotorTime = (CSVHelper.MaxDisplacement * 60) / (CSVHelper.RecommendedRPM * 2);
             MotorTime = Math.Abs(MotorTime);
+
+            float fltDelayval = ((CSVHelper.MotorRampDelayValue * 2) + 2);
+
+            //Never will reach
+            if (MotorTime < 2.0F) log.Log(LogLevel.Warn, "Shaping: Invalid MotorTime/too Small > " + MotorTime);
+
+            if (MotorTime < fltDelayval) {
+                DialogResult msgres = MessageBox.Show("Please adjust MotorRampDelay, Current: " + MotorTime + " But required:" + fltDelayval, "Warning! Incorrect Ramp delay value!", MessageBoxButtons.YesNo);
+                if (DialogResult.No == msgres)
+                {
+                    log.Log(LogLevel.Error, "Please adjust MotorRampDelay, Current: " + fltDelayval + " But required: " + MotorTime);
+                    CSVHelper.CompletingTime = MotorTime + 3.00F;
+                    CSVHelper.MotorTime = MotorTime;
+                    return MotorTime;
+                }
+                else MotorTime = fltDelayval;
+
+            }
+
             if (MotorTime > 900.0F)//Time cant be set more than 15 min.
+            {
                 MessageBox.Show("Time is out of bound! Max is 15Mins. But counted is " + (MotorTime / 60) + " Mins", "Warning! Time is out of bound!", MessageBoxButtons.OK);
+                CSVHelper.CompletingTime = 0;
+                CSVHelper.MotorTime = 0;
+                return 0;
+            }
 
-            CSVHelper.CompletingTime = MotorTime + 3.00F;
+            if (SetCompletingTime)
+                CSVHelper.CompletingTime = MotorTime + 3.00F;
 
-            if ((MotorTime-1.0F) < 1.0F)
-                log.Log(LogLevel.Error, "Shaping: Invalid MotorTime/too Small > "+ MotorTime);
-
-
+            CSVHelper.MotorTime = MotorTime;
             return MotorTime;
         }
 
-        public void RecommendedRPM(int CSV_RecommendedRPM,float maxRPM)
-        { 
-            //get { return recommendedRPM; }
-            //set
-            //{
-            //if (CSVHelper.MaxDisplacement < 1)
-            //{
-            //    if (_TwinCathelper.PLCMotorsStatuses.mPostion.Max() > 0)
-            //        CSVHelper.MaxDisplacement = _TwinCathelper.PLCMotorsStatuses.mPostion.Max();
-            //    else //if (csvdata != null && csvdata.Max() > 0)
-            //        try { CSVHelper.MaxDisplacement = csvdata.Max(); } catch { CSVHelper.MaxDisplacement = 0; }
-            //    //else {
-            //    //    LoadCSVValues();
-            //    //}
-            //}
+        //public void RecommendedRPM(int CSV_RecommendedRPM,float maxRPM)
+        //{ 
+        //    //get { return recommendedRPM; }
+        //    //set
+        //    //{
+        //    //if (CSVHelper.MaxDisplacement < 1)
+        //    //{
+        //    //    if (_TwinCathelper.PLCMotorsStatuses.mPostion.Max() > 0)
+        //    //        CSVHelper.MaxDisplacement = _TwinCathelper.PLCMotorsStatuses.mPostion.Max();
+        //    //    else //if (csvdata != null && csvdata.Max() > 0)
+        //    //        try { CSVHelper.MaxDisplacement = csvdata.Max(); } catch { CSVHelper.MaxDisplacement = 0; }
+        //    //    //else {
+        //    //    //    LoadCSVValues();
+        //    //    //}
+        //    //}
 
-            CSVHelper.MotorTime = (CSVHelper.MaxDisplacement * 60) / (CSV_RecommendedRPM * 2);
-            //log.Log(LogLevel.Info, $"New MotortimeSet >>>>>>>>>>>>>"+ CSVHelper.MotorTime);
+        //    CSVHelper.MotorTime = (CSVHelper.MaxDisplacement * 60) / (CSV_RecommendedRPM * 2);
+        //    //log.Log(LogLevel.Info, $"New MotortimeSet >>>>>>>>>>>>>"+ CSVHelper.MotorTime);
 
-            if (CSVHelper.MotorTime > 900F)//Time cant be set more than 15 min.
-                MessageBox.Show("Time is out of bound! Max is 15Mins. But counted is "+ (CSVHelper.MotorTime/60)+" Mins","Warning! Time is out of bound!",MessageBoxButtons.OK);
-                //CSVHelper.MotorTime = time;
-                //CSVHelper.MotorTime = CSVHelper.MotorTime;
+        //    if (CSVHelper.MotorTime > 900F)//Time cant be set more than 15 min.
+        //        MessageBox.Show("Time is out of bound! Max is 15Mins. But counted is "+ (CSVHelper.MotorTime/60)+" Mins","Warning! Time is out of bound!",MessageBoxButtons.OK);
+        //        //CSVHelper.MotorTime = time;
+        //        //CSVHelper.MotorTime = CSVHelper.MotorTime;
 
-            //if (CSV_RecommendedRPM != recommendedRPM)
-            //{
-            //    //recommendedRPM = CSV_RecommendedRPM;
-            //    ////total time = (d * 60) / (RPM * 2)
-            //    //if (time != _MotorTime)
-            //    //{
-            //    //    //total time = (d * 60) / (RPM * 2)
-            //    //    MotorTime = time;
-            //    //}
-            //    if (RecommendedRPM > maxRPM)
-            //    {
-            //        log.Log(LogLevel.Error, $"Value cannot exceed more than Maximum RPM");
-            //        //BtnEnbl = true;
-            //        //Message = "";
-            //    }
-            //    //}
-            //    //OnPropertyChanged();
-            //}
-        }
+        //    //if (CSV_RecommendedRPM != recommendedRPM)
+        //    //{
+        //    //    //recommendedRPM = CSV_RecommendedRPM;
+        //    //    ////total time = (d * 60) / (RPM * 2)
+        //    //    //if (time != _MotorTime)
+        //    //    //{
+        //    //    //    //total time = (d * 60) / (RPM * 2)
+        //    //    //    MotorTime = time;
+        //    //    //}
+        //    //    if (RecommendedRPM > maxRPM)
+        //    //    {
+        //    //        log.Log(LogLevel.Error, $"Value cannot exceed more than Maximum RPM");
+        //    //        //BtnEnbl = true;
+        //    //        //Message = "";
+        //    //    }
+        //    //    //}
+        //    //    //OnPropertyChanged();
+        //    //}
+        //}
 
 
         private bool ConfirmMotorsAreFine()
@@ -2070,7 +2099,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             if (!ConfirmMotorsAreFine())
                 return;            
 
-            uint zero = 0;
+            //uint zero = 0;
 
             float MaxPosition = 0.00F;
 
@@ -2185,9 +2214,9 @@ namespace FlexMold.MVVM.ViewModel.Project
                                                                                        //    _TwinCathelper.PLCMotors[i].mTime = CSVHelper.MotorTime;//float.Parse(ConfigurationManager.AppSettings["DefaultRampTime"].ToString());
                                                                                        //else
                                                                                        //{
-                RecommendedMaxDisplacement(homeDisplacement);
-                int CSV_RecommendedRPM = (int)CSVHelper.RecommendedRPM;//int.Parse(ConfigurationManager.AppSettings["CSV_RecommendedRPM"].ToString());
-                RecommendedRPM(CSV_RecommendedRPM, CSVHelper.MaxRPM);//CSVHelper.MotorTime
+                //RecommendedMaxDisplacement(homeDisplacement);
+                ////int CSV_RecommendedRPM = (int)CSVHelper.RecommendedRPM;//int.Parse(ConfigurationManager.AppSettings["CSV_RecommendedRPM"].ToString());
+                //GetRecommendedRPM(false);//CSVHelper.MotorTime
 
                 //_TwinCathelper.PLCMotors[i].mTime = GetRecommendedRPM(Math.Abs(calc_displacement));//CSVHelper.MotorTime;CSVHelper.MotorTime;//float.Parse(ConfigurationManager.AppSettings["DefaultRampTime"].ToString());
 
@@ -2200,25 +2229,26 @@ namespace FlexMold.MVVM.ViewModel.Project
                 _TwinCathelper.PLCMotors[i].mDisplacement = Math.Abs(calc_displacement);
             }
 
+            //CSVHelper.MaxDisplacement = Math.Abs(homeDisplacement.Max());//GetRecommendedRPM(Math.Abs(homeDisplacement.Max()));
+            RecommendedMaxDisplacement(homeDisplacement);
+            GetRecommendedRPM(true);
 
-            CSVHelper.MaxDisplacement = Math.Abs(homeDisplacement.Max());//GetRecommendedRPM(Math.Abs(homeDisplacement.Max()));
-            calc_displacement = GetRecommendedRPM(Math.Abs(CSVHelper.MaxDisplacement));
-            if (calc_displacement > 1.0F)
+            if (CSVHelper.MotorTime > 1.0F)
             {
                 //reset time for all motors for negativeOffset
                 for (int i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
                 {
-                    _TwinCathelper.PLCMotors[i].mTime = Math.Abs(calc_displacement);
+                    _TwinCathelper.PLCMotors[i].mTime = CSVHelper.MotorTime;//Math.Abs(calc_displacement);
 
                     //            log.Log(LogLevel.Info, "HOME_writeCV:" + i.ToString() + " : " + _TwinCathelper.PLCMotors[i].mDisplacement + "  >> Direction: " + _TwinCathelper.PLCMotors[i].mDirection.ToString()
                     //+ "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay.ToString()
                     //+ "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime.ToString()
                     //+ "  >> mMode: " + (int)EMode.Project);
 
-                    log.Log(LogLevel.Warn, "ProjectView > HomeTrigger Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
+                    log.Log(LogLevel.Warn, "ProjectView > HomeTrigger Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + (Math.Abs(_TwinCathelper.PLCMotors[i].mDisplacement) - Math.Abs(_TwinCathelper.PLCMotorsStatuses.mPostion[i])) + "  >> Direction: " + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
         + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
-        + "  >> mRPM: " + _TwinCathelper.PLCMotors[i].mRPM
-        + "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
+        + "  >> mRPM: " + CSVHelper.RecommendedRPM
+        + "  >> MotorTime: " + CSVHelper.MotorTime//_TwinCathelper.PLCMotors[i].mTime
         + "  >> mMode: " + EMode.Project.ToString());
 
                 }
@@ -2246,19 +2276,21 @@ namespace FlexMold.MVVM.ViewModel.Project
                     //}                
 
                     //CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 3.00F;
-                    GetRecommendedRPM(0.0f);
+                    //GetRecommendedRPM(true);
 
                     if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
                     CSVHelper.ST_timer.Restart();
 
-                    _TwinCathelper.WriteEthercatDeviceData();
-                    log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} Home value(s) has been written sucessfully");
+                    //_TwinCathelper.WriteEthercatDeviceData();
+                    //log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} Home value(s) has been written sucessfully");
 
-                    Thread.Sleep(200);
+                    //Thread.Sleep(200);
 
-                    for (uint i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
-                        _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
-                    log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} zero value(s) has been written sucessfully");
+                    //for (uint i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
+                    //    _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
+                    //log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} zero value(s) has been written sucessfully");
+
+                    writeDataToMachine("Home ");
 
                     //IsPsitionDataProcessing = true;
                     try { LastPositionData = MotorStatus.mPosition[0]; } catch { LastPositionData = 0; }
@@ -2288,13 +2320,39 @@ namespace FlexMold.MVVM.ViewModel.Project
             try
             {
                 if(CSVHelper.NegativeoffsetResume.Length>1)
-                    LastmaxVal = (int)(Math.Abs(_TwinCathelper.PLCMotors.Min().mDisplacement));
+                    CSVHelper.MaxDisplacement = (int)(Math.Abs(_TwinCathelper.PLCMotors.Min().mDisplacement));
                 else
-                    LastmaxVal = MotorStatus.mPosition.Max();
+                    CSVHelper.MaxDisplacement = MotorStatus.mPosition.Max();
                     
             }
             catch { }
         }
+
+        private void writeDataToMachine(string Sourc)
+        {
+            uint zero = 0;
+
+            _TwinCathelper.WriteEthercatDeviceData();
+            log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} {Sourc} value(s) has been written sucessfully");
+
+            Thread.Sleep(200);
+            
+            //for (uint i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
+            //    _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
+
+
+            Parallel.For(0, _TwinCathelper.PLCMotors.Count(), j =>
+            {
+                _TwinCathelper.WriteEthercatDeviceData((uint)j, DeviceSymbol.mDisplacement, zero.CastToArray());
+
+                //if (!array1[i].Equals(array2[i]))
+                //{
+                //    mismatchedIndexes.Add(i);
+                //}
+            });
+            log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} zero value(s) has been written sucessfully");
+        }
+
 
         private string ConvertSectoDay(uint n)
         {
@@ -2438,12 +2496,10 @@ namespace FlexMold.MVVM.ViewModel.Project
                 catch { }
 
                 float posDiff = 0;
-
+                try { SplashScreenViewModel._mainWindow.bt_TCP.Content = MotorStatus.mPosition.Max() + "%"; } catch { }
                 if (IsRampCompleted)
-                {
-                    
+                {                    
                     //IsHomeEnabled = true;
-
                     //pgProcesStatusVal = 100;
                     if (pgProcesStatusVal >= 99)
                     {
@@ -2877,7 +2933,8 @@ namespace FlexMold.MVVM.ViewModel.Project
                 String FirmwareNotMatched = "";
                 for (uint i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)  
                 {
-                    if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713969130 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713968323 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)//0x662917EA (1713969130=Wed Apr 24 2024 14:32:10 GMT+0000) CSVHelper.MotorsStatusGlobal[0] == "Healthy" && //1713968323=Wed Apr 24 2024 14:18:43 GMT+0000
+                    //if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713969130 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713968323 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)//0x662917EA (1713969130=Wed Apr 24 2024 14:32:10 GMT+0000) CSVHelper.MotorsStatusGlobal[0] == "Healthy" && //1713968323=Wed Apr 24 2024 14:18:43 GMT+0000
+                    if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1737720238 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)
                         continue;
                     else
                         FirmwareNotMatched += "Motor" + (i + 1) + ",";
@@ -3032,6 +3089,12 @@ namespace FlexMold.MVVM.ViewModel.Project
                 {
                     if (toggleStopResumeButtonText == "Stop")
                     {
+                        try
+                        {
+                            if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
+                            CSVHelper.ST_timer.Stop(); CSVHelper.ST_timer.Reset();
+                        }
+                        catch { }
 
                         if (!CSVHelper.MachineEnabled)
                         {
@@ -3054,9 +3117,9 @@ namespace FlexMold.MVVM.ViewModel.Project
                         IsRampCompleted = false;
 
                         if (MotorStatus.mPosition != null)
-                            LastmaxVal = MotorStatus.mPosition.Max();
+                            CSVHelper.MaxDisplacement = MotorStatus.mPosition.Max();
                         else
-                            LastmaxVal = _TwinCathelper.PLCMotorsStatuses.mPostion.Max();
+                            CSVHelper.MaxDisplacement = _TwinCathelper.PLCMotorsStatuses.mPostion.Max();
 
                         AbortAllOperations();
 
@@ -3077,6 +3140,39 @@ namespace FlexMold.MVVM.ViewModel.Project
                         if (!CSVHelper.MachineEnabled)
                         {
                             MessageBox.Show("Please Power ON the machine before resuming!", "Machine state is off", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
+
+                        if (CSVHelper.ST_timer != null && CSVHelper.ST_timer.IsRunning)
+                        {
+                            if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
+
+                            CSVHelper.ST_timer.Stop(); CSVHelper.ST_timer.Reset();
+
+                            log.Log(LogLevel.Warn, $"Manual Stop not allowed while Homing!");
+                            
+                            if (MachineTotalTimeSW.IsRunning)
+                            {
+                                CSVHelper.TotalNoHrs += (uint)(MachineTotalTimeSW.ElapsedMilliseconds / 1000);
+                                MachineTotalTimeSW.Stop();
+                                MachineTotalTimeSW.Reset();
+                            }
+                            IsRampCompleted = false;
+
+                            if (MotorStatus.mPosition != null)
+                                CSVHelper.MaxDisplacement = MotorStatus.mPosition.Max();
+                            else
+                                CSVHelper.MaxDisplacement = _TwinCathelper.PLCMotorsStatuses.mPostion.Max();
+
+                            AbortAllOperations();
+
+                            StopProcess_WriteCSVData();
+                            LastEventPressed = 'S';
+
+                            toggleStopResumeButtonText = "Stop";
+                            OnPropertyChanged();
+
+                            MessageBox.Show("Machine is already in shaping, Now Stopped!", "Machine already in shaping!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
                         }
 
@@ -3226,11 +3322,11 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                 if (csvdata == null)
                 {
-                    CSVHelper.MaxDisplacement = _TwinCathelper.PLCMotorsStatuses.mPostion.Max();
+                    //CSVHelper.MaxDisplacement = _TwinCathelper.PLCMotorsStatuses.mPostion.Max();
 
                     //CSVHelper.MaxRPM = float.Parse(ConfigurationManager.AppSettings["CSV_MaxRPM"].ToString());
-                    int CSV_RecommendedRPM = (int)CSVHelper.RecommendedRPM;//int.Parse(ConfigurationManager.AppSettings["CSV_RecommendedRPM"].ToString());
-                    RecommendedRPM(CSV_RecommendedRPM, CSVHelper.MaxRPM);//CSVHelper.MotorTime
+                    //int CSV_RecommendedRPM = (int)CSVHelper.RecommendedRPM;//int.Parse(ConfigurationManager.AppSettings["CSV_RecommendedRPM"].ToString());
+                    //GetRecommendedRPM(false);//CSVHelper.MotorTime
                     //CSVHelper.MotorDirValue = int.Parse(ConfigurationManager.AppSettings["CSV_MotorDirValue"].ToString());
 
                     //CSVHelper.MotorRampDelayValue = float.Parse(ConfigurationManager.AppSettings["CSV_DefaultTimeSec"].ToString());//CSV_DefaultTimeSec=5
@@ -3244,11 +3340,14 @@ namespace FlexMold.MVVM.ViewModel.Project
                 try { travelTime = ConvertSectoDay(CSVHelper.TotalNoHrs); } catch (Exception ex) { string st = ex.Message; travelTime = ConvertSectoDay(1); }
 
                 if (MotorStatus.mPosition != null)
-                    LastmaxVal = MotorStatus.mPosition.Max();
+                    CSVHelper.MaxDisplacement = MotorStatus.mPosition.Max();
                 else
-                    LastmaxVal = _TwinCathelper.PLCMotorsStatuses.mPostion.Max();
+                    CSVHelper.MaxDisplacement = _TwinCathelper.PLCMotorsStatuses.mPostion.Max();
 
+                //GetRecommendedRPM(true);
                 updateHomeButtonStatus();
+                //rootSelectedMyDataModel = myDataModels[0];
+                
             }
             catch (Exception ex)
             {

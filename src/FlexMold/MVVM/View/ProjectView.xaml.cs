@@ -21,6 +21,10 @@ namespace FlexMold.MVVM.View
         {
             DataContext = _ProjectViewModel;
             InitializeComponent();
+
+            if (ProjectsListView.Items.Count > 0)
+                ProjectsListView.SelectedIndex = 0;
+            else { MessageBox.Show("Please update project folder location from settings!","Project Folder Not Found!", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
 
         private void HandleStop(object sender, RoutedEventArgs e)

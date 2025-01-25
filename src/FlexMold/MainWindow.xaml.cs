@@ -1,5 +1,6 @@
 ﻿using FlexMold.MVVM.Model;
 using FlexMold.MVVM.ViewModel;
+using FlexMold.MVVM.ViewModel.Project;
 using FlexMold.Utility;
 using MahApps.Metro.Controls;
 using MaterialDesignThemes.Wpf;
@@ -56,6 +57,10 @@ namespace FlexMold
             log.Log(LogLevel.Info, $"Application Loaded Sucessfully.....");
             log.Log(LogLevel.Info, $"Selected Machine Type : {_SplashScreenViewModel.SelectedMachine.MachineType} " +
                 $"Name : {_SplashScreenViewModel.SelectedMachine.Name} ID : {_SplashScreenViewModel.SelectedMachine.ID}");
+
+                bt_TCP.Background = new SolidColorBrush(Colors.YellowGreen);
+                bt_TCP.Foreground = new SolidColorBrush(Colors.Black);
+
             }
             catch (Exception ex)
             {

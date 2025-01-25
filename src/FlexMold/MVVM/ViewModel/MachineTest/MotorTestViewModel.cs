@@ -221,16 +221,41 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
 
             //Every motor must reach exactly same time ie some will move faster and some will slower --- Client requirement
             float MotorTime = ((float)SelectedMotorDisplacementValue * 60) / ((float)SelectedMotorRPM * 2);
+            MotorTime = Math.Abs(MotorTime);
+
+            float fltDelayval = ((CSVHelper.MotorRampDelayValue * 2) + 2);
+
+            //Never will reach
+            if (MotorTime < 2.0F) log.Log(LogLevel.Warn, "Shaping: Invalid MotorTime/too Small > " + MotorTime);
+
+            if (MotorTime < fltDelayval)
+            {
+                MessageBoxResult msgres = MessageBox.Show("Please adjust MotorRampDelay, Current: " + MotorTime + " But required:" + fltDelayval, "Warning! Incorrect Ramp delay value!", MessageBoxButton.YesNo);
+                if (MessageBoxResult.No == msgres)
+                {
+                    log.Log(LogLevel.Error, "Please adjust MotorRampDelay, Current: " + fltDelayval + " But required: " + MotorTime);
+                    CSVHelper.CompletingTime = MotorTime + 3.00F;
+                    CSVHelper.MotorTime = MotorTime;
+                    return MotorTime;
+
+                }
+                else MotorTime = fltDelayval;
+
+            }
 
             if (MotorTime > 900.0F)//Time cant be set more than 15 min.
-                MessageBox.Show("Time is out of bound! Max is 15Mins. But counted is " + (MotorTime / 60) + " Mins", "Warning! Time is out of bound!", MessageBoxButton.OK);            
-
-            if (MotorTime < 1.0F)
-                log.Log(LogLevel.Error, "Shaping: Invalid MotorTime/too Small > " + MotorTime);
+            {
+                MessageBox.Show("Time is out of bound! Max is 15Mins. But counted is " + (MotorTime / 60) + " Mins", "Warning! Time is out of bound!", MessageBoxButton.OK);
+                CSVHelper.CompletingTime = 0;
+                CSVHelper.MotorTime = 0;
+                return 0;
+            }
 
             CSVHelper.CompletingTime = MotorTime + 3.00F;
+            CSVHelper.MotorTime = MotorTime;
             return MotorTime;
         }
+
         private void Client_AdsNotificationMT(object sender, EventArgs e)
         {
             Position = _TwinCathelper.PLCMotorsStatuses.mPostion[SelectedMotorIndex];
@@ -256,6 +281,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         {
             if (!justread)
             {
+
                 GetRecommendedRPM();
 
                 MyPLCMotor[SelectedMotorIndex].mDisplacement = (float)SelectedMotorDisplacementValue;

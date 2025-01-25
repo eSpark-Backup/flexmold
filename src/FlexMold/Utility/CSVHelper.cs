@@ -35,6 +35,7 @@ namespace FlexMold.Utility
         public static string prjFolderLoc = Environment.CurrentDirectory;
         public static string NegativeoffsetResume = "";
         public static List<float> NegativeoffsetResumeFlt = null;
+        public static float[] LastOffsetBeforeCalibration = null;
         public static string LastPositionValues = "";
         public static MVVM.ViewModel.Setting.MotorSettingViewModel offsetRes_MotorSettingViewModel=null;
 

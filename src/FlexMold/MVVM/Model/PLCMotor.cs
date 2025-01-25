@@ -65,9 +65,11 @@ namespace FlexMold.MVVM.Model
         CalibrationSquence02Failed,//5
         CalibrationSquence02Success,//6
         RampSequenceCompleted,//7
-        ShapeFormingStarted,//8
-        ShapeFormingCompleted,//9
-        HomePosition//10
+        RampSequenceRunning,//8
+        RampSequenceFailed,//9
+        //ShapeFormingStarted,//10
+        //ShapeFormingCompleted,//11
+        //HomePosition//12
     }
     public static class TCVarName
     {
@@ -79,9 +81,10 @@ namespace FlexMold.MVVM.Model
 
     public enum EmotorDiagnostic
     {
-        Healthy,
-        Stepper_Driver_Failed,
-        Stall
+        No_Error,//Healthy,
+        Temperature_Limit_exceed,//Stepper_Driver_Failed,
+        Motor_stalled,//Stall
+        Invalid_Ramp_Seq,
     }
 
     public enum TCSymbols

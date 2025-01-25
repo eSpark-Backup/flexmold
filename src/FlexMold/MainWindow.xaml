@@ -93,6 +93,7 @@
         <mah:WindowCommands ShowLastSeparator="False">
             <Button x:Name="bt_TCC" Margin="0" />
             <Button x:Name="bt_TCS" />
+            <Button x:Name="bt_TCP" x:FieldModifier="public"/>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
     <materialDesignMahApps:DialogHost DialogTheme="Inherit" Identifier="RootDialog">

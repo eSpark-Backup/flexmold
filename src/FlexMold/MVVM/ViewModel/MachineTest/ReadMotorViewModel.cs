@@ -141,7 +141,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             {
                 try
                 {
-                    if (Regex.IsMatch(CSVHelper.MotorsStatusGlobal[i], "Healthy|EC_DEVICE_STATE_OP|EC_DEVICE_STATE_OK|EC_DEVICE_STATE_INIT", RegexOptions.IgnoreCase))
+                    if (Regex.IsMatch(CSVHelper.MotorsStatusGlobal[i], "Healthy|EC_DEVICE_STATE_OP|EC_DEVICE_STATE_OK|EC_DEVICE_STATE_INIT|No_Error", RegexOptions.IgnoreCase))
                         responding += DateTime.Now + " >>> Motor " + i + " Healthy" + Environment.NewLine;
                     else
                         nonresponding += DateTime.Now + " >>> Motor " + i + " Not Responding:" + CSVHelper.MotorsStatusGlobal[i] + Environment.NewLine;

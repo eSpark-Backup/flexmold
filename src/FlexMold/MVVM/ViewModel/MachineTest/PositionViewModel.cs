@@ -347,8 +347,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
 
                 if (csvdata.Count != (NumMotorToProp - NumMotorFromProp + 1))
                 {
-                    log.Log(LogLevel.Error, $"Please select correct CSV\n" +
-                    $" File doesn't conatain desired data");
+                    log.Log(LogLevel.Error, $"Please select correct CSV," + " Current motors count is: " + csvdata.Count + " But expected is: " + _TwinCathelper.PLCMotors.Length+ Environment.NewLine+
+                    $" File doesn't conatain desired data: "+ selectedCSV);
                     TNF.ShowError($"CSV Failed");
                     return;
                 }
@@ -705,12 +705,16 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     {
                         if (((int)MotorStatus.mPosition[i] > int.Parse(Max_mm)) || ((int)MotorStatus.mPosition[i] < int.Parse("-" + Max_mm)) || Moveinmm >= int.Parse(Max_mm))
                         {
+                            String st = "";
                             log.Log(LogLevel.Error, $"Motor no:" + i + " has invalid position!");
                             
-                            log.Log(LogLevel.Warn, $"Stopping Motors");
                             var data = (int)EMode.Abort;
                             for (uint j = 0; j < _TwinCathelper.PLCMotors.Count(); j++)
-                                _TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray());
+                            { _TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray()); st += j + ":" + MotorStatus.mPosition[j] + ","; }
+
+                            log.Log(LogLevel.Warn, $"Position, Stopping Motors > " + st);
+
+                            //_TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray());
 
 
                             return false;
@@ -792,6 +796,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     {
                         FileInfo SelectedFile_finf = new FileInfo(dialog.FileName);
                         selectedCSV = SelectedFile_finf.FullName;
+                        CSVHelper.LastSelectedCSV = selectedCSV;
                     }
                     else
                         log.Log(LogLevel.Warn, $"Project folder path not found!");

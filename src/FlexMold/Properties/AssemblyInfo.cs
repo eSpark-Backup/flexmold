@@ -6,11 +6,11 @@ using System.Windows;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("FlexMold")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Flexmold By Kurvatur")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Kurvatur")]
 [assembly: AssemblyProduct("FlexMold")]
-[assembly: AssemblyCopyright("Copyright©2024®eSpark")]
+[assembly: AssemblyCopyright("Copyright©2025®eSpark")]
 [assembly: AssemblyTrademark("®eSpark")]
 [assembly: AssemblyCulture("")]
 
@@ -47,5 +47,5 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.24.05.2024")]
-[assembly: AssemblyFileVersion("1.24.05.2024")]
+[assembly: AssemblyVersion("3.27.01.2025")]
+[assembly: AssemblyFileVersion("3.27.01.2025")]

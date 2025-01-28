@@ -742,7 +742,7 @@ namespace FlexMold.MVVM.ViewModel.Project
 
             List<float> NegativeoffsetResumeProj = new List<float>();
             String CSVOffset_contents = CSVHelper.NegativeoffsetResume.ToString(CultureInfo.InvariantCulture);
-            String[] offset_resume = CSVOffset_contents.Split('~');
+            String[] Old_offset_resume = CSVOffset_contents.Split('~');
             CSVHelper.LastStopTime = DateTime.Now;
 
             if (!ConfirmMotorsAreFine())
@@ -800,14 +800,16 @@ namespace FlexMold.MVVM.ViewModel.Project
                 return false;
             }
 
-            try
+            for (int i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
             {
-                for (int i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
-                    NegativeoffsetResumeProj.Add(float.Parse(offset_resume[i]));
+                try
+                {
+                    NegativeoffsetResumeProj.Add(float.Parse(Old_offset_resume[i]));
+                }
+                catch { NegativeoffsetResumeProj.Add(0.00f); }
             }
-            catch { }
-
             //string Max_mm = CSVHelper.MaxDisplacement.ToString();//ConfigurationManager.AppSettings["Max_mm"].ToString();
+            Array.Resize(ref Old_offset_resume, NegativeoffsetResumeProj.Count());
 
             for (int i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
             {
@@ -825,7 +827,12 @@ namespace FlexMold.MVVM.ViewModel.Project
                 }
                 catch { }
 
-                data_resume[i] = (float)(Math.Round(round3digs, 3));
+                try { data_resume[i] = (float)(Math.Round(round3digs, 3)); } catch {
+                        MessageBox.Show("You can not select other Resume while Shaping for other process, Please calibrate first to coutinue!" + Environment.NewLine + " Last selected CSV = " + CSVHelper.LastSelectedCSV, "Please calibrate first to continue!", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    log.Log(LogLevel.Error, $"Please select correct CSV," + " Current motors count is: " + csvdata.Count + " But expected is: " + _TwinCathelper.PLCMotors.Length + Environment.NewLine +
+                        $" File doesn't conatain desired data: " + selectedCSV);
+                    return false;
+                }
 
                 try
                 {
@@ -942,10 +949,10 @@ namespace FlexMold.MVVM.ViewModel.Project
                         {
                             try
                             {
-                                    offset_resume[i] = ((float.Parse(offset_resume[i], vCulture) + (_TwinCathelper.PLCMotorsStatuses.mPostion[i]) * -1)).ToString();
+                                Old_offset_resume[i] = (NegativeoffsetResumeProj[i] + (_TwinCathelper.PLCMotorsStatuses.mPostion[i]) * -1).ToString();
 
-                                    if (Math.Abs(float.Parse(offset_resume[i], vCulture)) >= CSVHelper.Max_mm)
-                                        errmsg += " Motor" + i + "-" + offset_resume[i].ToString() + Environment.NewLine;
+                                    if (Math.Abs(float.Parse(Old_offset_resume[i], vCulture)) >= CSVHelper.Max_mm)
+                                        errmsg += " Motor" + i + "-" + Old_offset_resume[i].ToString() + Environment.NewLine;
                             }
                             catch (Exception ee)
                             {
@@ -966,11 +973,11 @@ namespace FlexMold.MVVM.ViewModel.Project
                     errmsg = "";
                 }
 
-                if (offset_resume.Count() > 0)
+                if (Old_offset_resume.Count() > 0)
                 {
                     CSVHelper.NegativeoffsetResume = "";
                     String newHomingOffset = "";
-                    foreach (string flt in offset_resume)
+                    foreach (string flt in Old_offset_resume)
                         newHomingOffset += flt.ToString(CultureInfo.InvariantCulture).Trim() + "~";
 
                     CSVHelper.NegativeoffsetResume = newHomingOffset.Substring(0, newHomingOffset.Length - 1);
@@ -988,7 +995,7 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                     int i = 0;
                     float newResumeLoc = 0.00F;
-                    foreach (string flt in offset_resume)
+                    foreach (string flt in Old_offset_resume)
                     {
                         newResumeLoc = data_resume[i]; //+ Math.Abs(float.Parse(flt, vCulture));
                         i++;
@@ -1044,7 +1051,14 @@ namespace FlexMold.MVVM.ViewModel.Project
 
             updateHomeButtonStatus();
 
-            return true;
+            if (CSVHelper.ST_timer != null && CSVHelper.ST_timer.IsRunning)
+            {
+                if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
+
+                CSVHelper.ST_timer.Stop(); CSVHelper.ST_timer.Reset();
+            }
+
+                return true;
         }
 
         private void ResumeProcess_WriteCSVData()
@@ -1828,19 +1842,18 @@ namespace FlexMold.MVVM.ViewModel.Project
             FileInfo SelectedFile_finf = new FileInfo(selectedCSV);
 
             csvdata = CSVHelper.ReadCSV_DoubleData(SelectedFile_finf);
-            if (csvdata.Count == 0)
-            {
-                log.Log(LogLevel.Error, $"Please select correct CSV\n" +
-                $" File doesn't conatain desired data");
-                TNF.ShowError($"CSV Failed");
-                return;
-            }
-            if (_TwinCathelper.PLCMotors.Length != csvdata.Count)
+            //if (csvdata.Count == 0)
+            //{
+            //    log.Log(LogLevel.Error, $"Please select correct CSV\n" +
+            //    $" File doesn't conatain desired data");
+            //    TNF.ShowError($"CSV Failed");
+            //    return;
+            //}
+            if (csvdata.Count == 0 || _TwinCathelper.PLCMotors.Length != csvdata.Count)
             {
 
-                log.Log(LogLevel.Error, $"Please select correct CSV");
-                log.Log(LogLevel.Error, $"Data and Box counts are not equal");
                 log.Log(LogLevel.Error, $"Data Count : {csvdata.Count} | Device Count : {_TwinCathelper.PLCMotors.Length}");
+                log.Log(LogLevel.Error, "Please select correct CSV, "+"Data and Box counts are not equal");
                 TNF.ShowError($"CSV Failed\nDevice Count :{_TwinCathelper.PLCMotors.Length} != Data Count :{csvdata.Count}");
                 return;
             }
@@ -2182,10 +2195,8 @@ namespace FlexMold.MVVM.ViewModel.Project
             {
                 try
                 {
-                    if (CSVOffset_contents != null && CSVOffset_contents.Length > 0)
-                    {
+                    if (CSVOffset_contents != null && CSVOffset_contents.Length > 0 && offset_resume.Count() > 1)
                         calc_displacement = MotorStatus.mPosition[i] + Math.Abs(float.Parse(offset_resume[i], vCulture));
-                    }
                     else
                         calc_displacement = MotorStatus.mPosition[i];
                     //Max_mm
@@ -2195,7 +2206,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                         return;
                     }
 
-                    if ((Math.Abs(calc_displacement) - Math.Abs(LastChangedVal)) > 1)
+                    if (Math.Abs((Math.Abs(calc_displacement) - Math.Abs(LastChangedVal))) > 1)
                     {
                         LastChangedVal = calc_displacement;
                         HomingOffsetDataCommand += "Motor " + i + ":=" + calc_displacement + Environment.NewLine;
@@ -2330,17 +2341,15 @@ namespace FlexMold.MVVM.ViewModel.Project
 
         private void writeDataToMachine(string Sourc)
         {
-            uint zero = 0;
-
             _TwinCathelper.WriteEthercatDeviceData();
             log.Log(LogLevel.Info, $"{_TwinCathelper.PLCMotors.Count()} {Sourc} value(s) has been written sucessfully");
 
             Thread.Sleep(200);
-            
+
             //for (uint i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
             //    _TwinCathelper.WriteEthercatDeviceData(i, DeviceSymbol.mDisplacement, zero.CastToArray());
 
-
+            uint zero = 0;
             Parallel.For(0, _TwinCathelper.PLCMotors.Count(), j =>
             {
                 _TwinCathelper.WriteEthercatDeviceData((uint)j, DeviceSymbol.mDisplacement, zero.CastToArray());
@@ -2391,9 +2400,14 @@ namespace FlexMold.MVVM.ViewModel.Project
                     {
                         String[] newHomingArr = CSVHelper.NegativeoffsetResume.Split("~");
                         int i = 1;
-                        for (int j = 0; j < _TwinCathelper.PLCMotors.Count(); j++)
+                    for (int j = 0; j < _TwinCathelper.PLCMotors.Count(); j++)
+                    {
+                        if (newHomingArr.Count() > 1)
                             fltmPos[j] = float.Parse(newHomingArr[j], vCulture);
+                        else
+                            fltmPos[j] = 0.00f;
                     }
+                }
 
                     //if (MotorStatus.mPosition.Max() > LastmaxVal)
                     //    chkdiff1 = MotorStatus.mPosition.Max() - LastmaxVal;
@@ -2459,7 +2473,7 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                 //}
             }
-            catch { }
+            catch (Exception ex) { log.Log(LogLevel.Info, "updateHomeButtonStatus Error > " + ex.Message); }
 
         }
 
@@ -3419,7 +3433,7 @@ namespace FlexMold.MVVM.ViewModel.Project
             var data = (int)EMode.Abort;
             String st = "";
             for (uint j = 0; j < _TwinCathelper.PLCMotors.Count(); j++)
-            { _TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray()); st += MotorStatus.mPosition[j] + ","; }
+            { _TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray()); st += j+":"+MotorStatus.mPosition[j] + ","; }
 
             log.Log(LogLevel.Warn, $"Stopping Motors > " + st);
 

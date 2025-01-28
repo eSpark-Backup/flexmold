@@ -126,12 +126,11 @@ namespace FlexMold.Utility
                                 {
                                     String CSVOffset_contents = CSVHelper.NegativeoffsetResume.ToString(CultureInfo.InvariantCulture);
                                     String[] offset_resume = CSVOffset_contents.Split('~');
-                                    int i = 0;
-                                    
-                                    foreach (string negHomin in offset_resume)
+                                    NegativeoffsetResumeProj.Clear();
+                                    //foreach (string negHomin in offset_resume)
+                                    for (int j = 0; j < TwinCathelper.DeviceCount; j++)
                                     {
-                                        try { NegativeoffsetResumeProj[i] = float.Parse(negHomin, vCulture); } catch { }
-                                        i++;
+                                        try { NegativeoffsetResumeProj[j] = float.Parse(offset_resume[j], vCulture); } catch { NegativeoffsetResumeProj.Add(0.00f); }
                                     }
                                 }
                                 catch { }

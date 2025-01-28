@@ -671,9 +671,12 @@ namespace FlexMold.MVVM.ViewModel.Home
 
             var data = (int)EMode.Abort; String st = "";
             for (uint j = 0; j < DeviceCount; j++)
-            { _TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray()); st += MotorStatus.mPosition[j] + ","; }
+            { _TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray()); st += j+":"+MotorStatus.mPosition[j] + ","; }
             log.Log(LogLevel.Warn, $"Stopping Motors > " + st);
-        
+
+            if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
+            CSVHelper.ST_timer.Stop(); CSVHelper.ST_timer.Reset();
+
         }
 
         private string SetUI(int i, EmotorDiagnostic sw, SolidColorBrush br)
@@ -873,28 +876,29 @@ namespace FlexMold.MVVM.ViewModel.Home
                     //    _TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray());
                     stoppingMotors();
 
-                    if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'C' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'N')
-                    {
+                    //if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'C' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'N')
+                    //{
 
-                        if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'W')
-                        {
-                            FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'N';
-                            //FlexMold.MVVM.ViewModel.Project.ProjectViewModel.StallErrMotorsCheckTimer.Start(); 
-                            FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start();
-                        }
-                        else if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'R' || FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'S' || FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'H')
-                        {
-                            FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'N';
-                            FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start(); //FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'D';
-                        }
-                        else
-                            FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start(); //FlexMold.MVVM.ViewModel.Project.ProjectViewModel.StallErrMotorsCheckTimer.Start();
-                    }
+                    //    //if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'W')//already called by twincatHelper class
+                    //    //{
+                    //    //    FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'N';
+                    //    //    //FlexMold.MVVM.ViewModel.Project.ProjectViewModel.StallErrMotorsCheckTimer.Start(); 
+                    //    //    FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start();
+                    //    //}
+                    //    //else 
+                    //    if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'R' || FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'S' || FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'H')
+                    //    {
+                    //        FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'N';
+                    //        FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start(); //FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'D';
+                    //    }
+                    //    else
+                    //        FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start(); //FlexMold.MVVM.ViewModel.Project.ProjectViewModel.StallErrMotorsCheckTimer.Start();
+                    //}
 
                     break;
                 case EmotorDiagnostic.Motor_stalled://EmotorDiagnostic.Stall:
                     CSVHelper.NoLinkHappened = true;
-                    log.Log(LogLevel.Error, $"StallError > Stopping Motors");
+                    log.Log(LogLevel.Error, $"StallError > Stopping Motors:"+i);
                     //var data2 = (int)EMode.Abort;
                     //for (uint j = 0; j < DeviceCount; j++)
                     //    _TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data2.CastToArray());

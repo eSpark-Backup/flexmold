@@ -125,6 +125,8 @@ namespace FlexMold.Utility
                                 errorDirectlyCalledByTwincat = true;// some times this loop is called directly
 
                             CSVHelper.NoLinkHappened = false;
+                            
+                            //if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'R' || FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'S' || FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'H')
                             if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'Z' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'N' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'D' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'C')
                             {
                                 FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'N';

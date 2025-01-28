@@ -222,19 +222,27 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     String newCsvHomeData = "";
                     int i = 1;
                     HomingOffsetDataCommand = "";
+                    
+                    Array.Resize(ref newHomingArr, _TwinCathelper.PLCMotors.Count());
 
                     for (int j = 0; j < _TwinCathelper.PLCMotors.Count(); j++)
                     {
                         try
                         {
                             //HomingOffsetDataCommand += "Motor " + i + ":=" + float.Parse(st, vCulture) + Environment.NewLine;
-                            if ((newHomingArr[j]).Contains('"'))
-                                HomingOffsetDataCommand += "Motor " + j + ":=" + float.Parse(newHomingArr[j]) + Environment.NewLine;
-                            else
-                                HomingOffsetDataCommand += "Motor " + j + ":=" + float.Parse(newHomingArr[j], vCulture) + Environment.NewLine;
+                            if (newHomingArr.Length > 0)
+                            {
+                                if (newHomingArr[j]==null || (newHomingArr[j]).Contains('"'))
+                                    HomingOffsetDataCommand += "Motor " + j + ":=" + float.Parse(newHomingArr[j]) + Environment.NewLine;
+                                else
+                                    HomingOffsetDataCommand += "Motor " + j + ":=" + float.Parse(newHomingArr[j], vCulture) + Environment.NewLine;
+                            }
+                            else {
+                                HomingOffsetDataCommand += "Motor " + j + ":=0"+ Environment.NewLine;
+                            }
                             i++;
                         }
-                        catch { }
+                        catch(Exception ep) { HomingOffsetDataCommand += "Motor " + j + ":=0"+ Environment.NewLine;  log.Log(LogLevel.Info, "Motor issue !"+ep.Message); }
                     }
                 }
                 catch { }

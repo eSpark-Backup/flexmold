@@ -64,36 +64,61 @@ namespace FlexMold.MVVM.ViewModel.Home
             switch (MySlaves[index].Slave_Link_State)
             {
                 case ESlaveLink.EC_LINK_STATE_OK:
+                    //log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_OK ");
                     var _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Green);
                     
                     CSVHelper.MachineEnabled = true;
                     HomeMachineStatus = true;
+                    
+                    if(CSVHelper.PCBsInError.Contains(index))
+                        CSVHelper.PCBsInError.Remove(index);//, "EC_LINK_STATE_NOT_PRESENT"
 
                     log.Log(LogLevel.Info, _tmg);
                     TNF.ShowSuccess(_tmg);
                     break;
                 case ESlaveLink.EC_LINK_STATE_Other_Fail:
-                case ESlaveLink.EC_LINK_STATE_ADDITIONAL_LINK:
+                    //log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_Other_Fail ");
+                    break;
                 case ESlaveLink.EC_LINK_STATE_NOT_PRESENT:
+                    if (!CSVHelper.PCBsInError.Contains(index)) CSVHelper.PCBsInError.Add(index, "EC_LINK_STATE_NOT_PRESENT");
+
+                    //log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_NOT_PRESENT ");
+                    break;
+                case ESlaveLink.EC_LINK_STATE_ADDITIONAL_LINK:
+                    //log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_ADDITIONAL_LINK ");
+                    break;
                 case ESlaveLink.EC_LINK_STATE_LINK_WITHOUT_COMM:
+                    //log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_LINK_WITHOUT_COMM ");
+                    break;
                 case ESlaveLink.ERR_PREOP_INIT_ERR:
+                    //log.Log(LogLevel.Error, ">>>>>>>>ERR_PREOP_INIT_ERR ");
+                    break;
                 case ESlaveLink.EC_LINK_STATE_MISSING_LINK:
                     _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Red);
                     log.Log(LogLevel.Warn, _tmg);
                     TNF.ShowWarning(_tmg);
+                    //log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_MISSING_LINK ");
                     break;
                 case ESlaveLink.UnAvailable:
                     _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.White);
                     log.Log(LogLevel.Trace, _tmg);
+                    //log.Log(LogLevel.Error, ">>>>>>>>UnAvailable ");
                     //TNF.ShowWarning(_tmg);
                     break;
                 case ESlaveLink.EC_DEVICE_STATE_INIT:
                     _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Blue);
                     log.Log(LogLevel.Trace, _tmg);
+                    //log.Log(LogLevel.Error, ">>>>>>>>EC_DEVICE_STATE_INIT ");
+
+                    if (CSVHelper.PCBsInError.Contains(index))
+                        CSVHelper.PCBsInError.Remove(index);//, "EC_LINK_STATE_NOT_PRESENT"
+
                     //TNF.ShowWarning(_tmg);
                     break;
                 default:
                     _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Orange);
+                    //log.Log(LogLevel.Error, ">>>>>>>>"+_tmg);
+
                     log.Log(LogLevel.Error, "! Undocumented State ! " + _tmg);
                     TNF.ShowError(_tmg);
                     break;

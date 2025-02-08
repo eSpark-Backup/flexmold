@@ -317,6 +317,12 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             if (!ConfirmMotorsAreFine())
                 return;
 
+            if (CSVHelper.ST_timer.IsRunning)
+            {
+                MessageBox.Show("Operation Still In Progress, Please Try Later!","Machine still busy!", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             //if (selectedCSV == null || selectedCSV.Length < 6 || !File.Exists(selectedCSV))
             //{
             //    MessageBox.Show("Please select proper CSV file before starting the process!","Warning! No CSV selected!",MessageBoxButton.OK, MessageBoxImage.Stop);
@@ -577,7 +583,8 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             {
                 FlexMold.MVVM.ViewModel.Project.ProjectViewModel.IsRampCompleted = false;
 
-                _TwinCathelper.WriteEthercatDeviceData();
+                for (int i = NumMotorFromProp; i <= NumMotorToProp; i++)
+                    _TwinCathelper.WriteEthercatDeviceData((uint)i);
                 log.Log(LogLevel.Info, $"{DeviceCount} csv value(s) has been written sucessfully");
 
                 Thread.Sleep(200);

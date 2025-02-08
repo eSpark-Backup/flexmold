@@ -943,13 +943,20 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                         if (CSVHelper.NegativeoffsetResume.Length < 1)//when no offset exist
                         {
-                            NegativeoffsetResumeProj[i] = 0.00F - _TwinCathelper.PLCMotorsStatuses.mPostion[i];
+                            if (CSVHelper.PCBsInError.Count > 0 && CSVHelper.PCBsInError.Contains(i))
+                                NegativeoffsetResumeProj[i] = 0.00F - _TwinCathelper.PLCMotorsStatuses.mPostion[i];
+                            else NegativeoffsetResumeProj[i] = 0.00F;
+
                         }                        
                         else//if (CSVHelper.NegativeoffsetResume.Length > 2)//0.0F
                         {
                             try
                             {
-                                Old_offset_resume[i] = (NegativeoffsetResumeProj[i] + (_TwinCathelper.PLCMotorsStatuses.mPostion[i]) * -1).ToString();
+                                if (CSVHelper.PCBsInError.Count > 0 && CSVHelper.PCBsInError.Contains(i))
+                                    Old_offset_resume[i] = (NegativeoffsetResumeProj[i] + (_TwinCathelper.PLCMotorsStatuses.mPostion[i]) * -1).ToString();
+                                else {
+                                    Old_offset_resume[i] = (NegativeoffsetResumeProj[i] + 0).ToString();
+                                }
 
                                     if (Math.Abs(float.Parse(Old_offset_resume[i], vCulture)) >= CSVHelper.Max_mm)
                                         errmsg += " Motor" + i + "-" + Old_offset_resume[i].ToString() + Environment.NewLine;
@@ -2430,15 +2437,23 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                             //fltmPos = float.Parse(newHomingArr[0], vCulture);
 
+                            float chkdiffMax = 0.0F;
+                            float chkdiffMin = 0.0F;
                             float chkdiff = 0.0F;
 
-                            if (fltmPos.Max() > MotorStatus.mPosition.Max())
-                                chkdiff = fltmPos.Max() - MotorStatus.mPosition.Max();
+                        if (fltmPos.Max() > MotorStatus.mPosition.Max())
+                                chkdiffMax = fltmPos.Max() - MotorStatus.mPosition.Max();
                             else
-                                chkdiff = MotorStatus.mPosition.Max() - fltmPos.Max();
+                                chkdiffMax = MotorStatus.mPosition.Max() - fltmPos.Max();
 
-                            //only in home when diff is > 1
-                            if (chkdiff <= 1.5F && chkdiff >= -1.5F)
+                            if (fltmPos.Min() < MotorStatus.mPosition.Min())
+                                chkdiffMin = fltmPos.Min() - MotorStatus.mPosition.Min();
+                            else
+                                chkdiffMin = MotorStatus.mPosition.Min() - fltmPos.Min();
+
+                        chkdiff = Math.Abs(chkdiffMin) > Math.Abs(chkdiffMax)? chkdiffMin:chkdiffMax;
+                        //only in home when diff is > 1
+                        if (chkdiff <= 1.5F && chkdiff >= -1.5F)
                                 toggleShapeHomeButtonText = "Shape";
                             else
                                 toggleShapeHomeButtonText = "Home";
@@ -2447,10 +2462,10 @@ namespace FlexMold.MVVM.ViewModel.Project
                         }
                         catch
                         {
-                            float chkdiff = MotorStatus.mPosition.Max();
+                            float chkdiffMax = MotorStatus.mPosition.Max();
 
                             //only in home when diff is > 1
-                            if (chkdiff < 1.0F || chkdiff > -1.0F)
+                            if (chkdiffMax < 1.0F || chkdiffMax > -1.0F)
                                 toggleShapeHomeButtonText = "Home";
                             else
                                 toggleShapeHomeButtonText = "Shape";

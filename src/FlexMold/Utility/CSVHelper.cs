@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using NLog;
 using Sylvan.Data.Csv;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -27,9 +28,11 @@ namespace FlexMold.Utility
         public static string LastSelectedCSV = "";
         public static float CompletingTime = 0.00F;
         public static float CompletingTime_count = 0;
+        public static float TwincatExtStop_cnt = 0;
         public static Stopwatch ST_timer = new Stopwatch();
         //public static int RPMAssume = 0;
         //public static int CalibrationSeq02Delay = 0;
+        public static Hashtable PCBsInError = new Hashtable();
 
         public static int AdsStateTimeout = 6;
         public static string prjFolderLoc = Environment.CurrentDirectory;

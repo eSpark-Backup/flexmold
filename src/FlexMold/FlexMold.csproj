@@ -34,9 +34,11 @@
 	  <Page Remove="StartupHelper\**" />
 	</ItemGroup>
 	<ItemGroup>
+	  <Compile Remove="MVVM\View\Home\EmergencyStatusView.xaml.cs" />
 	  <Compile Remove="MVVM\View\Project\ProjectGridView - Copy.xaml.cs" />
 	</ItemGroup>
 	<ItemGroup>
+	  <Page Remove="MVVM\View\Home\EmergencyStatusView.xaml" />
 	  <Page Remove="MVVM\View\Project\ProjectGridView - Copy.xaml" />
 	</ItemGroup>
 	<ItemGroup>
@@ -98,16 +100,16 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Reference Include="envdte">
-	    <HintPath>..\..\flexmold-zlaserByMASB-OriginalLastRelease\src\FlexMold\bin\Debug\net6.0-windows\envdte.dll</HintPath>
+	    <HintPath>bin\envdte.dll</HintPath>
 	  </Reference>
 	  <Reference Include="System.Data.SQLite">
-	    <HintPath>bin\Debug\System.Data.SQLite.dll</HintPath>
+	    <HintPath>bin\System.Data.SQLite.dll</HintPath>
 	  </Reference>
 	  <Reference Include="System.Data.SQLite.EF6">
-	    <HintPath>bin\Debug\System.Data.SQLite.EF6.dll</HintPath>
+	    <HintPath>bin\System.Data.SQLite.EF6.dll</HintPath>
 	  </Reference>
 	  <Reference Include="System.Data.SQLite.Linq">
-	    <HintPath>bin\Debug\System.Data.SQLite.Linq.dll</HintPath>
+	    <HintPath>bin\System.Data.SQLite.Linq.dll</HintPath>
 	  </Reference>
 	</ItemGroup>
 	<ItemGroup>

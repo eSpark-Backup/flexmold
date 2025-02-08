@@ -237,7 +237,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     _TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationSeq02Request;
                     _TwinCathelper.PLCMotors[i].mTime = mtime;
 
-                    log.Log(LogLevel.Warn, "Position > WriteCSVData Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
+                    log.Log(LogLevel.Warn, "MotorTest > CalibrateSeq02 Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
                         + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
                         + "  >> mRPM: " + CSVHelper.RecommendedRPM
                         + "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
@@ -255,7 +255,7 @@ namespace FlexMold.MVVM.ViewModel.Home
 
                 CSVHelper.UpdateHomeCSVStatus = true;
 
-                FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'C';
+                FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = '2';
             }
             catch (Exception ee) { log.Log(LogLevel.Info, $"Motor_DeviceStatusChanged>>>>" + ee.Message); }
 
@@ -338,7 +338,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     { }
 
 
-                    FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'Z';
+                    FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'C';
 
                     //if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
                     //CSVHelper.ST_timer.Stop(); CSVHelper.ST_timer.Reset();
@@ -425,7 +425,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     { }
 
 
-                    FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'C';
+                    FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = '1';
                     if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
                     CSVHelper.ST_timer.Stop(); CSVHelper.ST_timer.Reset();
 
@@ -524,10 +524,15 @@ namespace FlexMold.MVVM.ViewModel.Home
                     _tmgs = SetUI(i, swe, Brushes.Yellow);
                     TNF.ShowInformation(_tmgs);
                     log.Log(LogLevel.Info, _tmgs);
-                    //CalibrateButtonEnable = false;
-                    if(FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'Z')
-                        FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'C';
-                    if(!CalibrationCompletedList.ContainsKey(i))
+                    //CalibrateButtonEnable = false;                    
+                    if (!CSVHelper.ST_timer.IsRunning)
+                    { CSVHelper.ST_timer.Reset(); CSVHelper.ST_timer.Start(); CSVHelper.CompletingTime = int.MaxValue; }
+
+                    if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'C') FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = '1';
+
+                    
+
+                    if (!CalibrationCompletedList.ContainsKey(i))
                         CalibrationCompletedList.Add(i, i);
                     log.Log(LogLevel.Warn, "***************** CalibrationSeq01Started.....Motor:" + i);                    
                     //CSVHelper.CalibrationCompleted = false;
@@ -556,6 +561,9 @@ namespace FlexMold.MVVM.ViewModel.Home
                     {
                         CalibrationCompletedList.Remove(i);
                         log.Log(LogLevel.Warn, "***************** CalibrationSquence01Success.....Motor:" + i);
+
+                        if (CSVHelper.ST_timer.IsRunning)
+                        { CSVHelper.ST_timer.Reset(); CSVHelper.ST_timer.Stop(); CSVHelper.CompletingTime = 0; }
                     }
 
                     TNF.ShowSuccess(_tmgs);
@@ -572,26 +580,23 @@ namespace FlexMold.MVVM.ViewModel.Home
                             && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'H')// H=Home R=Resume S=Stop W= WriteCSV O=Initial
                         {
                             FlexMold.MVVM.ViewModel.Project.ProjectViewModel.StallErrMotorsCheckTimer.Start();
-                            FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'C';
+                            FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = '1';
                             log.Log(LogLevel.Error, "CalibrationSeq01Success Error occured while Homing...");
                         }
 
-                        //if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'Z')
+                        //if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'C')
                         //{
                         //    Thread.Sleep(1500);
                         //    CalibrateSeq02(); 
                         //}
 
                         // this condition will only occur when last motor has some update
-                        if ((i >= DeviceCount-1) && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'Z')//CSVHelper.CalibrationCompleted if failed
+                        if (CalibrationCompletedList.Count<1 && (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'C'))//CSVHelper.CalibrationCompleted if failed
                         {
-                            if (CalibrationCompletedList == null || CalibrationCompletedList.Count < 1)
-                            {
                                 log.Log(LogLevel.Warn, "Sending CalibrationSeq02 Request, Please wait.....Motor:" + i);
                                 CalibrateSeq02_HomeUp();//EMode.Resume
                                 Thread.Sleep(1500);
                                 CalibrateSeq02();
-                            }
                         }
 
                     }
@@ -602,7 +607,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     _tmgs = SetUI(i, swe, Brushes.Yellow);
                     TNF.ShowInformation(_tmgs);
                     log.Log(LogLevel.Info, _tmgs);
-                    FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'C';
+                    FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = '2';
                     log.Log(LogLevel.Warn, "***************** CalibrationSeq02Started...... motor:" + i);
                     //CSVHelper.CalibrationCompleted = false;
                     //CalibrateButtonEnable = false;
@@ -624,7 +629,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     log.Log(LogLevel.Info, _tmgs);
                     log.Log(LogLevel.Warn, "***************** CalibrationSeq02Success...... motor:" + i);
                     //try { HardCalibrateProcess(); } catch { }
-                    FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'C';
+                    FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = '2';
                     FlexMold.MVVM.ViewModel.Project.ProjectViewModel.IsRampCompleted = true;
                     UpdateHomingProcess();
 
@@ -692,12 +697,12 @@ namespace FlexMold.MVVM.ViewModel.Home
             if (sw.ToString().ToLower().Contains("Temperature_Limit_exceed") || sw.ToString().ToLower().Contains("Stepper_Driver_Failed") || sw.ToString().ToLower().Contains("stall") || sw.ToString().ToLower().Contains("EC_LINK_STATE_NOT_PRESENT"))
             {
                 CSVHelper.MotorsStatusGlobal[i] = sw.ToString();
-                if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'C')
+                if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != '1')
                 {
                     //FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start();
 
                     stoppingMotors();
-                    log.Log(LogLevel.Error, $"Motor{i} --> Diagnostic : {_tmgs}");
+                    log.Log(LogLevel.Error, $"SetUI - Motor{i} --> Diagnostic : {_tmgs}");
                 }
             }
 
@@ -772,7 +777,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                         Position_SetUI(i);
                     }
 
-                    log.Log(LogLevel.Error, "*** MotorStatusView>>GetMismatchedIndexes mPosition=null **********!!!!!!!");
+                    log.Log(LogLevel.Warn, "********************** MotorStatusView>>GetMismatchedIndexes Machine Ready **********************");
                 }
 
                 CSVHelper.CompletingTime_count += 1;                
@@ -854,7 +859,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     break;
                 case EmotorDiagnostic.Temperature_Limit_exceed://EmotorDiagnostic.Stepper_Driver_Failed:
                     CSVHelper.NoLinkHappened = true;
-                    //if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'C')
+                    //if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == '1')
                     //{
                     log.Log(LogLevel.Info, ">>->>IsEnabled=" + FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled + " ->>LastEventPressed=" + FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed
                         + " ->>MotorCalled=" + i
@@ -876,7 +881,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     //    _TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray());
                     stoppingMotors();
 
-                    //if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'C' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'N')
+                    //if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != '1' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'N')
                     //{
 
                     //    //if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'W')//already called by twincatHelper class
@@ -914,7 +919,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     TNF.ShowWarning(_tmgs);
                     log.Log(LogLevel.Warn, _tmgs);
 
-                    //if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'C' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'N')
+                    //if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != '1' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'N')
                     //{
                     //    if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'W')
                     //    {
@@ -928,7 +933,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     //        FlexMold.MVVM.ViewModel.Project.ProjectViewModel.StallErrMotorsCheckTimer.Start();
                     //}
 
-                    //if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'C')
+                    //if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == '1')
                     //{
                     break;
                 case EmotorDiagnostic.Invalid_Ramp_Seq://newely added

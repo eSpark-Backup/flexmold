@@ -106,9 +106,10 @@ namespace FlexMold.Utility
                     var evenIndexesValues = deviceandlinkstatusbytes.Where((value, index) => index % 2 == 0);
                     Slave_StateMachine_Status = evenIndexesValues.Select(b => (ESlaveStateMachine)Enum.ToObject(typeof(ESlaveStateMachine), b)).ToArray();
 
-                if (Slave_Link_Status[0].ToString().Contains("EC_LINK_STATE_NOT_PRESENT"))
+                //if (Slave_Link_Status[0].ToString().Contains("EC_LINK_STATE_NOT_PRESENT") || CSVHelper.StopOnPowerFailure)
+                if(CSVHelper.PCBsInError.Count>0)
                     {
-                        if (!machineEmergencyDisconnected)//if false
+                        if (CSVHelper.TwincatExtStop_cnt>3 && !machineEmergencyDisconnected)//if false
                         {
                             machineEmergencyDisconnected = true;
                             //FlexMold.MVVM.ViewModel.Project.ProjectViewModel.EventStopToggle = true;
@@ -127,16 +128,19 @@ namespace FlexMold.Utility
                             CSVHelper.NoLinkHappened = false;
                             
                             //if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'R' || FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'S' || FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'H')
-                            if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'Z' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'N' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'D' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'C')
+                            if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'C' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'N' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'D' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != '1' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != '2')
                             {
                                 FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'N';
                                 FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start();
+                                CSVHelper.TwincatExtStop_cnt = 0;
                             }
                         }
+                        CSVHelper.TwincatExtStop_cnt++;
 
                     }
                     //2024-02-12 14:25:11.9061|INFO|Machine Link Status|FlexMold.MVVM.ViewModel.Home.MachineDetailViewModel.DispLinkStatus|Box_16 --> Link State EC_LINK_STATE_OK
-                    else if (Slave_Link_Status[0].ToString().Contains("EC_LINK_STATE_OK") || Slave_Link_Status[0].ToString().Contains("EC_DEVICE_STATE_INIT") || Slave_Link_Status[0].ToString().Contains("EC_DEVICE_STATE_OP"))//&& machineEmergencyDisconnected
+                    //else if (Slave_Link_Status[0].ToString().Contains("EC_LINK_STATE_OK") || Slave_Link_Status[0].ToString().Contains("EC_DEVICE_STATE_INIT") || Slave_Link_Status[0].ToString().Contains("EC_DEVICE_STATE_OP"))//&& machineEmergencyDisconnected
+                    else if (CSVHelper.PCBsInError.Count < 1)
                     {
                         if (machineEmergencyDisconnected)
                         {

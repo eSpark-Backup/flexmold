@@ -64,9 +64,9 @@ namespace FlexMold.MVVM.ViewModel.Home
             switch (MySlaves[index].Slave_Link_State)
             {
                 case ESlaveLink.EC_LINK_STATE_OK:
-                    //log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_OK ");
+                    log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_OK PCB:" + index);
                     var _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Green);
-                    
+
                     CSVHelper.MachineEnabled = true;
                     HomeMachineStatus = true;
                     
@@ -77,47 +77,53 @@ namespace FlexMold.MVVM.ViewModel.Home
                     TNF.ShowSuccess(_tmg);
                     break;
                 case ESlaveLink.EC_LINK_STATE_Other_Fail:
-                    //log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_Other_Fail ");
+                    log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_Other_Fail PCB:" + index);
                     break;
                 case ESlaveLink.EC_LINK_STATE_NOT_PRESENT:
-                    if (!CSVHelper.PCBsInError.Contains(index)) CSVHelper.PCBsInError.Add(index, "EC_LINK_STATE_NOT_PRESENT");
-
-                    //log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_NOT_PRESENT ");
+                    log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_NOT_PRESENT PCB:" + index);
+                    if (!CSVHelper.PCBsInError.Contains(index)) CSVHelper.PCBsInError.Add(index, "EC_LINK_STATE_NOT_PRESENT");                    
                     break;
                 case ESlaveLink.EC_LINK_STATE_ADDITIONAL_LINK:
-                    //log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_ADDITIONAL_LINK ");
+                    log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_ADDITIONAL_LINK PCB:" + index);
                     break;
                 case ESlaveLink.EC_LINK_STATE_LINK_WITHOUT_COMM:
-                    //log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_LINK_WITHOUT_COMM ");
+                    log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_LINK_WITHOUT_COMM PCB:" + index);
                     break;
                 case ESlaveLink.ERR_PREOP_INIT_ERR:
-                    //log.Log(LogLevel.Error, ">>>>>>>>ERR_PREOP_INIT_ERR ");
+                    log.Log(LogLevel.Error, ">>>>>>>>ERR_PREOP_INIT_ERR PCB:" + index);
                     break;
                 case ESlaveLink.EC_LINK_STATE_MISSING_LINK:
                     _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Red);
                     log.Log(LogLevel.Warn, _tmg);
                     TNF.ShowWarning(_tmg);
-                    //log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_MISSING_LINK ");
+                    log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_MISSING_LINK PCB:" + index);
                     break;
                 case ESlaveLink.UnAvailable:
                     _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.White);
                     log.Log(LogLevel.Trace, _tmg);
-                    //log.Log(LogLevel.Error, ">>>>>>>>UnAvailable ");
+                    log.Log(LogLevel.Error, ">>>>>>>>UnAvailable PCB:" + index);
                     //TNF.ShowWarning(_tmg);
                     break;
                 case ESlaveLink.EC_DEVICE_STATE_INIT:
                     _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Blue);
                     log.Log(LogLevel.Trace, _tmg);
-                    //log.Log(LogLevel.Error, ">>>>>>>>EC_DEVICE_STATE_INIT ");
+                    log.Log(LogLevel.Error, ">>>>>>>>EC_DEVICE_STATE_INIT PCB:"+index);
 
-                    if (CSVHelper.PCBsInError.Contains(index))
-                        CSVHelper.PCBsInError.Remove(index);//, "EC_LINK_STATE_NOT_PRESENT"
-
+                    //if (CSVHelper.PCBsInError.Contains(index))
+                    //    CSVHelper.PCBsInError.Remove(index);//, "EC_LINK_STATE_NOT_PRESENT"
+                    //else if(FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed=='W' && !CSVHelper.PCBsInError.Contains(index))//https://github.com/eSpark-Consultants/flexmold/issues/52
+                    //    CSVHelper.PCBsInError.Add(index, "EC_LINK_STATE_NOT_PRESENT");//, "EC_LINK_STATE_NOT_PRESENT"
                     //TNF.ShowWarning(_tmg);
+                    break;
+                case ESlaveLink.EC_LINK_20://StatusByTwinCat
+                    log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_20 PCB:" + index);
+                    break;
+                case ESlaveLink.EC_LINK_40://StatusByTwinCat
+                    log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_40 PCB:" + index);
                     break;
                 default:
                     _tmg = SetUI(index, MySlaves[index].Slave_Link_State, Brushes.Orange);
-                    //log.Log(LogLevel.Error, ">>>>>>>>"+_tmg);
+                    log.Log(LogLevel.Error, "Undocumented State>>>>>>>>PCB:" + index);
 
                     log.Log(LogLevel.Error, "! Undocumented State ! " + _tmg);
                     TNF.ShowError(_tmg);
@@ -135,7 +141,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             MySlaves[i].StrokeColor = br;
             if(CSVHelper.MotorsStatusGlobal==null || CSVHelper.MotorsStatusGlobal.Length<1)
                 CSVHelper.MotorsStatusGlobal = new String[TwinCathelper.DeviceCount];
-            CSVHelper.MotorsStatusGlobal[i] = sw.ToString();
+            if (CSVHelper.MotorsStatusGlobal.Length > 0) CSVHelper.MotorsStatusGlobal[i] = sw.ToString();
             var _tmg = $"{MySlaves[i].SlaveName} --> Link State {MySlaves[i].Slave_Link_State}";
             return _tmg;
         }
@@ -229,9 +235,13 @@ namespace FlexMold.MVVM.ViewModel.Home
                 switch (MySlaves[index].Slave_State_Machine)
                 {
                     case ESlaveStateMachine.EC_DEVICE_STATE_OK:
+                        log.Log(LogLevel.Error, "ESlaveStateMachine.EC_DEVICE_STATE_OK>>> " + index);
+                        break;
+
                     case ESlaveStateMachine.EC_DEVICE_STATE_OP:
+                        log.Log(LogLevel.Error, "ESlaveStateMachine.EC_DEVICE_STATE_OP>>> " + index);
                         var _tmg = SetUI(index, MySlaves[index].Slave_State_Machine, Brushes.Green);
-                        CSVHelper.MotorsStatusGlobal[index] = "Healthy";
+                        if (CSVHelper.MotorsStatusGlobal.Length > 0) CSVHelper.MotorsStatusGlobal[index] = "Healthy";
                         CSVHelper.MachineEnabled = true;
                         HomeMachineStatus = true;
 
@@ -240,16 +250,32 @@ namespace FlexMold.MVVM.ViewModel.Home
                         break;
                     
                     case ESlaveStateMachine.EC_DEVICE_STATE_INIT:
+                        log.Log(LogLevel.Error, "ESlaveStateMachine.EC_DEVICE_STATE_INIT>>> " + index);
+                        break;
                     case ESlaveStateMachine.EC_DEVICE_STATE_PREOP:
+                        log.Log(LogLevel.Error, "ESlaveStateMachine.EC_DEVICE_STATE_PREOP>>> " + index);
+                        break;
                     case ESlaveStateMachine.EC_DEVICE_STATE_BOOTSTRAP:
+                        log.Log(LogLevel.Error, "ESlaveStateMachine.EC_DEVICE_STATE_BOOTSTRAP>>> " + index);
+                        break;
                     case ESlaveStateMachine.EC_DEVICE_STATE_SAFEOP:
+                        log.Log(LogLevel.Error, "ESlaveStateMachine.EC_DEVICE_STATE_SAFEOP>>> " + index);
+                        break;
                     case ESlaveStateMachine.EC_DEVICE_STATE_ERROR:
+                        log.Log(LogLevel.Error, "ESlaveStateMachine.EC_DEVICE_STATE_ERROR>>> " + index);
+                        break;
                     case ESlaveStateMachine.EC_DEVICE_STATE_INVALID_VPRS:
+                        log.Log(LogLevel.Error, "ESlaveStateMachine.EC_DEVICE_STATE_INVALID_VPRS>>> " + index);
+                        break;
                     case ESlaveStateMachine.EC_DEVICE_STATE_INITCMD_ERROR:
+                        log.Log(LogLevel.Error, "ESlaveStateMachine.EC_DEVICE_STATE_INITCMD_ERROR>>> " + index);
+                        break;
                     case ESlaveStateMachine.EC_DEVICE_STATE_DISABLED:
+                        log.Log(LogLevel.Error, "ESlaveStateMachine.EC_DEVICE_STATE_DISABLED>>> " + index);
                         _tmg = SetUI(index, MySlaves[index].Slave_State_Machine, Brushes.Red);
                         TNF.ShowError(_tmg);
-                        CSVHelper.MotorsStatusGlobal[index] = MySlaves[index].Slave_State_Machine.ToString();
+                        if(CSVHelper.MotorsStatusGlobal.Length>0)
+                            CSVHelper.MotorsStatusGlobal[index] = MySlaves[index].Slave_State_Machine.ToString();
                         log.Log(LogLevel.Error, _tmg);
                         break;
                     default:

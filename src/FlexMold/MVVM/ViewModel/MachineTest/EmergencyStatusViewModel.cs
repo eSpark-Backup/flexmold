@@ -233,6 +233,11 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     _TwinCathelper.PLCMotors[i].mDisplacement = CalibrationData[i];
                     _TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationSeq02Request;
                     _TwinCathelper.PLCMotors[i].mTime = mtime;
+                    log.Log(LogLevel.Warn, "CalibrateSeq02 > Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: Up"
+                    + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
+                    + "  >> mRPM: 30" +  "  >> MotorTime: " + CSVHelper.MotorTime
+                    + "  >> mMode: CalibrationSeq02Request");
+
                 }
 
                 CSVHelper.LastOffsetBeforeCalibration = new float[_TwinCathelper.PLCMotorsStatuses.mPostion.Length];

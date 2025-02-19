@@ -38,13 +38,15 @@
 	  <Compile Remove="MVVM\View\Project\ProjectGridView - Copy.xaml.cs" />
 	</ItemGroup>
 	<ItemGroup>
+	  <None Remove="flexmold-24Jan2025_NewFirmware10mmIssue.zip" />
+	  <None Remove="flexmold.ico" />
+	  <None Remove="LAN9255_018-RampSequenceValidation.bin" />
+	</ItemGroup>
+	<ItemGroup>
 	  <Page Remove="MVVM\View\Home\EmergencyStatusView.xaml" />
 	  <Page Remove="MVVM\View\Project\ProjectGridView - Copy.xaml" />
 	</ItemGroup>
 	<ItemGroup>
-		<Resource Include="flexmold.ico">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
 		<Resource Include="Nlog.config">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Resource>
@@ -75,6 +77,9 @@
 			<Isolated>false</Isolated>
 			<EmbedInteropTypes>true</EmbedInteropTypes>
 		</COMReference>
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Include="flexmold.ico" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Beckhoff.TwinCAT.Ads" Version="6.1.154" />

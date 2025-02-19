@@ -319,8 +319,16 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
 
             if (CSVHelper.ST_timer.IsRunning)
             {
-                MessageBox.Show("Operation Still In Progress, Please Try Later!","Machine still busy!", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                CSVHelper.ST_timer.Stop(); CSVHelper.ST_timer.Reset();
+
+                log.Log(LogLevel.Warn, $"Stopping Motors");
+                var data = (int)EMode.Abort;
+                for (uint j = 0; j < _TwinCathelper.PLCMotors.Count(); j++)
+                    _TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray());
+
+                Thread.Sleep(200);
+                //MessageBox.Show("Operation Still In Progress, Please Try Later!","Machine still busy!", MessageBoxButton.OK, MessageBoxImage.Warning);
+                //return;
             }
 
             //if (selectedCSV == null || selectedCSV.Length < 6 || !File.Exists(selectedCSV))

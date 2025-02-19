@@ -619,8 +619,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                     //log.Log(LogLevel.Info, ">>>CalibrationSquence02Failed");
                     log.Log(LogLevel.Error, "EDeviceStatus.CalibrationSeq02Failed...... motor:" + i);
                     //CalibrateButtonEnable = false;
-                    if (i >= DeviceCount - 1)
-                        CalibrateSeq02_HomeUp();
+                    //if (i >= DeviceCount - 1)
+                    //    CalibrateSeq02_HomeUp();
 
                     break;
                 case (int)EDeviceStatus.CalibrationSquence02Success:
@@ -633,8 +633,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                     FlexMold.MVVM.ViewModel.Project.ProjectViewModel.IsRampCompleted = true;
                     UpdateHomingProcess();
 
-                    if (i >= DeviceCount - 1)
-                        CalibrateSeq02_HomeUp();
+                    //if (i >= DeviceCount - 1)
+                    //    CalibrateSeq02_HomeUp();
 
                     //CalibrateButtonEnable = false;
                     break;

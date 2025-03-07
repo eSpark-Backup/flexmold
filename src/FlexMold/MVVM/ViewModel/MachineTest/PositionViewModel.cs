@@ -314,9 +314,6 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             //if (NumMotorToProp < 1)
             //    NumMotorToProp = 1;
 
-            if (!ConfirmMotorsAreFine())
-                return;
-
             if (CSVHelper.ST_timer.IsRunning)
             {
                 CSVHelper.ST_timer.Stop(); CSVHelper.ST_timer.Reset();
@@ -539,10 +536,6 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
 
         private void WriteCSVData(List<float> data)
         {
-
-            if (!ConfirmMotorsAreFine())
-                return;
-
             checkFirmware();           
             
             //String selectedListRootDir = Directory.GetParent(CSVHelper.LastSelectedCSV).FullName;
@@ -576,12 +569,20 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 + "  >> mMode: " + EMode.Project.ToString());
             }
 
+            try
+            {
+                if (!ConfirmMotorsAreFine(_TwinCathelper.PLCMotors))
+                    return;
+            }
+            catch { }
+
             //GetRecommendedRPM(0);
 
             //CSVHelper.CompletingTime = _TwinCathelper.PLCMotors.Max().mTime + 3.00F;
             if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
                 CSVHelper.ST_timer.Restart();
 
+            Project.ProjectViewModel.progressbar_FinalVal = (int)data.Max();
             //if (data.Count != null)
             //    LastmaxVal = data.Max();
             //else
@@ -623,8 +624,9 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                 for (uint i = 0; i < DeviceCount; i++)
                 {
                     //if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713969130 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713968323 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)//0x662917EA (1713969130=Wed Apr 24 2024 14:32:10 GMT+0000) CSVHelper.MotorsStatusGlobal[0] == "Healthy" && //1713968323=Wed Apr 24 2024 14:18:43 GMT+0000
-                    if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1737720238 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)
-                        continue;
+                    //if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1737720238 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)
+                    if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1741256250 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)
+                            continue;
                     else
                         FirmwareNotMatched += "Motor" + (i + 1) + ",";
                 }
@@ -708,20 +710,27 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
         }
 
 
-        private bool ConfirmMotorsAreFine()
+        private bool ConfirmMotorsAreFine(EthercatDevice[] newDisp)
         {
             try
             {
                 string Max_mm = CSVHelper.Max_mm.ToString();//ConfigurationManager.AppSettings["Max_mm"].ToString();
 
-                for (int i = 0; i < DeviceCount; i++)
+                //for (int i = 0; i < MotorStatus.mPosition.Count(); i++)
+                for (int i = NumMotorFromProp; i <= NumMotorToProp; i++)
                 {
+                    float negLoc = 0.0f;
+                    try { negLoc = Math.Abs(float.Parse(CSVHelper.NegativeoffsetResume.Split('~')[i])); } catch { }
+                    float destSrc = newDisp[i].mDisplacement+ negLoc;
+                    if (newDisp[i].mDirection==true)
+                        destSrc = destSrc*-1;
+
                     if (MotorStatus.mPosition != null)
                     {
-                        if (((int)MotorStatus.mPosition[i] > int.Parse(Max_mm)) || ((int)MotorStatus.mPosition[i] < int.Parse("-" + Max_mm)) || Moveinmm >= int.Parse(Max_mm))
+                        if (((int)MotorStatus.mPosition[i] + destSrc > int.Parse(Max_mm)) || ((int)MotorStatus.mPosition[i] + destSrc < int.Parse("-" + Max_mm)) || Moveinmm >= int.Parse(Max_mm))
                         {
                             String st = "";
-                            log.Log(LogLevel.Error, $"Motor no:" + i + " has invalid position!");
+                            log.Log(LogLevel.Error, $"PCB:" + i + " MAX displacement exceeds!");
                             
                             var data = (int)EMode.Abort;
                             for (uint j = 0; j < _TwinCathelper.PLCMotors.Count(); j++)
@@ -735,10 +744,10 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                             return false;
                         }
                     }
-                    else if (((int)_TwinCathelper.PLCMotorsStatuses.mPostion[i] > int.Parse(Max_mm)) || ((int)_TwinCathelper.PLCMotorsStatuses.mPostion[i] < int.Parse("-" + Max_mm)) || Moveinmm >= int.Parse(Max_mm))
+                    else if (((int)_TwinCathelper.PLCMotorsStatuses.mPostion[i] + destSrc > int.Parse(Max_mm)) || ((int)_TwinCathelper.PLCMotorsStatuses.mPostion[i] + destSrc < int.Parse("-" + Max_mm)) || Moveinmm >= int.Parse(Max_mm))
                     {
-                        log.Log(LogLevel.Error, $"Motor no:" + i + " has invalid position!");
-                        
+                        log.Log(LogLevel.Error, $"PCB:" + i + " MAX displacement exceeds!");
+
                         log.Log(LogLevel.Warn, $"Stopping Motors");
                         var data = (int)EMode.Abort;
                         for (uint j = 0; j < _TwinCathelper.PLCMotors.Count(); j++)
@@ -774,13 +783,6 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             Logger log = LogManager.GetLogger("Browse Project Files");
             try
             {
-                try
-                {
-                    if (!ConfirmMotorsAreFine())
-                        return;
-                }
-                catch { }
-
                 log.Log(LogLevel.Info, $"Loading Project Files Folder");
                 //string projectfolder = ConfigurationManager.AppSettings["ProjectFolder"].ToString();
                 string projectfolder = "";

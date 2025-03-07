@@ -321,7 +321,7 @@ namespace FlexMold.MVVM.ViewModel.SplashScreen
             }
 
             log.Log(LogLevel.Info, $"{TCSymbols.foe_nSlaveAddr} : {MyDevicesAndBoxes[runningIndex].Foe_nSlaveAddr} State {state}");
-            if (retry < 5)
+            if (retry < 20)
             {
                 log.Log(LogLevel.Warn, $"{(retry != 0 ? ("Retrying : " + retry) : "")} Requesting Slave State Please Wait ....");
                 DeviceStatusIndex = $"Retrying[{retry}] Requesting Slave State {curStr}";

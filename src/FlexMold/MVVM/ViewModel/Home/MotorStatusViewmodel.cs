@@ -33,6 +33,7 @@ namespace FlexMold.MVVM.ViewModel.Home
         public RelayCommand OnLoadedCommand { get; set; }
         public RelayCommand OnUnLoadedCommand { get; set; }
         private Hashtable hlist = new Hashtable();
+        public static Hashtable RampMotorsHlist = new Hashtable();
         private Hashtable CalibrationCompletedList = new Hashtable();
         
         private void DisplayError(MotorStatusControl o)
@@ -237,7 +238,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     _TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationSeq02Request;
                     _TwinCathelper.PLCMotors[i].mTime = mtime;
 
-                    log.Log(LogLevel.Warn, "MotorTest > CalibrateSeq02 Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
+                    log.Log(LogLevel.Warn, "MotorTest > CalibrateSeq02 Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: Up"// + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
                         + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
                         + "  >> mRPM: " + CSVHelper.RecommendedRPM
                         + "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
@@ -519,6 +520,19 @@ namespace FlexMold.MVVM.ViewModel.Home
                     TNF.ShowInformation(_tmgs);
                     log.Log(LogLevel.Info, _tmgs);
                     CalibrateButtonEnable = true;
+
+                    if (RampMotorsHlist.ContainsKey(i))
+                    {
+                        RampMotorsHlist.Remove(i);
+                        if (RampMotorsHlist.Count < 1)
+                        {
+                            if (CSVHelper.ST_timer.IsRunning)
+                            { CSVHelper.ST_timer.Reset(); CSVHelper.ST_timer.Stop(); CSVHelper.CompletingTime = 0; }
+
+                            log.Log(LogLevel.Warn, "***************** Machine is Ready *****************");
+                        }
+                    }
+
                     break;
                 case (int)EDeviceStatus.CalibrationSquence01Started:
                     _tmgs = SetUI(i, swe, Brushes.Yellow);
@@ -645,6 +659,19 @@ namespace FlexMold.MVVM.ViewModel.Home
                     if(FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed=='H')
                         FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = 'S';
 
+                    if (RampMotorsHlist.ContainsKey(i))
+                    {
+                        RampMotorsHlist.Remove(i);
+                        if (RampMotorsHlist.Count < 1)
+                        {
+                            if (CSVHelper.ST_timer.IsRunning)
+                            { CSVHelper.ST_timer.Reset(); CSVHelper.ST_timer.Stop(); CSVHelper.CompletingTime = 0; }
+
+                            log.Log(LogLevel.Warn, "***************** Machine is Ready *****************");
+                        }
+                    }
+
+
                     _tmgs = SetUI(i, swe, Brushes.Green);
                     TNF.ShowSuccess(_tmgs);
                     //log.Log(LogLevel.Info, _tmgs);
@@ -655,13 +682,28 @@ namespace FlexMold.MVVM.ViewModel.Home
                     TNF.ShowSuccess(_tmgs);
                     //log.Log(LogLevel.Warn, _tmgs);
                     //CalibrateButtonEnable = false;
+                    if (!RampMotorsHlist.ContainsKey(i))
+                        RampMotorsHlist.Add(i, i);
                     log.Log(LogLevel.Warn, "***************** RampSeqStarted...... motor:" + i);
+                    
+
                     break;
                 case (int)EDeviceStatus.RampSequenceFailed:
                     _tmgs = SetUI(i, swe, Brushes.Red);
-                    log.Log(LogLevel.Error, "***************** RampSeqFailed *****************...... motor:" + i);
+                    log.Log(LogLevel.Error, "***************** RampSeqFailed, Please check motor ...... :" + i);
                     TNF.ShowError(_tmgs);
                     log.Log(LogLevel.Error, _tmgs);
+
+                    if (RampMotorsHlist.ContainsKey(i))
+                        RampMotorsHlist.Remove(i);
+                    if (RampMotorsHlist.Count < 1)
+                    {
+                        if (CSVHelper.ST_timer.IsRunning)
+                        { CSVHelper.ST_timer.Reset(); CSVHelper.ST_timer.Stop(); CSVHelper.CompletingTime = 0; }
+
+                        log.Log(LogLevel.Warn, "***************** Machine is Ready *****************");
+                    }
+
                     break;
                 default:
                     _tmgs = SetUI(i, swe, Brushes.Blue);
@@ -935,6 +977,15 @@ namespace FlexMold.MVVM.ViewModel.Home
 
                     //if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == '1')
                     //{
+
+                    if (CSVHelper.ST_timer.IsRunning)
+                    { CSVHelper.ST_timer.Reset(); CSVHelper.ST_timer.Stop(); CSVHelper.CompletingTime = 0;
+                        RampMotorsHlist.Clear();
+                        CalibrationCompletedList.Clear();
+                    }
+
+
+
                     break;
                 case EmotorDiagnostic.Invalid_Ramp_Seq://newely added
                     CSVHelper.NoLinkHappened = true;
@@ -1318,7 +1369,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                 for (uint i = 0; i < DeviceCount; i++)
                 {
                     //if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713969130 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713968323 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)//0x662917EA (1713969130=Wed Apr 24 2024 14:32:10 GMT+0000) CSVHelper.MotorsStatusGlobal[0] == "Healthy" && //1713968323=Wed Apr 24 2024 14:18:43 GMT+0000
-                    if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1737720238 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)
+                    //if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1737720238 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)
+                    if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1741256250 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)
                         continue;
                     else
                         FirmwareNotMatched += "Motor" + (i + 1) + ",";

@@ -81,6 +81,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     break;
                 case ESlaveLink.EC_LINK_STATE_NOT_PRESENT:
                     log.Log(LogLevel.Error, ">>>>>>>>EC_LINK_STATE_NOT_PRESENT PCB:" + index);
+                    
                     if (!CSVHelper.PCBsInError.Contains(index)) CSVHelper.PCBsInError.Add(index, "EC_LINK_STATE_NOT_PRESENT");                    
                     break;
                 case ESlaveLink.EC_LINK_STATE_ADDITIONAL_LINK:

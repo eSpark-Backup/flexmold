@@ -33,13 +33,16 @@ namespace FlexMold.MVVM.ViewModel.Project
     public class ProjectViewModel : ObservableObject, IProjectViewModel
     {
         private MachineTestViewModel MyMachineTestViewModel { get { return App.AppHost.Services.GetRequiredService<MachineTestViewModel>(); } }
+        int UpdateLogTimer = 10;
         private String ZlaserIP = "";//ConfigurationManager.AppSettings["ZlaserIP"].ToString();
         private int ZlaserPort = 0;//int.Parse(ConfigurationManager.AppSettings["ZlaserPort"].ToString());
         private Stopwatch MachineTotalTimeSW = new Stopwatch();
         private string _toggleStopResumeButtonText="Stop";
         private string _toggleShapeHomeButtonText = "Home";
         private int LastProgressval = 0;
+        private int logWriteCntr = 0;
         private int progressActonCounter = 0;
+        //private String WriteOncestr = "";
         //private int UpdateProgressStatusSeconds = 5;
         private int intSpecifiedSecs = 60;
         //private float LastmaxVal = 0.00F;
@@ -435,11 +438,10 @@ namespace FlexMold.MVVM.ViewModel.Project
         //}
         private void WriteCSVData(List<float> data)
         {
-            checkFirmware();
-
-
             try
             {
+                checkFirmware();
+
                 if (data != null && data.Count>0)
                     CSVHelper.MaxDisplacement = data.Max();
                 else
@@ -463,12 +465,14 @@ namespace FlexMold.MVVM.ViewModel.Project
                 //+ "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
                 //+ "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
                 //+ "  >> mMode: " + EMode.Project.ToString());
-                log.Log(LogLevel.Warn, "ProjectView > WriteCSVData  Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
+
+                CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > ProjectView > WriteCSVData  Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
                     + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
                     + "  >> mRPM: " + CSVHelper.RecommendedRPM
                     + "  >> MotorTime: " + CSVHelper.MotorTime
-                    + "  >> mMode: " + EMode.Project.ToString());
-            }
+                    + "  >> mMode: " + EMode.Project.ToString() + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
+            }            
+
 
             if (!ConfirmMotorsAreFine(_TwinCathelper.PLCMotors,"Shape"))
             {
@@ -1287,13 +1291,15 @@ namespace FlexMold.MVVM.ViewModel.Project
                     //+ "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
                     //+ "  >> mMode: " + (int)EMode.Project);
 
-                    log.Log(LogLevel.Warn, "ProjectView > ResumingMotor_writeCV Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
-                        + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
-                        + "  >> mRPM: " + CSVHelper.RecommendedRPM
-                        + "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
-                        + "  >> mMode: " + EMode.Project.ToString());
+                    CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > ProjectView > ResumingMotor_writeCV Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: " + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
+                            + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
+                            + "  >> mRPM: " + CSVHelper.RecommendedRPM
+                            + "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
+                            + "  >> mMode: " + EMode.Project.ToString() + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
                 }
+
             }
+
             catch (Exception ex)
             {
                 log.Log(LogLevel.Error, "Resuming Calculation Error3 >>> " + ex.Message);
@@ -1758,39 +1764,40 @@ namespace FlexMold.MVVM.ViewModel.Project
         }
 
 
-        private void Client_AdsNotification(object sender, AdsNotificationEventArgs e)
-        {
-            try
-            {
-                // Or here we know about UDINT type --> can be marshalled as UINT32
-                var _mysymbol = e.UserData as Symbol;
-                if (_mysymbol != null)
-                {
-                    TCSymbols aa;
-                    Enum.TryParse(_mysymbol.InstancePath.Replace("MAIN.", ""), out aa);
-                    switch (aa)
-                    {
-                        case TCSymbols.mPosition:
-                            Position = new float[_TwinCathelper.PLCMotors.Count()];
-                            Buffer.BlockCopy(e.Data.ToArray(), 0, Position, 0, e.Data.Length);
-                            log.Log(LogLevel.Info, $"Positions Updated : {String.Join(",", Position)}");
-                            break;
-                        case TCSymbols.MotorDiagnostic:
-                            //MDiag1 = new UInt32[TwinCathelper.DeviceCount];
-                            //Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag1, 0, e.Data.Length);
-                            //log.Log(LogLevel.Info, $"Diag0 Updated : {String.Join(",", MDiag1)}");
-                            //Diag1Value = MDiag1;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                log.Log(LogLevel.Error, ex.Message);
-            }
-        }
+        //private void Client_AdsNotification(object sender, AdsNotificationEventArgs e)
+        //{
+        //    try
+        //    {
+        //        // Or here we know about UDINT type --> can be marshalled as UINT32
+        //        var _mysymbol = e.UserData as Symbol;
+        //        if (_mysymbol != null)
+        //        {
+        //            TCSymbols aa;
+        //            Enum.TryParse(_mysymbol.InstancePath.Replace("MAIN.", ""), out aa);
+        //            switch (aa)
+        //            {
+        //                case TCSymbols.mPosition:
+        //                    Position = new float[_TwinCathelper.PLCMotors.Count()];
+        //                    Buffer.BlockCopy(e.Data.ToArray(), 0, Position, 0, e.Data.Length);
+        //                    log.Log(LogLevel.Info, $"Positions Updated : {String.Join(",", Position)}");
+        //                    break;
+        //                case TCSymbols.MotorDiagnostic:
+        //                    //MDiag1 = new UInt32[TwinCathelper.DeviceCount];
+        //                    //Buffer.BlockCopy(e.Data.ToArray(), 0, MDiag1, 0, e.Data.Length);
+        //                    //log.Log(LogLevel.Info, $"Diag0 Updated : {String.Join(",", MDiag1)}");
+        //                    //Diag1Value = MDiag1;
+        //                    break;
+        //                default:
+        //                    break;
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        log.Log(LogLevel.Error, ex.Message);
+        //    }
+        //}
+
         //private PanelData[] CalcSoftStarter(IList<float> _csvdata)
         //{
         //    // Inputs
@@ -2269,14 +2276,14 @@ namespace FlexMold.MVVM.ViewModel.Project
                     //+ "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime.ToString()
                     //+ "  >> mMode: " + (int)EMode.Project);
 
-                    log.Log(LogLevel.Warn, "ProjectView > HomeTrigger Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + (Math.Abs(_TwinCathelper.PLCMotors[i].mDisplacement) - Math.Abs(_TwinCathelper.PLCMotorsStatuses.mPostion[i])) + "  >> Direction: " + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
-        + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
-        + "  >> mRPM: " + CSVHelper.RecommendedRPM
-        + "  >> MotorTime: " + CSVHelper.MotorTime//_TwinCathelper.PLCMotors[i].mTime
-        + "  >> mMode: " + EMode.Project.ToString());
+                    CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > ProjectView > HomeTrigger Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + (Math.Abs(_TwinCathelper.PLCMotors[i].mDisplacement) - Math.Abs(_TwinCathelper.PLCMotorsStatuses.mPostion[i])) + "  >> Direction: " + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
+                                    + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
+                                    + "  >> mRPM: " + CSVHelper.RecommendedRPM
+                                    + "  >> MotorTime: " + CSVHelper.MotorTime//_TwinCathelper.PLCMotors[i].mTime
+                                    + "  >> mMode: " + EMode.Project.ToString() + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
 
                 }
-                
+
                 if (!ConfirmMotorsAreFine(_TwinCathelper.PLCMotors,"Home"))
                 {
                     updateHomeButtonStatus();
@@ -2531,6 +2538,22 @@ namespace FlexMold.MVVM.ViewModel.Project
                         CSVHelper.UpdateHomeCSVStatus = false;
                     }
 
+                    try
+                    {
+                        if (logWriteCntr > UpdateLogTimer)
+                        {
+                            if (CSVHelper.WriteWarnMsgsOnce.Length > 1) log.Log(LogLevel.Warn, CSVHelper.WriteWarnMsgsOnce);
+
+                            if (CSVHelper.WriteErrMsgsOnce.Length > 1) log.Log(LogLevel.Error, CSVHelper.WriteErrMsgsOnce);
+
+                            CSVHelper.WriteWarnMsgsOnce = "";
+                            CSVHelper.WriteErrMsgsOnce = "";
+                            logWriteCntr = 0;
+                        }
+                        logWriteCntr += 1;
+                    }
+                    catch { }
+
 
                 }
                 catch { }
@@ -2538,7 +2561,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 float posDiff = 0;
                 try { SplashScreenViewModel._mainWindow.bt_TCP.Content = MotorStatus.mPosition.Max() + "%"; } catch { }
                 if (IsRampCompleted)
-                {                    
+                {
                     //IsHomeEnabled = true;
                     //pgProcesStatusVal = 100;
                     if (pgProcesStatusVal >= 99)
@@ -2971,17 +2994,22 @@ namespace FlexMold.MVVM.ViewModel.Project
             {
 
                 String FirmwareNotMatched = "";
-                for (uint i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)  
+                String FirmwaresMatched = "";
+                for (uint i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
                 {
                     //if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713969130 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713968323 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)//0x662917EA (1713969130=Wed Apr 24 2024 14:32:10 GMT+0000) CSVHelper.MotorsStatusGlobal[0] == "Healthy" && //1713968323=Wed Apr 24 2024 14:18:43 GMT+0000
                     //if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1737720238 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)
                     if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1741256250 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)
-                        continue;
-                    else
-                        FirmwareNotMatched += "Motor" + (i + 1) + ",";
-                }
+                    {
+                        if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1741256250 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)
+                            continue;
+                        else
+                            FirmwareNotMatched += "Motor" + (i + 1) + ",";
+                    }
+                }       
+                CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > MotorStatusView > NotMatched Firmwares=" + FirmwareNotMatched + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
 
-                if (!CSVHelper.MachineEnabled)
+                    if (!CSVHelper.MachineEnabled)
                 {
                     MessageBox.Show("Please Power ON the machine before resuming!", "Machine state is off", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
@@ -2989,6 +3017,9 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                 if (FirmwareNotMatched.Length > 0)
                 {
+                    var log = LogManager.GetLogger("ProjectView");
+                    log.Log(LogLevel.Error, "Please update the firmware/machine versions of the following motor(s)!" + Environment.NewLine + FirmwareNotMatched);
+
                     MessageBox.Show("Please update the firmware/machine versions of the following motor(s)!" + Environment.NewLine + FirmwareNotMatched, "Wrong firmware/Machine found!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     //MessageBox.Show("Please close the application and update the firmware!" + Environment.NewLine + FirmwareNotMatched, "Wrong firmware found!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     CSVHelper.wrongFirmwareFound = true;
@@ -3049,6 +3080,11 @@ namespace FlexMold.MVVM.ViewModel.Project
                 }
                 catch { }
 
+                try
+                {
+                    UpdateLogTimer = int.Parse(ConfigurationManager.AppSettings["UpdateLogTimer"].ToString());
+                }
+                catch { UpdateLogTimer = 10; }
 
                 MotorsCheckTimer.Tick += new EventHandler(Timer_Elapsed);
                 MotorsCheckTimer.Interval = new TimeSpan(0, 0, 1);
@@ -3062,28 +3098,6 @@ namespace FlexMold.MVVM.ViewModel.Project
                 
 
                 this._TwinCathelper = twinCathelper;
-                try
-                {
-                    IsHomeEnabled = false;
-                    LaserSendButton = false;
-                    IsStopEnable = false;
-
-                    if (!CSVHelper.MachineEnabled && !DoMachineUserCanceled)
-                    {
-                        log.Log(LogLevel.Error, $"Machine status disconnected! ");
-                        DialogResult dr = MessageBox.Show("Machine link InActive, Please check connection!", "Machine not connected", MessageBoxButtons.RetryCancel);
-
-                        if (dr == DialogResult.Cancel)
-                        {
-                            DoMachineUserCanceled = true;
-                            return;
-                        }
-
-                        return;
-                    }
-
-                }
-                catch { }
 
                 //Browse CSV folder loaded
                 try
@@ -3103,6 +3117,29 @@ namespace FlexMold.MVVM.ViewModel.Project
                 //Fill project folder list
                 FileProjectList();
 
+                try
+                {
+                    IsHomeEnabled = false;
+                    LaserSendButton = false;
+                    IsStopEnable = false;
+
+                    if (!CSVHelper.MachineEnabled && !DoMachineUserCanceled)
+                    {
+                        log.Log(LogLevel.Error, $"Machine status disconnected! ");
+                        DialogResult dr = MessageBox.Show("Machine link InActive, Please check connection!", "Machine not connected", MessageBoxButtons.RetryCancel);
+
+                        if (dr == DialogResult.Cancel)
+                        {
+                            DoMachineUserCanceled = true;
+                            //return;
+                        }
+
+                        //return;
+                    }
+
+                }
+                catch { }
+
                 BrowseProjectCommand = new RelayCommand(o =>
                 {
                     try
@@ -3114,6 +3151,7 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                         if (!CSVHelper.MachineEnabled)
                         {
+                            log.Log(LogLevel.Warn, $"Machine state is off!!!");
                             MessageBox.Show("Please Power ON the machine before resuming!", "Machine state is off", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
                         }
@@ -3139,6 +3177,7 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                         if (!CSVHelper.MachineEnabled)
                         {
+                            log.Log(LogLevel.Error, $"Machine status disconnected! ");
                             MessageBox.Show("Please Power ON the machine before resuming!", "Machine state is off", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
                         }
@@ -3180,6 +3219,7 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                         if (!CSVHelper.MachineEnabled)
                         {
+                            log.Log(LogLevel.Error, $"Machine status disconnected! ");
                             MessageBox.Show("Please Power ON the machine before resuming!", "Machine state is off", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
                         }
@@ -3237,6 +3277,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 {
                     if (!CSVHelper.MachineEnabled)
                     {
+                        log.Log(LogLevel.Error, $"Machine status disconnected! ");
                         MessageBox.Show("Please Power ON the machine before resuming!", "Machine state is off", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                     }
@@ -3312,6 +3353,7 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                 if (!CSVHelper.MachineEnabled)
                 {
+                    log.Log(LogLevel.Error, $"Machine status disconnected! ");
                     MessageBox.Show("Please Power ON the machine before resuming!", "Machine state is off", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
@@ -3322,7 +3364,6 @@ namespace FlexMold.MVVM.ViewModel.Project
                     {
                         //ZlaserIP = ConfigurationManager.AppSettings["ZlaserIP"].ToString();
                         //ZlaserPort = int.Parse(ConfigurationManager.AppSettings["ZlaserPort"].ToString());
-
                             DataSet dsMachSet = new DataSet();
                             dsMachSet = FlexMoldDB.ReadData("FM_LaserProjectors", "LP_IsDefault=1");
 
@@ -3396,7 +3437,9 @@ namespace FlexMold.MVVM.ViewModel.Project
                 log.Log(LogLevel.Error, ex.Message);
             }
 
+            CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > ProjectView > Starting Checking Firmware For All PCB!!!"+Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
             checkFirmware();
+            CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > ProjectView > Done Checking Firmware For All PCB!!!" + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
         }
 
         private void UpdateSettingsDB()
@@ -3468,7 +3511,8 @@ namespace FlexMold.MVVM.ViewModel.Project
             int cntr = 0;
             while (MotorStatusViewModel.RampMotorsHlist.Count > 0)
             {
-                log.Log(LogLevel.Warn, $"**************** Please wait **************** (" + MotorStatusViewModel.RampMotorsHlist.Count + ") PCB's still in operation!!!!!!");
+                CSVHelper.WriteWarnMsgsOnce = DateTime.Now + $" ProjectView>>>AbortAllOperations>>>**************** Please wait **************** (" + MotorStatusViewModel.RampMotorsHlist.Count + ") PCB's still in operation!!!!!!" + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
+                //log.Log(LogLevel.Warn, $"**************** Please wait **************** (" + MotorStatusViewModel.RampMotorsHlist.Count + ") PCB's still in operation!!!!!!");
                 Thread.Sleep(1000);
                 cntr++;
 

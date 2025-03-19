@@ -142,7 +142,8 @@ namespace FlexMold.MVVM.ViewModel.Home
             }
 
             _TwinCathelper.WriteEthercatDeviceData(DeviceSymbol.mMode);
-            log.Log(LogLevel.Warn, $"{DeviceCount} Calibration value(s) has been written sucessfully");
+            //log.Log(LogLevel.Warn, $"{DeviceCount} Calibration value(s) has been written sucessfully");
+            CSVHelper.WriteWarnMsgsOnce = DateTime.Now + $" MotorStatusView>>CalibrateSeq02_HomeUp {DeviceCount} Calibration value(s) has been written sucessfully" + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
 
             Thread.Sleep(200);
             uint zero = 0;
@@ -185,7 +186,8 @@ namespace FlexMold.MVVM.ViewModel.Home
         {
             //IsMotorsIdle = false;
             var log = LogManager.GetLogger("Device Status");
-            log.Log(LogLevel.Warn, "Sending CalibrationSeq02 Request, Please wait.....");
+            //log.Log(LogLevel.Warn, "Sending CalibrationSeq02 Request, Please wait.....");
+            CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > MotorStatusView>>CalibrateSeq02 Sending CalibrationSeq02 Request, Please wait....." + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
             var array = new uint[DeviceCount];
             try
             {
@@ -238,12 +240,17 @@ namespace FlexMold.MVVM.ViewModel.Home
                     _TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationSeq02Request;
                     _TwinCathelper.PLCMotors[i].mTime = mtime;
 
-                    log.Log(LogLevel.Warn, "MotorTest > CalibrateSeq02 Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: Up"// + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
+                    //log.Log(LogLevel.Warn, "MotorTest > CalibrateSeq02 Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: Up"// + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
+                    //    + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
+                    //    + "  >> mRPM: " + CSVHelper.RecommendedRPM
+                    //    + "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
+                    //    + "  >> mMode: " + (int)EMode.CalibrationSeq02Request);
+
+                    CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > MotorStatusView >> CalibrateSeq02>>> Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: Up"// + (_TwinCathelper.PLCMotors[i].mDirection ? "Down" : "Up")
                         + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
                         + "  >> mRPM: " + CSVHelper.RecommendedRPM
                         + "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
-                        + "  >> mMode: " + (int)EMode.CalibrationSeq02Request);
-
+                        + "  >> mMode: " + (int)EMode.CalibrationSeq02Request + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
                 }
                 _TwinCathelper.WriteEthercatDeviceData();
                 log.Log(LogLevel.Info, $"{EMode.CalibrationSeq02Request}. Please wait...");
@@ -347,11 +354,17 @@ namespace FlexMold.MVVM.ViewModel.Home
                     CSVHelper.IsLastEventCalibr = false;
                     for (int i = 0; i < DeviceCount; i++)
                     {
-                        log.Log(LogLevel.Warn, "CompleteCalibrate Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > Until_Stall  >> Direction: Down"
+                        //log.Log(LogLevel.Warn, "CompleteCalibrate Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > Until_Stall  >> Direction: Down"
+                        //       + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
+                        //       + "  >> mRPM: " + CSVHelper.RecommendedRPM
+                        //       + "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
+                        //       + "  >> mMode: CalibrationSeq01Request");
+
+                        CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > CompleteCalibrate Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > Until_Stall  >> Direction: Down"
                                + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
                                + "  >> mRPM: " + CSVHelper.RecommendedRPM
                                + "  >> MotorTime: " + _TwinCathelper.PLCMotors[i].mTime
-                               + "  >> mMode: CalibrationSeq01Request");
+                               + "  >> mMode: CalibrationSeq01Request" + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
 
                         _TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationSeq01Request; }
 
@@ -366,7 +379,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                     _TwinCathelper.WriteEthercatDeviceData();
 
 
-                    log.Log(LogLevel.Warn, $"Sending CalibrationSeq01 Request, Please wait...");
+                    //log.Log(LogLevel.Warn, $"Sending CalibrationSeq01 Request, Please wait...");
+                    CSVHelper.WriteWarnMsgsOnce = DateTime.Now + $" Sending CalibrationSeq01 Request, Please wait..." + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
                     TNF.ShowSuccess("Sending CalibrationSeq01 Request, Please wait...");
 
                     CSVHelper.UpdateHomeCSVStatus = true;
@@ -441,7 +455,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                     _TwinCathelper.WriteEthercatDeviceData();
 
 
-                    log.Log(LogLevel.Warn, $"Sending CalibrationSeq01 Request, Please wait...");
+                    //log.Log(LogLevel.Warn, $"Sending CalibrationSeq01 Request, Please wait...");
+                    CSVHelper.WriteWarnMsgsOnce = DateTime.Now + $" MotorStatusView >> Calibrate()>>> Sending CalibrationSeq01 Request, Please wait..." + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
                     TNF.ShowSuccess("Sending CalibrationSeq01 Request, Please wait...");
 
 
@@ -529,7 +544,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                             if (CSVHelper.ST_timer.IsRunning)
                             { CSVHelper.ST_timer.Reset(); CSVHelper.ST_timer.Stop(); CSVHelper.CompletingTime = 0; }
 
-                            log.Log(LogLevel.Warn, "***************** Machine is Ready *****************");
+                            //log.Log(LogLevel.Warn, "***************** Machine is Ready *****************");
+                            CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > MotorStatusView >> DispDevStatus>> ***************** Machine is Ready *****************" + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
                         }
                     }
 
@@ -548,16 +564,18 @@ namespace FlexMold.MVVM.ViewModel.Home
 
                     if (!CalibrationCompletedList.ContainsKey(i))
                         CalibrationCompletedList.Add(i, i);
-                    log.Log(LogLevel.Warn, "***************** CalibrationSeq01Started.....Motor:" + i);                    
+                    //log.Log(LogLevel.Warn, "***************** CalibrationSeq01Started.....Motor:" + i);                    
+                    CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > MotorStatusView >> DispDevStatus>>***************** CalibrationSeq01Started.....Motor:" + i + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
                     //CSVHelper.CalibrationCompleted = false;
                     break;
                 case (int)EDeviceStatus.CalibrationSquence01Failed:
                     _tmgs = SetUI(i, swe, Brushes.Red);
                     if (CalibrationCompletedList.ContainsKey(i)) 
                         CalibrationCompletedList.Remove(i);
-                    log.Log(LogLevel.Error, "***************** CalibrationSeq01Failed.....Motor: " + i);
+                    //log.Log(LogLevel.Error, "***************** CalibrationSeq01Failed.....Motor: " + i);
+                    CSVHelper.WriteErrMsgsOnce = DateTime.Now + " >  MotorStatusView >> DispDevStatus>>***************** CalibrationSeq01Failed.....Motor: " + i + Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
                     TNF.ShowError(_tmgs);
-                    log.Log(LogLevel.Error, _tmgs);
+                    //log.Log(LogLevel.Error, _tmgs);
                     CalibrateButtonEnable = true;                    
 
                     if (i >= DeviceCount-1)
@@ -574,8 +592,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                     if (CalibrationCompletedList.ContainsKey(i))
                     {
                         CalibrationCompletedList.Remove(i);
-                        log.Log(LogLevel.Warn, "***************** CalibrationSquence01Success.....Motor:" + i);
-
+                        //log.Log(LogLevel.Warn, "***************** CalibrationSquence01Success.....Motor:" + i);
+                        CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > MotorStatusView >> DispDevStatus>>***************** CalibrationSquence01Success.....Motor:" + i + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
                         if (CSVHelper.ST_timer.IsRunning)
                         { CSVHelper.ST_timer.Reset(); CSVHelper.ST_timer.Stop(); CSVHelper.CompletingTime = 0; }
                     }
@@ -595,7 +613,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                         {
                             FlexMold.MVVM.ViewModel.Project.ProjectViewModel.StallErrMotorsCheckTimer.Start();
                             FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = '1';
-                            log.Log(LogLevel.Error, "CalibrationSeq01Success Error occured while Homing...");
+                            //log.Log(LogLevel.Error, "CalibrationSeq01Success Error occured while Homing...");
+                            CSVHelper.WriteErrMsgsOnce = DateTime.Now + " >  MotorStatusView >> DispDevStatus>> CalibrationSeq01Success Error occured while Homing..." + Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
                         }
 
                         //if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'C')
@@ -607,8 +626,9 @@ namespace FlexMold.MVVM.ViewModel.Home
                         // this condition will only occur when last motor has some update
                         if (CalibrationCompletedList.Count<1 && (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'C'))//CSVHelper.CalibrationCompleted if failed
                         {
-                                log.Log(LogLevel.Warn, "Sending CalibrationSeq02 Request, Please wait.....Motor:" + i);
-                                CalibrateSeq02_HomeUp();//EMode.Resume
+                            //log.Log(LogLevel.Warn, "Sending CalibrationSeq02 Request, Please wait.....Motor:" + i);
+                            CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > MotorStatusView >> DispDevStatus>> Sending CalibrationSeq02 Request, Please wait.....Motor:" + i + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
+                            CalibrateSeq02_HomeUp();//EMode.Resume
                                 Thread.Sleep(1500);
                                 CalibrateSeq02();
                         }
@@ -622,16 +642,18 @@ namespace FlexMold.MVVM.ViewModel.Home
                     TNF.ShowInformation(_tmgs);
                     log.Log(LogLevel.Info, _tmgs);
                     FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = '2';
-                    log.Log(LogLevel.Warn, "***************** CalibrationSeq02Started...... motor:" + i);
+                    //log.Log(LogLevel.Warn, "***************** CalibrationSeq02Started...... motor:" + i);
+                    CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > MotorStatusView >> DispDevStatus>> ***************** CalibrationSeq02Started...... motor:" + i + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
                     //CSVHelper.CalibrationCompleted = false;
                     //CalibrateButtonEnable = false;
                     break;
                 case (int)EDeviceStatus.CalibrationSquence02Failed:
                     _tmgs = SetUI(i, swe, Brushes.Red);
                     TNF.ShowError(_tmgs);
-                    log.Log(LogLevel.Error, _tmgs);
+                    //log.Log(LogLevel.Error, _tmgs);
                     //log.Log(LogLevel.Info, ">>>CalibrationSquence02Failed");
-                    log.Log(LogLevel.Error, "EDeviceStatus.CalibrationSeq02Failed...... motor:" + i);
+                    //log.Log(LogLevel.Error, "EDeviceStatus.CalibrationSeq02Failed...... motor:" + i);
+                    CSVHelper.WriteErrMsgsOnce = DateTime.Now + " >  MotorStatusView >> DispDevStatus>> EDeviceStatus.CalibrationSeq02Failed...... motor:" + i + Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
                     //CalibrateButtonEnable = false;
                     //if (i >= DeviceCount - 1)
                     //    CalibrateSeq02_HomeUp();
@@ -641,7 +663,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                     _tmgs = SetUI(i, swe, Brushes.LightGreen);
                     TNF.ShowSuccess(_tmgs);
                     log.Log(LogLevel.Info, _tmgs);
-                    log.Log(LogLevel.Warn, "***************** CalibrationSeq02Success...... motor:" + i);
+                    //log.Log(LogLevel.Warn, "***************** CalibrationSeq02Success...... motor:" + i);
+                    CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > MotorStatusView >> DispDevStatus>> ***************** CalibrationSeq02Success...... motor:" + i + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
                     //try { HardCalibrateProcess(); } catch { }
                     FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed = '2';
                     FlexMold.MVVM.ViewModel.Project.ProjectViewModel.IsRampCompleted = true;
@@ -653,7 +676,9 @@ namespace FlexMold.MVVM.ViewModel.Home
                     //CalibrateButtonEnable = false;
                     break;
                 case (int)EDeviceStatus.RampSequenceCompleted:
-                    log.Log(LogLevel.Warn, "***************** RampSeqSuccess...... motor:" + i);
+                    //log.Log(LogLevel.Warn, "***************** RampSeqSuccess...... motor:" + i);
+                    CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > MotorStatusView >> DispDevStatus>> ***************** RampSeqSuccess...... motor:" + i + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
+
                     FlexMold.MVVM.ViewModel.Project.ProjectViewModel.IsRampCompleted = true;
                     HomeMotorStatus = true;
                     if(FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed=='H')
@@ -667,7 +692,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                             if (CSVHelper.ST_timer.IsRunning)
                             { CSVHelper.ST_timer.Reset(); CSVHelper.ST_timer.Stop(); CSVHelper.CompletingTime = 0; }
 
-                            log.Log(LogLevel.Warn, "***************** Machine is Ready *****************");
+                            //log.Log(LogLevel.Warn, "***************** Machine is Ready *****************");
+                            CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > MotorStatusView >> DispDevStatus>>***************** Machine is Ready *****************" + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
                         }
                     }
 
@@ -684,15 +710,16 @@ namespace FlexMold.MVVM.ViewModel.Home
                     //CalibrateButtonEnable = false;
                     if (!RampMotorsHlist.ContainsKey(i))
                         RampMotorsHlist.Add(i, i);
-                    log.Log(LogLevel.Warn, "***************** RampSeqStarted...... motor:" + i);
-                    
+                    //log.Log(LogLevel.Warn, "***************** RampSeqStarted...... motor:" + i);
+                    CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > MotorStatusView >> DispDevStatus>>***************** RampSeqStarted...... motor:" + i + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
 
                     break;
                 case (int)EDeviceStatus.RampSequenceFailed:
                     _tmgs = SetUI(i, swe, Brushes.Red);
-                    log.Log(LogLevel.Error, "***************** RampSeqFailed, Please check motor ...... :" + i);
+                    //log.Log(LogLevel.Error, "***************** RampSeqFailed, Please check motor ...... :" + i);
+                    CSVHelper.WriteErrMsgsOnce = DateTime.Now + " >  MotorStatusView >> DispDevStatus>>***************** RampSeqFailed, Please check motor ...... :" + i + Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
                     TNF.ShowError(_tmgs);
-                    log.Log(LogLevel.Error, _tmgs);
+                    //log.Log(LogLevel.Error, _tmgs);
 
                     if (RampMotorsHlist.ContainsKey(i))
                         RampMotorsHlist.Remove(i);
@@ -701,14 +728,16 @@ namespace FlexMold.MVVM.ViewModel.Home
                         if (CSVHelper.ST_timer.IsRunning)
                         { CSVHelper.ST_timer.Reset(); CSVHelper.ST_timer.Stop(); CSVHelper.CompletingTime = 0; }
 
-                        log.Log(LogLevel.Warn, "***************** Machine is Ready *****************");
+                        //log.Log(LogLevel.Warn, "***************** Machine is Ready *****************");
+                        CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > MotorStatusView >> DispDevStatus>> ***************** Machine is Ready *****************" + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
                     }
 
                     break;
                 default:
                     _tmgs = SetUI(i, swe, Brushes.Blue);
                     TNF.ShowError(_tmgs);
-                    log.Log(LogLevel.Error, "! Undocumented Status ...... motor:" + i);
+                    //log.Log(LogLevel.Error, "! Undocumented Status ...... motor:" + i);
+                    CSVHelper.WriteErrMsgsOnce = DateTime.Now + " >  MotorStatusView >> DispDevStatus>> ! Undocumented Status ...... motor:" + i + Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
                     //CalibrateButtonEnable = false;
                     break;
             }
@@ -719,7 +748,8 @@ namespace FlexMold.MVVM.ViewModel.Home
             var data = (int)EMode.Abort; String st = "";
             for (uint j = 0; j < DeviceCount; j++)
             { _TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data.CastToArray()); st += j+":"+MotorStatus.mPosition[j] + ","; }
-            log.Log(LogLevel.Warn, $"Stopping Motors > " + st);
+            //log.Log(LogLevel.Warn, $"Stopping Motors > " + st);
+            CSVHelper.WriteWarnMsgsOnce = DateTime.Now + $" MotorStatusView >> Stopping Motors > " + st + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
 
             if (CSVHelper.ST_timer == null) CSVHelper.ST_timer = new System.Diagnostics.Stopwatch();
             CSVHelper.ST_timer.Stop(); CSVHelper.ST_timer.Reset();
@@ -744,7 +774,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                     //FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.Start();
 
                     stoppingMotors();
-                    log.Log(LogLevel.Error, $"SetUI - Motor{i} --> Diagnostic : {_tmgs}");
+                    //log.Log(LogLevel.Error, $"SetUI - Motor{i} --> Diagnostic : {_tmgs}");
+                    CSVHelper.WriteErrMsgsOnce = DateTime.Now + $"SetUI - Motor{i} --> Diagnostic : {_tmgs}" + Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
                 }
             }
 
@@ -792,7 +823,8 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 var log = LogManager.GetLogger("Device Status");
                 TNF.ShowError(ex.Message);
-                log.Log(LogLevel.Error, "! SetDevice Status Error =" + ex.Message);
+                //log.Log(LogLevel.Error, "! SetDevice Status Error =" + ex.Message);
+                CSVHelper.WriteErrMsgsOnce = DateTime.Now + " >  ! SetDevice Status Error =" + ex.Message + Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
             }
         }
         private void SetMotorPos(float[] _value)
@@ -819,7 +851,11 @@ namespace FlexMold.MVVM.ViewModel.Home
                         Position_SetUI(i);
                     }
 
-                    log.Log(LogLevel.Warn, "********************** MotorStatusView>>GetMismatchedIndexes Machine Ready **********************");
+                    //log.Log(LogLevel.Warn, "********************** MotorStatusView>>GetMismatchedIndexes Machine Ready **********************");
+                    if(CSVHelper.MachineEnabled)
+                        CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > MotorStatusView >> SetMotorPos>>********************** Machine Ready **********************" + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
+                    else
+                        CSVHelper.WriteErrMsgsOnce = DateTime.Now + " > MotorStatusView >> SetMotorPos>>********************** Machine NotAvailable **********************" + Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
                 }
 
                 CSVHelper.CompletingTime_count += 1;                
@@ -829,7 +865,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                     if (CSVHelper.CompletingTime_count > 3 && ((CSVHelper.ST_timer.ElapsedMilliseconds / 1000) > CSVHelper.CompletingTime))
                     {
                         CSVHelper.CompletingTime_count = 0;
-                        log.Log(LogLevel.Error, "*** Motors Malfunctioning, Please Turnoff Machine!");
+                        //log.Log(LogLevel.Error, "*** Motors Malfunctioning, Please Turnoff Machine!");
+                        CSVHelper.WriteErrMsgsOnce = DateTime.Now + " >  MotorStatusView >> SetMotorPos>> *** Motors Malfunctioning, Please Turnoff Machine!" + Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
 
                         //log.Log(LogLevel.Warn, $"Stopping Motors");
                         //var data = (int)EMode.Abort;
@@ -853,14 +890,18 @@ namespace FlexMold.MVVM.ViewModel.Home
                                 foreach (int k in hlist.Keys)
                                     ss += k + ", ";
 
-                                log.Log(LogLevel.Error, " Errors in PCB > " + ss);
+                                //log.Log(LogLevel.Error, " Errors in PCB > " + ss);
+                                CSVHelper.WriteErrMsgsOnce = DateTime.Now + " >  MotorStatusView >> SetMotorPos>> Errors in PCB > " + ss + Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
                                 MessageBox.Show("Motors still running after time elapsed Box(s) > " + ss, "Error in setup! ", MessageBoxButton.OK);
 
                             }
                         }
                     }
                     else {
-                        if ((CSVHelper.CompletingTime - (CSVHelper.ST_timer.ElapsedMilliseconds / 1000)) < 1.00f) { log.Log(LogLevel.Warn, "*** Maximum motor time expired!"); }
+                        if ((CSVHelper.CompletingTime - (CSVHelper.ST_timer.ElapsedMilliseconds / 1000)) < 1.00f) {
+                            //log.Log(LogLevel.Warn, "*** Maximum motor time expired!"); 
+                            CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > MotorStatusView >> SetMotorPos>> *** Maximum motor time expired!" + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
+                        }
                     }
                 }
 
@@ -871,7 +912,8 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 var log = LogManager.GetLogger("Device Status");
                 TNF.ShowError(ex.Message);
-                log.Log(LogLevel.Error, "! SetMotorPos Error =" + ex.Message);
+                //log.Log(LogLevel.Error, "! SetMotorPos Error =" + ex.Message);
+                CSVHelper.WriteErrMsgsOnce = DateTime.Now + " >  MotorStatusView >> SetMotorPos>> ! SetMotorPos Error =" + ex.Message + Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
             }
         }
         private uint[] _MotorDiagnistics;
@@ -906,12 +948,13 @@ namespace FlexMold.MVVM.ViewModel.Home
                     log.Log(LogLevel.Info, ">>->>IsEnabled=" + FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled + " ->>LastEventPressed=" + FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed
                         + " ->>MotorCalled=" + i
                         );
-                    log.Log(LogLevel.Error, $"Stepper_Driver_Failed > Stopping Motors");
+                    //log.Log(LogLevel.Error, $"Stepper_Driver_Failed > Stopping Motors");
+                    CSVHelper.WriteErrMsgsOnce = DateTime.Now + $" > MotorStatus > Stepper_Driver_Failed > Stopping Motor>"+i + Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
 
                     _tmgs = SetUI(i, sw, Brushes.Red);
                     CSVHelper.MotorsStatusGlobal[i] = "Stepper_Driver_Failed";
                     TNF.ShowError(_tmgs);
-                    log.Log(LogLevel.Error, _tmgs);
+                    //log.Log(LogLevel.Error, _tmgs);
                     CSVHelper.MotorsStatusGlobal[i] = sw.ToString();
 
                     if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled)
@@ -945,7 +988,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     break;
                 case EmotorDiagnostic.Motor_stalled://EmotorDiagnostic.Stall:
                     CSVHelper.NoLinkHappened = true;
-                    log.Log(LogLevel.Error, $"StallError > Stopping Motors:"+i);
+                    //log.Log(LogLevel.Error, $"StallError > Stopping Motors:"+i);                    
                     //var data2 = (int)EMode.Abort;
                     //for (uint j = 0; j < DeviceCount; j++)
                     //    _TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data2.CastToArray());
@@ -958,8 +1001,9 @@ namespace FlexMold.MVVM.ViewModel.Home
 
                     _tmgs = SetUI(i, sw, Brushes.Orange);
                     CSVHelper.MotorsStatusGlobal[i] = "Stall";
+                    CSVHelper.WriteErrMsgsOnce = DateTime.Now + $"MotorStatusView >> SetMotorPos>> {_tmgs} >>> StallError > Stopping Motor>" + i + Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
                     TNF.ShowWarning(_tmgs);
-                    log.Log(LogLevel.Warn, _tmgs);
+                    //log.Log(LogLevel.Warn, _tmgs);
 
                     //if (!FlexMold.MVVM.ViewModel.Project.ProjectViewModel.MotorsCheckTimer.IsEnabled && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != '1' && FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed != 'N')
                     //{
@@ -989,7 +1033,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     break;
                 case EmotorDiagnostic.Invalid_Ramp_Seq://newely added
                     CSVHelper.NoLinkHappened = true;
-                    log.Log(LogLevel.Error, $"EmotorDiagnostic Invalid_Ramp_Seq > Stopping Motors");
+                    //log.Log(LogLevel.Error, $"EmotorDiagnostic Invalid_Ramp_Seq > Stopping Motors");
                     //var data2 = (int)EMode.Abort;
                     //for (uint j = 0; j < DeviceCount; j++)
                     //    _TwinCathelper.WriteEthercatDeviceData(j, DeviceSymbol.mMode, data2.CastToArray());
@@ -1003,7 +1047,9 @@ namespace FlexMold.MVVM.ViewModel.Home
                     _tmgs = SetUI(i, sw, Brushes.Pink);
                     CSVHelper.MotorsStatusGlobal[i] = "InvalidRmp";
                     TNF.ShowError(_tmgs);
-                    log.Log(LogLevel.Warn, _tmgs);
+                    //log.Log(LogLevel.Warn, _tmgs);
+                    CSVHelper.WriteErrMsgsOnce = DateTime.Now + $"MotorStatusView >> SetMotorPos>> {_tmgs} >>>StallError > Stopping Motor>" + i + Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
+
                     break;
 
                 default:
@@ -1011,7 +1057,8 @@ namespace FlexMold.MVVM.ViewModel.Home
                     CSVHelper.MotorsStatusGlobal[i] = "Debug";
                     TNF.ShowError(_tmgs);
                     CSVHelper.MotorsStatusGlobal[i] = sw.ToString();
-                    log.Log(LogLevel.Error, "! Undocumented Status !" + _tmgs);
+                    //log.Log(LogLevel.Error, "! Undocumented Status !" + _tmgs);
+                    CSVHelper.WriteErrMsgsOnce = DateTime.Now + " >  MotorStatusView >> SetMotorPos>> ! Undocumented Status !" + _tmgs + Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
                     break;
             }
         }
@@ -1044,7 +1091,8 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
                 var log = LogManager.GetLogger("Device Status");
                 TNF.ShowError(ex.Message);
-                log.Log(LogLevel.Error, "! SetMotorDiagnisticStatus Error =" + ex.Message);
+                //log.Log(LogLevel.Error, "! SetMotorDiagnisticStatus Error =" + ex.Message);
+                CSVHelper.WriteErrMsgsOnce = DateTime.Now + " >  MotorStatusView >> SetMotorDiagnisticStatus>> ! SetMotorDiagnisticStatus Error =" + ex.Message + Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
             }
         }
         private void SetDeviceMode(uint[] _value, Logger log)
@@ -1148,14 +1196,15 @@ namespace FlexMold.MVVM.ViewModel.Home
             float fltDelayval = ((CSVHelper.MotorRampDelayValue * 2) + 2);
 
             //Never will reach
-            if (MotorTime < 2.0F) log.Log(LogLevel.Warn, "Shaping: Invalid MotorTime/too Small > " + MotorTime);
+            if (MotorTime < 2.0F) CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > MotorStatusView >> GetRecommendedRPM>> Shaping: Invalid MotorTime/too Small > " + MotorTime + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce; //log.Log(LogLevel.Warn, "Shaping: Invalid MotorTime/too Small > " + MotorTime);
 
             if (MotorTime < fltDelayval)
             {
                 MessageBoxResult msgres = MessageBox.Show("Please adjust MotorRampDelay, Current: " + MotorTime + " But required:" + fltDelayval, "Warning! Incorrect Ramp delay value!", MessageBoxButton.YesNo);
                 if (MessageBoxResult.No == msgres)
                 {
-                    log.Log(LogLevel.Error, "Please adjust MotorRampDelay, Current: " + fltDelayval + " But required: " + MotorTime);
+                    //log.Log(LogLevel.Error, "Please adjust MotorRampDelay, Current: " + fltDelayval + " But required: " + MotorTime);
+                    CSVHelper.WriteErrMsgsOnce = DateTime.Now + " >  MotorStatusView >> GetRecommendedRPM>> Please adjust MotorRampDelay, Current: " + fltDelayval + " But required: " + MotorTime + Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
                     CSVHelper.CompletingTime = MotorTime + 3.00F;
                     CSVHelper.MotorTime = MotorTime;
                     return MotorTime;
@@ -1348,13 +1397,14 @@ namespace FlexMold.MVVM.ViewModel.Home
 
                 try { if (CSVHelper.MotorsStatusGlobal[0] == "Healthy") HomeMotorStatus = true; } catch { }
 
-                checkFirmware();
+                //checkFirmware();
             }
             catch (Exception ex)
             {
                 var log = LogManager.GetLogger("Device Status");
                 TNF.ShowError(ex.Message);
-                log.Log(LogLevel.Error, "! MotorStatusViewmodel Error =" + ex.Message);
+                //log.Log(LogLevel.Error, "! MotorStatusViewmodel Error =" + ex.Message);
+                CSVHelper.WriteErrMsgsOnce = DateTime.Now + " >  MotorStatusView >> MotorStatusViewModel>> ! MotorStatusViewmodel Error =" + ex.Message + Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
             }
 
         }
@@ -1366,6 +1416,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             {
 
                 String FirmwareNotMatched = "";
+                //String FirmwaresMatched = "";
                 for (uint i = 0; i < DeviceCount; i++)
                 {
                     //if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713969130 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713968323 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)//0x662917EA (1713969130=Wed Apr 24 2024 14:32:10 GMT+0000) CSVHelper.MotorsStatusGlobal[0] == "Healthy" && //1713968323=Wed Apr 24 2024 14:18:43 GMT+0000
@@ -1375,6 +1426,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                     else
                         FirmwareNotMatched += "Motor" + (i + 1) + ",";
                 }
+                CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > MotorStatusView > NotMatched Firmwares=" + FirmwareNotMatched + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
 
                 if (!CSVHelper.MachineEnabled)
                 {
@@ -1384,6 +1436,11 @@ namespace FlexMold.MVVM.ViewModel.Home
 
                 if (FirmwareNotMatched.Length > 0)
                 {
+
+                    var log = LogManager.GetLogger("MotorStatusView");
+                    //log.Log(LogLevel.Error, "Please update the firmware/machine versions of the following motor(s)!" + Environment.NewLine + FirmwareNotMatched);
+                    CSVHelper.WriteErrMsgsOnce = DateTime.Now + " >  MotorStatusView >> checkFirmware>> Please update the firmware/machine versions of the following motor(s)!" + Environment.NewLine + FirmwareNotMatched+ Environment.NewLine + CSVHelper.WriteErrMsgsOnce;
+
                     MessageBox.Show("Please update the firmware/machine versions of the following motor(s)!" + Environment.NewLine + FirmwareNotMatched, "Wrong firmware/Machine found!", MessageBoxButton.OK, MessageBoxImage.Error);
                     //MessageBox.Show("Please close the application and update the firmware!" + Environment.NewLine + FirmwareNotMatched, "Wrong firmware found!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     CSVHelper.wrongFirmwareFound = true;

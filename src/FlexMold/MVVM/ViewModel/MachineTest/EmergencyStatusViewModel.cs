@@ -233,11 +233,15 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
                     _TwinCathelper.PLCMotors[i].mDisplacement = CalibrationData[i];
                     _TwinCathelper.PLCMotors[i].mMode = (int)EMode.CalibrationSeq02Request;
                     _TwinCathelper.PLCMotors[i].mTime = mtime;
-                    log.Log(LogLevel.Warn, "CalibrateSeq02 > Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: Up"
-                    + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
-                    + "  >> mRPM: 30" +  "  >> MotorTime: " + CSVHelper.MotorTime
-                    + "  >> mMode: CalibrationSeq02Request");
+                    //log.Log(LogLevel.Warn, "CalibrateSeq02 > Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: Up"
+                    //+ "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
+                    //+ "  >> mRPM: 30" +  "  >> MotorTime: " + CSVHelper.MotorTime
+                    //+ "  >> mMode: CalibrationSeq02Request");
 
+                    CSVHelper.WriteWarnMsgsOnce = "EmergencyStatus>>CalibrateSeq02 > Box:" + i.ToString() + " : Moving From:" + _TwinCathelper.PLCMotorsStatuses.mPostion[i] + " > " + _TwinCathelper.PLCMotors[i].mDisplacement.ToString() + "  >> Direction: Up"
+                    + "  >> RampDlay: " + _TwinCathelper.PLCMotors[i].mRampDelay
+                    + "  >> mRPM: 30" + "  >> MotorTime: " + CSVHelper.MotorTime
+                    + "  >> mMode: CalibrationSeq02Request" + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
                 }
 
                 CSVHelper.LastOffsetBeforeCalibration = new float[_TwinCathelper.PLCMotorsStatuses.mPostion.Length];
@@ -870,17 +874,23 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
             {
 
                 String FirmwareNotMatched = "";
+                String FirmwaresMatched = "";
                 for (uint i = 0; i < DeviceCount; i++)
                 {
                     //if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713969130 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713968323 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)//0x662917EA (1713969130=Wed Apr 24 2024 14:32:10 GMT+0000) CSVHelper.MotorsStatusGlobal[0] == "Healthy" && //1713968323=Wed Apr 24 2024 14:18:43 GMT+0000
                     //if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1737720238 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)
                     if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1741256250 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)
-                        continue;
-                    else
-                        FirmwareNotMatched += "Motor" + (i + 1) + ",";
-                }
+                    {
+                        if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1741256250 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)
+                            continue;
+                        else
+                            FirmwareNotMatched += "Motor" + (i + 1) + ",";
+                    }
+                }                    
+                CSVHelper.WriteWarnMsgsOnce = DateTime.Now + " > MotorStatusView > NotMatched Firmwares=" + FirmwareNotMatched + Environment.NewLine + CSVHelper.WriteWarnMsgsOnce;
 
-                if (!CSVHelper.MachineEnabled)
+
+                    if (!CSVHelper.MachineEnabled)
                 {
                     MessageBox.Show("Please Power ON the machine before resuming!", "Machine state is off", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
@@ -888,6 +898,9 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
 
                 if (FirmwareNotMatched.Length > 0)
                 {
+                    var log = LogManager.GetLogger("EmergencyStatusView");
+                    log.Log(LogLevel.Error, "Please update the firmware/machine versions of the following motor(s)!" + Environment.NewLine + FirmwareNotMatched);
+
                     MessageBox.Show("Please update the firmware/machine versions of the following motor(s)!" + Environment.NewLine + FirmwareNotMatched, "Wrong firmware/Machine found!", MessageBoxButton.OK, MessageBoxImage.Error);
                     //MessageBox.Show("Please close the application and update the firmware!" + Environment.NewLine + FirmwareNotMatched, "Wrong firmware found!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     CSVHelper.wrongFirmwareFound = true;
@@ -967,7 +980,7 @@ namespace FlexMold.MVVM.ViewModel.MachineTest
 
                 try { if (CSVHelper.MotorsStatusGlobal[0] == "Healthy") HomeMotorStatus = true; } catch { }
 
-                checkFirmware();
+                //checkFirmware();
             }
             catch (Exception ex)
             {

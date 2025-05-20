@@ -115,7 +115,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         //public float MotorRampDelayValue;
         //public float MotorTime;
         private float intProgressbar = 0.00F;
-        private List<float> csvdata;        
+        public static List<float> csvdata;
         //private List<bool> NegativeoffsetResumeDirection;//false=0 , true=1
         private bool Isintimer = false;
         string selectedPath = "";

@@ -528,10 +528,11 @@ namespace FlexMold.MVVM.ViewModel.Home
         {
             var swe = (EDeviceStatus)Enum.ToObject(typeof(EDeviceStatus), _value[i]);
             var log = LogManager.GetLogger("Calibration");
+            var _tmgs = "";
             switch (_value[i])
             {
                 case (int)EDeviceStatus.None:
-                    var _tmgs = SetUI(i, swe, Brushes.Transparent);
+                    _tmgs = SetUI(i, swe, Brushes.Transparent);
                     TNF.ShowInformation(_tmgs);
                     log.Log(LogLevel.Info, _tmgs);
                     CalibrateButtonEnable = true;
@@ -697,12 +698,19 @@ namespace FlexMold.MVVM.ViewModel.Home
                         }
                     }
 
-
-                    _tmgs = SetUI(i, swe, Brushes.Green);
-                    TNF.ShowSuccess(_tmgs);
-                    //log.Log(LogLevel.Info, _tmgs);
-                    //CalibrateButtonEnable = false;                    
-                    break;
+                    if (CSVHelper.HasMotorReached(MyMotors[i].MotorPosition, i))
+                    {
+                        _tmgs = SetUI(i, swe, Brushes.Green);
+                        TNF.ShowSuccess(_tmgs);
+                    }
+                    else
+                    {
+                        _tmgs = SetUI(i, swe, Brushes.Yellow);
+                        TNF.ShowSuccess(_tmgs);
+                    }
+                        //log.Log(LogLevel.Info, _tmgs);
+                        //CalibrateButtonEnable = false;                    
+                        break;
                 case (int)EDeviceStatus.RampSequenceRunning:// (int)EDeviceStatus.HomePosition:
                     _tmgs = SetUI(i, swe, Brushes.Yellow);
                     TNF.ShowSuccess(_tmgs);
@@ -926,6 +934,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                 _MotorDiagnistics = value;
             }
         }
+
         void DisplayMotorDiagStatus(uint[] _value, int i, Logger log)
         {
             MyMotors[i].MotorPosition = mPosition[i];
@@ -933,13 +942,23 @@ namespace FlexMold.MVVM.ViewModel.Home
             switch (sw)
             {
                 case EmotorDiagnostic.No_Error://EmotorDiagnostic.Healthy:
-                    var _tmgs = SetUI(i, sw, Brushes.Green);
+                    var _tmgs = "";
+                    if (CSVHelper.HasMotorReached(MyMotors[i].MotorPosition, i))
+                    {
+                        _tmgs = SetUI(i, sw, Brushes.Green);
+                        TNF.ShowSuccess(_tmgs);
+                        log.Log(LogLevel.Info, _tmgs);
+                    }
+                    else
+                    {
+                        _tmgs = SetUI(i, sw, Brushes.Yellow);
+                        TNF.ShowSuccess(_tmgs);
+                        //log.Log(LogLevel.Info, _tmgs);
+                    }
 
                     CSVHelper.MotorsStatusGlobal[i] = "Healthy";
                     HomeMotorStatus = true;
                     CSVHelper.MotorsStatusGlobal[i] = sw.ToString();
-                    TNF.ShowSuccess(_tmgs);
-                    log.Log(LogLevel.Info, _tmgs);
                     break;
                 case EmotorDiagnostic.Temperature_Limit_exceed://EmotorDiagnostic.Stepper_Driver_Failed:
                     CSVHelper.NoLinkHappened = true;
@@ -1105,6 +1124,7 @@ namespace FlexMold.MVVM.ViewModel.Home
             else
             {
                 _TwinCathelper.Motor_Diagnostic_Abort = true;
+                
                 _TwinCathelper.SetAbortMode(log);
             }
         }

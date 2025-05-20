@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -158,16 +159,16 @@ namespace FlexMold.MVVM.ViewModel
         private void MachineSelectMethod(Machine _a)
         {
             SelectedMachine = _a;
+            bool BuildTwinCAT = ConfigurationManager.AppSettings["BuildTwinCAT"].ToString() == "1"?true:false;
+
+
             switch (SelectedMachine.MachineType)
             {
                 case EMachineType.ScanDevices:
                     log.Log(LogLevel.Info, $"Building Scanning Script");
-                    if (MessageBox.Show("Do You Want to build TwinCAT Solution?", "Question",
-                      MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
-                    {
-                        TwincatConfig();
-                    }
-                    else
+
+                    if (BuildTwinCAT && MessageBox.Show("Do You Want to build TwinCAT Solution?", "Question",
+                                          MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                     {
                         SelectedScript = _TcDeviceScanning;
                         ComRegistration = true;
@@ -175,6 +176,7 @@ namespace FlexMold.MVVM.ViewModel
 
                         string TCVS = "TcXaeShell 15.0";
                         log.Log(LogLevel.Info, $"TwinCAT IDE : {TCVS}");
+
 
                         SelectedVS = AvailableVS.Where(a => a.Name == TCVS).FirstOrDefault();
 
@@ -191,16 +193,17 @@ namespace FlexMold.MVVM.ViewModel
 
                         }
                     }
-                    break;
+                    else
+                    {
+                        TwincatConfig();
+                    }
+                        
+                        break;
                 case EMachineType.Motor:
                     log.Log(LogLevel.Info, $"Building Machine Script");
-                    if (MessageBox.Show("Do You Want to build TwinCAT Solution?", "Question",
-                        MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
-                    {
-                        if (Validataion())
-                            RunMainWindow();
-                    }
-                    else
+
+                    if (BuildTwinCAT && MessageBox.Show("Do You Want to build TwinCAT Solution?", "Question",
+                        MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                     {
                         SelectedScript = _FlexMoldMachine1;
                         //SelectedScript = new FlexMoldMachineDebug();
@@ -225,7 +228,11 @@ namespace FlexMold.MVVM.ViewModel
 
                         }
                     }
-
+                    else
+                    {
+                        if (Validataion())
+                            RunMainWindow();
+                    }
                     break;
 
                 case EMachineType.Projector:
@@ -394,7 +401,7 @@ namespace FlexMold.MVVM.ViewModel
                 if (!File.Exists(_runningScript.ScriptRootFolder + @"\" + _runningScript.ScriptName + ".sln"))
                 {
                     //throw new ApplicationException("Twincat solution"+ _runningScript.ScriptName + ".sln not found!");
-                    MessageBox.Show("Twincat solution" + _runningScript.ScriptName + ".sln not found!","Twincat config error");
+                    MessageBox.Show("Twincat solution > " + _runningScript.ScriptName + ".sln not found! @"+ _runningScript.ScriptRootFolder, "Twincat config error");
                     return;
                 }
 

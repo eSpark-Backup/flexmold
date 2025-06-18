@@ -713,7 +713,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                         break;
                 case (int)EDeviceStatus.RampSequenceRunning:// (int)EDeviceStatus.HomePosition:
                     _tmgs = SetUI(i, swe, Brushes.Yellow);
-                    TNF.ShowSuccess(_tmgs);
+                    TNF.ShowSuccess(_tmgs);  
                     //log.Log(LogLevel.Warn, _tmgs);
                     //CalibrateButtonEnable = false;
                     if (!RampMotorsHlist.ContainsKey(i))
@@ -1441,7 +1441,7 @@ namespace FlexMold.MVVM.ViewModel.Home
                 {
                     //if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713969130 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1713968323 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)//0x662917EA (1713969130=Wed Apr 24 2024 14:32:10 GMT+0000) CSVHelper.MotorsStatusGlobal[0] == "Healthy" && //1713968323=Wed Apr 24 2024 14:18:43 GMT+0000
                     //if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1737720238 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)
-                    if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1741256250 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0)
+                    if (_TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1741256250 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 0 || _TwinCathelper.PLCMotorsStatuses.mDiag3[i] == 1750164892)
                         continue;
                     else
                         FirmwareNotMatched += "Motor" + (i + 1) + ",";

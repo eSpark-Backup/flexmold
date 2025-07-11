@@ -36,6 +36,8 @@ namespace FlexMold.MVVM.ViewModel.Home
         public static Hashtable RampMotorsHlist = new Hashtable();
         private Hashtable CalibrationCompletedList = new Hashtable();
         
+        public int BoundedRow { get { return int.Parse(ConfigurationManager.AppSettings["BoundedRow"].ToString()); } set { } }
+        public int BoundedColumn { get { return int.Parse(ConfigurationManager.AppSettings["BoundedColumn"].ToString()); } set { } }
         private void DisplayError(MotorStatusControl o)
         {
             MessageBox.Show(o.ToolTip);

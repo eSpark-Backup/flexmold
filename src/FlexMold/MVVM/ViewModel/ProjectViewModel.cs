@@ -47,6 +47,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         private int intSpecifiedSecs = 60;
         //private float LastmaxVal = 0.00F;
         private bool Timer_ElapsedBusy = false;
+        private DateTime elapsedTime = DateTime.Now;
         public static DispatcherTimer MotorsCheckTimer = new DispatcherTimer();
         public static DispatcherTimer StallErrMotorsCheckTimer = new DispatcherTimer();
         public string selectedCSV = "";        
@@ -179,7 +180,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         public string travelTime
         {
             get { return _travelTime; }
-            set { _travelTime = value; OnPropertyChanged(); }
+            set { _travelTime = value; OnPropertyChanged(nameof(travelTime)); }
         }
 
         //private int _machinePartsProduced;
@@ -440,6 +441,8 @@ namespace FlexMold.MVVM.ViewModel.Project
         {
             try
             {
+                elapsedTime = DateTime.Now;
+
                 checkFirmware();
 
                 if (data != null && data.Count>0)
@@ -749,9 +752,14 @@ namespace FlexMold.MVVM.ViewModel.Project
 
             if (CSVHelper.LastSelectedCSV != selectedCSV && toggleShapeHomeButtonText == "Home")  //negative offset exist ++(Math.Abs(CSVHelper.NegativeoffsetResumeFlt[0]) > 1)  && 
             {
-                if(selectedCSV != null && selectedCSV.Length > 10)
-                    MessageBox.Show("You can not select other Resume while Shaping for other process, Please calibrate first to coutinue!" + Environment.NewLine + " Last selected CSV = " + CSVHelper.LastSelectedCSV, "Please calibrate first to continue!", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                return false;
+                if (selectedCSV != null && selectedCSV.Length > 10)
+                {
+                    if (FlexMoldDB.IsEditingEnabled)
+                        MessageBox.Show("While In Admin Mode you are allowed to Shape, Please be careful!", "Alert! Machine Already in Shape", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    else { MessageBox.Show("You can not select other Resume while Shaping for other process, Please calibrate first to coutinue!" + Environment.NewLine + " Last selected CSV = " + CSVHelper.LastSelectedCSV, "Please calibrate first to continue!", MessageBoxButtons.OK, MessageBoxIcon.Stop); return false; }
+
+                }
+                
             }
 
             if (SelectedFile == null)
@@ -793,8 +801,11 @@ namespace FlexMold.MVVM.ViewModel.Project
             if (CSVHelper.LastSelectedCSV != selectedCSV && toggleShapeHomeButtonText == "Home")  //negative offset exist ++(Math.Abs(CSVHelper.NegativeoffsetResumeFlt[0]) > 1)  && 
             {
                 if (selectedCSV != null && selectedCSV.Length > 10)
-                    MessageBox.Show("You can not select other Resume while Shaping for other process, Please calibrate first to coutinue!" + Environment.NewLine + " Last selected CSV = " + CSVHelper.LastSelectedCSV, "Please calibrate first to continue!", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                return false;
+                    if (FlexMoldDB.IsEditingEnabled)
+                        MessageBox.Show("While In Admin Mode you are allowed to Shape, Please be careful!", "Alert! Machine Already in Shape", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    else { MessageBox.Show("You can not select other Resume while Shaping for other process, Please calibrate first to coutinue!" + Environment.NewLine + " Last selected CSV = " + CSVHelper.LastSelectedCSV, "Please calibrate first to continue!", MessageBoxButtons.OK, MessageBoxIcon.Stop); return false; }
+
+                //MessageBox.Show("You can not select other Resume while Shaping for other process, Please calibrate first to coutinue!" + Environment.NewLine + " Last selected CSV = " + CSVHelper.LastSelectedCSV, "Please calibrate first to continue!", MessageBoxButtons.OK, MessageBoxIcon.Stop);                
             }
 
             for (int i = 0; i < _TwinCathelper.PLCMotors.Count(); i++)
@@ -1069,6 +1080,7 @@ namespace FlexMold.MVVM.ViewModel.Project
         {
             //if (!ConfirmMotorsAreFine())
             //{ updateHomeButtonStatus(); return; }
+            elapsedTime = DateTime.Now;
 
             FileInfo finf;
             String CSVMotors_contents = null;
@@ -1897,8 +1909,13 @@ namespace FlexMold.MVVM.ViewModel.Project
             if (CSVHelper.LastSelectedCSV != selectedCSV && toggleShapeHomeButtonText == "Home")//negative offset exist //(Math.Abs(CSVHelper.NegativeoffsetResumeFlt[0]) > 1) && 
             {
                 if (selectedCSV != null && selectedCSV.Length > 10)
-                    MessageBox.Show("You can not select other shape while HomeOffset exist, Please calibrate first to coutinue!"+Environment.NewLine+" Last selected CSV = "+ CSVHelper.LastSelectedCSV, "Please calibrate first to continue!", MessageBoxButtons.OK,MessageBoxIcon.Stop);
-                return;
+                {//MessageBox.Show("You can not select other shape while HomeOffset exist, Please calibrate first to coutinue!"+Environment.NewLine+" Last selected CSV = "+ CSVHelper.LastSelectedCSV, "Please calibrate first to continue!", MessageBoxButtons.OK,MessageBoxIcon.Stop);
+                    if (FlexMoldDB.IsEditingEnabled)
+                        MessageBox.Show("While In Admin Mode you are allowed to Shape, Please be careful!", "Alert! Machine Already in Shape", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    else { MessageBox.Show("You can not select other shape while HomeOffset exist, Please calibrate first to coutinue!" + Environment.NewLine + " Last selected CSV = " + CSVHelper.LastSelectedCSV, "Please calibrate first to continue!", MessageBoxButtons.OK, MessageBoxIcon.Stop); return; }
+
+                    //return;
+                }
             }
 
             UpdateSettingsDB();
@@ -2559,7 +2576,7 @@ namespace FlexMold.MVVM.ViewModel.Project
                 catch { }
 
                 float posDiff = 0;
-                try { SplashScreenViewModel._mainWindow.bt_TCP.Content = MotorStatus.mPosition.Max() + "%"; } catch { }
+                try { SplashScreenViewModel._mainWindow.bt_TCP.Content = (MotorStatus.mPosition.Max()<0? Math.Round(MotorStatus.mPosition.Min(),3): Math.Round(MotorStatus.mPosition.Max(),3))+ "mm"; } catch { }
                 if (IsRampCompleted)
                 {
                     //IsHomeEnabled = true;
@@ -2657,19 +2674,152 @@ namespace FlexMold.MVVM.ViewModel.Project
                     }
                     catch { }
 
+                    // Track last progress to detect stalling
+                     int lastProgressValue = -1;
+                     DateTime lastProgressUpdateTime = DateTime.MinValue;
+
                     try
                     {
-                        if (!TravelTimeUpdate)
+                        int total = 100;
+                        var elapsed = DateTime.Now - elapsedTime;
+                        double progress = (double)pgProcesStatusVal / total;
+
+                        // Check if motor is stalled or not making progress
+                        bool isStalled = false;
+                        if (pgProcesStatusVal == lastProgressValue)
                         {
-                            progressbar_timespent += 1;
+                            if ((DateTime.Now - lastProgressUpdateTime).TotalSeconds > 3) // 3 seconds of no progress = stalled
+                            {
+                                isStalled = true;
+                            }
+                        }
+                        else
+                        {
+                            lastProgressUpdateTime = DateTime.Now;
+                            lastProgressValue = pgProcesStatusVal;
+                        }
+
+                        if (isStalled)
+                        {
+                            travelTime= "Remaining time: Motor stalled";
+                        }
+                        else if (progress >= 1.0)
+                        {
+                            travelTime= "Remaining time: Completed";
+                        }
+                        else if (progress > 0.01 && progress < 1)
+                        {
+                            double projectedSeconds = elapsed.TotalSeconds / progress * (1 - progress);
+
+                            if (!double.IsNaN(projectedSeconds) && !double.IsInfinity(projectedSeconds) && projectedSeconds > 0)
+                            {
+                                TimeSpan tps = TimeSpan.FromSeconds(projectedSeconds);
+                                travelTime= "Remaining time: " + tps.ToString(@"dd\:hh\:mm\:ss");
+                                
+                                log.Log(LogLevel.Info, $"[travelTimeDebug] elapsed={elapsed.TotalSeconds:F1}, progress={progress:P1}, TravelTime={travelTime}");
+
+                                if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'H' && progress != 0)
+                                {
+                                    progress = Math.Round((progress * 100), 0);
+                                    travelTime= "Remaining: 00:00:" + progress;
+                                }
+                            }
+                            else
+                            {
+                                travelTime= $"Remaining Time: {_travelTime}";
+                            }
+                        }
+                        else
+                        {
+                            //travelTime= $"Remaining Time: {_travelTime}";
                             TimeSpan timesp = TimeSpan.FromSeconds(progressbar_timespent);
-                            _travelTime = "Travel Time: " + timesp.ToString(@"hh\:mm\:ss\:fff");
+                            travelTime = "Travel Time: " + timesp.ToString(@"dd\:hh\:mm\:ss");
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        travelTime = "Remaining time: Error";
+                        log.Log(LogLevel.Error, $"[travelTimeDebug] Calculation failed: {ex.Message}");
+                    }
+                    //try
+                    //{
+                    //    //Our purpose is to estimate and display the remaining time to complete a motor control process based on current progress.
+                    //    int total = 100; //total units of work assumed(100)
+                    //    var elapsed = DateTime.Now - elapsedTime; //elapsedTime is the starting time of the process.  //pgProcessStatusVal is how much has been completed so far.
+                    //    double progress = (double)pgProcesStatusVal / total; //Converts the current ptrogress into a percentage betwwen 0 and 1
+                    //    //If pgProcessStatusVal = 20, then progress = 0.3(30%)
 
+                    //    if (progress > 0.01 && progress < 1) //means that progress has started but not yet finished.
+                    //    {
+                    //        //inside this, it estimates remaining time based on the current speed of the process.
+                    //        double projectedSeconds = elapsed.TotalSeconds / progress * (1 - progress); //this assumes that progress continues at the same rate as it has been so far.
+
+                    //        if (!double.IsNaN(projectedSeconds) && !double.IsInfinity(projectedSeconds) && projectedSeconds > 0)
+                    //        {
+                    //            //This here, is important, cause it ensures that the result is realistic and not NaN, negati, or infinite.
+                    //            TimeSpan tps = TimeSpan.FromSeconds(projectedSeconds);
+                    //            travelTime= "Remaining time: " + tps.ToString(@"dd\:hh\:mm\:ss"); //travelTimeis a string that shows the estimated time remaining.
+
+                    //            log.Log(LogLevel.Info, $"[travelTimeDebug] elapsed={elapsed.TotalSeconds:F1}, progress={progress:P1}, TravelTime={TravelTime}"); //NLOG.config reference is here.
+
+                    //            if (FlexMold.MVVM.ViewModel.Project.ProjectViewModel.LastEventPressed == 'H' && progress != 0)
+                    //            {
+                    //                //
+                    //                progress = Math.Round((progress * 100), 0);
+                    //                travelTime= "Remaining: 00:00:" + progress;
+                    //                return; //return is here to stop the counter 
+                    //            }
+                    //        }
+                    //        else { travelTime= "Remaining time: Estimating..."; }
+                    //    }
+                    //    //else if (progress >= 1.0)
+                    //    //{
+                    //    //    travelTime= "Remaining time: Completed";
+                    //    //}
+                    //    else { travelTime= "Remaining time: Initializing..."; }
+
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    travelTime= "Remaining time: Error";
+                    //    log.Log(LogLevel.Error, $"[travelTimeDebug] Calculation failed: {ex.Message}");
+                    //}
+
+
+                    //**************  Another/Original code version is below **************
+
+
+                    //try
+                    // {
+                    //     //DateTime start = DateTime.Now;
+                    //     //int total = 1000;//, procesed = 0;
+                    //     //var elapsed  = DateTime.Now - start; //elapsed time should be stored in db, so when the program restarts on that PARTICULAR day it remembers
+
+
+
+                    //     int total = 100;//, processed = 0;
+                    //     var elapsed = DateTime.Now - elapsedTime;
+                    //     var progress = (double)pgProcesStatusVal / total;
+                    //     //_travelTime = TimeSpan.FromSeconds(elapsed.TotalSeconds / progress * (1 - progress)).ToString();
+
+                    //     TimeSpan tps = TimeSpan.FromSeconds(elapsed.TotalSeconds / progress * (1 - progress));
+                    //     travelTime= "Remaining time: " + tps.ToString(@"dd\:hh\:mm\:ss");
+
+
+
+                    //     //var elapsed = DateTime.Now - elapsedTime;
+                    //     //var progress = (double)pgProcesStatusVal / total;
+                    //     //_travelTime = TimeSpan.FromSeconds(elapsed.TotalSeconds / progress * (1 - progress)).ToString();
+
+                    //if (!TravelTimeUpdate)
+                    //{
+                    //    progressbar_timespent += 1;
+                    //    TimeSpan timesp = TimeSpan.FromSeconds(progressbar_timespent);
+                    //    travelTime = "Travel Time: " + timesp.ToString(@"dd\:hh\:mm\:ss");
+                    //}
+                    // }
+                    // catch { }
                 }
-
 
                 //log.Log(LogLevel.Info, $"This is four444555" + pgProcesStatusVal);
                 OnPropertyChanged();
@@ -3419,7 +3569,7 @@ namespace FlexMold.MVVM.ViewModel.Project
 
                 
                 try { motorMaxTravel = "Max Travel: " + MotorStatus.mPosition.Max() + "mm"; } catch { motorMaxTravel = "Max Travel: 0mm"; }
-                try { travelTime = ConvertSectoDay(CSVHelper.TotalNoHrs); } catch (Exception ex) { string st = ex.Message; travelTime = ConvertSectoDay(1); }
+                try { travelTime = "Total time: "+ ConvertSectoDay(CSVHelper.TotalNoHrs); } catch (Exception ex) { string st = ex.Message; travelTime = ConvertSectoDay(1); }
 
                 if (MotorStatus.mPosition != null)
                     CSVHelper.MaxDisplacement = MotorStatus.mPosition.Max();

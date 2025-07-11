@@ -2,6 +2,7 @@
 using FlexMold.MVVM.ViewModel.SplashScreen;
 using StructPacker;
 using System;
+using System.Configuration;
 using System.Runtime.InteropServices;
 using System.Windows.Media;
 
@@ -421,6 +422,29 @@ namespace FlexMold.MVVM.Model
             {
                 _ToolTip = value;
                 OnPropertyChanged();
+            }
+        }
+
+        private int boundedRow;
+        public int BoundedRow
+        {
+            get => int.Parse(ConfigurationManager.AppSettings["BoundedRow"]);
+            set
+            {
+                boundedRow = int.Parse(ConfigurationManager.AppSettings["BoundedRow"]);
+                OnPropertyChanged();
+                //boundedRow = value; //OnPropertyChanged(nameof(BoundedRow));
+            }
+        }
+        private int boundedColumn;
+        public int BoundedColumn
+        {
+            get => int.Parse(ConfigurationManager.AppSettings["BoundedColumn"]);
+            set
+            {
+                boundedColumn = int.Parse(ConfigurationManager.AppSettings["BoundedColumn"]);
+                OnPropertyChanged();
+                //boundedColumn = value; //OnPropertyChanged(nameof(BoundedColumn));
             }
         }
     }
